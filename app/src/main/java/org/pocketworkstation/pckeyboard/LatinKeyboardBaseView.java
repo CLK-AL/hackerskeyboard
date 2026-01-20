@@ -821,11 +821,7 @@ public class LatinKeyboardBaseView extends View implements PointerTracker.UIProx
             setMeasuredDimension(
                     getPaddingLeft() + getPaddingRight(), getPaddingTop() + getPaddingBottom());
         } else {
-            int width = mKeyboard.getMinWidth() + getPaddingLeft() + getPaddingRight();
-            if (MeasureSpec.getSize(widthMeasureSpec) < width + 10) {
-                int badWidth = MeasureSpec.getSize(widthMeasureSpec);
-                if (badWidth != width) Log.i(TAG, "ignoring unexpected width=" + badWidth);
-            }
+            int width = MeasureSpec.getSize(widthMeasureSpec);
             Log.i(TAG, "onMeasure width=" + width);
             setMeasuredDimension(
                     width, mKeyboard.getHeight() + getPaddingTop() + getPaddingBottom());
