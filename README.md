@@ -1,6 +1,6 @@
 ## Status of this fork ##
 
-This is a fork of the original hacker's keyboard by Klaus W. The original had falled behind on evolution Android evolution, and was not even compilable any more in today's environments. I took it upon myself and bring it up to Sdk 36 level (Android 16), and got dictionaries working again.
+This is a fork of the original hacker's keyboard by Klaus Weidner. The original had fallen behind on evolution Android evolution, and was not even compilable any more in today's environments. I took it upon myself to bring it up to Sdk 36 level (Android 16), and got dictionaries working again.
 
 [Releases here](../../releases)
 
