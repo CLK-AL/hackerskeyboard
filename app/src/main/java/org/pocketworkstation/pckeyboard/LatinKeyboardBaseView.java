@@ -440,7 +440,7 @@ public class LatinKeyboardBaseView extends View implements PointerTracker.UIProx
     static {
         initCompatibility();
     }
-    
+
     static void initCompatibility() {
         try {
             sSetRenderMode = View.class.getMethod("setLayerType", int.class, Paint.class);
@@ -452,7 +452,7 @@ public class LatinKeyboardBaseView extends View implements PointerTracker.UIProx
             Log.i(TAG, "ignoring render mode, not supported");
         }
     }
-    
+
     private void setRenderModeIfPossible(int mode) {
         if (sSetRenderMode != null && mode != sPrevRenderMode) {
             try {
@@ -468,7 +468,7 @@ public class LatinKeyboardBaseView extends View implements PointerTracker.UIProx
             }
         }
     }
-    
+
     public LatinKeyboardBaseView(Context context, AttributeSet attrs) {
         this(context, attrs, R.attr.keyboardViewStyle);
     }
@@ -686,7 +686,7 @@ public class LatinKeyboardBaseView extends View implements PointerTracker.UIProx
         setRenderModeIfPossible(LatinIME.sKeyboardSettings.renderMode);
         mIgnoreMove = true;
     }
-    
+
     /**
      * Returns the current keyboard being displayed by this view.
      * @return the currently attached keyboard
@@ -726,7 +726,7 @@ public class LatinKeyboardBaseView extends View implements PointerTracker.UIProx
             invalidateKey(mKeyboard.setCtrlIndicator(active));
         }
     }
-    
+
     public void setAltIndicator(boolean active) {
         if (mKeyboard != null) {
             invalidateKey(mKeyboard.setAltIndicator(active));
@@ -750,7 +750,7 @@ public class LatinKeyboardBaseView extends View implements PointerTracker.UIProx
         }
         return Keyboard.SHIFT_OFF;
     }
-    
+
     public boolean isShiftCaps() {
         return getShiftState() != Keyboard.SHIFT_OFF;
     }
@@ -760,7 +760,7 @@ public class LatinKeyboardBaseView extends View implements PointerTracker.UIProx
         if (LatinIME.sKeyboardSettings.shiftLockModifiers) {
             return state == Keyboard.SHIFT_ON || state == Keyboard.SHIFT_LOCKED;
         } else {
-            return state == Keyboard.SHIFT_ON;            
+            return state == Keyboard.SHIFT_ON;
         }
     }
 
@@ -823,6 +823,17 @@ public class LatinKeyboardBaseView extends View implements PointerTracker.UIProx
         } else {
             int width = MeasureSpec.getSize(widthMeasureSpec);
             Log.i(TAG, "onMeasure width=" + width);
+
+            // workaround for those small "popup" keyboards. There
+            // should be a proper fix specifying the correct width in
+            // the layout (wrapx_content rather than match_parent), but
+            // in which layout is this set?
+            int oldWidth = mKeyboard.getMinWidth();
+            if(width > oldWidth) {
+                Log.i(TAG, "Reducing width from "+width+" to "+oldWidth);
+                width = oldWidth;
+            }
+
             setMeasuredDimension(
                     width, mKeyboard.getHeight() + getPaddingTop() + getPaddingBottom());
         }
@@ -867,7 +878,7 @@ public class LatinKeyboardBaseView extends View implements PointerTracker.UIProx
         }
         if (mBuffer != null) canvas.drawBitmap(mBuffer, 0, 0, null);
     }
-    
+
     private void drawDeadKeyLabel(Canvas canvas, String hint, int x, float baseline, Paint paint) {
         char c = hint.charAt(0);
         String accent = DeadAccentSequence.getSpacing(c);
@@ -1132,7 +1143,7 @@ public class LatinKeyboardBaseView extends View implements PointerTracker.UIProx
                     icon.draw(canvas);
                     icon.setColorFilter(null);
                 } else {
-                    icon.draw(canvas);                    
+                    icon.draw(canvas);
                 }
                 canvas.translate(-drawableX, -drawableY);
             }
@@ -1561,7 +1572,7 @@ public class LatinKeyboardBaseView extends View implements PointerTracker.UIProx
     /*package*/ boolean enableSlideKeyHack() {
         return false;
     }
-    
+
     private PointerTracker getPointerTracker(final int id) {
         final ArrayList<PointerTracker> pointers = mPointerTrackers;
         final Key[] keys = mKeys;
@@ -1603,7 +1614,7 @@ public class LatinKeyboardBaseView extends View implements PointerTracker.UIProx
         final int pointerCount = me.getPointerCount();
         final int oldPointerCount = mOldPointerCount;
         mOldPointerCount = pointerCount;
-        
+
         // TODO: cleanup this code into a multi-touch to single-touch event converter class?
         // If the device does not have distinct multi-touch support panel, ignore all multi-touch
         // events except a transition from/to single-touch.
