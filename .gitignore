@@ -9,6 +9,7 @@
 .DS_Store
 /build
 /captures
+!gradle/wrapper/gradle-wrapper.properties
 .externalNativeBuild
 /app/.cxx
 .env

@@ -1,15 +1,18 @@
-apply plugin: 'com.android.application'
+plugins {
+    id 'com.android.application'
+}
 
 android {
-    compileSdkVersion 36
-    namespace = 'org.pocketworkstation.pckeyboard'
+    namespace 'org.pocketworkstation.pckeyboard'
+    compileSdk 36
+
     defaultConfig {
-        applicationId = 'org.pocketworkstation.pckeyboard'
-        minSdkVersion = 21
-        targetSdkVersion = 36
-        versionCode = 1042002
-        versionName = "v1.42.2ak"
-        testInstrumentationRunner = "android.support.test.runner.AndroidJUnitRunner"
+        applicationId 'org.pocketworkstation.pckeyboard'
+        minSdk 21
+        targetSdk 36
+        versionCode 1042002
+        versionName "v1.42.2ak"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
             cmake {
                 cppFlags ""
@@ -28,32 +31,44 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled = false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             signingConfig = signingConfigs.release
         }
     }
+
     externalNativeBuild {
         cmake {
             path "CMakeLists.txt"
         }
     }
-    productFlavors {
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
-    lintOptions {
+
+    lint {
         checkReleaseBuilds false
-        // Or, if you prefer, you can continue to check for errors in release builds,
-        // but continue the build even when errors are found:
-        //abortOnError false
     }
 }
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation 'androidx.appcompat:appcompat:1.6.1'
+
+    // AndroidX dependencies
+    implementation 'androidx.appcompat:appcompat:1.7.0'
+    implementation 'androidx.core:core:1.15.0'
+    implementation 'androidx.preference:preference:1.2.1'
+
+    // Unit testing
     testImplementation 'junit:junit:4.13.2'
-    testImplementation 'org.mockito:mockito-core:3.12.4'
-    testImplementation 'org.robolectric:robolectric:4.6.1'
-    androidTestImplementation 'com.android.support.test:runner:1.0.2'
-    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+    testImplementation 'org.mockito:mockito-core:5.14.2'
+    testImplementation 'org.robolectric:robolectric:4.14.1'
+
+    // Instrumented testing (AndroidX Test)
+    androidTestImplementation 'androidx.test:runner:1.6.2'
+    androidTestImplementation 'androidx.test:core:1.6.1'
+    androidTestImplementation 'androidx.test.ext:junit:1.2.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
 }
