@@ -6,6 +6,215 @@
 # Format: code points; status # symbol name
 
 # ============================================================
+# group: IPA Phonetics
+# ============================================================
+# International Phonetic Alphabet - organized by IPA chart categories
+
+# subgroup: ipa-vowels-front
+0069                                                  ; fully-qualified     # i close front unrounded vowel
+0079                                                  ; fully-qualified     # y close front rounded vowel
+026A                                                  ; fully-qualified     # ɪ near-close front unrounded vowel
+028F                                                  ; fully-qualified     # ʏ near-close front rounded vowel
+0065                                                  ; fully-qualified     # e close-mid front unrounded vowel
+00F8                                                  ; fully-qualified     # ø close-mid front rounded vowel
+025B                                                  ; fully-qualified     # ɛ open-mid front unrounded vowel
+0153                                                  ; fully-qualified     # œ open-mid front rounded vowel
+00E6                                                  ; fully-qualified     # æ near-open front unrounded vowel
+0061                                                  ; fully-qualified     # a open front unrounded vowel
+0276                                                  ; fully-qualified     # ɶ open front rounded vowel
+
+# subgroup: ipa-vowels-central
+0268                                                  ; fully-qualified     # ɨ close central unrounded vowel
+0289                                                  ; fully-qualified     # ʉ close central rounded vowel
+026F                                                  ; fully-qualified     # ɯ close back unrounded vowel (often central)
+0258                                                  ; fully-qualified     # ɘ close-mid central unrounded vowel
+0275                                                  ; fully-qualified     # ɵ close-mid central rounded vowel
+0259                                                  ; fully-qualified     # ə mid central vowel (schwa)
+025A                                                  ; fully-qualified     # ɚ rhotacized schwa
+025C                                                  ; fully-qualified     # ɜ open-mid central unrounded vowel
+025D                                                  ; fully-qualified     # ɝ rhotacized open-mid central vowel
+025E                                                  ; fully-qualified     # ɞ open-mid central rounded vowel
+0250                                                  ; fully-qualified     # ɐ near-open central vowel
+
+# subgroup: ipa-vowels-back
+0075                                                  ; fully-qualified     # u close back rounded vowel
+028A                                                  ; fully-qualified     # ʊ near-close back rounded vowel
+006F                                                  ; fully-qualified     # o close-mid back rounded vowel
+0264                                                  ; fully-qualified     # ɤ close-mid back unrounded vowel
+0254                                                  ; fully-qualified     # ɔ open-mid back rounded vowel
+028C                                                  ; fully-qualified     # ʌ open-mid back unrounded vowel
+0251                                                  ; fully-qualified     # ɑ open back unrounded vowel
+0252                                                  ; fully-qualified     # ɒ open back rounded vowel
+
+# subgroup: ipa-consonants-plosives
+0070                                                  ; fully-qualified     # p voiceless bilabial plosive
+0062                                                  ; fully-qualified     # b voiced bilabial plosive
+0074                                                  ; fully-qualified     # t voiceless alveolar plosive
+0064                                                  ; fully-qualified     # d voiced alveolar plosive
+0288                                                  ; fully-qualified     # ʈ voiceless retroflex plosive
+0256                                                  ; fully-qualified     # ɖ voiced retroflex plosive
+0063                                                  ; fully-qualified     # c voiceless palatal plosive
+025F                                                  ; fully-qualified     # ɟ voiced palatal plosive
+006B                                                  ; fully-qualified     # k voiceless velar plosive
+0261                                                  ; fully-qualified     # ɡ voiced velar plosive
+0067                                                  ; fully-qualified     # g voiced velar plosive (alternate)
+0071                                                  ; fully-qualified     # q voiceless uvular plosive
+0262                                                  ; fully-qualified     # ɢ voiced uvular plosive
+0294                                                  ; fully-qualified     # ʔ glottal stop
+
+# subgroup: ipa-consonants-nasals
+006D                                                  ; fully-qualified     # m voiced bilabial nasal
+0271                                                  ; fully-qualified     # ɱ voiced labiodental nasal
+006E                                                  ; fully-qualified     # n voiced alveolar nasal
+0273                                                  ; fully-qualified     # ɳ voiced retroflex nasal
+0272                                                  ; fully-qualified     # ɲ voiced palatal nasal
+014B                                                  ; fully-qualified     # ŋ voiced velar nasal
+0274                                                  ; fully-qualified     # ɴ voiced uvular nasal
+
+# subgroup: ipa-consonants-trills
+0299                                                  ; fully-qualified     # ʙ voiced bilabial trill
+0072                                                  ; fully-qualified     # r voiced alveolar trill
+0280                                                  ; fully-qualified     # ʀ voiced uvular trill
+029C                                                  ; fully-qualified     # ʜ voiceless epiglottal trill
+02A2                                                  ; fully-qualified     # ʢ voiced epiglottal trill
+
+# subgroup: ipa-consonants-taps-flaps
+2C71                                                  ; fully-qualified     # ⱱ labiodental flap
+027E                                                  ; fully-qualified     # ɾ voiced alveolar tap
+027D                                                  ; fully-qualified     # ɽ voiced retroflex flap
+027A                                                  ; fully-qualified     # ɺ voiced alveolar lateral flap
+
+# subgroup: ipa-consonants-fricatives
+0278                                                  ; fully-qualified     # ɸ voiceless bilabial fricative
+03B2                                                  ; fully-qualified     # β voiced bilabial fricative
+0066                                                  ; fully-qualified     # f voiceless labiodental fricative
+0076                                                  ; fully-qualified     # v voiced labiodental fricative
+03B8                                                  ; fully-qualified     # θ voiceless dental fricative
+00F0                                                  ; fully-qualified     # ð voiced dental fricative
+0073                                                  ; fully-qualified     # s voiceless alveolar fricative
+007A                                                  ; fully-qualified     # z voiced alveolar fricative
+0283                                                  ; fully-qualified     # ʃ voiceless postalveolar fricative
+0292                                                  ; fully-qualified     # ʒ voiced postalveolar fricative
+0282                                                  ; fully-qualified     # ʂ voiceless retroflex fricative
+0290                                                  ; fully-qualified     # ʐ voiced retroflex fricative
+0255                                                  ; fully-qualified     # ɕ voiceless alveolo-palatal fricative
+0291                                                  ; fully-qualified     # ʑ voiced alveolo-palatal fricative
+00E7                                                  ; fully-qualified     # ç voiceless palatal fricative
+029D                                                  ; fully-qualified     # ʝ voiced palatal fricative
+0078                                                  ; fully-qualified     # x voiceless velar fricative
+0263                                                  ; fully-qualified     # ɣ voiced velar fricative
+03C7                                                  ; fully-qualified     # χ voiceless uvular fricative
+0281                                                  ; fully-qualified     # ʁ voiced uvular fricative
+0127                                                  ; fully-qualified     # ħ voiceless pharyngeal fricative
+0295                                                  ; fully-qualified     # ʕ voiced pharyngeal fricative
+0068                                                  ; fully-qualified     # h voiceless glottal fricative
+0266                                                  ; fully-qualified     # ɦ voiced glottal fricative
+
+# subgroup: ipa-consonants-laterals
+026C                                                  ; fully-qualified     # ɬ voiceless alveolar lateral fricative
+026E                                                  ; fully-qualified     # ɮ voiced alveolar lateral fricative
+006C                                                  ; fully-qualified     # l voiced alveolar lateral approximant
+026D                                                  ; fully-qualified     # ɭ voiced retroflex lateral approximant
+028E                                                  ; fully-qualified     # ʎ voiced palatal lateral approximant
+029F                                                  ; fully-qualified     # ʟ voiced velar lateral approximant
+027A                                                  ; fully-qualified     # ɺ voiced alveolar lateral flap
+
+# subgroup: ipa-consonants-approximants
+028B                                                  ; fully-qualified     # ʋ voiced labiodental approximant
+0279                                                  ; fully-qualified     # ɹ voiced alveolar approximant
+027B                                                  ; fully-qualified     # ɻ voiced retroflex approximant
+006A                                                  ; fully-qualified     # j voiced palatal approximant
+0270                                                  ; fully-qualified     # ɰ voiced velar approximant
+0077                                                  ; fully-qualified     # w voiced labio-velar approximant
+0265                                                  ; fully-qualified     # ɥ voiced labio-palatal approximant
+028D                                                  ; fully-qualified     # ʍ voiceless labio-velar approximant
+
+# subgroup: ipa-clicks
+0298                                                  ; fully-qualified     # ʘ bilabial click
+01C0                                                  ; fully-qualified     # ǀ dental click
+01C1                                                  ; fully-qualified     # ǁ lateral click
+01C2                                                  ; fully-qualified     # ǂ palatal click
+01C3                                                  ; fully-qualified     # ǃ alveolar click
+A78C                                                  ; fully-qualified     # ꞌ saltillo (ejective modifier)
+
+# subgroup: ipa-implosives
+0253                                                  ; fully-qualified     # ɓ voiced bilabial implosive
+0257                                                  ; fully-qualified     # ɗ voiced alveolar implosive
+0260                                                  ; fully-qualified     # ɠ voiced velar implosive
+029B                                                  ; fully-qualified     # ʛ voiced uvular implosive
+0284                                                  ; fully-qualified     # ʄ voiced palatal implosive
+
+# subgroup: ipa-suprasegmentals
+02C8                                                  ; fully-qualified     # ˈ primary stress
+02CC                                                  ; fully-qualified     # ˌ secondary stress
+02D0                                                  ; fully-qualified     # ː long vowel
+02D1                                                  ; fully-qualified     # ˑ half-long vowel
+0306                                                  ; fully-qualified     # ̆  extra-short (combining breve)
+007C                                                  ; fully-qualified     # | minor (foot) group
+2016                                                  ; fully-qualified     # ‖ major (intonation) group
+002E                                                  ; fully-qualified     # . syllable break
+203F                                                  ; fully-qualified     # ‿ linking (absence of break)
+2197                                                  ; fully-qualified     # ↗ global rise
+2198                                                  ; fully-qualified     # ↘ global fall
+
+# subgroup: ipa-tone-letters
+02E5                                                  ; fully-qualified     # ˥ extra high tone
+02E6                                                  ; fully-qualified     # ˦ high tone
+02E7                                                  ; fully-qualified     # ˧ mid tone
+02E8                                                  ; fully-qualified     # ˨ low tone
+02E9                                                  ; fully-qualified     # ˩ extra low tone
+A712                                                  ; fully-qualified     # ꜒ modifier letter extra-high contour
+A713                                                  ; fully-qualified     # ꜓ modifier letter high contour
+A714                                                  ; fully-qualified     # ꜔ modifier letter mid contour
+A715                                                  ; fully-qualified     # ꜕ modifier letter low contour
+A716                                                  ; fully-qualified     # ꜖ modifier letter extra-low contour
+
+# subgroup: ipa-diacritics-modifiers
+02BC                                                  ; fully-qualified     # ʼ ejective
+02B0                                                  ; fully-qualified     # ʰ aspirated
+02B2                                                  ; fully-qualified     # ʲ palatalized
+02B7                                                  ; fully-qualified     # ʷ labialized
+02E0                                                  ; fully-qualified     # ˠ velarized
+02E4                                                  ; fully-qualified     # ˤ pharyngealized
+02DE                                                  ; fully-qualified     # ˞ rhoticity
+207F                                                  ; fully-qualified     # ⁿ nasal release
+02E1                                                  ; fully-qualified     # ˡ lateral release
+02B1                                                  ; fully-qualified     # ʱ breathy voiced
+0325                                                  ; fully-qualified     # ̥  voiceless (combining ring below)
+032C                                                  ; fully-qualified     # ̬  voiced (combining caron below)
+0339                                                  ; fully-qualified     # ̹  more rounded
+031C                                                  ; fully-qualified     # ̜  less rounded
+031F                                                  ; fully-qualified     # ̟  advanced
+0320                                                  ; fully-qualified     # ̠  retracted
+0308                                                  ; fully-qualified     # ̈  centralized
+033D                                                  ; fully-qualified     # ̽  mid-centralized
+0329                                                  ; fully-qualified     # ̩  syllabic
+032F                                                  ; fully-qualified     # ̯  non-syllabic
+0324                                                  ; fully-qualified     # ̤  breathy voice
+0330                                                  ; fully-qualified     # ̰  creaky voice
+033C                                                  ; fully-qualified     # ̼  linguolabial
+02DA                                                  ; fully-qualified     # ˚ ring above (voiceless)
+0303                                                  ; fully-qualified     # ̃  nasalized
+031A                                                  ; fully-qualified     # ̚  no audible release
+0334                                                  ; fully-qualified     # ̴  velarized or pharyngealized
+0318                                                  ; fully-qualified     # ̘  advanced tongue root
+0319                                                  ; fully-qualified     # ̙  retracted tongue root
+032A                                                  ; fully-qualified     # ̪  dental
+033A                                                  ; fully-qualified     # ̺  apical
+033B                                                  ; fully-qualified     # ̻  laminal
+
+# subgroup: ipa-extipa
+028D                                                  ; fully-qualified     # ʍ voiceless labial-velar fricative
+0295                                                  ; fully-qualified     # ʕ voiced pharyngeal fricative
+02A1                                                  ; fully-qualified     # ʡ epiglottal plosive
+02A2                                                  ; fully-qualified     # ʢ voiced epiglottal fricative
+029A                                                  ; fully-qualified     # ʚ closed open-mid front rounded
+0277                                                  ; fully-qualified     # ɷ closed omega (obsolete)
+026B                                                  ; fully-qualified     # ɫ velarized alveolar lateral
+0267                                                  ; fully-qualified     # ɧ simultaneous ʃ and x
+029E                                                  ; fully-qualified     # ʞ turned k (obsolete click)
+
+# ============================================================
 # group: Latin Extended
 # ============================================================
 
@@ -26,68 +235,6 @@
 014B                                                  ; fully-qualified     # ŋ latin small letter eng
 0132                                                  ; fully-qualified     # Ĳ latin capital ligature ij
 0133                                                  ; fully-qualified     # ĳ latin small ligature ij
-
-# subgroup: latin-phonetic
-0250                                                  ; fully-qualified     # ɐ latin small letter turned a
-0251                                                  ; fully-qualified     # ɑ latin small letter alpha
-0252                                                  ; fully-qualified     # ɒ latin small letter turned alpha
-0253                                                  ; fully-qualified     # ɓ latin small letter b with hook
-0254                                                  ; fully-qualified     # ɔ latin small letter open o
-0255                                                  ; fully-qualified     # ɕ latin small letter c with curl
-0256                                                  ; fully-qualified     # ɖ latin small letter d with tail
-0257                                                  ; fully-qualified     # ɗ latin small letter d with hook
-0258                                                  ; fully-qualified     # ɘ latin small letter reversed e
-0259                                                  ; fully-qualified     # ə latin small letter schwa
-025A                                                  ; fully-qualified     # ɚ latin small letter schwa with hook
-025B                                                  ; fully-qualified     # ɛ latin small letter open e
-025C                                                  ; fully-qualified     # ɜ latin small letter reversed open e
-0260                                                  ; fully-qualified     # ɠ latin small letter g with hook
-0261                                                  ; fully-qualified     # ɡ latin small letter script g
-0262                                                  ; fully-qualified     # ɢ latin letter small capital g
-0263                                                  ; fully-qualified     # ɣ latin small letter gamma
-0264                                                  ; fully-qualified     # ɤ latin small letter rams horn
-0265                                                  ; fully-qualified     # ɥ latin small letter turned h
-0266                                                  ; fully-qualified     # ɦ latin small letter h with hook
-0268                                                  ; fully-qualified     # ɨ latin small letter i with stroke
-026A                                                  ; fully-qualified     # ɪ latin letter small capital i
-026F                                                  ; fully-qualified     # ɯ latin small letter turned m
-0270                                                  ; fully-qualified     # ɰ latin small letter turned m with long leg
-0271                                                  ; fully-qualified     # ɱ latin small letter m with hook
-0272                                                  ; fully-qualified     # ɲ latin small letter n with left hook
-0273                                                  ; fully-qualified     # ɳ latin small letter n with retroflex hook
-0274                                                  ; fully-qualified     # ɴ latin letter small capital n
-0275                                                  ; fully-qualified     # ɵ latin small letter barred o
-0279                                                  ; fully-qualified     # ɹ latin small letter turned r
-027A                                                  ; fully-qualified     # ɺ latin small letter turned r with long leg
-027B                                                  ; fully-qualified     # ɻ latin small letter turned r with hook
-027C                                                  ; fully-qualified     # ɼ latin small letter r with long leg
-027D                                                  ; fully-qualified     # ɽ latin small letter r with tail
-027E                                                  ; fully-qualified     # ɾ latin small letter r with fishhook
-0280                                                  ; fully-qualified     # ʀ latin letter small capital r
-0281                                                  ; fully-qualified     # ʁ latin letter small capital inverted r
-0282                                                  ; fully-qualified     # ʂ latin small letter s with hook
-0283                                                  ; fully-qualified     # ʃ latin small letter esh
-0288                                                  ; fully-qualified     # ʈ latin small letter t with retroflex hook
-0289                                                  ; fully-qualified     # ʉ latin small letter u bar
-028A                                                  ; fully-qualified     # ʊ latin small letter upsilon
-028B                                                  ; fully-qualified     # ʋ latin small letter v with hook
-028C                                                  ; fully-qualified     # ʌ latin small letter turned v
-028D                                                  ; fully-qualified     # ʍ latin small letter turned w
-028E                                                  ; fully-qualified     # ʎ latin small letter turned y
-028F                                                  ; fully-qualified     # ʏ latin letter small capital y
-0290                                                  ; fully-qualified     # ʐ latin small letter z with retroflex hook
-0291                                                  ; fully-qualified     # ʑ latin small letter z with curl
-0292                                                  ; fully-qualified     # ʒ latin small letter ezh
-0294                                                  ; fully-qualified     # ʔ latin letter glottal stop
-0295                                                  ; fully-qualified     # ʕ latin letter pharyngeal voiced fricative
-0298                                                  ; fully-qualified     # ʘ latin letter bilabial click
-0299                                                  ; fully-qualified     # ʙ latin letter small capital b
-029A                                                  ; fully-qualified     # ʚ latin small letter closed open e
-029B                                                  ; fully-qualified     # ʛ latin letter small capital g with hook
-029C                                                  ; fully-qualified     # ʜ latin letter small capital h
-029D                                                  ; fully-qualified     # ʝ latin small letter j with crossed-tail
-029E                                                  ; fully-qualified     # ʞ latin small letter turned k
-029F                                                  ; fully-qualified     # ʟ latin letter small capital l
 
 # ============================================================
 # group: Greek

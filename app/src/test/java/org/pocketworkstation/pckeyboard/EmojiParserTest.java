@@ -675,8 +675,8 @@ public class EmojiParserTest {
         assertNotNull("Test resource symbols-test-sample.txt should exist", symbolStream);
         EmojiParser symbolParser = EmojiParser.parseFrom(symbolStream);
 
-        // Should have 6 groups: Arrows, Mathematics, Currency, Punctuation, Geometric Shapes, Dingbats
-        assertEquals("Should parse 6 symbol groups", 6, symbolParser.getGroups().size());
+        // Should have 7 groups: IPA Phonetics, Arrows, Mathematics, Currency, Punctuation, Geometric Shapes, Dingbats
+        assertEquals("Should parse 7 symbol groups", 7, symbolParser.getGroups().size());
     }
 
     @Test
@@ -750,8 +750,8 @@ public class EmojiParserTest {
 
         // Should have emoji groups + symbol groups
         // Emoji: Smileys & Emotion, People & Body, Component, Animals & Nature, Symbols (5)
-        // Symbols: Arrows, Mathematics, Currency, Punctuation, Geometric Shapes, Dingbats (6)
-        assertEquals("Combined should have 11 groups", 11, combinedParser.getGroups().size());
+        // Symbols: IPA Phonetics, Arrows, Mathematics, Currency, Punctuation, Geometric Shapes, Dingbats (7)
+        assertEquals("Combined should have 12 groups", 12, combinedParser.getGroups().size());
 
         // Should be able to search both emoji and symbols
         List<EmojiParser.EmojiEntry> hearts = combinedParser.search("heart");
@@ -788,5 +788,112 @@ public class EmojiParserTest {
         // Circles
         List<EmojiParser.EmojiEntry> circles = symbolParser.search("circle");
         assertEquals("Should find 2 circles", 2, circles.size());
+    }
+
+    // ==================== IPA Phonetics Tests ====================
+
+    @Test
+    public void testIPAPhoneticsGroup() {
+        InputStream symbolStream = getClass().getClassLoader().getResourceAsStream("symbols-test-sample.txt");
+        EmojiParser symbolParser = EmojiParser.parseFrom(symbolStream);
+
+        // Should have IPA Phonetics as a group
+        List<String> groups = symbolParser.getGroupNames();
+        assertTrue("Should have IPA Phonetics group", groups.contains("IPA Phonetics"));
+    }
+
+    @Test
+    public void testIPAVowels() {
+        InputStream symbolStream = getClass().getClassLoader().getResourceAsStream("symbols-test-sample.txt");
+        EmojiParser symbolParser = EmojiParser.parseFrom(symbolStream);
+
+        // Front vowels
+        List<EmojiParser.EmojiEntry> frontVowels = symbolParser.filter()
+                .subgroup("ipa-vowels-front")
+                .results();
+        assertEquals("Should find 4 front vowels", 4, frontVowels.size());
+
+        // Schwa search
+        List<EmojiParser.EmojiEntry> schwa = symbolParser.search("schwa");
+        assertEquals("Should find 2 schwa variants", 2, schwa.size());
+    }
+
+    @Test
+    public void testIPAConsonants() {
+        InputStream symbolStream = getClass().getClassLoader().getResourceAsStream("symbols-test-sample.txt");
+        EmojiParser symbolParser = EmojiParser.parseFrom(symbolStream);
+
+        // Plosives
+        List<EmojiParser.EmojiEntry> plosives = symbolParser.filter()
+                .subgroup("ipa-consonants-plosives")
+                .results();
+        assertEquals("Should find 3 plosives", 3, plosives.size());
+
+        // Fricatives
+        List<EmojiParser.EmojiEntry> fricatives = symbolParser.filter()
+                .subgroup("ipa-consonants-fricatives")
+                .results();
+        assertEquals("Should find 4 fricatives", 4, fricatives.size());
+    }
+
+    @Test
+    public void testIPASuprasegmentals() {
+        InputStream symbolStream = getClass().getClassLoader().getResourceAsStream("symbols-test-sample.txt");
+        EmojiParser symbolParser = EmojiParser.parseFrom(symbolStream);
+
+        List<EmojiParser.EmojiEntry> suprasegmentals = symbolParser.filter()
+                .subgroup("ipa-suprasegmentals")
+                .results();
+        assertEquals("Should find 3 suprasegmentals", 3, suprasegmentals.size());
+
+        // Search for stress markers
+        List<EmojiParser.EmojiEntry> stress = symbolParser.search("stress");
+        assertEquals("Should find 2 stress markers", 2, stress.size());
+    }
+
+    @Test
+    public void testIPADiacritics() {
+        InputStream symbolStream = getClass().getClassLoader().getResourceAsStream("symbols-test-sample.txt");
+        EmojiParser symbolParser = EmojiParser.parseFrom(symbolStream);
+
+        List<EmojiParser.EmojiEntry> diacritics = symbolParser.filter()
+                .subgroup("ipa-diacritics-modifiers")
+                .results();
+        assertEquals("Should find 3 diacritics/modifiers", 3, diacritics.size());
+
+        // Search for aspirated
+        List<EmojiParser.EmojiEntry> aspirated = symbolParser.search("aspirated");
+        assertFalse("Should find aspirated modifier", aspirated.isEmpty());
+        assertEquals("ʰ", aspirated.get(0).getEmoji());
+    }
+
+    @Test
+    public void testIPASubgroups() {
+        InputStream symbolStream = getClass().getClassLoader().getResourceAsStream("symbols-test-sample.txt");
+        EmojiParser symbolParser = EmojiParser.parseFrom(symbolStream);
+
+        List<String> subgroups = symbolParser.getSubgroupNames("IPA Phonetics");
+        assertEquals("IPA Phonetics should have 6 subgroups", 6, subgroups.size());
+        assertTrue(subgroups.contains("ipa-vowels-front"));
+        assertTrue(subgroups.contains("ipa-vowels-central"));
+        assertTrue(subgroups.contains("ipa-consonants-plosives"));
+        assertTrue(subgroups.contains("ipa-consonants-fricatives"));
+        assertTrue(subgroups.contains("ipa-suprasegmentals"));
+        assertTrue(subgroups.contains("ipa-diacritics-modifiers"));
+    }
+
+    @Test
+    public void testIPASpecificSymbols() {
+        InputStream symbolStream = getClass().getClassLoader().getResourceAsStream("symbols-test-sample.txt");
+        EmojiParser symbolParser = EmojiParser.parseFrom(symbolStream);
+
+        // Glottal stop
+        List<EmojiParser.EmojiEntry> glottal = symbolParser.search("glottal stop");
+        assertFalse("Should find glottal stop", glottal.isEmpty());
+        assertEquals("ʔ", glottal.get(0).getEmoji());
+
+        // Esh (sh sound)
+        List<EmojiParser.EmojiEntry> esh = symbolParser.search("postalveolar fricative");
+        assertEquals("Should find 2 postalveolar fricatives", 2, esh.size());
     }
 }
