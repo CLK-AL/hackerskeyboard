@@ -19,6 +19,8 @@ package org.pocketworkstation.pckeyboard
 import android.content.Context
 import android.graphics.Color
 import android.util.Log
+import com.google.common.collect.HashBiMap
+import com.google.common.collect.ImmutableBiMap
 import java.io.BufferedReader
 import java.io.InputStream
 import java.io.InputStreamReader
@@ -185,6 +187,87 @@ class EmojiParser private constructor() {
         }
     }
 
+    // ==================== IPA Syllable Mapping ====================
+
+    /**
+     * Supported keyboard language tags for IPA syllable mappings.
+     * These correspond to common keyboard locales.
+     */
+    enum class Language(val tag: String, val displayName: String) {
+        EN("en", "English"),
+        DE("de", "German"),
+        FR("fr", "French"),
+        ES("es", "Spanish"),
+        IT("it", "Italian"),
+        PT("pt", "Portuguese"),
+        NL("nl", "Dutch"),
+        PL("pl", "Polish"),
+        RU("ru", "Russian"),
+        JA("ja", "Japanese"),
+        ZH("zh", "Chinese"),
+        KO("ko", "Korean"),
+        AR("ar", "Arabic"),
+        HI("hi", "Hindi"),
+        TR("tr", "Turkish"),
+        VI("vi", "Vietnamese"),
+        TH("th", "Thai"),
+        EL("el", "Greek"),
+        HE("he", "Hebrew"),
+        UK("uk", "Ukrainian");
+
+        companion object {
+            private val byTag = entries.associateBy { it.tag.lowercase() }
+            fun fromTag(tag: String): Language? = byTag[tag.lowercase()]
+        }
+    }
+
+    /**
+     * A language-tagged syllable representation for an IPA symbol.
+     * Format: "lang:syllable" (e.g., "en:sh", "de:sch")
+     */
+    data class IPASyllable(
+        val language: Language,
+        val syllable: String,
+        val ipa: String
+    ) {
+        /** The full key for BiMap: "lang:syllable" */
+        val key: String get() = "${language.tag}:$syllable"
+
+        override fun toString(): String = "$key -> $ipa"
+
+        companion object {
+            /**
+             * Parse a syllable key like "en:sh" into language and syllable parts.
+             */
+            fun parseKey(key: String): Pair<Language, String>? {
+                val parts = key.split(":", limit = 2)
+                if (parts.size != 2) return null
+                val lang = Language.fromTag(parts[0]) ?: return null
+                return lang to parts[1]
+            }
+        }
+    }
+
+    /**
+     * IPA symbol with its language-specific syllable representations.
+     */
+    data class IPAMapping(
+        val ipa: String,
+        val codePoint: Int,
+        val name: String,
+        val syllables: Map<Language, List<String>>
+    ) {
+        /** All syllable keys for this IPA symbol (e.g., ["en:sh", "de:sch"]) */
+        val allKeys: List<String>
+            get() = syllables.flatMap { (lang, syls) -> syls.map { "${lang.tag}:$it" } }
+
+        /** Get syllables for a specific language */
+        fun syllablesFor(lang: Language): List<String> = syllables[lang] ?: emptyList()
+
+        /** Check if this IPA has a syllable mapping for a language */
+        fun hasLanguage(lang: Language): Boolean = syllables.containsKey(lang)
+    }
+
     data class EmojiEntry(
         val codePoints: IntArray,
         val status: Status,
@@ -241,9 +324,13 @@ class EmojiParser private constructor() {
         private const val TAG = "HK/EmojiParser"
         private const val EMOJI_FILE = "emoji-test.txt"
         private const val SYMBOLS_FILE = "symbols-test.txt"
+        private const val IPA_GROUP = "IPA Phonetics"
 
         /** Asset files to load (emoji + symbols). */
         private val ASSET_FILES = listOf(EMOJI_FILE, SYMBOLS_FILE)
+
+        /** Pattern to match syllable mappings: [en:sh,de:sch] */
+        private val SYLLABLE_PATTERN = Regex("""\[([^\]]+)\]\s*$""")
 
         private const val GROUP_PREFIX = "# group: "
         private const val SUBGROUP_PREFIX = "# subgroup: "
@@ -311,6 +398,10 @@ class EmojiParser private constructor() {
     private val groups = mutableListOf<EmojiGroup>()
     private val allFullyQualified = mutableListOf<EmojiEntry>()
     private val byGroup = mutableMapOf<String, EmojiGroup>()
+
+    // IPA syllable mappings
+    private val ipaMappings = mutableMapOf<String, IPAMapping>()  // IPA symbol -> mapping
+    private val syllableToIpa = HashBiMap.create<String, String>()  // "lang:syllable" <-> IPA
 
     /** All parsed groups in file order. */
     fun getGroups(): List<EmojiGroup> = groups
@@ -606,6 +697,128 @@ class EmojiParser private constructor() {
         }
     }
 
+    // ==================== IPA Syllable Access ====================
+
+    /**
+     * Get the IPA symbol for a syllable key.
+     * @param key Syllable key in format "lang:syllable" (e.g., "en:sh")
+     * @return The IPA symbol (e.g., "ʃ") or null if not found
+     */
+    fun getIpaFromSyllable(key: String): String? = syllableToIpa[key.lowercase()]
+
+    /**
+     * Get the IPA symbol for a language and syllable.
+     * @param language The language
+     * @param syllable The syllable text (e.g., "sh")
+     * @return The IPA symbol or null if not found
+     */
+    fun getIpaFromSyllable(language: Language, syllable: String): String? =
+        syllableToIpa["${language.tag}:${syllable.lowercase()}"]
+
+    /**
+     * Get all syllable keys for an IPA symbol.
+     * @param ipa The IPA symbol (e.g., "ʃ")
+     * @return List of syllable keys (e.g., ["en:sh", "de:sch"])
+     */
+    fun getSyllablesFromIpa(ipa: String): List<String> {
+        val mapping = ipaMappings[ipa] ?: return emptyList()
+        return mapping.allKeys
+    }
+
+    /**
+     * Get syllables for an IPA symbol in a specific language.
+     * @param ipa The IPA symbol
+     * @param language The target language
+     * @return List of syllables in that language
+     */
+    fun getSyllablesFromIpa(ipa: String, language: Language): List<String> {
+        val mapping = ipaMappings[ipa] ?: return emptyList()
+        return mapping.syllablesFor(language)
+    }
+
+    /**
+     * Get IPA mapping for a symbol.
+     * @param ipa The IPA symbol
+     * @return The full IPAMapping or null
+     */
+    fun getIpaMapping(ipa: String): IPAMapping? = ipaMappings[ipa]
+
+    /**
+     * Get all IPA mappings that have syllables for a language.
+     * @param language The language to filter by
+     * @return List of IPAMappings with syllables in that language
+     */
+    fun getIpaMappingsForLanguage(language: Language): List<IPAMapping> =
+        ipaMappings.values.filter { it.hasLanguage(language) }
+
+    /**
+     * Get IPA suggestions for text input in a specific language.
+     * Returns IPA symbols that match syllable prefixes.
+     *
+     * @param text The text being typed
+     * @param language The current keyboard language
+     * @param maxResults Maximum number of suggestions to return
+     * @return List of pairs (IPA symbol, syllable that matched)
+     */
+    fun getIpaSuggestions(text: String, language: Language, maxResults: Int = 5): List<Pair<String, String>> {
+        if (text.isEmpty()) return emptyList()
+
+        val lowerText = text.lowercase()
+        val prefix = "${language.tag}:"
+
+        return syllableToIpa.entries
+            .filter { (key, _) ->
+                key.startsWith(prefix) && key.removePrefix(prefix).startsWith(lowerText)
+            }
+            .take(maxResults)
+            .map { (key, ipa) -> ipa to key.removePrefix(prefix) }
+    }
+
+    /**
+     * Get IPA suggestions matching exact syllable in any language.
+     * @param syllable The syllable to look up
+     * @return List of pairs (IPA symbol, language tag)
+     */
+    fun getIpaSuggestionsAllLanguages(syllable: String): List<Pair<String, Language>> {
+        val lowerSyllable = syllable.lowercase()
+        return Language.entries.mapNotNull { lang ->
+            val key = "${lang.tag}:$lowerSyllable"
+            syllableToIpa[key]?.let { ipa -> ipa to lang }
+        }
+    }
+
+    /**
+     * Check if a syllable key exists in the mapping.
+     */
+    fun hasSyllable(key: String): Boolean = syllableToIpa.containsKey(key.lowercase())
+
+    /**
+     * Check if a syllable exists for a language.
+     */
+    fun hasSyllable(language: Language, syllable: String): Boolean =
+        syllableToIpa.containsKey("${language.tag}:${syllable.lowercase()}")
+
+    /**
+     * Get an immutable view of the syllable-to-IPA BiMap.
+     */
+    fun getSyllableToIpaBiMap(): ImmutableBiMap<String, String> =
+        ImmutableBiMap.copyOf(syllableToIpa)
+
+    /**
+     * Get all IPA mappings.
+     */
+    fun getAllIpaMappings(): Collection<IPAMapping> = ipaMappings.values
+
+    /**
+     * Get count of IPA symbols with syllable mappings.
+     */
+    fun getIpaMappingCount(): Int = ipaMappings.size
+
+    /**
+     * Get count of total syllable keys.
+     */
+    fun getSyllableCount(): Int = syllableToIpa.size
+
     private fun load(context: Context) {
         for (assetFile in ASSET_FILES) {
             try {
@@ -686,6 +899,9 @@ class EmojiParser private constructor() {
      * Parse a single data line.
      *
      * Format: `1F600 ; fully-qualified # 😀 E1.0 grinning face`
+     *
+     * IPA entries may include syllable mappings:
+     * `0283 ; fully-qualified # ʃ E1.0 voiceless postalveolar fricative [en:sh,de:sch,fr:ch]`
      */
     private fun parseLine(line: String, group: String, subgroup: String): EmojiEntry? {
         // Split on semicolon: "1F600" and "fully-qualified # 😀 E1.0 grinning face"
@@ -723,13 +939,23 @@ class EmojiParser private constructor() {
         val versionRegex = Regex("""E(\d+\.\d+)\s+(.+)""")
         val match = versionRegex.find(comment)
         val version: String
-        val name: String
+        var name: String
         if (match != null) {
             version = "E${match.groupValues[1]}"
             name = match.groupValues[2]
         } else {
             version = ""
             name = comment
+        }
+
+        // Check for IPA syllable mappings: [en:sh,de:sch,fr:ch]
+        val syllableMatch = SYLLABLE_PATTERN.find(name)
+        if (syllableMatch != null && group == IPA_GROUP) {
+            val syllablesStr = syllableMatch.groupValues[1]
+            name = name.substring(0, syllableMatch.range.first).trim()
+
+            // Parse syllable mappings and build BiMap
+            parseIpaSyllables(emoji, codePoints[0], name, syllablesStr)
         }
 
         return EmojiEntry(
@@ -741,5 +967,46 @@ class EmojiParser private constructor() {
             group = group,
             subgroup = subgroup
         )
+    }
+
+    /**
+     * Parse IPA syllable mappings from the bracketed format.
+     * Format: "en:sh,de:sch,fr:ch"
+     */
+    private fun parseIpaSyllables(ipa: String, codePoint: Int, name: String, syllablesStr: String) {
+        val syllablesByLang = mutableMapOf<Language, MutableList<String>>()
+
+        for (part in syllablesStr.split(",")) {
+            val trimmed = part.trim()
+            if (trimmed.isEmpty()) continue
+
+            val colonIdx = trimmed.indexOf(':')
+            if (colonIdx < 0) continue
+
+            val langTag = trimmed.substring(0, colonIdx)
+            val syllable = trimmed.substring(colonIdx + 1)
+
+            val language = Language.fromTag(langTag) ?: continue
+
+            syllablesByLang.getOrPut(language) { mutableListOf() }.add(syllable)
+
+            // Add to BiMap: "lang:syllable" -> IPA
+            val key = "${language.tag}:${syllable.lowercase()}"
+            if (!syllableToIpa.containsKey(key)) {
+                syllableToIpa[key] = ipa
+            } else {
+                Log.w(TAG, "Duplicate syllable key: $key (already maps to ${syllableToIpa[key]}, ignoring $ipa)")
+            }
+        }
+
+        if (syllablesByLang.isNotEmpty()) {
+            val mapping = IPAMapping(
+                ipa = ipa,
+                codePoint = codePoint,
+                name = name,
+                syllables = syllablesByLang.mapValues { it.value.toList() }
+            )
+            ipaMappings[ipa] = mapping
+        }
     }
 }

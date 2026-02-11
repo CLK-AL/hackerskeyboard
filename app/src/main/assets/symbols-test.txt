@@ -11,123 +11,123 @@
 # International Phonetic Alphabet - organized by IPA chart categories
 
 # subgroup: ipa-vowels-front
-0069                                                  ; fully-qualified     # i close front unrounded vowel
-0079                                                  ; fully-qualified     # y close front rounded vowel
-026A                                                  ; fully-qualified     # ɪ near-close front unrounded vowel
-028F                                                  ; fully-qualified     # ʏ near-close front rounded vowel
-0065                                                  ; fully-qualified     # e close-mid front unrounded vowel
-00F8                                                  ; fully-qualified     # ø close-mid front rounded vowel
-025B                                                  ; fully-qualified     # ɛ open-mid front unrounded vowel
-0153                                                  ; fully-qualified     # œ open-mid front rounded vowel
-00E6                                                  ; fully-qualified     # æ near-open front unrounded vowel
-0061                                                  ; fully-qualified     # a open front unrounded vowel
-0276                                                  ; fully-qualified     # ɶ open front rounded vowel
+0069                                                  ; fully-qualified     # i close front unrounded vowel [en:ee,de:ie,fr:i,es:i,it:i]
+0079                                                  ; fully-qualified     # y close front rounded vowel [de:ü,fr:u,nl:uu]
+026A                                                  ; fully-qualified     # ɪ near-close front unrounded vowel [en:i,de:i]
+028F                                                  ; fully-qualified     # ʏ near-close front rounded vowel [de:ü]
+0065                                                  ; fully-qualified     # e close-mid front unrounded vowel [en:ay,de:eh,fr:é,es:e,it:e]
+00F8                                                  ; fully-qualified     # ø close-mid front rounded vowel [de:ö,fr:eu,nl:eu]
+025B                                                  ; fully-qualified     # ɛ open-mid front unrounded vowel [en:eh,de:ä,fr:è,es:e,it:e]
+0153                                                  ; fully-qualified     # œ open-mid front rounded vowel [de:ö,fr:œ]
+00E6                                                  ; fully-qualified     # æ near-open front unrounded vowel [en:a]
+0061                                                  ; fully-qualified     # a open front unrounded vowel [en:ah,de:a,fr:a,es:a,it:a]
+0276                                                  ; fully-qualified     # ɶ open front rounded vowel [de:ö]
 
 # subgroup: ipa-vowels-central
-0268                                                  ; fully-qualified     # ɨ close central unrounded vowel
-0289                                                  ; fully-qualified     # ʉ close central rounded vowel
-026F                                                  ; fully-qualified     # ɯ close back unrounded vowel (often central)
+0268                                                  ; fully-qualified     # ɨ close central unrounded vowel [ru:ы]
+0289                                                  ; fully-qualified     # ʉ close central rounded vowel [en:ew]
+026F                                                  ; fully-qualified     # ɯ close back unrounded vowel (often central) [ja:u,ko:eu]
 0258                                                  ; fully-qualified     # ɘ close-mid central unrounded vowel
 0275                                                  ; fully-qualified     # ɵ close-mid central rounded vowel
-0259                                                  ; fully-qualified     # ə mid central vowel (schwa)
-025A                                                  ; fully-qualified     # ɚ rhotacized schwa
-025C                                                  ; fully-qualified     # ɜ open-mid central unrounded vowel
-025D                                                  ; fully-qualified     # ɝ rhotacized open-mid central vowel
+0259                                                  ; fully-qualified     # ə mid central vowel (schwa) [en:uh,de:e,fr:e]
+025A                                                  ; fully-qualified     # ɚ rhotacized schwa [en:er]
+025C                                                  ; fully-qualified     # ɜ open-mid central unrounded vowel [en:ur]
+025D                                                  ; fully-qualified     # ɝ rhotacized open-mid central vowel [en:ir]
 025E                                                  ; fully-qualified     # ɞ open-mid central rounded vowel
-0250                                                  ; fully-qualified     # ɐ near-open central vowel
+0250                                                  ; fully-qualified     # ɐ near-open central vowel [de:er,pt:a]
 
 # subgroup: ipa-vowels-back
-0075                                                  ; fully-qualified     # u close back rounded vowel
-028A                                                  ; fully-qualified     # ʊ near-close back rounded vowel
-006F                                                  ; fully-qualified     # o close-mid back rounded vowel
-0264                                                  ; fully-qualified     # ɤ close-mid back unrounded vowel
-0254                                                  ; fully-qualified     # ɔ open-mid back rounded vowel
-028C                                                  ; fully-qualified     # ʌ open-mid back unrounded vowel
-0251                                                  ; fully-qualified     # ɑ open back unrounded vowel
-0252                                                  ; fully-qualified     # ɒ open back rounded vowel
+0075                                                  ; fully-qualified     # u close back rounded vowel [en:oo,de:u,fr:ou,es:u,it:u]
+028A                                                  ; fully-qualified     # ʊ near-close back rounded vowel [en:oo,de:u]
+006F                                                  ; fully-qualified     # o close-mid back rounded vowel [en:oh,de:o,fr:o,es:o,it:o]
+0264                                                  ; fully-qualified     # ɤ close-mid back unrounded vowel [ko:eo]
+0254                                                  ; fully-qualified     # ɔ open-mid back rounded vowel [en:aw,de:o,fr:o,it:o]
+028C                                                  ; fully-qualified     # ʌ open-mid back unrounded vowel [en:uh]
+0251                                                  ; fully-qualified     # ɑ open back unrounded vowel [en:ah,de:a,fr:a]
+0252                                                  ; fully-qualified     # ɒ open back rounded vowel [en:o]
 
 # subgroup: ipa-consonants-plosives
-0070                                                  ; fully-qualified     # p voiceless bilabial plosive
-0062                                                  ; fully-qualified     # b voiced bilabial plosive
-0074                                                  ; fully-qualified     # t voiceless alveolar plosive
-0064                                                  ; fully-qualified     # d voiced alveolar plosive
-0288                                                  ; fully-qualified     # ʈ voiceless retroflex plosive
-0256                                                  ; fully-qualified     # ɖ voiced retroflex plosive
+0070                                                  ; fully-qualified     # p voiceless bilabial plosive [en:p,de:p,fr:p,es:p,it:p]
+0062                                                  ; fully-qualified     # b voiced bilabial plosive [en:b,de:b,fr:b,es:b,it:b]
+0074                                                  ; fully-qualified     # t voiceless alveolar plosive [en:t,de:t,fr:t,es:t,it:t]
+0064                                                  ; fully-qualified     # d voiced alveolar plosive [en:d,de:d,fr:d,es:d,it:d]
+0288                                                  ; fully-qualified     # ʈ voiceless retroflex plosive [hi:ṭ]
+0256                                                  ; fully-qualified     # ɖ voiced retroflex plosive [hi:ḍ]
 0063                                                  ; fully-qualified     # c voiceless palatal plosive
 025F                                                  ; fully-qualified     # ɟ voiced palatal plosive
-006B                                                  ; fully-qualified     # k voiceless velar plosive
-0261                                                  ; fully-qualified     # ɡ voiced velar plosive
-0067                                                  ; fully-qualified     # g voiced velar plosive (alternate)
-0071                                                  ; fully-qualified     # q voiceless uvular plosive
+006B                                                  ; fully-qualified     # k voiceless velar plosive [en:k,de:k,fr:k,es:c,it:c]
+0261                                                  ; fully-qualified     # ɡ voiced velar plosive [en:g,de:g,fr:g,es:g,it:g]
+0067                                                  ; fully-qualified     # g voiced velar plosive (alternate) [en:g,de:g]
+0071                                                  ; fully-qualified     # q voiceless uvular plosive [ar:q]
 0262                                                  ; fully-qualified     # ɢ voiced uvular plosive
-0294                                                  ; fully-qualified     # ʔ glottal stop
+0294                                                  ; fully-qualified     # ʔ glottal stop [ar:',de:']
 
 # subgroup: ipa-consonants-nasals
-006D                                                  ; fully-qualified     # m voiced bilabial nasal
-0271                                                  ; fully-qualified     # ɱ voiced labiodental nasal
-006E                                                  ; fully-qualified     # n voiced alveolar nasal
-0273                                                  ; fully-qualified     # ɳ voiced retroflex nasal
-0272                                                  ; fully-qualified     # ɲ voiced palatal nasal
-014B                                                  ; fully-qualified     # ŋ voiced velar nasal
+006D                                                  ; fully-qualified     # m voiced bilabial nasal [en:m,de:m,fr:m,es:m,it:m]
+0271                                                  ; fully-qualified     # ɱ voiced labiodental nasal [en:mf]
+006E                                                  ; fully-qualified     # n voiced alveolar nasal [en:n,de:n,fr:n,es:n,it:n]
+0273                                                  ; fully-qualified     # ɳ voiced retroflex nasal [hi:ṇ]
+0272                                                  ; fully-qualified     # ɲ voiced palatal nasal [es:ñ,fr:gn,it:gn,pt:nh]
+014B                                                  ; fully-qualified     # ŋ voiced velar nasal [en:ng,de:ng,vi:ng]
 0274                                                  ; fully-qualified     # ɴ voiced uvular nasal
 
 # subgroup: ipa-consonants-trills
 0299                                                  ; fully-qualified     # ʙ voiced bilabial trill
-0072                                                  ; fully-qualified     # r voiced alveolar trill
-0280                                                  ; fully-qualified     # ʀ voiced uvular trill
+0072                                                  ; fully-qualified     # r voiced alveolar trill [es:rr,it:r,ru:r,pl:r]
+0280                                                  ; fully-qualified     # ʀ voiced uvular trill [de:r,fr:r]
 029C                                                  ; fully-qualified     # ʜ voiceless epiglottal trill
 02A2                                                  ; fully-qualified     # ʢ voiced epiglottal trill
 
 # subgroup: ipa-consonants-taps-flaps
 2C71                                                  ; fully-qualified     # ⱱ labiodental flap
-027E                                                  ; fully-qualified     # ɾ voiced alveolar tap
-027D                                                  ; fully-qualified     # ɽ voiced retroflex flap
-027A                                                  ; fully-qualified     # ɺ voiced alveolar lateral flap
+027E                                                  ; fully-qualified     # ɾ voiced alveolar tap [en:tt,en:dd,es:r,ja:r,ko:r]
+027D                                                  ; fully-qualified     # ɽ voiced retroflex flap [hi:ṛ]
+027A                                                  ; fully-qualified     # ɺ voiced alveolar lateral flap [ja:r]
 
 # subgroup: ipa-consonants-fricatives
-0278                                                  ; fully-qualified     # ɸ voiceless bilabial fricative
-03B2                                                  ; fully-qualified     # β voiced bilabial fricative
-0066                                                  ; fully-qualified     # f voiceless labiodental fricative
-0076                                                  ; fully-qualified     # v voiced labiodental fricative
-03B8                                                  ; fully-qualified     # θ voiceless dental fricative
-00F0                                                  ; fully-qualified     # ð voiced dental fricative
-0073                                                  ; fully-qualified     # s voiceless alveolar fricative
-007A                                                  ; fully-qualified     # z voiced alveolar fricative
-0283                                                  ; fully-qualified     # ʃ voiceless postalveolar fricative
-0292                                                  ; fully-qualified     # ʒ voiced postalveolar fricative
-0282                                                  ; fully-qualified     # ʂ voiceless retroflex fricative
-0290                                                  ; fully-qualified     # ʐ voiced retroflex fricative
-0255                                                  ; fully-qualified     # ɕ voiceless alveolo-palatal fricative
-0291                                                  ; fully-qualified     # ʑ voiced alveolo-palatal fricative
-00E7                                                  ; fully-qualified     # ç voiceless palatal fricative
-029D                                                  ; fully-qualified     # ʝ voiced palatal fricative
-0078                                                  ; fully-qualified     # x voiceless velar fricative
-0263                                                  ; fully-qualified     # ɣ voiced velar fricative
-03C7                                                  ; fully-qualified     # χ voiceless uvular fricative
-0281                                                  ; fully-qualified     # ʁ voiced uvular fricative
-0127                                                  ; fully-qualified     # ħ voiceless pharyngeal fricative
-0295                                                  ; fully-qualified     # ʕ voiced pharyngeal fricative
-0068                                                  ; fully-qualified     # h voiceless glottal fricative
-0266                                                  ; fully-qualified     # ɦ voiced glottal fricative
+0278                                                  ; fully-qualified     # ɸ voiceless bilabial fricative [ja:f]
+03B2                                                  ; fully-qualified     # β voiced bilabial fricative [es:b,el:v]
+0066                                                  ; fully-qualified     # f voiceless labiodental fricative [en:f,de:f,fr:f,es:f,it:f]
+0076                                                  ; fully-qualified     # v voiced labiodental fricative [en:v,de:w,fr:v,es:v,it:v]
+03B8                                                  ; fully-qualified     # θ voiceless dental fricative [en:th,el:th,es:z]
+00F0                                                  ; fully-qualified     # ð voiced dental fricative [en:th,es:d]
+0073                                                  ; fully-qualified     # s voiceless alveolar fricative [en:s,de:s,fr:s,es:s,it:s]
+007A                                                  ; fully-qualified     # z voiced alveolar fricative [en:z,de:s,fr:z,it:z]
+0283                                                  ; fully-qualified     # ʃ voiceless postalveolar fricative [en:sh,de:sch,fr:ch,it:sc,pt:x]
+0292                                                  ; fully-qualified     # ʒ voiced postalveolar fricative [en:zh,fr:j,pt:j,ru:zh]
+0282                                                  ; fully-qualified     # ʂ voiceless retroflex fricative [zh:sh,ru:sh,pl:sz]
+0290                                                  ; fully-qualified     # ʐ voiced retroflex fricative [zh:r,ru:zh,pl:ż]
+0255                                                  ; fully-qualified     # ɕ voiceless alveolo-palatal fricative [zh:x,ja:sh,pl:ś,ko:s]
+0291                                                  ; fully-qualified     # ʑ voiced alveolo-palatal fricative [ja:j,pl:ź]
+00E7                                                  ; fully-qualified     # ç voiceless palatal fricative [de:ch,ja:h]
+029D                                                  ; fully-qualified     # ʝ voiced palatal fricative [es:y]
+0078                                                  ; fully-qualified     # x voiceless velar fricative [de:ch,es:j,ru:kh,ar:kh]
+0263                                                  ; fully-qualified     # ɣ voiced velar fricative [el:g,ar:gh,nl:g]
+03C7                                                  ; fully-qualified     # χ voiceless uvular fricative [de:ch,nl:g,he:kh]
+0281                                                  ; fully-qualified     # ʁ voiced uvular fricative [de:r,fr:r,nl:r,pt:r]
+0127                                                  ; fully-qualified     # ħ voiceless pharyngeal fricative [ar:h]
+0295                                                  ; fully-qualified     # ʕ voiced pharyngeal fricative [ar:']
+0068                                                  ; fully-qualified     # h voiceless glottal fricative [en:h,de:h,fr:h,es:h]
+0266                                                  ; fully-qualified     # ɦ voiced glottal fricative [uk:h,nl:h]
 
 # subgroup: ipa-consonants-laterals
 026C                                                  ; fully-qualified     # ɬ voiceless alveolar lateral fricative
 026E                                                  ; fully-qualified     # ɮ voiced alveolar lateral fricative
-006C                                                  ; fully-qualified     # l voiced alveolar lateral approximant
-026D                                                  ; fully-qualified     # ɭ voiced retroflex lateral approximant
-028E                                                  ; fully-qualified     # ʎ voiced palatal lateral approximant
+006C                                                  ; fully-qualified     # l voiced alveolar lateral approximant [en:l,de:l,fr:l,es:l,it:l]
+026D                                                  ; fully-qualified     # ɭ voiced retroflex lateral approximant [hi:ḷ]
+028E                                                  ; fully-qualified     # ʎ voiced palatal lateral approximant [it:gl,es:ll,pt:lh]
 029F                                                  ; fully-qualified     # ʟ voiced velar lateral approximant
-027A                                                  ; fully-qualified     # ɺ voiced alveolar lateral flap
+027A                                                  ; fully-qualified     # ɺ voiced alveolar lateral flap [ja:r]
 
 # subgroup: ipa-consonants-approximants
-028B                                                  ; fully-qualified     # ʋ voiced labiodental approximant
-0279                                                  ; fully-qualified     # ɹ voiced alveolar approximant
-027B                                                  ; fully-qualified     # ɻ voiced retroflex approximant
-006A                                                  ; fully-qualified     # j voiced palatal approximant
-0270                                                  ; fully-qualified     # ɰ voiced velar approximant
-0077                                                  ; fully-qualified     # w voiced labio-velar approximant
-0265                                                  ; fully-qualified     # ɥ voiced labio-palatal approximant
-028D                                                  ; fully-qualified     # ʍ voiceless labio-velar approximant
+028B                                                  ; fully-qualified     # ʋ voiced labiodental approximant [nl:w,hi:v]
+0279                                                  ; fully-qualified     # ɹ voiced alveolar approximant [en:r]
+027B                                                  ; fully-qualified     # ɻ voiced retroflex approximant [en:r,zh:r]
+006A                                                  ; fully-qualified     # j voiced palatal approximant [en:y,de:j,fr:y,es:y,it:i]
+0270                                                  ; fully-qualified     # ɰ voiced velar approximant [es:g,ko:g]
+0077                                                  ; fully-qualified     # w voiced labio-velar approximant [en:w,fr:ou,it:u]
+0265                                                  ; fully-qualified     # ɥ voiced labio-palatal approximant [fr:u]
+028D                                                  ; fully-qualified     # ʍ voiceless labio-velar approximant [en:wh]
 
 # subgroup: ipa-clicks
 0298                                                  ; fully-qualified     # ʘ bilabial click
