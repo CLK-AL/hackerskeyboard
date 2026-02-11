@@ -3,6 +3,14 @@ plugins {
     id 'org.jetbrains.kotlin.android'
 }
 
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+
+// Generate timestamp-based version suffix: yyyy.MM.dd.HH.mm.ss
+def buildTimestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy.MM.dd.HH.mm.ss"))
+def baseVersionName = "v1.42.2ak"
+def baseVersionCode = 1042002
+
 android {
     namespace 'org.pocketworkstation.pckeyboard'
     compileSdk 36
@@ -11,8 +19,8 @@ android {
         applicationId 'org.pocketworkstation.pckeyboard'
         minSdk 21
         targetSdk 36
-        versionCode 1042002
-        versionName "v1.42.2ak"
+        versionCode baseVersionCode
+        versionName "${baseVersionName}-${buildTimestamp}"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
             cmake {
@@ -82,4 +90,25 @@ dependencies {
     androidTestImplementation 'androidx.test:core:1.6.1'
     androidTestImplementation 'androidx.test.ext:junit:1.2.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
+}
+
+// Task to print version name (used by CI/CD)
+tasks.register('printVersionName') {
+    doLast {
+        println android.defaultConfig.versionName
+    }
+}
+
+// Task to print version code
+tasks.register('printVersionCode') {
+    doLast {
+        println android.defaultConfig.versionCode
+    }
+}
+
+// Task to print build timestamp
+tasks.register('printBuildTimestamp') {
+    doLast {
+        println buildTimestamp
+    }
 }
