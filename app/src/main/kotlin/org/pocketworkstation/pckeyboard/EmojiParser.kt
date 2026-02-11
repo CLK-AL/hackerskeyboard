@@ -119,6 +119,58 @@ class EmojiParser private constructor() {
     }
 
     /**
+     * Unified color value merging SkinTone and ColorName.
+     * SkinTone acts as an optional modifier for emoji with skin tone variants.
+     */
+    sealed interface EmojiColorValue {
+        val hex: String
+        val displayName: String
+        val colorInt: Int get() = Color.parseColor(hex)
+        val isSkinTone: Boolean
+
+        /** Wrap a named color. */
+        @JvmInline
+        value class Named(val color: ColorName) : EmojiColorValue {
+            override val hex: String get() = color.hex
+            override val displayName: String get() = color.displayName
+            override val isSkinTone: Boolean get() = false
+        }
+
+        /** Wrap a skin tone modifier. */
+        @JvmInline
+        value class Skin(val tone: SkinTone) : EmojiColorValue {
+            override val hex: String get() = tone.hex
+            override val displayName: String get() = tone.displayName
+            override val isSkinTone: Boolean get() = true
+        }
+
+        fun toEmojiColor(): EmojiColor = EmojiColor(hex, displayName)
+
+        companion object {
+            /** All color values: named colors first, then skin tones. */
+            @JvmStatic
+            fun all(): List<EmojiColorValue> =
+                ColorName.entries.map { Named(it) } + SkinTone.entries.map { Skin(it) }
+
+            /** All named colors. */
+            @JvmStatic
+            fun allNamed(): List<Named> = ColorName.entries.map { Named(it) }
+
+            /** All skin tones. */
+            @JvmStatic
+            fun allSkinTones(): List<Skin> = SkinTone.entries.map { Skin(it) }
+
+            /** Create from SkinTone. */
+            @JvmStatic
+            fun from(tone: SkinTone): Skin = Skin(tone)
+
+            /** Create from ColorName. */
+            @JvmStatic
+            fun from(color: ColorName): Named = Named(color)
+        }
+    }
+
+    /**
      * Emoji qualification status per UTS #51.
      */
     enum class Status(val value: String) {
@@ -154,6 +206,11 @@ class EmojiParser private constructor() {
         val color: EmojiColor?
             get() = skinTone?.let { EmojiColor.fromSkinTone(it) }
                 ?: colorName?.let { EmojiColor.fromColorName(it) }
+
+        /** Unified color value (skin tone takes priority). */
+        val colorValue: EmojiColorValue?
+            get() = skinTone?.let { EmojiColorValue.Skin(it) }
+                ?: colorName?.let { EmojiColorValue.Named(it) }
 
         override fun equals(other: Any?): Boolean {
             if (this === other) return true
@@ -325,20 +382,28 @@ class EmojiParser private constructor() {
     /**
      * Filter criteria for narrowing emoji search results.
      * Use with [filter] to create breadcrumb-style navigation.
+     *
+     * @property color Unified color filter (can be [EmojiColorValue.Named] or [EmojiColorValue.Skin])
      */
     data class EmojiFilter(
         val group: String? = null,
         val subgroup: String? = null,
-        val skinTone: SkinTone? = null,
-        val colorName: ColorName? = null,
+        val color: EmojiColorValue? = null,
         val query: String? = null
     ) {
+        /** Skin tone filter (if color is a skin tone). */
+        val skinTone: SkinTone?
+            get() = (color as? EmojiColorValue.Skin)?.tone
+
+        /** Color name filter (if color is a named color). */
+        val colorName: ColorName?
+            get() = (color as? EmojiColorValue.Named)?.color
+
         /** Returns a human-readable breadcrumb trail. */
         fun toBreadcrumbs(): List<String> = buildList {
             group?.let { add(it) }
             subgroup?.let { add(it) }
-            skinTone?.let { add(it.displayName) }
-            colorName?.let { add(it.displayName) }
+            color?.let { add(it.displayName) }
             query?.let { add("\"$it\"") }
         }
 
@@ -356,7 +421,7 @@ class EmojiParser private constructor() {
      *     .results()
      *
      * parser.filter()
-     *     .colorName(ColorName.RED)
+     *     .color(EmojiColorValue.Named(ColorName.RED))
      *     .query("heart")
      *     .results()
      * ```
@@ -370,11 +435,14 @@ class EmojiParser private constructor() {
         /** Filter by subgroup (subcategory). */
         fun subgroup(name: String) = apply { criteria = criteria.copy(subgroup = name) }
 
-        /** Filter by skin tone. */
-        fun skinTone(tone: SkinTone) = apply { criteria = criteria.copy(skinTone = tone) }
+        /** Filter by unified color value (skin tone or named color). */
+        fun color(value: EmojiColorValue) = apply { criteria = criteria.copy(color = value) }
 
-        /** Filter by named color. */
-        fun colorName(color: ColorName) = apply { criteria = criteria.copy(colorName = color) }
+        /** Filter by skin tone (convenience for [color] with [EmojiColorValue.Skin]). */
+        fun skinTone(tone: SkinTone) = color(EmojiColorValue.Skin(tone))
+
+        /** Filter by named color (convenience for [color] with [EmojiColorValue.Named]). */
+        fun colorName(colorName: ColorName) = color(EmojiColorValue.Named(colorName))
 
         /** Filter by name substring (description). */
         fun query(text: String) = apply { criteria = criteria.copy(query = text) }
@@ -410,12 +478,17 @@ class EmojiParser private constructor() {
                 .distinct()
         }
 
-        /** Get available colors (unified) given current filters. */
-        fun availableColors(): List<EmojiColor> {
+        /** Get available color values (unified) given current filters. */
+        fun availableColorValues(): List<EmojiColorValue> {
             return applyFilters()
-                .mapNotNull { it.color }
+                .mapNotNull { it.colorValue }
                 .distinctBy { it.hex }
                 .sortedBy { colorToHue(it.hex) }
+        }
+
+        /** Get available colors (legacy) given current filters. */
+        fun availableColors(): List<EmojiColor> {
+            return availableColorValues().map { it.toEmojiColor() }
         }
 
         /** Get the count of results without fetching all entries. */
@@ -435,12 +508,11 @@ class EmojiParser private constructor() {
                 result = result.filter { it.subgroup == s }
             }
 
-            criteria.skinTone?.let { tone ->
-                result = result.filter { it.skinTone == tone }
-            }
-
-            criteria.colorName?.let { color ->
-                result = result.filter { it.colorName == color }
+            criteria.color?.let { colorValue ->
+                result = when (colorValue) {
+                    is EmojiColorValue.Skin -> result.filter { it.skinTone == colorValue.tone }
+                    is EmojiColorValue.Named -> result.filter { it.colorName == colorValue.color }
+                }
             }
 
             criteria.query?.let { q ->
@@ -483,6 +555,24 @@ class EmojiParser private constructor() {
      */
     fun getAvailableColorNames(): List<ColorName> {
         return ColorName.entries.filter { byColorName.containsKey(it) }
+    }
+
+    /**
+     * Get all available color values (both skin tones and named colors) that have emoji.
+     */
+    fun getAvailableColorValues(): List<EmojiColorValue> {
+        val result = mutableListOf<EmojiColorValue>()
+        for (color in ColorName.entries) {
+            if (byColorName.containsKey(color)) {
+                result.add(EmojiColorValue.Named(color))
+            }
+        }
+        for (tone in SkinTone.entries) {
+            if (bySkinTone.containsKey(tone)) {
+                result.add(EmojiColorValue.Skin(tone))
+            }
+        }
+        return result
     }
 
     /** Convert hex color to hue for sorting. */

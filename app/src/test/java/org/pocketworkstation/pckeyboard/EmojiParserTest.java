@@ -555,4 +555,115 @@ public class EmojiParserTest {
         List<EmojiParser.EmojiEntry> results = parser.filter().results();
         assertEquals("No filters should return all fully-qualified", 21, results.size());
     }
+
+    // ==================== Unified EmojiColorValue Tests ====================
+
+    @Test
+    public void testEmojiColorValueNamed() {
+        EmojiParser.EmojiColorValue.Named red = new EmojiParser.EmojiColorValue.Named(EmojiParser.ColorName.RED);
+        assertEquals("#FF0000", red.getHex());
+        assertEquals("red", red.getDisplayName());
+        assertFalse(red.isSkinTone());
+    }
+
+    @Test
+    public void testEmojiColorValueSkin() {
+        EmojiParser.EmojiColorValue.Skin light = new EmojiParser.EmojiColorValue.Skin(EmojiParser.SkinTone.LIGHT);
+        assertEquals("#FFDFC4", light.getHex());
+        assertEquals("light skin tone", light.getDisplayName());
+        assertTrue(light.isSkinTone());
+    }
+
+    @Test
+    public void testEmojiColorValueAll() {
+        List<EmojiParser.EmojiColorValue> all = EmojiParser.EmojiColorValue.all();
+        // 12 named colors + 5 skin tones = 17
+        assertEquals(17, all.size());
+    }
+
+    @Test
+    public void testEmojiColorValueToEmojiColor() {
+        EmojiParser.EmojiColorValue.Named red = new EmojiParser.EmojiColorValue.Named(EmojiParser.ColorName.RED);
+        EmojiParser.EmojiColor color = red.toEmojiColor();
+        assertEquals("#FF0000", color.getHex());
+        assertEquals("red", color.getName());
+    }
+
+    @Test
+    public void testFilterByColorValue() {
+        EmojiParser.EmojiColorValue redValue = new EmojiParser.EmojiColorValue.Named(EmojiParser.ColorName.RED);
+        List<EmojiParser.EmojiEntry> results = parser.filter()
+                .color(redValue)
+                .results();
+        assertEquals("Should find 2 red emoji", 2, results.size());
+    }
+
+    @Test
+    public void testFilterByColorValueSkin() {
+        EmojiParser.EmojiColorValue skinValue = new EmojiParser.EmojiColorValue.Skin(EmojiParser.SkinTone.LIGHT);
+        List<EmojiParser.EmojiEntry> results = parser.filter()
+                .color(skinValue)
+                .results();
+        assertEquals("Should find 1 light skin tone emoji", 1, results.size());
+    }
+
+    @Test
+    public void testEntryColorValue() {
+        // Red heart should have Named color value
+        List<EmojiParser.EmojiEntry> redHearts = parser.search("red heart");
+        assertFalse(redHearts.isEmpty());
+        EmojiParser.EmojiColorValue colorValue = redHearts.get(0).getColorValue();
+        assertNotNull(colorValue);
+        assertTrue(colorValue instanceof EmojiParser.EmojiColorValue.Named);
+        assertEquals(EmojiParser.ColorName.RED, ((EmojiParser.EmojiColorValue.Named) colorValue).getColor());
+    }
+
+    @Test
+    public void testEntryColorValueSkinTone() {
+        // Waving hand with light skin tone should have Skin color value
+        List<EmojiParser.EmojiEntry> results = parser.search("light skin tone");
+        assertFalse(results.isEmpty());
+        EmojiParser.EmojiColorValue colorValue = results.get(0).getColorValue();
+        assertNotNull(colorValue);
+        assertTrue(colorValue instanceof EmojiParser.EmojiColorValue.Skin);
+        assertEquals(EmojiParser.SkinTone.LIGHT, ((EmojiParser.EmojiColorValue.Skin) colorValue).getTone());
+    }
+
+    @Test
+    public void testGetAvailableColorValues() {
+        List<EmojiParser.EmojiColorValue> values = parser.getAvailableColorValues();
+        // 8 named colors + 1 skin tone in test data = 9
+        assertEquals("Test data has 9 color values", 9, values.size());
+    }
+
+    @Test
+    public void testFilterAvailableColorValues() {
+        List<EmojiParser.EmojiColorValue> values = parser.filter()
+                .group("Symbols")
+                .availableColorValues();
+        // Symbols has 8 colored hearts + 2 colored circles (same colors)
+        assertEquals("Symbols should have 8 color values", 8, values.size());
+        // All should be Named (no skin tones in Symbols)
+        for (EmojiParser.EmojiColorValue value : values) {
+            assertFalse("Symbols colors should not be skin tones", value.isSkinTone());
+        }
+    }
+
+    @Test
+    public void testFilterCriteriaColorAccessors() {
+        EmojiParser.EmojiFilter criteria = parser.filter()
+                .colorName(EmojiParser.ColorName.RED)
+                .getCriteria();
+        assertEquals(EmojiParser.ColorName.RED, criteria.getColorName());
+        assertNull(criteria.getSkinTone());
+    }
+
+    @Test
+    public void testFilterCriteriaSkinToneAccessors() {
+        EmojiParser.EmojiFilter criteria = parser.filter()
+                .skinTone(EmojiParser.SkinTone.LIGHT)
+                .getCriteria();
+        assertEquals(EmojiParser.SkinTone.LIGHT, criteria.getSkinTone());
+        assertNull(criteria.getColorName());
+    }
 }
