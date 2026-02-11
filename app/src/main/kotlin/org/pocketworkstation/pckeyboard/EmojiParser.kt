@@ -17,6 +17,7 @@
 package org.pocketworkstation.pckeyboard
 
 import android.content.Context
+import android.graphics.Color
 import android.util.Log
 import java.io.BufferedReader
 import java.io.InputStream
@@ -38,16 +39,98 @@ import java.io.InputStreamReader
 class EmojiParser private constructor() {
 
     /**
-     * Represents a color with hex value and name.
+     * Skin tone modifiers based on Fitzpatrick scale.
+     */
+    enum class SkinTone(val codePoint: Int, val hex: String) {
+        LIGHT(0x1F3FB, "#FFDFC4"),
+        MEDIUM_LIGHT(0x1F3FC, "#F0D5BE"),
+        MEDIUM(0x1F3FD, "#D2A67D"),
+        MEDIUM_DARK(0x1F3FE, "#A26D49"),
+        DARK(0x1F3FF, "#5C3D2E");
+
+        val colorInt: Int get() = Color.parseColor(hex)
+        val displayName: String get() = name.lowercase().replace('_', '-') + " skin tone"
+
+        companion object {
+            private val byCodePoint = entries.associateBy { it.codePoint }
+            private val byHex = entries.associateBy { it.hex }
+
+            fun fromCodePoint(cp: Int): SkinTone? = byCodePoint[cp]
+            fun fromHex(hex: String): SkinTone? = byHex[hex.uppercase()]
+        }
+    }
+
+    /**
+     * Named colors commonly used in emoji.
+     */
+    enum class ColorName(val hex: String, val keywords: List<String> = listOf()) {
+        RED("#FF0000", listOf("red")),
+        ORANGE("#FFA500", listOf("orange")),
+        YELLOW("#FFFF00", listOf("yellow")),
+        GREEN("#00FF00", listOf("green")),
+        BLUE("#0000FF", listOf("blue")),
+        LIGHT_BLUE("#87CEEB", listOf("light blue")),
+        PURPLE("#800080", listOf("purple")),
+        PINK("#FFC0CB", listOf("pink")),
+        BROWN("#8B4513", listOf("brown")),
+        BLACK("#000000", listOf("black")),
+        WHITE("#FFFFFF", listOf("white")),
+        GREY("#808080", listOf("grey", "gray"));
+
+        val colorInt: Int get() = Color.parseColor(hex)
+        val displayName: String get() = name.lowercase().replace('_', ' ')
+
+        companion object {
+            private val byHex = entries.associateBy { it.hex }
+            // Sort by keyword length descending to match "light blue" before "blue"
+            private val byKeyword: Map<String, ColorName> = entries
+                .flatMap { color -> color.keywords.map { it to color } }
+                .sortedByDescending { it.first.length }
+                .toMap()
+
+            fun fromHex(hex: String): ColorName? = byHex[hex.uppercase()]
+
+            fun fromName(name: String): ColorName? {
+                val lower = name.lowercase()
+                for ((keyword, color) in byKeyword) {
+                    if (lower.contains(keyword)) return color
+                }
+                return null
+            }
+        }
+    }
+
+    /**
+     * Represents a color with hex value and display name.
+     * Unifies SkinTone and ColorName for consistent API.
      */
     data class EmojiColor(
         val hex: String,
         val name: String
     ) {
-        /** Returns the color as an Android color int (with alpha). */
-        fun toColorInt(): Int = android.graphics.Color.parseColor(hex)
+        val colorInt: Int get() = Color.parseColor(hex)
 
         override fun toString(): String = "$name ($hex)"
+
+        companion object {
+            fun fromSkinTone(tone: SkinTone) = EmojiColor(tone.hex, tone.displayName)
+            fun fromColorName(color: ColorName) = EmojiColor(color.hex, color.displayName)
+        }
+    }
+
+    /**
+     * Emoji qualification status per UTS #51.
+     */
+    enum class Status(val value: String) {
+        COMPONENT("component"),
+        FULLY_QUALIFIED("fully-qualified"),
+        MINIMALLY_QUALIFIED("minimally-qualified"),
+        UNQUALIFIED("unqualified");
+
+        companion object {
+            private val byValue = entries.associateBy { it.value }
+            fun fromString(s: String): Status? = byValue[s.trim()]
+        }
     }
 
     data class EmojiEntry(
@@ -59,18 +142,18 @@ class EmojiParser private constructor() {
         val group: String,
         val subgroup: String
     ) {
-        /** The color associated with this emoji, if any. */
-        val color: EmojiColor?
-            get() = detectColor()
+        /** The skin tone of this emoji, if it has one. */
+        val skinTone: SkinTone?
+            get() = codePoints.firstNotNullOfOrNull { SkinTone.fromCodePoint(it) }
 
-        private fun detectColor(): EmojiColor? {
-            // Check for skin tone modifier in sequence
-            for (cp in codePoints) {
-                SKIN_TONE_COLORS[cp]?.let { return it }
-            }
-            // Check for color in name
-            return detectColorFromName(name)
-        }
+        /** The named color of this emoji, if detectable from name. */
+        val colorName: ColorName?
+            get() = ColorName.fromName(name)
+
+        /** The color associated with this emoji (skin tone takes priority). */
+        val color: EmojiColor?
+            get() = skinTone?.let { EmojiColor.fromSkinTone(it) }
+                ?: colorName?.let { EmojiColor.fromColorName(it) }
 
         override fun equals(other: Any?): Boolean {
             if (this === other) return true
@@ -81,17 +164,6 @@ class EmojiParser private constructor() {
         override fun hashCode(): Int = codePoints.contentHashCode()
 
         override fun toString(): String = "$emoji $name"
-    }
-
-    enum class Status(val value: String) {
-        COMPONENT("component"),
-        FULLY_QUALIFIED("fully-qualified"),
-        MINIMALLY_QUALIFIED("minimally-qualified"),
-        UNQUALIFIED("unqualified");
-
-        companion object {
-            fun fromString(s: String): Status? = entries.find { it.value == s.trim() }
-        }
     }
 
     data class EmojiGroup(
@@ -115,49 +187,23 @@ class EmojiParser private constructor() {
         private const val GROUP_PREFIX = "# group: "
         private const val SUBGROUP_PREFIX = "# subgroup: "
 
-        // Skin tone modifier codepoints mapped to their approximate colors
-        // Based on Fitzpatrick scale
+        // Legacy compatibility - maps for direct lookup
         @JvmField
-        val SKIN_TONE_COLORS = mapOf(
-            0x1F3FB to EmojiColor("#FFDFC4", "light skin tone"),
-            0x1F3FC to EmojiColor("#F0D5BE", "medium-light skin tone"),
-            0x1F3FD to EmojiColor("#D2A67D", "medium skin tone"),
-            0x1F3FE to EmojiColor("#A26D49", "medium-dark skin tone"),
-            0x1F3FF to EmojiColor("#5C3D2E", "dark skin tone")
-        )
+        val SKIN_TONE_COLORS: Map<Int, EmojiColor> =
+            SkinTone.entries.associateBy({ it.codePoint }, { EmojiColor.fromSkinTone(it) })
 
-        // Common color names mapped to hex values
         @JvmField
-        val COLOR_NAME_MAP = mapOf(
-            "red" to EmojiColor("#FF0000", "red"),
-            "orange" to EmojiColor("#FFA500", "orange"),
-            "yellow" to EmojiColor("#FFFF00", "yellow"),
-            "green" to EmojiColor("#00FF00", "green"),
-            "blue" to EmojiColor("#0000FF", "blue"),
-            "light blue" to EmojiColor("#87CEEB", "light blue"),
-            "purple" to EmojiColor("#800080", "purple"),
-            "pink" to EmojiColor("#FFC0CB", "pink"),
-            "brown" to EmojiColor("#8B4513", "brown"),
-            "black" to EmojiColor("#000000", "black"),
-            "white" to EmojiColor("#FFFFFF", "white"),
-            "grey" to EmojiColor("#808080", "grey"),
-            "gray" to EmojiColor("#808080", "gray")
-        )
+        val COLOR_NAME_MAP: Map<String, EmojiColor> =
+            ColorName.entries.flatMap { color ->
+                color.keywords.map { keyword -> keyword to EmojiColor.fromColorName(color) }
+            }.toMap()
 
         /**
          * Detects color from emoji name by looking for color keywords.
          */
         @JvmStatic
-        fun detectColorFromName(name: String): EmojiColor? {
-            val lower = name.lowercase()
-            // Check for "light blue" before "blue" (longer match first)
-            if (lower.contains("light blue")) return COLOR_NAME_MAP["light blue"]
-            // Check other colors
-            for ((colorName, color) in COLOR_NAME_MAP) {
-                if (lower.contains(colorName)) return color
-            }
-            return null
-        }
+        fun detectColorFromName(name: String): EmojiColor? =
+            ColorName.fromName(name)?.let { EmojiColor.fromColorName(it) }
 
         @Volatile
         private var instance: EmojiParser? = null
@@ -217,6 +263,20 @@ class EmojiParser private constructor() {
             .groupBy { it.color!!.hex }
     }
 
+    /** All emoji grouped by skin tone. */
+    private val bySkinTone: Map<SkinTone, List<EmojiEntry>> by lazy {
+        allFullyQualified
+            .filter { it.skinTone != null }
+            .groupBy { it.skinTone!! }
+    }
+
+    /** All emoji grouped by color name. */
+    private val byColorName: Map<ColorName, List<EmojiEntry>> by lazy {
+        allFullyQualified
+            .filter { it.colorName != null }
+            .groupBy { it.colorName!! }
+    }
+
     /** Get all unique colors found in the emoji set, sorted by hue. */
     fun getColors(): List<EmojiColor> {
         val colors = mutableSetOf<EmojiColor>()
@@ -228,20 +288,24 @@ class EmojiParser private constructor() {
 
     /** Get all emoji that have a specific color (by hex). */
     fun getEmojiByColor(hex: String): List<EmojiEntry> {
-        return byColor[hex.uppercase()] ?: byColor[hex.lowercase()] ?: emptyList()
+        return byColor[hex.uppercase()] ?: byColor[hex] ?: emptyList()
     }
+
+    /** Get all emoji with a specific skin tone. */
+    fun getEmojiBySkinTone(tone: SkinTone): List<EmojiEntry> =
+        bySkinTone[tone] ?: emptyList()
+
+    /** Get all emoji with a specific named color. */
+    fun getEmojiByColorName(color: ColorName): List<EmojiEntry> =
+        byColorName[color] ?: emptyList()
 
     /** Get all emoji that have any color associated. */
-    fun getColoredEmoji(): List<EmojiEntry> {
-        return allFullyQualified.filter { it.color != null }
-    }
+    fun getColoredEmoji(): List<EmojiEntry> =
+        allFullyQualified.filter { it.color != null }
 
     /** Get all emoji with skin tone modifiers. */
-    fun getSkinToneEmoji(): List<EmojiEntry> {
-        return allFullyQualified.filter { entry ->
-            entry.codePoints.any { it in SKIN_TONE_COLORS }
-        }
-    }
+    fun getSkinToneEmoji(): List<EmojiEntry> =
+        allFullyQualified.filter { it.skinTone != null }
 
     /** Get a virtual "Color" group that organizes emoji by their color. */
     fun getColorGroup(): EmojiGroup {
@@ -259,9 +323,9 @@ class EmojiParser private constructor() {
     /** Convert hex color to hue for sorting. */
     private fun colorToHue(hex: String): Float {
         return try {
-            val color = android.graphics.Color.parseColor(hex)
+            val color = Color.parseColor(hex)
             val hsv = FloatArray(3)
-            android.graphics.Color.colorToHSV(color, hsv)
+            Color.colorToHSV(color, hsv)
             hsv[0] // hue
         } catch (e: Exception) {
             0f
@@ -276,7 +340,8 @@ class EmojiParser private constructor() {
                 }
             }
             val coloredCount = allFullyQualified.count { it.color != null }
-            Log.i(TAG, "Loaded ${allFullyQualified.size} fully-qualified emoji in ${groups.size} groups ($coloredCount with color)")
+            val skinToneCount = allFullyQualified.count { it.skinTone != null }
+            Log.i(TAG, "Loaded ${allFullyQualified.size} fully-qualified emoji in ${groups.size} groups ($coloredCount colored, $skinToneCount with skin tone)")
         } catch (e: Exception) {
             Log.e(TAG, "Failed to load $ASSET_FILE", e)
         }
