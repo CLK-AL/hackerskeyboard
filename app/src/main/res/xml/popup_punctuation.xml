@@ -45,9 +45,7 @@
             hackkbd:keyLabel="+"
             hackkbd:keyEdgeFlags="right" />
     </Row>
-    <Row
-        hackkbd:rowEdgeFlags="bottom"
-    >
+    <Row>
         <Key
             hackkbd:keyLabel=";"
             hackkbd:keyEdgeFlags="left" />
@@ -64,5 +62,15 @@
         <Key
             hackkbd:keyLabel=","
             hackkbd:keyEdgeFlags="right" />
+    </Row>
+    <Row
+        hackkbd:rowEdgeFlags="bottom"
+    >
+        <Key
+            hackkbd:codes="@integer/key_emoji"
+            hackkbd:keyLabel="☺"
+            hackkbd:keyWidth="70%p"
+            hackkbd:isModifier="true"
+            hackkbd:keyEdgeFlags="left|right" />
     </Row>
 </Keyboard>

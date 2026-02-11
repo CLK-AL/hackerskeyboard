@@ -307,6 +307,10 @@ class LatinIME : InputMethodService(), ComposeSequencing,
     private var mWordToSuggestions = HashMap<String, MutableList<CharSequence>>()
     private var mWordHistory = ArrayList<WordAlternatives>()
 
+    // Emoji picker
+    private var mEmojiPickerView: EmojiPickerView? = null
+    private var mEmojiPickerShowing = false
+
     // Selection tracking
     private var mLastSelectionStart = 0
     private var mLastSelectionEnd = 0
@@ -755,6 +759,84 @@ class LatinIME : InputMethodService(), ComposeSequencing,
         mJustAddedAutoSpace = false
     }
 
+    // ==================== Emoji Picker ====================
+
+    /**
+     * Toggle the emoji picker visibility.
+     */
+    fun toggleEmojiPicker() {
+        if (mEmojiPickerShowing) {
+            hideEmojiPicker()
+        } else {
+            showEmojiPicker()
+        }
+    }
+
+    /**
+     * Show the emoji picker, hiding the keyboard.
+     */
+    fun showEmojiPicker() {
+        if (mEmojiPickerView == null) {
+            mEmojiPickerView = EmojiPickerView(this).apply {
+                setBackgroundColor(android.graphics.Color.parseColor("#FF2B2B2B"))
+                layoutParams = ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    (resources.displayMetrics.heightPixels * 0.4).toInt()
+                )
+                setOnEmojiSelectedListener { emoji ->
+                    commitEmojiText(emoji)
+                }
+            }
+        }
+
+        val inputView = mKeyboardSwitcher?.getInputView()
+        if (inputView != null) {
+            val parent = inputView.parent
+            if (parent is ViewGroup) {
+                // Hide keyboard, show emoji picker
+                inputView.visibility = View.GONE
+
+                if (mEmojiPickerView!!.parent == null) {
+                    parent.addView(mEmojiPickerView)
+                }
+                mEmojiPickerView!!.visibility = View.VISIBLE
+                mEmojiPickerShowing = true
+                Log.i(TAG, "Emoji picker shown")
+            }
+        }
+    }
+
+    /**
+     * Hide the emoji picker, showing the keyboard.
+     */
+    fun hideEmojiPicker() {
+        val inputView = mKeyboardSwitcher?.getInputView()
+        if (inputView != null) {
+            inputView.visibility = View.VISIBLE
+        }
+
+        mEmojiPickerView?.let { picker ->
+            picker.visibility = View.GONE
+            (picker.parent as? ViewGroup)?.removeView(picker)
+        }
+        mEmojiPickerShowing = false
+        Log.i(TAG, "Emoji picker hidden")
+    }
+
+    /**
+     * Check if emoji picker is currently showing.
+     */
+    fun isEmojiPickerShowing(): Boolean = mEmojiPickerShowing
+
+    /**
+     * Commit emoji text to the input.
+     */
+    private fun commitEmojiText(emoji: String) {
+        val ic = currentInputConnection ?: return
+        ic.commitText(emoji, 1)
+        Log.i(TAG, "Committed emoji: $emoji")
+    }
+
     override fun onStartInput(attribute: EditorInfo, restarting: Boolean) {
         super.onStartInput(attribute, restarting)
         setCandidatesViewShownInternal(true, false)
@@ -1048,6 +1130,7 @@ class LatinIME : InputMethodService(), ComposeSequencing,
                     mVoiceRecognitionTrigger!!.startVoiceRecognition()
                 }
             }
+            LatinKeyboardView.KEYCODE_EMOJI -> toggleEmojiPicker()
             9 -> { // Tab
                 if (!processMultiKey(primaryCode)) sendTab()
             }
@@ -1942,6 +2025,7 @@ class LatinIME : InputMethodService(), ComposeSequencing,
             mOptionsDialog!!.dismiss()
             mOptionsDialog = null
         }
+        hideEmojiPicker()
         mWordToSuggestions.clear()
         mWordHistory.clear()
         super.hideWindow()
@@ -1951,8 +2035,15 @@ class LatinIME : InputMethodService(), ComposeSequencing,
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
         when (keyCode) {
             KeyEvent.KEYCODE_BACK -> {
-                if (event.repeatCount == 0 && mKeyboardSwitcher?.getInputView() != null) {
-                    if (mKeyboardSwitcher!!.getInputView()!!.handleBack()) return true
+                if (event.repeatCount == 0) {
+                    // First close emoji picker if showing
+                    if (mEmojiPickerShowing) {
+                        hideEmojiPicker()
+                        return true
+                    }
+                    if (mKeyboardSwitcher?.getInputView() != null) {
+                        if (mKeyboardSwitcher!!.getInputView()!!.handleBack()) return true
+                    }
                 }
             }
             KeyEvent.KEYCODE_VOLUME_UP -> {

@@ -76,8 +76,9 @@
             hackkbd:keyLabel="O:-)"
             hackkbd:keyOutputText="O:-) " />
         <Key
-            hackkbd:keyLabel=":-\\"
-            hackkbd:keyOutputText=":-\\ " />
+            hackkbd:codes="@integer/key_emoji"
+            hackkbd:keyLabel="☺+"
+            hackkbd:isModifier="true" />
         <Key
             hackkbd:keyLabel=":'("
             hackkbd:keyOutputText=":'( " />

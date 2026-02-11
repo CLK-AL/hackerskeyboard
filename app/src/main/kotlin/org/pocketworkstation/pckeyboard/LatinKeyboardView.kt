@@ -570,6 +570,7 @@ class LatinKeyboardView @JvmOverloads constructor(
         const val KEYCODE_FKEY_F11 = -141
         const val KEYCODE_FKEY_F12 = -142
         const val KEYCODE_NUM_LOCK = -143
+        const val KEYCODE_EMOJI = -144
 
         const val DEBUG_AUTO_PLAY = false
         const val DEBUG_LINE = false
