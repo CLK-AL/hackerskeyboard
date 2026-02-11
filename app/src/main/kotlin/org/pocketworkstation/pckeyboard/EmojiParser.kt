@@ -320,6 +320,171 @@ class EmojiParser private constructor() {
         return EmojiGroup("Color", subgroups)
     }
 
+    // ==================== Filter / Breadcrumb API ====================
+
+    /**
+     * Filter criteria for narrowing emoji search results.
+     * Use with [filter] to create breadcrumb-style navigation.
+     */
+    data class EmojiFilter(
+        val group: String? = null,
+        val subgroup: String? = null,
+        val skinTone: SkinTone? = null,
+        val colorName: ColorName? = null,
+        val query: String? = null
+    ) {
+        /** Returns a human-readable breadcrumb trail. */
+        fun toBreadcrumbs(): List<String> = buildList {
+            group?.let { add(it) }
+            subgroup?.let { add(it) }
+            skinTone?.let { add(it.displayName) }
+            colorName?.let { add(it.displayName) }
+            query?.let { add("\"$it\"") }
+        }
+
+        override fun toString(): String = toBreadcrumbs().joinToString(" > ")
+    }
+
+    /**
+     * Builder for progressively filtering emoji with breadcrumb-style navigation.
+     *
+     * Usage:
+     * ```
+     * parser.filter()
+     *     .group("Smileys & Emotion")
+     *     .subgroup("face-smiling")
+     *     .results()
+     *
+     * parser.filter()
+     *     .colorName(ColorName.RED)
+     *     .query("heart")
+     *     .results()
+     * ```
+     */
+    inner class EmojiFilterBuilder {
+        private var criteria = EmojiFilter()
+
+        /** Filter by group (category). */
+        fun group(name: String) = apply { criteria = criteria.copy(group = name) }
+
+        /** Filter by subgroup (subcategory). */
+        fun subgroup(name: String) = apply { criteria = criteria.copy(subgroup = name) }
+
+        /** Filter by skin tone. */
+        fun skinTone(tone: SkinTone) = apply { criteria = criteria.copy(skinTone = tone) }
+
+        /** Filter by named color. */
+        fun colorName(color: ColorName) = apply { criteria = criteria.copy(colorName = color) }
+
+        /** Filter by name substring (description). */
+        fun query(text: String) = apply { criteria = criteria.copy(query = text) }
+
+        /** Get the current filter criteria. */
+        fun getCriteria(): EmojiFilter = criteria
+
+        /** Get available groups given current filters. */
+        fun availableGroups(): List<String> {
+            return applyFilters()
+                .map { it.group }
+                .distinct()
+        }
+
+        /** Get available subgroups given current filters. */
+        fun availableSubgroups(): List<String> {
+            return applyFilters()
+                .map { it.subgroup }
+                .distinct()
+        }
+
+        /** Get available skin tones given current filters. */
+        fun availableSkinTones(): List<SkinTone> {
+            return applyFilters()
+                .mapNotNull { it.skinTone }
+                .distinct()
+        }
+
+        /** Get available color names given current filters. */
+        fun availableColorNames(): List<ColorName> {
+            return applyFilters()
+                .mapNotNull { it.colorName }
+                .distinct()
+        }
+
+        /** Get available colors (unified) given current filters. */
+        fun availableColors(): List<EmojiColor> {
+            return applyFilters()
+                .mapNotNull { it.color }
+                .distinctBy { it.hex }
+                .sortedBy { colorToHue(it.hex) }
+        }
+
+        /** Get the count of results without fetching all entries. */
+        fun count(): Int = applyFilters().size
+
+        /** Get filtered results. */
+        fun results(): List<EmojiEntry> = applyFilters()
+
+        private fun applyFilters(): List<EmojiEntry> {
+            var result: List<EmojiEntry> = allFullyQualified
+
+            criteria.group?.let { g ->
+                result = result.filter { it.group == g }
+            }
+
+            criteria.subgroup?.let { s ->
+                result = result.filter { it.subgroup == s }
+            }
+
+            criteria.skinTone?.let { tone ->
+                result = result.filter { it.skinTone == tone }
+            }
+
+            criteria.colorName?.let { color ->
+                result = result.filter { it.colorName == color }
+            }
+
+            criteria.query?.let { q ->
+                val lower = q.lowercase()
+                result = result.filter { it.name.lowercase().contains(lower) }
+            }
+
+            return result
+        }
+    }
+
+    /** Create a new filter builder for breadcrumb-style navigation. */
+    fun filter(): EmojiFilterBuilder = EmojiFilterBuilder()
+
+    /**
+     * Get subgroups for a specific group.
+     * Useful for breadcrumb navigation at category level.
+     */
+    fun getSubgroups(groupName: String): List<EmojiSubgroup> {
+        return byGroup[groupName]?.subgroups ?: emptyList()
+    }
+
+    /**
+     * Get subgroup names for a specific group.
+     * Useful for breadcrumb UI.
+     */
+    fun getSubgroupNames(groupName: String): List<String> {
+        return getSubgroups(groupName).map { it.name }
+    }
+
+    /**
+     * Get all available skin tones that have emoji in the dataset.
+     */
+    fun getAvailableSkinTones(): List<SkinTone> {
+        return SkinTone.entries.filter { bySkinTone.containsKey(it) }
+    }
+
+    /**
+     * Get all available color names that have emoji in the dataset.
+     */
+    fun getAvailableColorNames(): List<ColorName> {
+        return ColorName.entries.filter { byColorName.containsKey(it) }
+    }
+
     /** Convert hex color to hue for sorting. */
     private fun colorToHue(hex: String): Float {
         return try {

@@ -351,4 +351,208 @@ public class EmojiParserTest {
         EmojiParser.EmojiColor none = EmojiParser.detectColorFromName("grinning face");
         assertNull("Non-color emoji should return null", none);
     }
+
+    // ==================== Filter / Breadcrumb Tests ====================
+
+    @Test
+    public void testFilterByGroup() {
+        List<EmojiParser.EmojiEntry> results = parser.filter()
+                .group("Smileys & Emotion")
+                .results();
+        assertEquals("Should find 7 fully-qualified in Smileys & Emotion", 7, results.size());
+        for (EmojiParser.EmojiEntry entry : results) {
+            assertEquals("Smileys & Emotion", entry.getGroup());
+        }
+    }
+
+    @Test
+    public void testFilterBySubgroup() {
+        List<EmojiParser.EmojiEntry> results = parser.filter()
+                .subgroup("face-smiling")
+                .results();
+        assertEquals("Should find 3 in face-smiling", 3, results.size());
+        for (EmojiParser.EmojiEntry entry : results) {
+            assertEquals("face-smiling", entry.getSubgroup());
+        }
+    }
+
+    @Test
+    public void testFilterByGroupAndSubgroup() {
+        List<EmojiParser.EmojiEntry> results = parser.filter()
+                .group("Smileys & Emotion")
+                .subgroup("face-affection")
+                .results();
+        assertEquals("Should find 3 fully-qualified in face-affection", 3, results.size());
+    }
+
+    @Test
+    public void testFilterByColorName() {
+        List<EmojiParser.EmojiEntry> results = parser.filter()
+                .colorName(EmojiParser.ColorName.RED)
+                .results();
+        assertEquals("Should find 2 red emoji (heart + circle)", 2, results.size());
+        for (EmojiParser.EmojiEntry entry : results) {
+            assertEquals(EmojiParser.ColorName.RED, entry.getColorName());
+        }
+    }
+
+    @Test
+    public void testFilterBySkinTone() {
+        List<EmojiParser.EmojiEntry> results = parser.filter()
+                .skinTone(EmojiParser.SkinTone.LIGHT)
+                .results();
+        assertEquals("Should find 1 light skin tone emoji", 1, results.size());
+        assertEquals(EmojiParser.SkinTone.LIGHT, results.get(0).getSkinTone());
+    }
+
+    @Test
+    public void testFilterByQuery() {
+        List<EmojiParser.EmojiEntry> results = parser.filter()
+                .query("heart")
+                .results();
+        assertEquals("Should find 10 heart emoji", 10, results.size());
+    }
+
+    @Test
+    public void testFilterChainedGroupAndColor() {
+        List<EmojiParser.EmojiEntry> results = parser.filter()
+                .group("Symbols")
+                .colorName(EmojiParser.ColorName.RED)
+                .results();
+        assertEquals("Should find 2 red Symbols (heart + circle)", 2, results.size());
+    }
+
+    @Test
+    public void testFilterChainedColorAndQuery() {
+        List<EmojiParser.EmojiEntry> results = parser.filter()
+                .colorName(EmojiParser.ColorName.RED)
+                .query("heart")
+                .results();
+        assertEquals("Should find 1 red heart", 1, results.size());
+        assertEquals("red heart", results.get(0).getName());
+    }
+
+    @Test
+    public void testFilterCount() {
+        int count = parser.filter()
+                .group("Symbols")
+                .count();
+        assertEquals("Should count 10 Symbols", 10, count);
+    }
+
+    @Test
+    public void testFilterAvailableGroups() {
+        List<String> groups = parser.filter()
+                .colorName(EmojiParser.ColorName.RED)
+                .availableGroups();
+        assertEquals("Red emoji should be in 1 group", 1, groups.size());
+        assertEquals("Symbols", groups.get(0));
+    }
+
+    @Test
+    public void testFilterAvailableSubgroups() {
+        List<String> subgroups = parser.filter()
+                .group("Symbols")
+                .availableSubgroups();
+        assertEquals("Symbols should have 2 subgroups", 2, subgroups.size());
+        assertTrue(subgroups.contains("heart"));
+        assertTrue(subgroups.contains("geometric"));
+    }
+
+    @Test
+    public void testFilterAvailableColorNames() {
+        List<EmojiParser.ColorName> colors = parser.filter()
+                .group("Symbols")
+                .subgroup("heart")
+                .availableColorNames();
+        // heart subgroup has: red, orange, yellow, green, blue, purple, black, white
+        assertEquals("Should have 8 color names in hearts", 8, colors.size());
+    }
+
+    @Test
+    public void testFilterAvailableSkinTones() {
+        List<EmojiParser.SkinTone> tones = parser.filter()
+                .group("People & Body")
+                .availableSkinTones();
+        assertEquals("Should have 1 skin tone in test data", 1, tones.size());
+        assertEquals(EmojiParser.SkinTone.LIGHT, tones.get(0));
+    }
+
+    @Test
+    public void testFilterAvailableColors() {
+        List<EmojiParser.EmojiColor> colors = parser.filter()
+                .subgroup("geometric")
+                .availableColors();
+        assertEquals("Geometric should have 2 colors (red, blue)", 2, colors.size());
+    }
+
+    @Test
+    public void testFilterBreadcrumbs() {
+        EmojiParser.EmojiFilter criteria = parser.filter()
+                .group("Symbols")
+                .subgroup("heart")
+                .colorName(EmojiParser.ColorName.RED)
+                .query("heart")
+                .getCriteria();
+        List<String> breadcrumbs = criteria.toBreadcrumbs();
+        assertEquals(4, breadcrumbs.size());
+        assertEquals("Symbols", breadcrumbs.get(0));
+        assertEquals("heart", breadcrumbs.get(1));
+        assertEquals("red", breadcrumbs.get(2));
+        assertEquals("\"heart\"", breadcrumbs.get(3));
+    }
+
+    @Test
+    public void testFilterToString() {
+        String str = parser.filter()
+                .group("Symbols")
+                .colorName(EmojiParser.ColorName.RED)
+                .getCriteria()
+                .toString();
+        assertEquals("Symbols > red", str);
+    }
+
+    @Test
+    public void testGetSubgroups() {
+        List<EmojiParser.EmojiSubgroup> subgroups = parser.getSubgroups("Smileys & Emotion");
+        assertEquals(3, subgroups.size());
+        assertEquals("face-smiling", subgroups.get(0).getName());
+    }
+
+    @Test
+    public void testGetSubgroupNames() {
+        List<String> names = parser.getSubgroupNames("Symbols");
+        assertEquals(2, names.size());
+        assertTrue(names.contains("heart"));
+        assertTrue(names.contains("geometric"));
+    }
+
+    @Test
+    public void testGetAvailableSkinTones() {
+        List<EmojiParser.SkinTone> tones = parser.getAvailableSkinTones();
+        assertEquals("Test data has 1 skin tone emoji", 1, tones.size());
+        assertEquals(EmojiParser.SkinTone.LIGHT, tones.get(0));
+    }
+
+    @Test
+    public void testGetAvailableColorNames() {
+        List<EmojiParser.ColorName> colors = parser.getAvailableColorNames();
+        // Test data has: red, orange, yellow, green, blue, purple, black, white
+        assertEquals("Test data has 8 color names", 8, colors.size());
+    }
+
+    @Test
+    public void testFilterEmptyResults() {
+        List<EmojiParser.EmojiEntry> results = parser.filter()
+                .group("Symbols")
+                .skinTone(EmojiParser.SkinTone.DARK)
+                .results();
+        assertTrue("No dark skin tone in Symbols", results.isEmpty());
+    }
+
+    @Test
+    public void testFilterNoFilters() {
+        List<EmojiParser.EmojiEntry> results = parser.filter().results();
+        assertEquals("No filters should return all fully-qualified", 21, results.size());
+    }
 }
