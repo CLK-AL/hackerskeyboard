@@ -1,40 +1,40 @@
 # symbols-test-sample.txt
 # Test sample for symbol parsing unit tests
 #
-# Format: code points; status # symbol name
+# Format: code points; status # symbol name [lang:syllable,lang:syllable]
 
 # group: IPA Phonetics
 
 # subgroup: ipa-vowels-front
-0069                                                  ; fully-qualified     # i close front unrounded vowel
-026A                                                  ; fully-qualified     # ɪ near-close front unrounded vowel
-025B                                                  ; fully-qualified     # ɛ open-mid front unrounded vowel
-00E6                                                  ; fully-qualified     # æ near-open front unrounded vowel
+0069                                                  ; fully-qualified     # i close front unrounded vowel [en:ee,de:ie,fr:i]
+026A                                                  ; fully-qualified     # ɪ near-close front unrounded vowel [en:i,de:i]
+025B                                                  ; fully-qualified     # ɛ open-mid front unrounded vowel [en:eh,de:ä,fr:è]
+00E6                                                  ; fully-qualified     # æ near-open front unrounded vowel [en:a]
 
 # subgroup: ipa-vowels-central
-0259                                                  ; fully-qualified     # ə mid central vowel (schwa)
-025A                                                  ; fully-qualified     # ɚ rhotacized schwa
+0259                                                  ; fully-qualified     # ə mid central vowel (schwa) [en:uh,de:e,fr:e]
+025A                                                  ; fully-qualified     # ɚ rhotacized schwa [en:er]
 
 # subgroup: ipa-consonants-plosives
-0070                                                  ; fully-qualified     # p voiceless bilabial plosive
-0062                                                  ; fully-qualified     # b voiced bilabial plosive
-0294                                                  ; fully-qualified     # ʔ glottal stop
+0070                                                  ; fully-qualified     # p voiceless bilabial plosive [en:p,de:p,fr:p]
+0062                                                  ; fully-qualified     # b voiced bilabial plosive [en:b,de:b,fr:b]
+0294                                                  ; fully-qualified     # ʔ glottal stop [ar:',de:']
 
 # subgroup: ipa-consonants-fricatives
-0283                                                  ; fully-qualified     # ʃ voiceless postalveolar fricative
-0292                                                  ; fully-qualified     # ʒ voiced postalveolar fricative
-03B8                                                  ; fully-qualified     # θ voiceless dental fricative
-00F0                                                  ; fully-qualified     # ð voiced dental fricative
+0283                                                  ; fully-qualified     # ʃ voiceless postalveolar fricative [en:sh,de:sch,fr:ch]
+0292                                                  ; fully-qualified     # ʒ voiced postalveolar fricative [en:zh,fr:j,pt:j]
+03B8                                                  ; fully-qualified     # θ voiceless dental fricative [en:th,el:th]
+00F0                                                  ; fully-qualified     # ð voiced dental fricative [en:th]
 
 # subgroup: ipa-suprasegmentals
-02C8                                                  ; fully-qualified     # ˈ primary stress
-02CC                                                  ; fully-qualified     # ˌ secondary stress
-02D0                                                  ; fully-qualified     # ː long vowel
+02C8                                                  ; fully-qualified     # ˈ primary stress [en:',de:',fr:']
+02CC                                                  ; fully-qualified     # ˌ secondary stress [en:,]
+02D0                                                  ; fully-qualified     # ː long vowel [en::,de::,ja::]
 
 # subgroup: ipa-diacritics-modifiers
-02BC                                                  ; fully-qualified     # ʼ ejective
-02B0                                                  ; fully-qualified     # ʰ aspirated
-02B7                                                  ; fully-qualified     # ʷ labialized
+02BC                                                  ; fully-qualified     # ʼ ejective [en:',ar:']
+02B0                                                  ; fully-qualified     # ʰ aspirated [en:h,de:h,hi:h]
+02B7                                                  ; fully-qualified     # ʷ labialized [en:w]
 
 # group: Arrows
 

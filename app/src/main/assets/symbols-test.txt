@@ -130,88 +130,88 @@
 028D                                                  ; fully-qualified     # ʍ voiceless labio-velar approximant [en:wh]
 
 # subgroup: ipa-clicks
-0298                                                  ; fully-qualified     # ʘ bilabial click
-01C0                                                  ; fully-qualified     # ǀ dental click
-01C1                                                  ; fully-qualified     # ǁ lateral click
+0298                                                  ; fully-qualified     # ʘ bilabial click [en:kiss]
+01C0                                                  ; fully-qualified     # ǀ dental click [en:tsk]
+01C1                                                  ; fully-qualified     # ǁ lateral click [en:tchick]
 01C2                                                  ; fully-qualified     # ǂ palatal click
-01C3                                                  ; fully-qualified     # ǃ alveolar click
-A78C                                                  ; fully-qualified     # ꞌ saltillo (ejective modifier)
+01C3                                                  ; fully-qualified     # ǃ alveolar click [en:tut]
+A78C                                                  ; fully-qualified     # ꞌ saltillo (ejective modifier) [en:']
 
 # subgroup: ipa-implosives
-0253                                                  ; fully-qualified     # ɓ voiced bilabial implosive
-0257                                                  ; fully-qualified     # ɗ voiced alveolar implosive
-0260                                                  ; fully-qualified     # ɠ voiced velar implosive
+0253                                                  ; fully-qualified     # ɓ voiced bilabial implosive [vi:b,hi:bh]
+0257                                                  ; fully-qualified     # ɗ voiced alveolar implosive [vi:d,hi:dh]
+0260                                                  ; fully-qualified     # ɠ voiced velar implosive [vi:g]
 029B                                                  ; fully-qualified     # ʛ voiced uvular implosive
-0284                                                  ; fully-qualified     # ʄ voiced palatal implosive
+0284                                                  ; fully-qualified     # ʄ voiced palatal implosive [hi:jh]
 
 # subgroup: ipa-suprasegmentals
-02C8                                                  ; fully-qualified     # ˈ primary stress
-02CC                                                  ; fully-qualified     # ˌ secondary stress
-02D0                                                  ; fully-qualified     # ː long vowel
-02D1                                                  ; fully-qualified     # ˑ half-long vowel
+02C8                                                  ; fully-qualified     # ˈ primary stress [en:',de:',fr:']
+02CC                                                  ; fully-qualified     # ˌ secondary stress [en:,,de:,,fr:,]
+02D0                                                  ; fully-qualified     # ː long vowel [en::,de::,fr::,ja::]
+02D1                                                  ; fully-qualified     # ˑ half-long vowel [en:;]
 0306                                                  ; fully-qualified     # ̆  extra-short (combining breve)
-007C                                                  ; fully-qualified     # | minor (foot) group
-2016                                                  ; fully-qualified     # ‖ major (intonation) group
-002E                                                  ; fully-qualified     # . syllable break
-203F                                                  ; fully-qualified     # ‿ linking (absence of break)
-2197                                                  ; fully-qualified     # ↗ global rise
-2198                                                  ; fully-qualified     # ↘ global fall
+007C                                                  ; fully-qualified     # | minor (foot) group [en:|]
+2016                                                  ; fully-qualified     # ‖ major (intonation) group [en:||]
+002E                                                  ; fully-qualified     # . syllable break [en:.]
+203F                                                  ; fully-qualified     # ‿ linking (absence of break) [en:~]
+2197                                                  ; fully-qualified     # ↗ global rise [en:up,zh:2]
+2198                                                  ; fully-qualified     # ↘ global fall [en:down,zh:4]
 
 # subgroup: ipa-tone-letters
-02E5                                                  ; fully-qualified     # ˥ extra high tone
-02E6                                                  ; fully-qualified     # ˦ high tone
-02E7                                                  ; fully-qualified     # ˧ mid tone
-02E8                                                  ; fully-qualified     # ˨ low tone
-02E9                                                  ; fully-qualified     # ˩ extra low tone
-A712                                                  ; fully-qualified     # ꜒ modifier letter extra-high contour
-A713                                                  ; fully-qualified     # ꜓ modifier letter high contour
-A714                                                  ; fully-qualified     # ꜔ modifier letter mid contour
-A715                                                  ; fully-qualified     # ꜕ modifier letter low contour
-A716                                                  ; fully-qualified     # ꜖ modifier letter extra-low contour
+02E5                                                  ; fully-qualified     # ˥ extra high tone [zh:1,vi:1]
+02E6                                                  ; fully-qualified     # ˦ high tone [zh:1,vi:2]
+02E7                                                  ; fully-qualified     # ˧ mid tone [zh:3,vi:3]
+02E8                                                  ; fully-qualified     # ˨ low tone [zh:4,vi:4]
+02E9                                                  ; fully-qualified     # ˩ extra low tone [zh:4,vi:5]
+A712                                                  ; fully-qualified     # ꜒ modifier letter extra-high contour [zh:55]
+A713                                                  ; fully-qualified     # ꜓ modifier letter high contour [zh:44]
+A714                                                  ; fully-qualified     # ꜔ modifier letter mid contour [zh:33]
+A715                                                  ; fully-qualified     # ꜕ modifier letter low contour [zh:22]
+A716                                                  ; fully-qualified     # ꜖ modifier letter extra-low contour [zh:11]
 
 # subgroup: ipa-diacritics-modifiers
-02BC                                                  ; fully-qualified     # ʼ ejective
-02B0                                                  ; fully-qualified     # ʰ aspirated
-02B2                                                  ; fully-qualified     # ʲ palatalized
-02B7                                                  ; fully-qualified     # ʷ labialized
-02E0                                                  ; fully-qualified     # ˠ velarized
-02E4                                                  ; fully-qualified     # ˤ pharyngealized
-02DE                                                  ; fully-qualified     # ˞ rhoticity
-207F                                                  ; fully-qualified     # ⁿ nasal release
-02E1                                                  ; fully-qualified     # ˡ lateral release
-02B1                                                  ; fully-qualified     # ʱ breathy voiced
-0325                                                  ; fully-qualified     # ̥  voiceless (combining ring below)
+02BC                                                  ; fully-qualified     # ʼ ejective [en:',ar:']
+02B0                                                  ; fully-qualified     # ʰ aspirated [en:h,de:h,hi:h]
+02B2                                                  ; fully-qualified     # ʲ palatalized [ru:',pl:i]
+02B7                                                  ; fully-qualified     # ʷ labialized [en:w]
+02E0                                                  ; fully-qualified     # ˠ velarized [en:l,ru:l]
+02E4                                                  ; fully-qualified     # ˤ pharyngealized [ar:']
+02DE                                                  ; fully-qualified     # ˞ rhoticity [en:r]
+207F                                                  ; fully-qualified     # ⁿ nasal release [en:n]
+02E1                                                  ; fully-qualified     # ˡ lateral release [en:l]
+02B1                                                  ; fully-qualified     # ʱ breathy voiced [hi:h]
+0325                                                  ; fully-qualified     # ̥  voiceless (combining ring below) [en:0]
 032C                                                  ; fully-qualified     # ̬  voiced (combining caron below)
 0339                                                  ; fully-qualified     # ̹  more rounded
 031C                                                  ; fully-qualified     # ̜  less rounded
-031F                                                  ; fully-qualified     # ̟  advanced
-0320                                                  ; fully-qualified     # ̠  retracted
-0308                                                  ; fully-qualified     # ̈  centralized
+031F                                                  ; fully-qualified     # ̟  advanced [en:+]
+0320                                                  ; fully-qualified     # ̠  retracted [en:-]
+0308                                                  ; fully-qualified     # ̈  centralized [de:ue]
 033D                                                  ; fully-qualified     # ̽  mid-centralized
-0329                                                  ; fully-qualified     # ̩  syllabic
+0329                                                  ; fully-qualified     # ̩  syllabic [en:=]
 032F                                                  ; fully-qualified     # ̯  non-syllabic
-0324                                                  ; fully-qualified     # ̤  breathy voice
+0324                                                  ; fully-qualified     # ̤  breathy voice [hi:h]
 0330                                                  ; fully-qualified     # ̰  creaky voice
 033C                                                  ; fully-qualified     # ̼  linguolabial
 02DA                                                  ; fully-qualified     # ˚ ring above (voiceless)
-0303                                                  ; fully-qualified     # ̃  nasalized
+0303                                                  ; fully-qualified     # ̃  nasalized [fr:n,pt:~]
 031A                                                  ; fully-qualified     # ̚  no audible release
-0334                                                  ; fully-qualified     # ̴  velarized or pharyngealized
-0318                                                  ; fully-qualified     # ̘  advanced tongue root
-0319                                                  ; fully-qualified     # ̙  retracted tongue root
-032A                                                  ; fully-qualified     # ̪  dental
-033A                                                  ; fully-qualified     # ̺  apical
-033B                                                  ; fully-qualified     # ̻  laminal
+0334                                                  ; fully-qualified     # ̴  velarized or pharyngealized [en:l]
+0318                                                  ; fully-qualified     # ̘  advanced tongue root [ko:+]
+0319                                                  ; fully-qualified     # ̙  retracted tongue root [ko:-]
+032A                                                  ; fully-qualified     # ̪  dental [es:t,es:d]
+033A                                                  ; fully-qualified     # ̺  apical [es:s]
+033B                                                  ; fully-qualified     # ̻  laminal [fr:s]
 
 # subgroup: ipa-extipa
-028D                                                  ; fully-qualified     # ʍ voiceless labial-velar fricative
-0295                                                  ; fully-qualified     # ʕ voiced pharyngeal fricative
-02A1                                                  ; fully-qualified     # ʡ epiglottal plosive
-02A2                                                  ; fully-qualified     # ʢ voiced epiglottal fricative
+028D                                                  ; fully-qualified     # ʍ voiceless labial-velar fricative [en:wh]
+0295                                                  ; fully-qualified     # ʕ voiced pharyngeal fricative [ar:ayn]
+02A1                                                  ; fully-qualified     # ʡ epiglottal plosive [ar:']
+02A2                                                  ; fully-qualified     # ʢ voiced epiglottal fricative [ar:h]
 029A                                                  ; fully-qualified     # ʚ closed open-mid front rounded
 0277                                                  ; fully-qualified     # ɷ closed omega (obsolete)
-026B                                                  ; fully-qualified     # ɫ velarized alveolar lateral
-0267                                                  ; fully-qualified     # ɧ simultaneous ʃ and x
+026B                                                  ; fully-qualified     # ɫ velarized alveolar lateral [en:ll,ru:l]
+0267                                                  ; fully-qualified     # ɧ simultaneous ʃ and x [sv:sj]
 029E                                                  ; fully-qualified     # ʞ turned k (obsolete click)
 
 # ============================================================
