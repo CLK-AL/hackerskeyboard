@@ -22,7 +22,9 @@ class NotificationReceiver(private val mIME: LatinIME) : BroadcastReceiver() {
                 imm?.showSoftInputFromInputMethod(mIME.mToken, InputMethodManager.SHOW_FORCED)
             }
             ACTION_SETTINGS -> {
-                context.startActivity(Intent(mIME, LatinIMESettings::class.java))
+                val i = Intent(mIME, LatinIMESettings::class.java)
+                i.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                context.startActivity(i)
             }
         }
     }

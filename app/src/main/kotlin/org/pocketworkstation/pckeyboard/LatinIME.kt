@@ -215,8 +215,8 @@ class LatinIME : InputMethodService(), ComposeSequencing,
     private var CTRL_SEQUENCES: MutableMap<Int, Int>? = null
 
     private companion object {
-        private const val NOTIFICATION_CHANNEL_ID = "keyboard_notification_channel"
-        private const val NOTIFICATION_ONGOING_ID = 1
+        private const val NOTIFICATION_CHANNEL_ID = "PCKeyboard"
+        private const val NOTIFICATION_ONGOING_ID = 1001
     }
 
     private val mComposing = StringBuilder()

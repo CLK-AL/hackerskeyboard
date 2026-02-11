@@ -163,6 +163,10 @@ class CandidateView(context: Context, attrs: AttributeSet?) : View(context, attr
         if (canvas != null) {
             super.onDraw(canvas)
         }
+        _onDraw(canvas)
+    }
+
+    private fun _onDraw(canvas: Canvas?) {
         mTotalWidth = 0
 
         val height = getHeight()
@@ -279,7 +283,7 @@ class CandidateView(context: Context, attrs: AttributeSet?) : View(context, attr
         scrollTo(0, scrollY)
         mTargetScrollX = 0
         mHaveMinimalSuggestion = haveMinimalSuggestion
-        onDraw(null)
+        _onDraw(null)
         invalidate()
         requestLayout()
     }

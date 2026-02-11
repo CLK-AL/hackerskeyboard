@@ -267,7 +267,7 @@ class InputLanguageSelection : PreferenceActivity() {
             "ar", "bg", "bg_ST", "ca", "cs", "cs_QY", "da", "de", "de_NE",
             "el", "en", "en_CX", "en_DV", "en_GB", "es", "es_LA", "es_US",
             "fa", "fi", "fr", "fr_CA", "he", "hr", "hu", "hu_QY", "hy", "in",
-            "it", "iw", "ja", "ka", "ko", "lo", "lt", "lv", "nb", "nl", "pl",
+            "it", "iw", "ja", "ka", "ko", "lb", "lb_LU", "lo", "lt", "lv", "nb", "nl", "pl",
             "pt", "pt_PT", "rm", "ro", "ru", "ru_PH", "si", "sk", "sk_QY", "sl",
             "sr", "sv", "ta", "th", "tl", "tr", "uk", "vi", "zh_CN", "zh_TW"
         )
@@ -275,7 +275,7 @@ class InputLanguageSelection : PreferenceActivity() {
         private val KBD_5_ROW = arrayOf(
             "ar", "bg", "bg_ST", "cs", "cs_QY", "da", "de", "de_NE", "el",
             "en", "en_CX", "en_DV", "en_GB", "es", "es_LA", "fa", "fi", "fr",
-            "fr_CA", "he", "hr", "hu", "hu_QY", "hy", "it", "iw", "lo", "lt",
+            "fr_CA", "he", "hr", "hu", "hu_QY", "hy", "it", "iw", "lb", "lo", "lt",
             "nb", "pt_PT", "ro", "ru", "ru_PH", "si", "sk", "sk_QY", "sl",
             "sr", "sv", "ta", "th", "tr", "uk"
         )
@@ -283,7 +283,7 @@ class InputLanguageSelection : PreferenceActivity() {
         private val KBD_4_ROW = arrayOf(
             "ar", "bg", "bg_ST", "cs", "cs_QY", "da", "de", "de_NE", "el",
             "en", "en_CX", "en_DV", "es", "es_LA", "es_US", "fa", "fr", "fr_CA",
-            "he", "hr", "hu", "hu_QY", "iw", "nb", "ru", "ru_PH", "sk", "sk_QY",
+            "he", "hr", "hu", "hu_QY", "iw", "lb", "lb_LU", "nb", "ru", "ru_PH", "sk", "sk_QY",
             "sl", "sr", "sv", "tr", "uk"
         )
 
@@ -300,6 +300,7 @@ class InputLanguageSelection : PreferenceActivity() {
                 lang == "hu" && country == "QY" -> "Magyar (QWERTY)"
                 lang == "sk" && country == "QY" -> "Slovenčina (QWERTY)"
                 lang == "ru" && country == "PH" -> "Русский (Phonetic)"
+                lang == "lb" -> "Lëtzebuergesch"
                 lang == "bg" -> {
                     if (country == "ST") {
                         "български език (Standard)"
