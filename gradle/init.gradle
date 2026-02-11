@@ -15,6 +15,17 @@
  */
 
 def configureProxy() {
+    // Skip if proxy already configured via gradle.properties (systemProp.*)
+    def existingHttpProxy = System.getProperty('http.proxyHost')
+    def existingHttpsProxy = System.getProperty('https.proxyHost')
+
+    if (existingHttpProxy || existingHttpsProxy) {
+        println "[init.gradle] Proxy already configured via gradle.properties:"
+        if (existingHttpProxy) println "[init.gradle]   HTTP: ${existingHttpProxy}:${System.getProperty('http.proxyPort')}"
+        if (existingHttpsProxy) println "[init.gradle]   HTTPS: ${existingHttpsProxy}:${System.getProperty('https.proxyPort')}"
+        return
+    }
+
     def httpProxy = System.getenv('HTTP_PROXY') ?: System.getenv('http_proxy')
     def httpsProxy = System.getenv('HTTPS_PROXY') ?: System.getenv('https_proxy')
     def noProxy = System.getenv('NO_PROXY') ?: System.getenv('no_proxy') ?: ''
@@ -37,7 +48,7 @@ def configureProxy() {
             if (nonProxyHosts) {
                 System.setProperty('http.nonProxyHosts', nonProxyHosts)
             }
-            println "[init.gradle] HTTP proxy configured: ${parsed.host}:${parsed.port}"
+            println "[init.gradle] HTTP proxy configured from env: ${parsed.host}:${parsed.port}"
         }
     }
 
@@ -53,7 +64,7 @@ def configureProxy() {
             if (nonProxyHosts) {
                 System.setProperty('https.nonProxyHosts', nonProxyHosts)
             }
-            println "[init.gradle] HTTPS proxy configured: ${parsed.host}:${parsed.port}"
+            println "[init.gradle] HTTPS proxy configured from env: ${parsed.host}:${parsed.port}"
         }
     }
 
