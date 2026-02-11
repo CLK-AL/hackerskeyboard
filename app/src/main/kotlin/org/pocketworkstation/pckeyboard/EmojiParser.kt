@@ -37,6 +37,19 @@ import java.io.InputStreamReader
  */
 class EmojiParser private constructor() {
 
+    /**
+     * Represents a color with hex value and name.
+     */
+    data class EmojiColor(
+        val hex: String,
+        val name: String
+    ) {
+        /** Returns the color as an Android color int (with alpha). */
+        fun toColorInt(): Int = android.graphics.Color.parseColor(hex)
+
+        override fun toString(): String = "$name ($hex)"
+    }
+
     data class EmojiEntry(
         val codePoints: IntArray,
         val status: Status,
@@ -46,6 +59,19 @@ class EmojiParser private constructor() {
         val group: String,
         val subgroup: String
     ) {
+        /** The color associated with this emoji, if any. */
+        val color: EmojiColor?
+            get() = detectColor()
+
+        private fun detectColor(): EmojiColor? {
+            // Check for skin tone modifier in sequence
+            for (cp in codePoints) {
+                SKIN_TONE_COLORS[cp]?.let { return it }
+            }
+            // Check for color in name
+            return detectColorFromName(name)
+        }
+
         override fun equals(other: Any?): Boolean {
             if (this === other) return true
             if (other !is EmojiEntry) return false
@@ -88,6 +114,50 @@ class EmojiParser private constructor() {
 
         private const val GROUP_PREFIX = "# group: "
         private const val SUBGROUP_PREFIX = "# subgroup: "
+
+        // Skin tone modifier codepoints mapped to their approximate colors
+        // Based on Fitzpatrick scale
+        @JvmField
+        val SKIN_TONE_COLORS = mapOf(
+            0x1F3FB to EmojiColor("#FFDFC4", "light skin tone"),
+            0x1F3FC to EmojiColor("#F0D5BE", "medium-light skin tone"),
+            0x1F3FD to EmojiColor("#D2A67D", "medium skin tone"),
+            0x1F3FE to EmojiColor("#A26D49", "medium-dark skin tone"),
+            0x1F3FF to EmojiColor("#5C3D2E", "dark skin tone")
+        )
+
+        // Common color names mapped to hex values
+        @JvmField
+        val COLOR_NAME_MAP = mapOf(
+            "red" to EmojiColor("#FF0000", "red"),
+            "orange" to EmojiColor("#FFA500", "orange"),
+            "yellow" to EmojiColor("#FFFF00", "yellow"),
+            "green" to EmojiColor("#00FF00", "green"),
+            "blue" to EmojiColor("#0000FF", "blue"),
+            "light blue" to EmojiColor("#87CEEB", "light blue"),
+            "purple" to EmojiColor("#800080", "purple"),
+            "pink" to EmojiColor("#FFC0CB", "pink"),
+            "brown" to EmojiColor("#8B4513", "brown"),
+            "black" to EmojiColor("#000000", "black"),
+            "white" to EmojiColor("#FFFFFF", "white"),
+            "grey" to EmojiColor("#808080", "grey"),
+            "gray" to EmojiColor("#808080", "gray")
+        )
+
+        /**
+         * Detects color from emoji name by looking for color keywords.
+         */
+        @JvmStatic
+        fun detectColorFromName(name: String): EmojiColor? {
+            val lower = name.lowercase()
+            // Check for "light blue" before "blue" (longer match first)
+            if (lower.contains("light blue")) return COLOR_NAME_MAP["light blue"]
+            // Check other colors
+            for ((colorName, color) in COLOR_NAME_MAP) {
+                if (lower.contains(colorName)) return color
+            }
+            return null
+        }
 
         @Volatile
         private var instance: EmojiParser? = null
@@ -138,6 +208,66 @@ class EmojiParser private constructor() {
         return allFullyQualified.filter { it.name.lowercase().contains(lower) }
     }
 
+    // ==================== Color-based Access ====================
+
+    /** All emoji grouped by their associated color hex value. */
+    private val byColor: Map<String, List<EmojiEntry>> by lazy {
+        allFullyQualified
+            .filter { it.color != null }
+            .groupBy { it.color!!.hex }
+    }
+
+    /** Get all unique colors found in the emoji set, sorted by hue. */
+    fun getColors(): List<EmojiColor> {
+        val colors = mutableSetOf<EmojiColor>()
+        for (entry in allFullyQualified) {
+            entry.color?.let { colors.add(it) }
+        }
+        return colors.sortedBy { colorToHue(it.hex) }
+    }
+
+    /** Get all emoji that have a specific color (by hex). */
+    fun getEmojiByColor(hex: String): List<EmojiEntry> {
+        return byColor[hex.uppercase()] ?: byColor[hex.lowercase()] ?: emptyList()
+    }
+
+    /** Get all emoji that have any color associated. */
+    fun getColoredEmoji(): List<EmojiEntry> {
+        return allFullyQualified.filter { it.color != null }
+    }
+
+    /** Get all emoji with skin tone modifiers. */
+    fun getSkinToneEmoji(): List<EmojiEntry> {
+        return allFullyQualified.filter { entry ->
+            entry.codePoints.any { it in SKIN_TONE_COLORS }
+        }
+    }
+
+    /** Get a virtual "Color" group that organizes emoji by their color. */
+    fun getColorGroup(): EmojiGroup {
+        val subgroups = getColors().map { color ->
+            EmojiSubgroup(
+                name = color.name,
+                group = "Color",
+                entries = getEmojiByColor(color.hex)
+            )
+        }.filter { it.entries.isNotEmpty() }
+
+        return EmojiGroup("Color", subgroups)
+    }
+
+    /** Convert hex color to hue for sorting. */
+    private fun colorToHue(hex: String): Float {
+        return try {
+            val color = android.graphics.Color.parseColor(hex)
+            val hsv = FloatArray(3)
+            android.graphics.Color.colorToHSV(color, hsv)
+            hsv[0] // hue
+        } catch (e: Exception) {
+            0f
+        }
+    }
+
     private fun load(context: Context) {
         try {
             context.assets.open(ASSET_FILE).use { inputStream ->
@@ -145,7 +275,8 @@ class EmojiParser private constructor() {
                     parse(reader)
                 }
             }
-            Log.i(TAG, "Loaded ${allFullyQualified.size} fully-qualified emoji in ${groups.size} groups")
+            val coloredCount = allFullyQualified.count { it.color != null }
+            Log.i(TAG, "Loaded ${allFullyQualified.size} fully-qualified emoji in ${groups.size} groups ($coloredCount with color)")
         } catch (e: Exception) {
             Log.e(TAG, "Failed to load $ASSET_FILE", e)
         }

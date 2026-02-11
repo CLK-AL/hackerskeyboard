@@ -43,7 +43,7 @@ public class EmojiParserTest {
 
     @Test
     public void testGroupCount() {
-        assertEquals("Should parse 4 groups", 4, parser.getGroups().size());
+        assertEquals("Should parse 5 groups", 5, parser.getGroups().size());
     }
 
     @Test
@@ -53,6 +53,7 @@ public class EmojiParserTest {
         assertEquals("People & Body", names.get(1));
         assertEquals("Component", names.get(2));
         assertEquals("Animals & Nature", names.get(3));
+        assertEquals("Symbols", names.get(4));
     }
 
     @Test
@@ -100,8 +101,8 @@ public class EmojiParserTest {
     @Test
     public void testFullyQualifiedCount() {
         // 3 (face-smiling) + 3 (face-affection fully-qualified) + 1 (face-neutral fq)
-        // + 2 (hand-fingers-open) + 2 (animal-mammal) = 11
-        assertEquals("Should have 11 fully-qualified emoji", 11, parser.getAllFullyQualified().size());
+        // + 2 (hand-fingers-open) + 2 (animal-mammal) + 8 (hearts) + 2 (circles) = 21
+        assertEquals("Should have 21 fully-qualified emoji", 21, parser.getAllFullyQualified().size());
     }
 
     @Test
@@ -231,7 +232,8 @@ public class EmojiParserTest {
     @Test
     public void testSearchPartialMatch() {
         List<EmojiParser.EmojiEntry> results = parser.search("heart");
-        assertEquals("Should find 2 heart-related emoji", 2, results.size());
+        // 2 face with hearts + 8 colored hearts = 10
+        assertEquals("Should find 10 heart-related emoji", 10, results.size());
     }
 
     // ==================== AllEmoji Convenience Tests ====================
@@ -260,5 +262,93 @@ public class EmojiParserTest {
         String str = entry.toString();
         assertTrue("toString should contain emoji", str.contains(entry.getEmoji()));
         assertTrue("toString should contain name", str.contains("grinning face"));
+    }
+
+    // ==================== Color Tests ====================
+
+    @Test
+    public void testColorDetectionFromName() {
+        // "red heart" should have red color
+        List<EmojiParser.EmojiEntry> redHearts = parser.search("red heart");
+        assertFalse("Should find red heart", redHearts.isEmpty());
+        EmojiParser.EmojiColor color = redHearts.get(0).getColor();
+        assertNotNull("Red heart should have color", color);
+        assertEquals("red", color.getName());
+        assertEquals("#FF0000", color.getHex());
+    }
+
+    @Test
+    public void testColorDetectionFromSkinTone() {
+        // "waving hand: light skin tone" should have light skin tone color
+        List<EmojiParser.EmojiEntry> results = parser.search("light skin tone");
+        assertFalse("Should find light skin tone emoji", results.isEmpty());
+        EmojiParser.EmojiColor color = results.get(0).getColor();
+        assertNotNull("Skin tone emoji should have color", color);
+        assertEquals("light skin tone", color.getName());
+        assertTrue("Skin tone hex should start with #", color.getHex().startsWith("#"));
+    }
+
+    @Test
+    public void testGetColors() {
+        List<EmojiParser.EmojiColor> colors = parser.getColors();
+        assertFalse("Should have some colors", colors.isEmpty());
+        // Should have at least: red, orange, yellow, green, blue, purple, black, white, light skin tone
+        assertTrue("Should have multiple colors", colors.size() >= 8);
+    }
+
+    @Test
+    public void testGetEmojiByColor() {
+        List<EmojiParser.EmojiEntry> redEmoji = parser.getEmojiByColor("#FF0000");
+        assertFalse("Should find red emoji", redEmoji.isEmpty());
+        // Should include red heart and red circle
+        assertTrue("Should have at least 2 red emoji", redEmoji.size() >= 2);
+    }
+
+    @Test
+    public void testGetColoredEmoji() {
+        List<EmojiParser.EmojiEntry> colored = parser.getColoredEmoji();
+        assertFalse("Should have colored emoji", colored.isEmpty());
+        for (EmojiParser.EmojiEntry entry : colored) {
+            assertNotNull("Colored emoji should have color", entry.getColor());
+        }
+    }
+
+    @Test
+    public void testGetSkinToneEmoji() {
+        List<EmojiParser.EmojiEntry> skinTone = parser.getSkinToneEmoji();
+        assertFalse("Should have skin tone emoji", skinTone.isEmpty());
+        // "waving hand: light skin tone" is the only one in test data
+        assertEquals("Should find 1 skin tone emoji in test data", 1, skinTone.size());
+    }
+
+    @Test
+    public void testGetColorGroup() {
+        EmojiParser.EmojiGroup colorGroup = parser.getColorGroup();
+        assertEquals("Color", colorGroup.getName());
+        assertFalse("Color group should have subgroups", colorGroup.getSubgroups().isEmpty());
+        // Each subgroup is a color
+        for (EmojiParser.EmojiSubgroup sub : colorGroup.getSubgroups()) {
+            assertFalse("Color subgroup should have entries", sub.getEntries().isEmpty());
+        }
+    }
+
+    @Test
+    public void testEmojiColorToString() {
+        EmojiParser.EmojiColor color = new EmojiParser.EmojiColor("#FF0000", "red");
+        assertEquals("red (#FF0000)", color.toString());
+    }
+
+    @Test
+    public void testDetectColorFromNameStatic() {
+        EmojiParser.EmojiColor red = EmojiParser.detectColorFromName("red heart");
+        assertNotNull(red);
+        assertEquals("red", red.getName());
+
+        EmojiParser.EmojiColor lightBlue = EmojiParser.detectColorFromName("light blue heart");
+        assertNotNull(lightBlue);
+        assertEquals("light blue", lightBlue.getName());
+
+        EmojiParser.EmojiColor none = EmojiParser.detectColorFromName("grinning face");
+        assertNull("Non-color emoji should return null", none);
     }
 }

@@ -39,4 +39,20 @@
 1F436                                                  ; fully-qualified     # 🐶 E0.6 dog face
 1F431                                                  ; fully-qualified     # 🐱 E0.6 cat face
 
+# group: Symbols
+
+# subgroup: heart
+2764 FE0F                                              ; fully-qualified     # ❤️ E0.6 red heart
+1F9E1                                                  ; fully-qualified     # 🧡 E5.0 orange heart
+1F49B                                                  ; fully-qualified     # 💛 E0.6 yellow heart
+1F49A                                                  ; fully-qualified     # 💚 E0.6 green heart
+1F499                                                  ; fully-qualified     # 💙 E0.6 blue heart
+1F49C                                                  ; fully-qualified     # 💜 E0.6 purple heart
+1F5A4                                                  ; fully-qualified     # 🖤 E3.0 black heart
+1F90D                                                  ; fully-qualified     # 🤍 E12.0 white heart
+
+# subgroup: geometric
+1F534                                                  ; fully-qualified     # 🔴 E0.6 red circle
+1F535                                                  ; fully-qualified     # 🔵 E0.6 blue circle
+
 #EOF
