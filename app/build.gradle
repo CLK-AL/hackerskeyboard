@@ -8,7 +8,7 @@ import java.time.format.DateTimeFormatter
 
 // Generate timestamp-based version suffix: yyyy.MM.dd.HH.mm.ss
 def buildTimestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy.MM.dd.HH.mm.ss"))
-def baseVersionName = "v1.42.2ak"
+def baseVersionName = "hk-v"
 def baseVersionCode = 1042002
 
 android {
@@ -20,7 +20,7 @@ android {
         minSdk 21
         targetSdk 36
         versionCode baseVersionCode
-        versionName "${baseVersionName}-${buildTimestamp}"
+        versionName "${baseVersionName}${buildTimestamp}"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
             cmake {

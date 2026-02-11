@@ -1,0 +1,118 @@
+/**
+ * Gradle Init Script for Proxy Configuration
+ *
+ * This script auto-detects proxy settings from environment variables
+ * and configures Gradle to use them properly.
+ *
+ * Place this file in:
+ *   - Project: <project>/gradle/init.gradle (loaded via settings.gradle)
+ *   - User: ~/.gradle/init.gradle (always loaded)
+ *
+ * Supported environment variables:
+ *   - HTTP_PROXY, http_proxy
+ *   - HTTPS_PROXY, https_proxy
+ *   - NO_PROXY, no_proxy
+ */
+
+def configureProxy() {
+    def httpProxy = System.getenv('HTTP_PROXY') ?: System.getenv('http_proxy')
+    def httpsProxy = System.getenv('HTTPS_PROXY') ?: System.getenv('https_proxy')
+    def noProxy = System.getenv('NO_PROXY') ?: System.getenv('no_proxy') ?: ''
+
+    // Convert NO_PROXY to Java format (pipe-separated)
+    def nonProxyHosts = noProxy.split(',').collect { it.trim() }
+        .findAll { it }
+        .collect { it.startsWith('.') ? "*${it}" : it }
+        .join('|')
+
+    if (httpProxy) {
+        def parsed = parseProxyUrl(httpProxy)
+        if (parsed) {
+            System.setProperty('http.proxyHost', parsed.host)
+            System.setProperty('http.proxyPort', parsed.port.toString())
+            if (parsed.user) {
+                System.setProperty('http.proxyUser', parsed.user)
+                System.setProperty('http.proxyPassword', parsed.password ?: '')
+            }
+            if (nonProxyHosts) {
+                System.setProperty('http.nonProxyHosts', nonProxyHosts)
+            }
+            println "[init.gradle] HTTP proxy configured: ${parsed.host}:${parsed.port}"
+        }
+    }
+
+    if (httpsProxy) {
+        def parsed = parseProxyUrl(httpsProxy)
+        if (parsed) {
+            System.setProperty('https.proxyHost', parsed.host)
+            System.setProperty('https.proxyPort', parsed.port.toString())
+            if (parsed.user) {
+                System.setProperty('https.proxyUser', parsed.user)
+                System.setProperty('https.proxyPassword', parsed.password ?: '')
+            }
+            if (nonProxyHosts) {
+                System.setProperty('https.nonProxyHosts', nonProxyHosts)
+            }
+            println "[init.gradle] HTTPS proxy configured: ${parsed.host}:${parsed.port}"
+        }
+    }
+
+    // Configure Java's default authenticator for proxy authentication
+    if (httpProxy || httpsProxy) {
+        def proxyInfo = parseProxyUrl(httpsProxy ?: httpProxy)
+        if (proxyInfo?.user) {
+            java.net.Authenticator.setDefault(new java.net.Authenticator() {
+                @Override
+                protected java.net.PasswordAuthentication getPasswordAuthentication() {
+                    if (getRequestorType() == RequestorType.PROXY) {
+                        return new java.net.PasswordAuthentication(
+                            proxyInfo.user,
+                            (proxyInfo.password ?: '').toCharArray()
+                        )
+                    }
+                    return null
+                }
+            })
+            println "[init.gradle] Proxy authenticator configured"
+        }
+    }
+}
+
+def parseProxyUrl(String proxyUrl) {
+    if (!proxyUrl) return null
+
+    try {
+        // Handle URLs with or without protocol
+        def urlStr = proxyUrl
+        if (!urlStr.startsWith('http://') && !urlStr.startsWith('https://')) {
+            urlStr = "http://${urlStr}"
+        }
+
+        def uri = new URI(urlStr)
+        def host = uri.host
+        def port = uri.port > 0 ? uri.port : 8080
+        def user = null
+        def password = null
+
+        if (uri.userInfo) {
+            def parts = uri.userInfo.split(':', 2)
+            user = URLDecoder.decode(parts[0], 'UTF-8')
+            password = parts.length > 1 ? URLDecoder.decode(parts[1], 'UTF-8') : null
+        }
+
+        return [host: host, port: port, user: user, password: password]
+    } catch (Exception e) {
+        println "[init.gradle] Warning: Could not parse proxy URL: ${proxyUrl}"
+        return null
+    }
+}
+
+// Apply proxy configuration
+configureProxy()
+
+// Configure all projects
+allprojects {
+    repositories.configureEach { repo ->
+        // Repositories are automatically configured via system properties
+    }
+}

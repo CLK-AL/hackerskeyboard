@@ -1,3 +1,38 @@
+// Apply proxy configuration from environment variables early
+def configureProxyFromEnv = {
+    def httpProxy = System.getenv('HTTP_PROXY') ?: System.getenv('http_proxy')
+    def httpsProxy = System.getenv('HTTPS_PROXY') ?: System.getenv('https_proxy')
+    def noProxy = System.getenv('NO_PROXY') ?: System.getenv('no_proxy') ?: ''
+
+    def parseProxy = { String proxyUrl ->
+        if (!proxyUrl) return null
+        try {
+            def urlStr = proxyUrl.startsWith('http') ? proxyUrl : "http://${proxyUrl}"
+            def uri = new URI(urlStr)
+            [host: uri.host, port: uri.port > 0 ? uri.port : 8080,
+             user: uri.userInfo?.split(':')?.getAt(0),
+             password: uri.userInfo?.split(':')?.with { it.size() > 1 ? it[1] : null }]
+        } catch (e) { null }
+    }
+
+    def nonProxyHosts = noProxy.split(',').collect { it.trim() }
+        .findAll { it }.collect { it.startsWith('.') ? "*${it}" : it }.join('|')
+
+    [http: httpProxy, https: httpsProxy].each { proto, proxy ->
+        def p = parseProxy(proxy)
+        if (p) {
+            System.setProperty("${proto}.proxyHost", p.host)
+            System.setProperty("${proto}.proxyPort", p.port.toString())
+            if (p.user) {
+                System.setProperty("${proto}.proxyUser", p.user)
+                System.setProperty("${proto}.proxyPassword", p.password ?: '')
+            }
+            if (nonProxyHosts) System.setProperty("${proto}.nonProxyHosts", nonProxyHosts)
+        }
+    }
+}
+configureProxyFromEnv()
+
 pluginManagement {
     repositories {
         google()
