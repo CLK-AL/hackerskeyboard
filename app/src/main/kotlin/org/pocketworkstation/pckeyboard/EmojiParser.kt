@@ -239,7 +239,11 @@ class EmojiParser private constructor() {
 
     companion object {
         private const val TAG = "HK/EmojiParser"
-        private const val ASSET_FILE = "emoji-test.txt"
+        private const val EMOJI_FILE = "emoji-test.txt"
+        private const val SYMBOLS_FILE = "symbols-test.txt"
+
+        /** Asset files to load (emoji + symbols). */
+        private val ASSET_FILES = listOf(EMOJI_FILE, SYMBOLS_FILE)
 
         private const val GROUP_PREFIX = "# group: "
         private const val SUBGROUP_PREFIX = "# subgroup: "
@@ -284,6 +288,21 @@ class EmojiParser private constructor() {
             return EmojiParser().also {
                 BufferedReader(InputStreamReader(inputStream, Charsets.UTF_8)).use { reader ->
                     it.parse(reader)
+                }
+            }
+        }
+
+        /**
+         * Create a parser from multiple [InputStream]s.
+         * Useful for loading both emoji and symbol files in tests.
+         */
+        @JvmStatic
+        fun parseFrom(vararg inputStreams: InputStream): EmojiParser {
+            return EmojiParser().also { parser ->
+                for (stream in inputStreams) {
+                    BufferedReader(InputStreamReader(stream, Charsets.UTF_8)).use { reader ->
+                        parser.parse(reader)
+                    }
                 }
             }
         }
@@ -588,18 +607,21 @@ class EmojiParser private constructor() {
     }
 
     private fun load(context: Context) {
-        try {
-            context.assets.open(ASSET_FILE).use { inputStream ->
-                BufferedReader(InputStreamReader(inputStream, Charsets.UTF_8)).use { reader ->
-                    parse(reader)
+        for (assetFile in ASSET_FILES) {
+            try {
+                context.assets.open(assetFile).use { inputStream ->
+                    BufferedReader(InputStreamReader(inputStream, Charsets.UTF_8)).use { reader ->
+                        parse(reader)
+                    }
                 }
+                Log.i(TAG, "Loaded $assetFile")
+            } catch (e: Exception) {
+                Log.w(TAG, "Failed to load $assetFile: ${e.message}")
             }
-            val coloredCount = allFullyQualified.count { it.color != null }
-            val skinToneCount = allFullyQualified.count { it.skinTone != null }
-            Log.i(TAG, "Loaded ${allFullyQualified.size} fully-qualified emoji in ${groups.size} groups ($coloredCount colored, $skinToneCount with skin tone)")
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to load $ASSET_FILE", e)
         }
+        val coloredCount = allFullyQualified.count { it.color != null }
+        val skinToneCount = allFullyQualified.count { it.skinTone != null }
+        Log.i(TAG, "Total: ${allFullyQualified.size} fully-qualified entries in ${groups.size} groups ($coloredCount colored, $skinToneCount with skin tone)")
     }
 
     private fun parse(reader: BufferedReader) {

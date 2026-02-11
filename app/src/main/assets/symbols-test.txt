@@ -1,0 +1,471 @@
+# symbols-test.txt
+# UTF-8 Symbols in emoji-test.txt format
+# Compatible with EmojiParser for unified symbol/emoji handling
+#
+# Format: code points; status # symbol name
+
+# group: Arrows
+
+# subgroup: arrows-basic
+2190                                                  ; fully-qualified     # ← leftwards arrow
+2191                                                  ; fully-qualified     # ↑ upwards arrow
+2192                                                  ; fully-qualified     # → rightwards arrow
+2193                                                  ; fully-qualified     # ↓ downwards arrow
+2194                                                  ; fully-qualified     # ↔ left right arrow
+2195                                                  ; fully-qualified     # ↕ up down arrow
+2196                                                  ; fully-qualified     # ↖ north west arrow
+2197                                                  ; fully-qualified     # ↗ north east arrow
+2198                                                  ; fully-qualified     # ↘ south east arrow
+2199                                                  ; fully-qualified     # ↙ south west arrow
+
+# subgroup: arrows-double
+21D0                                                  ; fully-qualified     # ⇐ leftwards double arrow
+21D1                                                  ; fully-qualified     # ⇑ upwards double arrow
+21D2                                                  ; fully-qualified     # ⇒ rightwards double arrow
+21D3                                                  ; fully-qualified     # ⇓ downwards double arrow
+21D4                                                  ; fully-qualified     # ⇔ left right double arrow
+21D5                                                  ; fully-qualified     # ⇕ up down double arrow
+
+# subgroup: arrows-misc
+21A9                                                  ; fully-qualified     # ↩ leftwards arrow with hook
+21AA                                                  ; fully-qualified     # ↪ rightwards arrow with hook
+21B0                                                  ; fully-qualified     # ↰ upwards arrow with tip leftwards
+21B1                                                  ; fully-qualified     # ↱ upwards arrow with tip rightwards
+21B2                                                  ; fully-qualified     # ↲ downwards arrow with tip leftwards
+21B3                                                  ; fully-qualified     # ↳ downwards arrow with tip rightwards
+21BA                                                  ; fully-qualified     # ↺ anticlockwise open circle arrow
+21BB                                                  ; fully-qualified     # ↻ clockwise open circle arrow
+
+# group: Mathematics
+
+# subgroup: math-operators
+00D7                                                  ; fully-qualified     # × multiplication sign
+00F7                                                  ; fully-qualified     # ÷ division sign
+00B1                                                  ; fully-qualified     # ± plus-minus sign
+2212                                                  ; fully-qualified     # − minus sign
+2213                                                  ; fully-qualified     # ∓ minus-or-plus sign
+2217                                                  ; fully-qualified     # ∗ asterisk operator
+2218                                                  ; fully-qualified     # ∘ ring operator
+2219                                                  ; fully-qualified     # ∙ bullet operator
+221A                                                  ; fully-qualified     # √ square root
+221B                                                  ; fully-qualified     # ∛ cube root
+221C                                                  ; fully-qualified     # ∜ fourth root
+
+# subgroup: math-relations
+003C                                                  ; fully-qualified     # < less-than sign
+003D                                                  ; fully-qualified     # = equals sign
+003E                                                  ; fully-qualified     # > greater-than sign
+2260                                                  ; fully-qualified     # ≠ not equal to
+2261                                                  ; fully-qualified     # ≡ identical to
+2262                                                  ; fully-qualified     # ≢ not identical to
+2264                                                  ; fully-qualified     # ≤ less-than or equal to
+2265                                                  ; fully-qualified     # ≥ greater-than or equal to
+226A                                                  ; fully-qualified     # ≪ much less-than
+226B                                                  ; fully-qualified     # ≫ much greater-than
+2248                                                  ; fully-qualified     # ≈ almost equal to
+2249                                                  ; fully-qualified     # ≉ not almost equal to
+
+# subgroup: math-logic
+00AC                                                  ; fully-qualified     # ¬ not sign
+2227                                                  ; fully-qualified     # ∧ logical and
+2228                                                  ; fully-qualified     # ∨ logical or
+2229                                                  ; fully-qualified     # ∩ intersection
+222A                                                  ; fully-qualified     # ∪ union
+2200                                                  ; fully-qualified     # ∀ for all
+2203                                                  ; fully-qualified     # ∃ there exists
+2204                                                  ; fully-qualified     # ∄ there does not exist
+2205                                                  ; fully-qualified     # ∅ empty set
+2208                                                  ; fully-qualified     # ∈ element of
+2209                                                  ; fully-qualified     # ∉ not an element of
+220B                                                  ; fully-qualified     # ∋ contains as member
+220C                                                  ; fully-qualified     # ∌ does not contain as member
+
+# subgroup: math-calculus
+221E                                                  ; fully-qualified     # ∞ infinity
+2202                                                  ; fully-qualified     # ∂ partial differential
+2206                                                  ; fully-qualified     # ∆ increment
+2207                                                  ; fully-qualified     # ∇ nabla
+220F                                                  ; fully-qualified     # ∏ n-ary product
+2211                                                  ; fully-qualified     # ∑ n-ary summation
+222B                                                  ; fully-qualified     # ∫ integral
+222C                                                  ; fully-qualified     # ∬ double integral
+222D                                                  ; fully-qualified     # ∭ triple integral
+
+# subgroup: math-greek
+03B1                                                  ; fully-qualified     # α greek small letter alpha
+03B2                                                  ; fully-qualified     # β greek small letter beta
+03B3                                                  ; fully-qualified     # γ greek small letter gamma
+03B4                                                  ; fully-qualified     # δ greek small letter delta
+03B5                                                  ; fully-qualified     # ε greek small letter epsilon
+03B6                                                  ; fully-qualified     # ζ greek small letter zeta
+03B7                                                  ; fully-qualified     # η greek small letter eta
+03B8                                                  ; fully-qualified     # θ greek small letter theta
+03BB                                                  ; fully-qualified     # λ greek small letter lamda
+03BC                                                  ; fully-qualified     # μ greek small letter mu
+03C0                                                  ; fully-qualified     # π greek small letter pi
+03C3                                                  ; fully-qualified     # σ greek small letter sigma
+03C6                                                  ; fully-qualified     # φ greek small letter phi
+03C9                                                  ; fully-qualified     # ω greek small letter omega
+0394                                                  ; fully-qualified     # Δ greek capital letter delta
+03A3                                                  ; fully-qualified     # Σ greek capital letter sigma
+03A9                                                  ; fully-qualified     # Ω greek capital letter omega
+
+# group: Currency
+
+# subgroup: currency-common
+0024                                                  ; fully-qualified     # $ dollar sign
+00A2                                                  ; fully-qualified     # ¢ cent sign
+00A3                                                  ; fully-qualified     # £ pound sign
+00A4                                                  ; fully-qualified     # ¤ currency sign
+00A5                                                  ; fully-qualified     # ¥ yen sign
+20AC                                                  ; fully-qualified     # € euro sign
+20B9                                                  ; fully-qualified     # ₹ indian rupee sign
+20BF                                                  ; fully-qualified     # ₿ bitcoin sign
+
+# subgroup: currency-other
+20A0                                                  ; fully-qualified     # ₠ euro-currency sign
+20A1                                                  ; fully-qualified     # ₡ colon sign
+20A2                                                  ; fully-qualified     # ₢ cruzeiro sign
+20A3                                                  ; fully-qualified     # ₣ french franc sign
+20A4                                                  ; fully-qualified     # ₤ lira sign
+20A7                                                  ; fully-qualified     # ₧ peseta sign
+20A9                                                  ; fully-qualified     # ₩ won sign
+20AA                                                  ; fully-qualified     # ₪ new sheqel sign
+20AB                                                  ; fully-qualified     # ₫ dong sign
+20AD                                                  ; fully-qualified     # ₭ kip sign
+20AE                                                  ; fully-qualified     # ₮ tugrik sign
+20B1                                                  ; fully-qualified     # ₱ peso sign
+20B2                                                  ; fully-qualified     # ₲ guarani sign
+20B4                                                  ; fully-qualified     # ₴ hryvnia sign
+20B5                                                  ; fully-qualified     # ₵ cedi sign
+20BA                                                  ; fully-qualified     # ₺ turkish lira sign
+20BD                                                  ; fully-qualified     # ₽ ruble sign
+
+# group: Punctuation
+
+# subgroup: punctuation-quotes
+2018                                                  ; fully-qualified     # ' left single quotation mark
+2019                                                  ; fully-qualified     # ' right single quotation mark
+201A                                                  ; fully-qualified     # ‚ single low-9 quotation mark
+201C                                                  ; fully-qualified     # " left double quotation mark
+201D                                                  ; fully-qualified     # " right double quotation mark
+201E                                                  ; fully-qualified     # „ double low-9 quotation mark
+2039                                                  ; fully-qualified     # ‹ single left-pointing angle quotation mark
+203A                                                  ; fully-qualified     # › single right-pointing angle quotation mark
+00AB                                                  ; fully-qualified     # « left-pointing double angle quotation mark
+00BB                                                  ; fully-qualified     # » right-pointing double angle quotation mark
+
+# subgroup: punctuation-dashes
+2010                                                  ; fully-qualified     # ‐ hyphen
+2011                                                  ; fully-qualified     # ‑ non-breaking hyphen
+2012                                                  ; fully-qualified     # ‒ figure dash
+2013                                                  ; fully-qualified     # – en dash
+2014                                                  ; fully-qualified     # — em dash
+2015                                                  ; fully-qualified     # ― horizontal bar
+
+# subgroup: punctuation-misc
+2020                                                  ; fully-qualified     # † dagger
+2021                                                  ; fully-qualified     # ‡ double dagger
+2022                                                  ; fully-qualified     # • bullet
+2023                                                  ; fully-qualified     # ‣ triangular bullet
+2026                                                  ; fully-qualified     # … horizontal ellipsis
+2027                                                  ; fully-qualified     # ‧ hyphenation point
+00A7                                                  ; fully-qualified     # § section sign
+00B6                                                  ; fully-qualified     # ¶ pilcrow sign
+00A9                                                  ; fully-qualified     # © copyright sign
+00AE                                                  ; fully-qualified     # ® registered sign
+2122                                                  ; fully-qualified     # ™ trade mark sign
+
+# group: Box Drawing
+
+# subgroup: box-light
+2500                                                  ; fully-qualified     # ─ box drawings light horizontal
+2502                                                  ; fully-qualified     # │ box drawings light vertical
+250C                                                  ; fully-qualified     # ┌ box drawings light down and right
+2510                                                  ; fully-qualified     # ┐ box drawings light down and left
+2514                                                  ; fully-qualified     # └ box drawings light up and right
+2518                                                  ; fully-qualified     # ┘ box drawings light up and left
+251C                                                  ; fully-qualified     # ├ box drawings light vertical and right
+2524                                                  ; fully-qualified     # ┤ box drawings light vertical and left
+252C                                                  ; fully-qualified     # ┬ box drawings light down and horizontal
+2534                                                  ; fully-qualified     # ┴ box drawings light up and horizontal
+253C                                                  ; fully-qualified     # ┼ box drawings light vertical and horizontal
+
+# subgroup: box-heavy
+2501                                                  ; fully-qualified     # ━ box drawings heavy horizontal
+2503                                                  ; fully-qualified     # ┃ box drawings heavy vertical
+250F                                                  ; fully-qualified     # ┏ box drawings heavy down and right
+2513                                                  ; fully-qualified     # ┓ box drawings heavy down and left
+2517                                                  ; fully-qualified     # ┗ box drawings heavy up and right
+251B                                                  ; fully-qualified     # ┛ box drawings heavy up and left
+2523                                                  ; fully-qualified     # ┣ box drawings heavy vertical and right
+252B                                                  ; fully-qualified     # ┫ box drawings heavy vertical and left
+2533                                                  ; fully-qualified     # ┳ box drawings heavy down and horizontal
+253B                                                  ; fully-qualified     # ┻ box drawings heavy up and horizontal
+254B                                                  ; fully-qualified     # ╋ box drawings heavy vertical and horizontal
+
+# subgroup: box-double
+2550                                                  ; fully-qualified     # ═ box drawings double horizontal
+2551                                                  ; fully-qualified     # ║ box drawings double vertical
+2554                                                  ; fully-qualified     # ╔ box drawings double down and right
+2557                                                  ; fully-qualified     # ╗ box drawings double down and left
+255A                                                  ; fully-qualified     # ╚ box drawings double up and right
+255D                                                  ; fully-qualified     # ╝ box drawings double up and left
+2560                                                  ; fully-qualified     # ╠ box drawings double vertical and right
+2563                                                  ; fully-qualified     # ╣ box drawings double vertical and left
+2566                                                  ; fully-qualified     # ╦ box drawings double down and horizontal
+2569                                                  ; fully-qualified     # ╩ box drawings double up and horizontal
+256C                                                  ; fully-qualified     # ╬ box drawings double vertical and horizontal
+
+# group: Blocks
+
+# subgroup: block-elements
+2580                                                  ; fully-qualified     # ▀ upper half block
+2581                                                  ; fully-qualified     # ▁ lower one eighth block
+2582                                                  ; fully-qualified     # ▂ lower one quarter block
+2583                                                  ; fully-qualified     # ▃ lower three eighths block
+2584                                                  ; fully-qualified     # ▄ lower half block
+2585                                                  ; fully-qualified     # ▅ lower five eighths block
+2586                                                  ; fully-qualified     # ▆ lower three quarters block
+2587                                                  ; fully-qualified     # ▇ lower seven eighths block
+2588                                                  ; fully-qualified     # █ full block
+2589                                                  ; fully-qualified     # ▉ left seven eighths block
+258A                                                  ; fully-qualified     # ▊ left three quarters block
+258B                                                  ; fully-qualified     # ▋ left five eighths block
+258C                                                  ; fully-qualified     # ▌ left half block
+258D                                                  ; fully-qualified     # ▍ left three eighths block
+258E                                                  ; fully-qualified     # ▎ left one quarter block
+258F                                                  ; fully-qualified     # ▏ left one eighth block
+2590                                                  ; fully-qualified     # ▐ right half block
+2591                                                  ; fully-qualified     # ░ light shade
+2592                                                  ; fully-qualified     # ▒ medium shade
+2593                                                  ; fully-qualified     # ▓ dark shade
+
+# group: Geometric Shapes
+
+# subgroup: geometric-squares
+25A0                                                  ; fully-qualified     # ■ black square
+25A1                                                  ; fully-qualified     # □ white square
+25A2                                                  ; fully-qualified     # ▢ white square with rounded corners
+25A3                                                  ; fully-qualified     # ▣ white square containing black small square
+25AA                                                  ; fully-qualified     # ▪ black small square
+25AB                                                  ; fully-qualified     # ▫ white small square
+25AC                                                  ; fully-qualified     # ▬ black rectangle
+25AD                                                  ; fully-qualified     # ▭ white rectangle
+
+# subgroup: geometric-triangles
+25B2                                                  ; fully-qualified     # ▲ black up-pointing triangle
+25B3                                                  ; fully-qualified     # △ white up-pointing triangle
+25B4                                                  ; fully-qualified     # ▴ black up-pointing small triangle
+25B5                                                  ; fully-qualified     # ▵ white up-pointing small triangle
+25B6                                                  ; fully-qualified     # ▶ black right-pointing triangle
+25B7                                                  ; fully-qualified     # ▷ white right-pointing triangle
+25BC                                                  ; fully-qualified     # ▼ black down-pointing triangle
+25BD                                                  ; fully-qualified     # ▽ white down-pointing triangle
+25C0                                                  ; fully-qualified     # ◀ black left-pointing triangle
+25C1                                                  ; fully-qualified     # ◁ white left-pointing triangle
+
+# subgroup: geometric-circles
+25CB                                                  ; fully-qualified     # ○ white circle
+25CC                                                  ; fully-qualified     # ◌ dotted circle
+25CD                                                  ; fully-qualified     # ◍ circle with vertical fill
+25CE                                                  ; fully-qualified     # ◎ bullseye
+25CF                                                  ; fully-qualified     # ● black circle
+25D0                                                  ; fully-qualified     # ◐ circle with left half black
+25D1                                                  ; fully-qualified     # ◑ circle with right half black
+25D2                                                  ; fully-qualified     # ◒ circle with lower half black
+25D3                                                  ; fully-qualified     # ◓ circle with upper half black
+25EF                                                  ; fully-qualified     # ◯ large circle
+
+# subgroup: geometric-diamonds
+25C6                                                  ; fully-qualified     # ◆ black diamond
+25C7                                                  ; fully-qualified     # ◇ white diamond
+25C8                                                  ; fully-qualified     # ◈ white diamond containing black small diamond
+25C9                                                  ; fully-qualified     # ◉ fisheye
+25CA                                                  ; fully-qualified     # ◊ lozenge
+
+# subgroup: geometric-stars
+2605                                                  ; fully-qualified     # ★ black star
+2606                                                  ; fully-qualified     # ☆ white star
+272A                                                  ; fully-qualified     # ✪ circled white star
+2730                                                  ; fully-qualified     # ✰ shadowed white star
+2734                                                  ; fully-qualified     # ✴ eight pointed black star
+2735                                                  ; fully-qualified     # ✵ eight pointed pinwheel star
+2736                                                  ; fully-qualified     # ✶ six pointed black star
+
+# group: Technical
+
+# subgroup: technical-misc
+2302                                                  ; fully-qualified     # ⌂ house
+2310                                                  ; fully-qualified     # ⌐ reversed not sign
+2318                                                  ; fully-qualified     # ⌘ place of interest sign
+2325                                                  ; fully-qualified     # ⌥ option key
+2326                                                  ; fully-qualified     # ⌦ erase to the right
+2327                                                  ; fully-qualified     # ⌧ x in a rectangle box
+232B                                                  ; fully-qualified     # ⌫ erase to the left
+2328                                                  ; fully-qualified     # ⌨ keyboard
+238B                                                  ; fully-qualified     # ⎋ broken circle with northwest arrow
+23CE                                                  ; fully-qualified     # ⏎ return symbol
+23CF                                                  ; fully-qualified     # ⏏ eject symbol
+
+# subgroup: technical-brackets
+2329                                                  ; fully-qualified     # 〈 left-pointing angle bracket
+232A                                                  ; fully-qualified     # 〉 right-pointing angle bracket
+27E8                                                  ; fully-qualified     # ⟨ mathematical left angle bracket
+27E9                                                  ; fully-qualified     # ⟩ mathematical right angle bracket
+2308                                                  ; fully-qualified     # ⌈ left ceiling
+2309                                                  ; fully-qualified     # ⌉ right ceiling
+230A                                                  ; fully-qualified     # ⌊ left floor
+230B                                                  ; fully-qualified     # ⌋ right floor
+
+# subgroup: technical-control
+2400                                                  ; fully-qualified     # ␀ symbol for null
+2401                                                  ; fully-qualified     # ␁ symbol for start of heading
+2402                                                  ; fully-qualified     # ␂ symbol for start of text
+2403                                                  ; fully-qualified     # ␃ symbol for end of text
+2404                                                  ; fully-qualified     # ␄ symbol for end of transmission
+2405                                                  ; fully-qualified     # ␅ symbol for enquiry
+2406                                                  ; fully-qualified     # ␆ symbol for acknowledge
+2407                                                  ; fully-qualified     # ␇ symbol for bell
+2408                                                  ; fully-qualified     # ␈ symbol for backspace
+2409                                                  ; fully-qualified     # ␉ symbol for horizontal tabulation
+240A                                                  ; fully-qualified     # ␊ symbol for line feed
+240B                                                  ; fully-qualified     # ␋ symbol for vertical tabulation
+240C                                                  ; fully-qualified     # ␌ symbol for form feed
+240D                                                  ; fully-qualified     # ␍ symbol for carriage return
+2420                                                  ; fully-qualified     # ␠ symbol for space
+2421                                                  ; fully-qualified     # ␡ symbol for delete
+2423                                                  ; fully-qualified     # ␣ open box
+
+# group: Numbers
+
+# subgroup: numbers-superscript
+00B9                                                  ; fully-qualified     # ¹ superscript one
+00B2                                                  ; fully-qualified     # ² superscript two
+00B3                                                  ; fully-qualified     # ³ superscript three
+2074                                                  ; fully-qualified     # ⁴ superscript four
+2075                                                  ; fully-qualified     # ⁵ superscript five
+2076                                                  ; fully-qualified     # ⁶ superscript six
+2077                                                  ; fully-qualified     # ⁷ superscript seven
+2078                                                  ; fully-qualified     # ⁸ superscript eight
+2079                                                  ; fully-qualified     # ⁹ superscript nine
+2070                                                  ; fully-qualified     # ⁰ superscript zero
+207A                                                  ; fully-qualified     # ⁺ superscript plus sign
+207B                                                  ; fully-qualified     # ⁻ superscript minus
+207C                                                  ; fully-qualified     # ⁼ superscript equals sign
+207D                                                  ; fully-qualified     # ⁽ superscript left parenthesis
+207E                                                  ; fully-qualified     # ⁾ superscript right parenthesis
+207F                                                  ; fully-qualified     # ⁿ superscript latin small letter n
+
+# subgroup: numbers-subscript
+2080                                                  ; fully-qualified     # ₀ subscript zero
+2081                                                  ; fully-qualified     # ₁ subscript one
+2082                                                  ; fully-qualified     # ₂ subscript two
+2083                                                  ; fully-qualified     # ₃ subscript three
+2084                                                  ; fully-qualified     # ₄ subscript four
+2085                                                  ; fully-qualified     # ₅ subscript five
+2086                                                  ; fully-qualified     # ₆ subscript six
+2087                                                  ; fully-qualified     # ₇ subscript seven
+2088                                                  ; fully-qualified     # ₈ subscript eight
+2089                                                  ; fully-qualified     # ₉ subscript nine
+208A                                                  ; fully-qualified     # ₊ subscript plus sign
+208B                                                  ; fully-qualified     # ₋ subscript minus
+208C                                                  ; fully-qualified     # ₌ subscript equals sign
+208D                                                  ; fully-qualified     # ₍ subscript left parenthesis
+208E                                                  ; fully-qualified     # ₎ subscript right parenthesis
+
+# subgroup: numbers-fractions
+00BC                                                  ; fully-qualified     # ¼ vulgar fraction one quarter
+00BD                                                  ; fully-qualified     # ½ vulgar fraction one half
+00BE                                                  ; fully-qualified     # ¾ vulgar fraction three quarters
+2150                                                  ; fully-qualified     # ⅐ vulgar fraction one seventh
+2151                                                  ; fully-qualified     # ⅑ vulgar fraction one ninth
+2152                                                  ; fully-qualified     # ⅒ vulgar fraction one tenth
+2153                                                  ; fully-qualified     # ⅓ vulgar fraction one third
+2154                                                  ; fully-qualified     # ⅔ vulgar fraction two thirds
+2155                                                  ; fully-qualified     # ⅕ vulgar fraction one fifth
+2156                                                  ; fully-qualified     # ⅖ vulgar fraction two fifths
+2157                                                  ; fully-qualified     # ⅗ vulgar fraction three fifths
+2158                                                  ; fully-qualified     # ⅘ vulgar fraction four fifths
+2159                                                  ; fully-qualified     # ⅙ vulgar fraction one sixth
+215A                                                  ; fully-qualified     # ⅚ vulgar fraction five sixths
+215B                                                  ; fully-qualified     # ⅛ vulgar fraction one eighth
+215C                                                  ; fully-qualified     # ⅜ vulgar fraction three eighths
+215D                                                  ; fully-qualified     # ⅝ vulgar fraction five eighths
+215E                                                  ; fully-qualified     # ⅞ vulgar fraction seven eighths
+
+# subgroup: numbers-circled
+2460                                                  ; fully-qualified     # ① circled digit one
+2461                                                  ; fully-qualified     # ② circled digit two
+2462                                                  ; fully-qualified     # ③ circled digit three
+2463                                                  ; fully-qualified     # ④ circled digit four
+2464                                                  ; fully-qualified     # ⑤ circled digit five
+2465                                                  ; fully-qualified     # ⑥ circled digit six
+2466                                                  ; fully-qualified     # ⑦ circled digit seven
+2467                                                  ; fully-qualified     # ⑧ circled digit eight
+2468                                                  ; fully-qualified     # ⑨ circled digit nine
+2469                                                  ; fully-qualified     # ⑩ circled number ten
+24EA                                                  ; fully-qualified     # ⓪ circled digit zero
+
+# group: Letterlike
+
+# subgroup: letterlike-common
+2103                                                  ; fully-qualified     # ℃ degree celsius
+2109                                                  ; fully-qualified     # ℉ degree fahrenheit
+2116                                                  ; fully-qualified     # № numero sign
+2117                                                  ; fully-qualified     # ℗ sound recording copyright
+211E                                                  ; fully-qualified     # ℞ prescription take
+2120                                                  ; fully-qualified     # ℠ service mark
+2121                                                  ; fully-qualified     # ℡ telephone sign
+212A                                                  ; fully-qualified     # K kelvin sign
+212B                                                  ; fully-qualified     # Å angstrom sign
+2133                                                  ; fully-qualified     # ℳ script capital m
+2139                                                  ; fully-qualified     # ℹ information source
+
+# group: Dingbats
+
+# subgroup: dingbats-misc
+2701                                                  ; fully-qualified     # ✁ upper blade scissors
+2702                                                  ; fully-qualified     # ✂ black scissors
+2703                                                  ; fully-qualified     # ✃ lower blade scissors
+2704                                                  ; fully-qualified     # ✄ white scissors
+2706                                                  ; fully-qualified     # ✆ telephone location sign
+2707                                                  ; fully-qualified     # ✇ tape drive
+2708                                                  ; fully-qualified     # ✈ airplane
+2709                                                  ; fully-qualified     # ✉ envelope
+270C                                                  ; fully-qualified     # ✌ victory hand
+270D                                                  ; fully-qualified     # ✍ writing hand
+270E                                                  ; fully-qualified     # ✎ lower right pencil
+270F                                                  ; fully-qualified     # ✏ pencil
+2710                                                  ; fully-qualified     # ✐ upper right pencil
+2711                                                  ; fully-qualified     # ✑ white nib
+2712                                                  ; fully-qualified     # ✒ black nib
+
+# subgroup: dingbats-checkmarks
+2713                                                  ; fully-qualified     # ✓ check mark
+2714                                                  ; fully-qualified     # ✔ heavy check mark
+2715                                                  ; fully-qualified     # ✕ multiplication x
+2716                                                  ; fully-qualified     # ✖ heavy multiplication x
+2717                                                  ; fully-qualified     # ✗ ballot x
+2718                                                  ; fully-qualified     # ✘ heavy ballot x
+2719                                                  ; fully-qualified     # ✙ outlined greek cross
+271A                                                  ; fully-qualified     # ✚ heavy greek cross
+271B                                                  ; fully-qualified     # ✛ open centre cross
+271C                                                  ; fully-qualified     # ✜ heavy open centre cross
+271D                                                  ; fully-qualified     # ✝ latin cross
+271E                                                  ; fully-qualified     # ✞ shadowed white latin cross
+271F                                                  ; fully-qualified     # ✟ outlined latin cross
+
+# subgroup: dingbats-ornaments
+2740                                                  ; fully-qualified     # ❀ white florette
+2741                                                  ; fully-qualified     # ❁ eight petalled outlined black florette
+2742                                                  ; fully-qualified     # ❂ circled open centre eight pointed star
+2743                                                  ; fully-qualified     # ❃ heavy teardrop-spoked pinwheel asterisk
+2744                                                  ; fully-qualified     # ❄ snowflake
+2745                                                  ; fully-qualified     # ❅ tight trifoliate snowflake
+2746                                                  ; fully-qualified     # ❆ heavy chevron snowflake
+2747                                                  ; fully-qualified     # ❇ sparkle
+2748                                                  ; fully-qualified     # ❈ heavy sparkle
+2749                                                  ; fully-qualified     # ❉ balloon-spoked asterisk
+
+#EOF

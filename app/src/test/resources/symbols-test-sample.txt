@@ -1,0 +1,69 @@
+# symbols-test-sample.txt
+# Test sample for symbol parsing unit tests
+#
+# Format: code points; status # symbol name
+
+# group: Arrows
+
+# subgroup: arrows-basic
+2190                                                  ; fully-qualified     # ← leftwards arrow
+2191                                                  ; fully-qualified     # ↑ upwards arrow
+2192                                                  ; fully-qualified     # → rightwards arrow
+2193                                                  ; fully-qualified     # ↓ downwards arrow
+
+# subgroup: arrows-double
+21D0                                                  ; fully-qualified     # ⇐ leftwards double arrow
+21D2                                                  ; fully-qualified     # ⇒ rightwards double arrow
+
+# group: Mathematics
+
+# subgroup: math-operators
+00D7                                                  ; fully-qualified     # × multiplication sign
+00F7                                                  ; fully-qualified     # ÷ division sign
+221A                                                  ; fully-qualified     # √ square root
+
+# subgroup: math-relations
+003D                                                  ; fully-qualified     # = equals sign
+2260                                                  ; fully-qualified     # ≠ not equal to
+2264                                                  ; fully-qualified     # ≤ less-than or equal to
+2265                                                  ; fully-qualified     # ≥ greater-than or equal to
+
+# subgroup: math-greek
+03C0                                                  ; fully-qualified     # π greek small letter pi
+03B1                                                  ; fully-qualified     # α greek small letter alpha
+03B2                                                  ; fully-qualified     # β greek small letter beta
+
+# group: Currency
+
+# subgroup: currency-common
+0024                                                  ; fully-qualified     # $ dollar sign
+00A3                                                  ; fully-qualified     # £ pound sign
+20AC                                                  ; fully-qualified     # € euro sign
+00A5                                                  ; fully-qualified     # ¥ yen sign
+
+# group: Punctuation
+
+# subgroup: punctuation-misc
+00A9                                                  ; fully-qualified     # © copyright sign
+00AE                                                  ; fully-qualified     # ® registered sign
+2122                                                  ; fully-qualified     # ™ trade mark sign
+
+# group: Geometric Shapes
+
+# subgroup: geometric-squares
+25A0                                                  ; fully-qualified     # ■ black square
+25A1                                                  ; fully-qualified     # □ white square
+
+# subgroup: geometric-circles
+25CF                                                  ; fully-qualified     # ● black circle
+25CB                                                  ; fully-qualified     # ○ white circle
+
+# group: Dingbats
+
+# subgroup: dingbats-checkmarks
+2713                                                  ; fully-qualified     # ✓ check mark
+2714                                                  ; fully-qualified     # ✔ heavy check mark
+2717                                                  ; fully-qualified     # ✗ ballot x
+2718                                                  ; fully-qualified     # ✘ heavy ballot x
+
+#EOF

@@ -666,4 +666,127 @@ public class EmojiParserTest {
         assertEquals(EmojiParser.SkinTone.LIGHT, criteria.getSkinTone());
         assertNull(criteria.getColorName());
     }
+
+    // ==================== Symbol Parsing Tests ====================
+
+    @Test
+    public void testSymbolParsing() {
+        InputStream symbolStream = getClass().getClassLoader().getResourceAsStream("symbols-test-sample.txt");
+        assertNotNull("Test resource symbols-test-sample.txt should exist", symbolStream);
+        EmojiParser symbolParser = EmojiParser.parseFrom(symbolStream);
+
+        // Should have 6 groups: Arrows, Mathematics, Currency, Punctuation, Geometric Shapes, Dingbats
+        assertEquals("Should parse 6 symbol groups", 6, symbolParser.getGroups().size());
+    }
+
+    @Test
+    public void testSymbolGroupNames() {
+        InputStream symbolStream = getClass().getClassLoader().getResourceAsStream("symbols-test-sample.txt");
+        EmojiParser symbolParser = EmojiParser.parseFrom(symbolStream);
+
+        List<String> names = symbolParser.getGroupNames();
+        assertTrue(names.contains("Arrows"));
+        assertTrue(names.contains("Mathematics"));
+        assertTrue(names.contains("Currency"));
+        assertTrue(names.contains("Punctuation"));
+        assertTrue(names.contains("Geometric Shapes"));
+        assertTrue(names.contains("Dingbats"));
+    }
+
+    @Test
+    public void testSymbolEntry() {
+        InputStream symbolStream = getClass().getClassLoader().getResourceAsStream("symbols-test-sample.txt");
+        EmojiParser symbolParser = EmojiParser.parseFrom(symbolStream);
+
+        // Search for arrow
+        List<EmojiParser.EmojiEntry> arrows = symbolParser.search("leftwards arrow");
+        assertFalse("Should find leftwards arrow", arrows.isEmpty());
+        EmojiParser.EmojiEntry arrow = arrows.get(0);
+        assertEquals("←", arrow.getEmoji());
+        assertEquals("Arrows", arrow.getGroup());
+        assertEquals("arrows-basic", arrow.getSubgroup());
+    }
+
+    @Test
+    public void testSymbolMathOperators() {
+        InputStream symbolStream = getClass().getClassLoader().getResourceAsStream("symbols-test-sample.txt");
+        EmojiParser symbolParser = EmojiParser.parseFrom(symbolStream);
+
+        List<EmojiParser.EmojiEntry> results = symbolParser.filter()
+                .group("Mathematics")
+                .subgroup("math-operators")
+                .results();
+        assertEquals("Should find 3 math operators", 3, results.size());
+    }
+
+    @Test
+    public void testSymbolCurrency() {
+        InputStream symbolStream = getClass().getClassLoader().getResourceAsStream("symbols-test-sample.txt");
+        EmojiParser symbolParser = EmojiParser.parseFrom(symbolStream);
+
+        List<EmojiParser.EmojiEntry> currency = symbolParser.filter()
+                .group("Currency")
+                .results();
+        assertEquals("Should find 4 currency symbols", 4, currency.size());
+    }
+
+    @Test
+    public void testSymbolGreekLetters() {
+        InputStream symbolStream = getClass().getClassLoader().getResourceAsStream("symbols-test-sample.txt");
+        EmojiParser symbolParser = EmojiParser.parseFrom(symbolStream);
+
+        List<EmojiParser.EmojiEntry> greek = symbolParser.search("greek");
+        assertEquals("Should find 3 greek letters", 3, greek.size());
+    }
+
+    @Test
+    public void testCombinedEmojiAndSymbols() {
+        InputStream emojiStream = getClass().getClassLoader().getResourceAsStream("emoji-test-sample.txt");
+        InputStream symbolStream = getClass().getClassLoader().getResourceAsStream("symbols-test-sample.txt");
+        assertNotNull(emojiStream);
+        assertNotNull(symbolStream);
+
+        EmojiParser combinedParser = EmojiParser.parseFrom(emojiStream, symbolStream);
+
+        // Should have emoji groups + symbol groups
+        // Emoji: Smileys & Emotion, People & Body, Component, Animals & Nature, Symbols (5)
+        // Symbols: Arrows, Mathematics, Currency, Punctuation, Geometric Shapes, Dingbats (6)
+        assertEquals("Combined should have 11 groups", 11, combinedParser.getGroups().size());
+
+        // Should be able to search both emoji and symbols
+        List<EmojiParser.EmojiEntry> hearts = combinedParser.search("heart");
+        assertFalse("Should find hearts from emoji", hearts.isEmpty());
+
+        List<EmojiParser.EmojiEntry> arrows = combinedParser.search("arrow");
+        assertFalse("Should find arrows from symbols", arrows.isEmpty());
+    }
+
+    @Test
+    public void testSymbolCheckmarks() {
+        InputStream symbolStream = getClass().getClassLoader().getResourceAsStream("symbols-test-sample.txt");
+        EmojiParser symbolParser = EmojiParser.parseFrom(symbolStream);
+
+        List<EmojiParser.EmojiEntry> checkmarks = symbolParser.filter()
+                .subgroup("dingbats-checkmarks")
+                .results();
+        assertEquals("Should find 4 checkmark symbols", 4, checkmarks.size());
+
+        // Verify specific symbols
+        List<EmojiParser.EmojiEntry> checkMark = symbolParser.search("check mark");
+        assertTrue("Should find check mark", checkMark.size() >= 2);
+    }
+
+    @Test
+    public void testSymbolGeometric() {
+        InputStream symbolStream = getClass().getClassLoader().getResourceAsStream("symbols-test-sample.txt");
+        EmojiParser symbolParser = EmojiParser.parseFrom(symbolStream);
+
+        // Squares
+        List<EmojiParser.EmojiEntry> squares = symbolParser.search("square");
+        assertEquals("Should find 2 squares", 2, squares.size());
+
+        // Circles
+        List<EmojiParser.EmojiEntry> circles = symbolParser.search("circle");
+        assertEquals("Should find 2 circles", 2, circles.size());
+    }
 }
