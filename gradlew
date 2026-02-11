@@ -208,10 +208,17 @@ DEFAULT_JVM_OPTS='"-Xmx64m" "-Xms64m"'
 #   * For example: A user cannot expect ${Hostname} to be expanded, as it is an environment variable and will be
 #     treated as '${Hostname}' itself on the command line.
 
+# Auto-apply init.gradle if present for proxy configuration
+INIT_SCRIPT_ARGS=""
+if [ -f "$APP_HOME/gradle/init.gradle" ]; then
+    INIT_SCRIPT_ARGS="--init-script $APP_HOME/gradle/init.gradle"
+fi
+
 set -- \
         "-Dorg.gradle.appname=$APP_BASE_NAME" \
         -classpath "$CLASSPATH" \
         org.gradle.wrapper.GradleWrapperMain \
+        $INIT_SCRIPT_ARGS \
         "$@"
 
 # Stop when "xargs" is not available.

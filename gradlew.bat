@@ -70,9 +70,12 @@ goto fail
 
 set CLASSPATH=%APP_HOME%\gradle\wrapper\gradle-wrapper.jar
 
+@rem Auto-apply init.gradle if present for proxy configuration
+set INIT_SCRIPT_ARGS=
+if exist "%APP_HOME%\gradle\init.gradle" set INIT_SCRIPT_ARGS=--init-script "%APP_HOME%\gradle\init.gradle"
 
 @rem Execute Gradle
-"%JAVA_EXE%" %DEFAULT_JVM_OPTS% %JAVA_OPTS% %GRADLE_OPTS% "-Dorg.gradle.appname=%APP_BASE_NAME%" -classpath "%CLASSPATH%" org.gradle.wrapper.GradleWrapperMain %*
+"%JAVA_EXE%" %DEFAULT_JVM_OPTS% %JAVA_OPTS% %GRADLE_OPTS% "-Dorg.gradle.appname=%APP_BASE_NAME%" -classpath "%CLASSPATH%" org.gradle.wrapper.GradleWrapperMain %INIT_SCRIPT_ARGS% %*
 
 :end
 @rem End local scope for the variables with windows NT shell
