@@ -16,6 +16,7 @@ dependencyResolutionManagement {
 
 rootProject.name = "hackerskeyboard"
 include ':app'
+include ':unikey-kmp'
 
 // Apply proxy configuration from environment variables
 // Note: This runs after DSL blocks per Gradle 9.x requirements
