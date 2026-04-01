@@ -322,13 +322,6 @@ open class LatinKeyboardBaseView @JvmOverloads constructor(
             cancelPopupPreview()
             cancelDismissPreview()
         }
-
-        companion object {
-            private const val MSG_POPUP_PREVIEW = 1
-            private const val MSG_DISMISS_PREVIEW = 2
-            private const val MSG_REPEAT_KEY = 3
-            private const val MSG_LONGPRESS_KEY = 4
-        }
     }
 
     class PointerQueue {
@@ -350,10 +343,10 @@ open class LatinKeyboardBaseView @JvmOverloads constructor(
             while (mQueue.isNotEmpty()) {
                 val t = mQueue[oldestPos]
                 if (t === tracker) break
-                if (t.isModifier) {
+                if (t.isModifier()) {
                     oldestPos++
                 } else {
-                    t.onUpEvent(t.lastX, t.lastY, eventTime)
+                    t.onUpEvent(t.getLastX(), t.getLastY(), eventTime)
                     t.setAlreadyProcessed()
                     mQueue.removeAt(oldestPos)
                 }
@@ -364,7 +357,7 @@ open class LatinKeyboardBaseView @JvmOverloads constructor(
         fun releaseAllPointersExcept(tracker: PointerTracker?, eventTime: Long) {
             for (t in mQueue) {
                 if (t === tracker) continue
-                t.onUpEvent(t.lastX, t.lastY, eventTime)
+                t.onUpEvent(t.getLastX(), t.getLastY(), eventTime)
                 t.setAlreadyProcessed()
             }
             mQueue.clear()
@@ -377,7 +370,7 @@ open class LatinKeyboardBaseView @JvmOverloads constructor(
 
         fun isInSlidingKeyInput(): Boolean {
             for (tracker in mQueue) {
-                if (tracker.isInSlidingKeyInput) return true
+                if (tracker.isInSlidingKeyInput()) return true
             }
             return false
         }
@@ -552,7 +545,10 @@ open class LatinKeyboardBaseView @JvmOverloads constructor(
         mHandler.cancelPopupPreview()
         mKeyboard = keyboard
         // Disable correctionX and correctionY, it doesn't seem to work as intended.
-        mKeys = mKeyDetector.setKeyboard(keyboard, 0, 0)
+        if (keyboard != null) {
+            mKeyDetector.setKeyboard(keyboard, 0f, 0f)
+        }
+        mKeys = keyboard?.getKeys()?.toTypedArray()
         mKeyboardVerticalGap = resources.getDimension(R.dimen.key_bottom_gap).toInt()
         for (tracker in mPointerTrackers) {
             tracker.setKeyboard(mKeys, mKeyHysteresisDistance)
@@ -581,7 +577,7 @@ open class LatinKeyboardBaseView @JvmOverloads constructor(
      * Return whether the device has distinct multi-touch panel.
      * @return true if the device has distinct multi-touch panel.
      */
-    fun hasDistinctMultitouch(): Boolean = mHasDistinctMultitouch
+    override fun hasDistinctMultitouch(): Boolean = mHasDistinctMultitouch
 
     /**
      * Sets the state of the shift key of the keyboard, if any.
@@ -600,15 +596,15 @@ open class LatinKeyboardBaseView @JvmOverloads constructor(
     }
 
     fun setCtrlIndicator(active: Boolean) {
-        mKeyboard?.let { invalidateKey(it.setCtrlIndicator(active)) }
+        mKeyboard?.let { invalidateKeyInternal(it.setCtrlIndicator(active)) }
     }
 
     fun setAltIndicator(active: Boolean) {
-        mKeyboard?.let { invalidateKey(it.setAltIndicator(active)) }
+        mKeyboard?.let { invalidateKeyInternal(it.setAltIndicator(active)) }
     }
 
     fun setMetaIndicator(active: Boolean) {
-        mKeyboard?.let { invalidateKey(it.setMetaIndicator(active)) }
+        mKeyboard?.let { invalidateKeyInternal(it.setMetaIndicator(active)) }
     }
 
     /**
@@ -635,7 +631,7 @@ open class LatinKeyboardBaseView @JvmOverloads constructor(
      * @param previewEnabled whether or not to enable the key feedback popup
      * @see isPreviewEnabled
      */
-    fun setPreviewEnabled(previewEnabled: Boolean) {
+    open fun setPreviewEnabled(previewEnabled: Boolean) {
         mShowPreview = previewEnabled
     }
 
@@ -685,13 +681,13 @@ open class LatinKeyboardBaseView @JvmOverloads constructor(
             // should be a proper fix specifying the correct width in
             // the layout (wrap_content rather than match_parent), but
             // in which layout is this set?
-            val oldWidth = mKeyboard!!.minWidth
+            val oldWidth = mKeyboard!!.getMinWidth()
             if (width > oldWidth) {
                 Log.i(TAG, "Reducing width from $width to $oldWidth")
                 width = oldWidth
             }
 
-            setMeasuredDimension(width, mKeyboard!!.height + paddingTop + paddingBottom)
+            setMeasuredDimension(width, mKeyboard!!.getHeight() + paddingTop + paddingBottom)
         }
     }
 
@@ -710,7 +706,7 @@ open class LatinKeyboardBaseView @JvmOverloads constructor(
             dimensionSum += Math.min(key.width, key.height + mKeyboardVerticalGap) + key.gap
         }
         if (dimensionSum < 0 || length == 0) return
-        mKeyDetector.setProximityThreshold((dimensionSum * 1.4f / length).toInt())
+        mKeyDetector.updateProximityThreshold((dimensionSum * 1.4f / length).toInt())
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
@@ -826,11 +822,11 @@ open class LatinKeyboardBaseView @JvmOverloads constructor(
             }
             paint.color = if (key.isCursor) mKeyCursorColor else mKeyTextColor
 
-            val drawableState = key.currentDrawableState
+            val drawableState = key.getCurrentDrawableState()
             keyBackground.state = drawableState
 
             // Switch the character to uppercase if shift is pressed
-            val label = key.caseLabel
+            val label = key.getCaseLabel()
 
             var yscale = 1.0f
             val bounds = keyBackground.bounds
@@ -858,7 +854,7 @@ open class LatinKeyboardBaseView @JvmOverloads constructor(
             if (label != null) {
                 // For characters, use large font. For labels like "Done", use small font.
                 val labelSize: Int
-                if (label.length > 1 && key.codes.size < 2) {
+                if (label.length > 1 && (key.codes?.size ?: 0) < 2) {
                     labelSize = (mLabelTextSize * mLabelScale).toInt()
                     paint.typeface = Typeface.DEFAULT
                 } else {
@@ -875,7 +871,7 @@ open class LatinKeyboardBaseView @JvmOverloads constructor(
 
                 // Draw hint label (if present) behind the main key
                 val hint = key.getHintLabel(showHints7Bit(), showHintsAll())
-                if (hint.isNotEmpty() && !(key.isShifted && key.shiftLabel != null && hint[0] == key.shiftLabel!![0])) {
+                if (hint.isNotEmpty() && !(key.isShifted() && key.shiftLabel != null && hint[0] == key.shiftLabel!![0])) {
                     val hintTextSize = (mKeyTextSize * 0.6 * mLabelScale).toInt()
                     paintHint.textSize = hintTextSize.toFloat()
 
@@ -909,7 +905,7 @@ open class LatinKeyboardBaseView @JvmOverloads constructor(
                 val centerX = (key.width + padding.left - padding.right) / 2
                 val centerY = (key.height + padding.top - padding.bottom) / 2
                 val baseline = centerY + labelHeight * KEY_LABEL_VERTICAL_ADJUSTMENT_FACTOR
-                if (key.isDeadKey) {
+                if (key.isDeadKey()) {
                     drawDeadKeyLabel(canvas, label, centerX, baseline, paint)
                 } else {
                     canvas.drawText(label, centerX.toFloat(), baseline, paint)
@@ -988,10 +984,10 @@ open class LatinKeyboardBaseView @JvmOverloads constructor(
         if (LatinIME.sKeyboardSettings.showTouchPos || DEBUG) {
             if (LatinIME.sKeyboardSettings.showTouchPos || mShowTouchPoints) {
                 for (tracker in mPointerTrackers) {
-                    val startX = tracker.startX
-                    val startY = tracker.startY
-                    val lastX = tracker.lastX
-                    val lastY = tracker.lastY
+                    val startX = tracker.getStartX()
+                    val startY = tracker.getStartY()
+                    val lastX = tracker.getLastX()
+                    val lastY = tracker.getLastY()
                     paint.alpha = 128
                     paint.color = 0xFFFF0000.toInt()
                     canvas.drawCircle(startX.toFloat(), startY.toFloat(), 3f, paint)
@@ -1013,14 +1009,18 @@ open class LatinKeyboardBaseView @JvmOverloads constructor(
         for (tracker in mPointerTrackers) {
             tracker.updateKey(NOT_A_KEY)
         }
-        showPreview(NOT_A_KEY, null)
+        showPreviewInternal(NOT_A_KEY, null)
     }
 
-    fun showPreview(keyIndex: Int, tracker: PointerTracker?) {
+    override fun showPreview(keyIndex: Int, tracker: PointerTracker) {
+        showPreviewInternal(keyIndex, tracker)
+    }
+
+    private fun showPreviewInternal(keyIndex: Int, tracker: PointerTracker?) {
         val oldKeyIndex = mOldPreviewKeyIndex
         mOldPreviewKeyIndex = keyIndex
         val isLanguageSwitchEnabled = (mKeyboard is LatinKeyboard) &&
-            (mKeyboard as LatinKeyboard).isLanguageSwitchEnabled
+            (mKeyboard as LatinKeyboard).isLanguageSwitchEnabled()
         // We should re-draw popup preview when 1) we need to hide the preview, 2) we will show
         // the space key preview and 3) pointer moves off the space key to other letter key, we
         // should hide the preview of the previous key.
@@ -1052,8 +1052,8 @@ open class LatinKeyboardBaseView @JvmOverloads constructor(
             mPreviewText?.text = null
         } else {
             mPreviewText?.setCompoundDrawables(null, null, null, null)
-            mPreviewText?.text = key.caseLabel
-            if (key.label != null && key.label!!.length > 1 && key.codes.size < 2) {
+            mPreviewText?.text = key.getCaseLabel()
+            if (key.label != null && key.label!!.length > 1 && (key.codes?.size ?: 0) < 2) {
                 mPreviewText?.setTextSize(TypedValue.COMPLEX_UNIT_PX, mKeyTextSize)
                 mPreviewText?.typeface = Typeface.DEFAULT_BOLD
             } else {
@@ -1148,7 +1148,11 @@ open class LatinKeyboardBaseView @JvmOverloads constructor(
      * @param key key in the attached [Keyboard].
      * @see invalidateAllKeys
      */
-    fun invalidateKey(key: Keyboard.Key?) {
+    override fun invalidateKey(key: Keyboard.Key) {
+        invalidateKeyInternal(key)
+    }
+
+    fun invalidateKeyInternal(key: Keyboard.Key?) {
         if (key == null) return
         mInvalidatedKey = key
         mDirtyRect.union(
@@ -1168,7 +1172,7 @@ open class LatinKeyboardBaseView @JvmOverloads constructor(
         }
 
         val popupKey = tracker.getKey(keyIndex) ?: return false
-        if (tracker.isInSlidingKeyInput) return false
+        if (tracker.isInSlidingKeyInput()) return false
         val result = onLongPress(popupKey)
         if (result) {
             dismissKeyPreview()
@@ -1224,8 +1228,8 @@ open class LatinKeyboardBaseView @JvmOverloads constructor(
 
     private fun getLongPressKeyboard(popupKey: Keyboard.Key): Keyboard? {
         val cache: WeakHashMap<Keyboard.Key, Keyboard> = when {
-            popupKey.isDistinctCaps -> mMiniKeyboardCacheCaps
-            popupKey.isShifted -> mMiniKeyboardCacheShift
+            popupKey.isDistinctCaps() -> mMiniKeyboardCacheCaps
+            popupKey.isShifted() -> mMiniKeyboardCacheShift
             else -> mMiniKeyboardCacheMain
         }
         var kbd = cache[popupKey]
@@ -1265,8 +1269,8 @@ open class LatinKeyboardBaseView @JvmOverloads constructor(
 
         // Get width of a key in the mini popup keyboard = "miniKeyWidth".
         // On the other hand, "popupKey.width" is width of the pressed key on the main keyboard.
-        val miniKeys = mMiniKeyboard?.getKeyboard()?.keys ?: emptyList()
-        val miniKeyWidth = if (miniKeys.isNotEmpty()) miniKeys[0].width else 0
+        val miniKeys: List<Keyboard.Key> = mMiniKeyboard?.getKeyboard()?.getKeys() ?: emptyList()
+        val miniKeyWidth: Int = if (miniKeys.isNotEmpty()) miniKeys[0].width else 0
 
         var popupX = popupKey.x + mWindowOffset!![0]
         popupX += paddingLeft
@@ -1426,7 +1430,7 @@ open class LatinKeyboardBaseView @JvmOverloads constructor(
             val tracker = getPointerTracker(id)
             // Key repeating timer will be canceled if 2 or more keys are in action, and current
             // event (UP or DOWN) is non-modifier key.
-            if (pointerCount > 1 && !tracker.isModifier) {
+            if (pointerCount > 1 && !tracker.isModifier()) {
                 mHandler.cancelKeyRepeatTimer()
             }
             // Up event will pass through.
@@ -1447,7 +1451,7 @@ open class LatinKeyboardBaseView @JvmOverloads constructor(
                 pointerCount == 2 && oldPointerCount == 1 -> {
                     // Single-touch to multi-touch transition.
                     // Send an up event for the last pointer.
-                    tracker.onUpEvent(tracker.lastX, tracker.lastY, eventTime)
+                    tracker.onUpEvent(tracker.getLastX(), tracker.getLastY(), eventTime)
                 }
                 pointerCount == 1 && oldPointerCount == 1 -> {
                     tracker.onTouchEvent(action, x, y, eventTime)
@@ -1499,7 +1503,7 @@ open class LatinKeyboardBaseView @JvmOverloads constructor(
     }
 
     private fun onUpEvent(tracker: PointerTracker, x: Int, y: Int, eventTime: Long) {
-        if (tracker.isModifier) {
+        if (tracker.isModifier()) {
             // Before processing an up event of modifier key, all pointers already being tracked
             // should be released.
             mPointerQueue.releaseAllPointersExcept(tracker, eventTime)
@@ -1528,7 +1532,7 @@ open class LatinKeyboardBaseView @JvmOverloads constructor(
 
     protected open fun swipeDown(): Boolean = mKeyboardActionListener?.swipeDown() ?: false
 
-    fun closing() {
+    open fun closing() {
         Log.i(TAG, "closing $this")
         mPreviewPopup?.dismiss()
         mHandler.cancelAllMessages()
@@ -1585,8 +1589,14 @@ open class LatinKeyboardBaseView @JvmOverloads constructor(
         const val NOT_A_TOUCH_COORDINATE = -1
 
         // Miscellaneous constants
-        @JvmField internal val NOT_A_KEY = -1
+        internal const val NOT_A_KEY = -1
         private const val NUMBER_HINT_VERTICAL_ADJUSTMENT_PIXEL = -1
+
+        // Message constants for UIHandler
+        private const val MSG_POPUP_PREVIEW = 1
+        private const val MSG_DISMISS_PREVIEW = 2
+        private const val MSG_REPEAT_KEY = 3
+        private const val MSG_LONGPRESS_KEY = 4
 
         private val INVERTING_MATRIX = floatArrayOf(
             -1f, 0f, 0f, 0f, 255f, // Red

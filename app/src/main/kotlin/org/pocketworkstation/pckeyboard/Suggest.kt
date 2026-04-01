@@ -196,7 +196,7 @@ class Suggest : Dictionary.WordCallback {
                     wordComposer, prevWord!!,
                     this, mNextLettersFrequencies
                 )
-                val currentChar = wordComposer.typedWord[0]
+                val currentChar = wordComposer.typedWord?.get(0) ?: return mSuggestions
                 val currentCharUpper = Character.toUpperCase(currentChar)
                 var count = 0
                 val bigramSuggestionSize = bigramSuggestions.size

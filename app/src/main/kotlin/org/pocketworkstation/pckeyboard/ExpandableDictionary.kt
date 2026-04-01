@@ -253,8 +253,9 @@ open class ExpandableDictionary(
 
                         if (codeSize == inputIndex + 1) {
                             if (terminal) {
+                                val typedWord = codes.typedWord
                                 if (INCLUDE_TYPED_WORD_IF_VALID
-                                    || !same(word, depth + 1, codes.typedWord)) {
+                                    || typedWord == null || !same(word, depth + 1, typedWord)) {
                                     var finalFreq = freq * snr * addedAttenuation
                                     if (skipPos < 0) finalFreq *= FULL_WORD_FREQ_MULTIPLIER
                                     callback.addWord(word, 0, depth + 1, finalFreq, mDicTypeId,

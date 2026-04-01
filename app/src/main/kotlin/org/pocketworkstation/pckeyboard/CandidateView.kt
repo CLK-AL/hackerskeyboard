@@ -164,7 +164,7 @@ class CandidateView(context: Context, attrs: AttributeSet?) : View(context, attr
         _onDraw(canvas)
     }
 
-    private fun _onDraw(canvas: Canvas) {
+    private fun _onDraw(canvas: Canvas?) {
         mTotalWidth = 0
 
         val height = getHeight()
@@ -329,12 +329,13 @@ class CandidateView(context: Context, attrs: AttributeSet?) : View(context, attr
             MotionEvent.ACTION_DOWN -> invalidate()
             MotionEvent.ACTION_MOVE -> {
                 if (y <= 0) {
-                    if (mSelectedString != null) {
+                    val selectedString = mSelectedString
+                    if (selectedString != null) {
                         if (!mShowingCompletions) {
                             // This "acceptedSuggestion" will not be counted as a word because
                             // it will be counted in pickSuggestion instead.
                         }
-                        mService?.pickSuggestionManually(mSelectedIndex, mSelectedString)
+                        mService?.pickSuggestionManually(mSelectedIndex, selectedString)
                         mSelectedString = null
                         mSelectedIndex = -1
                     }
@@ -342,7 +343,8 @@ class CandidateView(context: Context, attrs: AttributeSet?) : View(context, attr
             }
             MotionEvent.ACTION_UP -> {
                 if (!mScrolled) {
-                    if (mSelectedString != null) {
+                    val selectedString = mSelectedString
+                    if (selectedString != null) {
                         if (mShowingAddToDictionary) {
                             longPressFirstWord()
                             clear()
@@ -350,7 +352,7 @@ class CandidateView(context: Context, attrs: AttributeSet?) : View(context, attr
                             if (!mShowingCompletions) {
                                 // Handle suggestion manually
                             }
-                            mService?.pickSuggestionManually(mSelectedIndex, mSelectedString)
+                            mService?.pickSuggestionManually(mSelectedIndex, selectedString)
                         }
                     }
                 }

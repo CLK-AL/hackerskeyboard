@@ -128,7 +128,7 @@ class LatinKeyboardView @JvmOverloads constructor(
     }
 
     override fun setPreviewEnabled(previewEnabled: Boolean) {
-        if (keyboard == mPhoneKeyboard) {
+        if (getKeyboard() == mPhoneKeyboard) {
             super.setPreviewEnabled(false)
         } else {
             super.setPreviewEnabled(previewEnabled)
@@ -136,19 +136,19 @@ class LatinKeyboardView @JvmOverloads constructor(
     }
 
     override fun setKeyboard(newKeyboard: Keyboard?) {
-        val oldKeyboard = keyboard
+        val oldKeyboard = getKeyboard()
         if (oldKeyboard is LatinKeyboard) {
             oldKeyboard.keyReleased()
         }
         super.setKeyboard(newKeyboard)
         if (newKeyboard == null) return
-        mJumpThresholdSquare = newKeyboard.minWidth / 7
+        mJumpThresholdSquare = newKeyboard.getMinWidth() / 7
         mJumpThresholdSquare *= mJumpThresholdSquare
         val numRows = newKeyboard.mRowCount
-        mLastRowY = (newKeyboard.height * (numRows - 1)) / numRows
+        mLastRowY = (newKeyboard.getHeight() * (numRows - 1)) / numRows
         mExtensionKeyboard = (newKeyboard as LatinKeyboard).extension
         if (mExtensionKeyboard != null && mExtension != null) {
-            mExtension!!.keyboard = mExtensionKeyboard!!
+            mExtension!!.setKeyboard(mExtensionKeyboard!!)
         }
         setKeyboardLocal(newKeyboard)
     }
@@ -162,14 +162,14 @@ class LatinKeyboardView @JvmOverloads constructor(
         return when {
             primaryCode == KEYCODE_OPTIONS -> invokeOnKey(KEYCODE_OPTIONS_LONGPRESS)
             primaryCode == KEYCODE_DPAD_CENTER -> invokeOnKey(KEYCODE_COMPOSE)
-            primaryCode == '0'.code && keyboard == mPhoneKeyboard -> invokeOnKey('+'.code)
+            primaryCode == '0'.code && getKeyboard() == mPhoneKeyboard -> invokeOnKey('+'.code)
             else -> super.onLongPress(key)
         }
     }
 
     private fun invokeOnKey(primaryCode: Int): Boolean {
-        onKeyboardActionListener?.onKey(
-            primaryCode, null,
+        getOnKeyboardActionListener()?.onKey(
+            primaryCode, intArrayOf(primaryCode),
             NOT_A_TOUCH_COORDINATE,
             NOT_A_TOUCH_COORDINATE
         )
@@ -232,7 +232,7 @@ class LatinKeyboardView @JvmOverloads constructor(
     }
 
     override fun onTouchEvent(me: MotionEvent): Boolean {
-        val keyboard = keyboard as LatinKeyboard
+        val keyboard = getKeyboard() as LatinKeyboard
         if (LatinIME.sKeyboardSettings.showTouchPos || DEBUG_LINE) {
             mLastX = me.x.toInt()
             mLastY = me.y.toInt()
@@ -246,11 +246,11 @@ class LatinKeyboardView @JvmOverloads constructor(
         }
 
         if (me.action == MotionEvent.ACTION_UP) {
-            val languageDirection = keyboard.languageChangeDirection
+            val languageDirection = (getKeyboard() as? LatinKeyboard)?.languageChangeDirection ?: 0
             if (languageDirection != 0) {
-                onKeyboardActionListener?.onKey(
-                    if (languageDirection == 1) KEYCODE_NEXT_LANGUAGE else KEYCODE_PREV_LANGUAGE,
-                    null, mLastX, mLastY
+                val keycode = if (languageDirection == 1) KEYCODE_NEXT_LANGUAGE else KEYCODE_PREV_LANGUAGE
+                getOnKeyboardActionListener()?.onKey(
+                    keycode, intArrayOf(keycode), mLastX, mLastY
                 )
                 me.action = MotionEvent.ACTION_CANCEL
                 keyboard.keyReleased()
@@ -329,7 +329,7 @@ class LatinKeyboardView @JvmOverloads constructor(
             return false
         }
         PointerTracker.clearSlideKeys()
-        if ((keyboard as LatinKeyboard).extension == null) return false
+        if ((getKeyboard() as LatinKeyboard).extension == null) return false
         makePopupWindow()
         mExtensionVisible = true
         return true
@@ -347,27 +347,27 @@ class LatinKeyboardView @JvmOverloads constructor(
                 null
             ) as LatinKeyboardView
             val kbd = mExtensionKeyboard!!
-            mExtension!!.keyboard = kbd
+            mExtension!!.setKeyboard(kbd)
             mExtension!!.setExtensionType(true)
             mExtension!!.setPadding(0, 0, 0, 0)
             mExtension!!.setOnKeyboardActionListener(
-                ExtensionKeyboardListener(onKeyboardActionListener!!)
+                ExtensionKeyboardListener(getOnKeyboardActionListener()!!)
             )
             mExtension!!.setPopupParent(this)
             mExtension!!.setPopupOffset(0, -windowLocation[1])
             mExtensionPopup!!.contentView = mExtension
             mExtensionPopup!!.width = width
-            mExtensionPopup!!.height = kbd.height
+            mExtensionPopup!!.height = kbd.getHeight()
             mExtensionPopup!!.animationStyle = -1
             getLocationInWindow(windowLocation)
             mExtension!!.setPopupOffset(0, -windowLocation[1] - 30)
             mExtensionPopup!!.showAtLocation(
-                this, 0, 0, -kbd.height + windowLocation[1] + this.paddingTop
+                this, 0, 0, -kbd.getHeight() + windowLocation[1] + this.paddingTop
             )
         } else {
             mExtension!!.visibility = VISIBLE
         }
-        mExtension!!.setShiftState(shiftState)
+        mExtension!!.setShiftState(getShiftState())
     }
 
     override fun closing() {
@@ -473,9 +473,9 @@ class LatinKeyboardView @JvmOverloads constructor(
     }
 
     private fun findKeys() {
-        val keys = keyboard?.keys ?: return
+        val keys = getKeyboard()?.getKeys() ?: return
         for (i in keys.indices) {
-            val code = keys[i].codes!![0]
+            val code = keys[i].codes?.get(0) ?: continue
             if (code in 0..255) {
                 mAsciiKeys[code] = keys[i]
             }

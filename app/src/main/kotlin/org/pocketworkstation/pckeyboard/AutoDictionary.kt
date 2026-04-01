@@ -84,7 +84,7 @@ class AutoDictionary(
         var processedWord = word
         val length = processedWord.length
         if (length < 2 || length > getMaxWordLength()) return
-        if (mIme.currentWord.isAutoCapitalized) {
+        if (mIme.getCurrentWord().isAutoCapitalized()) {
             processedWord = Character.toLowerCase(processedWord[0]) + processedWord.substring(1)
         }
         var freq = getWordFrequency(processedWord)
@@ -92,7 +92,7 @@ class AutoDictionary(
         super.addWord(processedWord, freq)
 
         if (freq >= PROMOTION_THRESHOLD) {
-            mIme.promoteToUserDictionary(processedWord, FREQUENCY_FOR_AUTO_ADD)
+            mIme.addWordToDictionary(processedWord)
             freq = 0
         }
 

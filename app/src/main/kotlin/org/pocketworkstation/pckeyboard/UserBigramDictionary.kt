@@ -82,7 +82,7 @@ class UserBigramDictionary(
      */
     fun addBigrams(word1: String, word2: String): Int {
         var processedWord2 = word2
-        if (mIme != null && mIme.currentWord.isAutoCapitalized) {
+        if (mIme != null && mIme.getCurrentWord().isAutoCapitalized()) {
             processedWord2 = Character.toLowerCase(processedWord2[0]) + processedWord2.substring(1)
         }
 

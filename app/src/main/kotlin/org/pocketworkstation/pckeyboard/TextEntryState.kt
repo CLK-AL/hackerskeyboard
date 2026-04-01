@@ -237,8 +237,8 @@ object TextEntryState {
 
     @JvmStatic
     fun keyPressedAt(key: Keyboard.Key, x: Int, y: Int) {
-        if (LOGGING && keyLocationFile != null && key.codes[0] >= 32) {
-            val out = "KEY: ${key.codes[0].toChar()}" +
+        if (LOGGING && keyLocationFile != null && (key.codes?.get(0) ?: 0) >= 32) {
+            val out = "KEY: ${(key.codes?.get(0) ?: 0).toChar()}" +
                     " X: $x" +
                     " Y: $y" +
                     " MX: ${key.x + key.width / 2}" +

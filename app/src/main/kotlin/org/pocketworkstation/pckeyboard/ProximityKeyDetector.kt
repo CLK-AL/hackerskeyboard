@@ -25,7 +25,7 @@ open class ProximityKeyDetector : KeyDetector() {
 
     override fun setKeyboard(keyboard: Keyboard, correctionX: Float, correctionY: Float) {
         super.setKeyboard(keyboard, correctionX, correctionY)
-        proximityThreshold = (keyboard.minWidth * SEARCH_DISTANCE).toInt()
+        proximityThreshold = (keyboard.getMinWidth() * SEARCH_DISTANCE).toInt()
         proximityThreshold *= proximityThreshold
     }
 
@@ -47,7 +47,7 @@ open class ProximityKeyDetector : KeyDetector() {
                 val dist = key.squaredDistanceFrom(touchX, touchY)
                 if (dist < proximityThreshold || key.isInside(touchX, touchY)) {
                     // Find insertion point
-                    val nCodes = key.codes.size
+                    val nCodes = key.codes?.size ?: 0
                     if (dist < closestKeyDist) {
                         closestKeyDist = dist
                         closestKey = i
@@ -61,7 +61,7 @@ open class ProximityKeyDetector : KeyDetector() {
                                 System.arraycopy(primaryCodes, j, primaryCodes, j + nCodes,
                                     primaryCodes.size - j - nCodes)
                                 for (c in 0 until nCodes) {
-                                    primaryCodes[j + c] = key.codes[c]
+                                    primaryCodes[j + c] = key.codes!![c]
                                     distances[j + c] = dist
                                 }
                                 break

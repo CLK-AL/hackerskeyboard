@@ -39,7 +39,7 @@ class MiniKeyboardKeyDetector(private val slideAllowance: Float) : KeyDetector()
             }
         }
         if (allKeys != null && closestKey != NOT_A_KEY) {
-            allKeys[0] = keys[closestKey].codes[0]
+            allKeys[0] = keys[closestKey].codes?.get(0) ?: 0
         }
         return closestKey
     }

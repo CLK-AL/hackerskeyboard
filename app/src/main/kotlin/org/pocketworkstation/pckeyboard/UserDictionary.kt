@@ -80,9 +80,9 @@ class UserDictionary(context: Context, private val mLocale: String?) :
         values.put(Words.APP_ID, 0)
 
         val contentResolver = getContext().contentResolver
-        Thread("addWord") {
+        Thread({
             contentResolver.insert(Words.CONTENT_URI, values)
-        }.start()
+        }, "addWord").start()
 
         setRequiresReload(false)
     }

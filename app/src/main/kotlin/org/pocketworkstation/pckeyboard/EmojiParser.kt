@@ -279,7 +279,7 @@ class EmojiParser private constructor() {
     ) {
         /** The skin tone of this emoji, if it has one. */
         val skinTone: SkinTone?
-            get() = codePoints.firstNotNullOfOrNull { SkinTone.fromCodePoint(it) }
+            get() = codePoints.asIterable().firstNotNullOfOrNull { SkinTone.fromCodePoint(it) }
 
         /** The named color of this emoji, if detectable from name. */
         val colorName: ColorName?

@@ -404,8 +404,9 @@ class PointerTracker(
         if (key == null) {
             listener?.onCancel()
         } else {
-            if (key.text != null) {
-                listener?.onText(key.text)
+            val keyText = key.text
+            if (keyText != null) {
+                listener?.onText(keyText)
                 listener?.onRelease(0) // dummy key code
             } else {
                 val codes = key.codes ?: return

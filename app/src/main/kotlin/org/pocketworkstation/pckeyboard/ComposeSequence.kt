@@ -44,6 +44,8 @@ open class ComposeSequence(user: ComposeSequencing) {
         composeBuffer.setLength(0)
     }
 
+    fun isBufferNotEmpty(): Boolean = composeBuffer.isNotEmpty()
+
     fun bufferKey(code: Char) {
         composeBuffer.append(code)
     }
@@ -51,8 +53,8 @@ open class ComposeSequence(user: ComposeSequencing) {
     fun executeToString(code: Int): String? {
         var processedCode = code
         val ks = KeyboardSwitcher.getInstance()
-        if (ks.inputView?.isShiftCaps == true
-            && ks.isAlphabetMode
+        if (ks.inputView?.isShiftCaps() == true
+            && ks.isAlphabetMode()
             && Character.isLowerCase(processedCode)
         ) {
             processedCode = Character.toUpperCase(processedCode)

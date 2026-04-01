@@ -135,8 +135,8 @@ class PluginManager(private val mIME: LatinIME) : BroadcastReceiver() {
                     var lang: String? = null
                     try {
                         var current = xrp.eventType
-                        while (current != org.xmlpull.v1.XmlResourceParser.END_DOCUMENT) {
-                            if (current == org.xmlpull.v1.XmlResourceParser.START_TAG) {
+                        while (current != org.xmlpull.v1.XmlPullParser.END_DOCUMENT) {
+                            if (current == org.xmlpull.v1.XmlPullParser.START_TAG) {
                                 val tag = xrp.name
                                 if (tag == "Dictionary") {
                                     lang = xrp.getAttributeValue(null, "locale")

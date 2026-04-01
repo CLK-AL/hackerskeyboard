@@ -177,14 +177,14 @@ class LatinKeyboard @JvmOverloads constructor(
     }
 
     fun enableShiftLock() {
-        val index = shiftKeyIndex
+        val index = getShiftKeyIndex()
         if (index >= 0) {
-            mShiftKey = keys[index]
+            mShiftKey = getKeys()[index]
             mOldShiftIcon = mShiftKey!!.icon
         }
     }
 
-    override fun setShiftState(shiftState: Int): Boolean {
+    fun setShiftState(shiftState: Int): Boolean {
         return if (mShiftKey != null) {
             mShiftKey!!.on = shiftState == SHIFT_ON || shiftState == SHIFT_LOCKED
             mShiftKey!!.locked = shiftState == SHIFT_LOCKED || shiftState == SHIFT_CAPS_LOCKED
@@ -384,7 +384,7 @@ class LatinKeyboard @JvmOverloads constructor(
             paint.isAntiAlias = true
             paint.textAlign = Paint.Align.CENTER
 
-            val locale = mLanguageSwitcher!!.inputLocale
+            val locale = mLanguageSwitcher!!.inputLocale ?: return buffer
             val language = layoutSpaceBar(
                 paint, locale,
                 mButtonArrowLeftIcon, mButtonArrowRightIcon, width, height,
@@ -426,8 +426,8 @@ class LatinKeyboard @JvmOverloads constructor(
 
     private fun getSpacePreviewWidth(): Int {
         return min(
-            maxOf(mSpaceKey!!.width, (minWidth * SPACEBAR_POPUP_MIN_RATIO).toInt()),
-            (screenHeight * SPACEBAR_POPUP_MAX_RATIO).toInt()
+            maxOf(mSpaceKey!!.width, (getMinWidth() * SPACEBAR_POPUP_MIN_RATIO).toInt()),
+            (getScreenHeight() * SPACEBAR_POPUP_MAX_RATIO).toInt()
         )
     }
 
@@ -465,7 +465,7 @@ class LatinKeyboard @JvmOverloads constructor(
             null
         }
         if (locale != null && mLanguageSwitcher!!.localeCount == 1 &&
-            mLanguageSwitcher!!.systemLocale.language.equals(locale.language, ignoreCase = true)) {
+            mLanguageSwitcher!!.systemLocale?.language.equals(locale.language, ignoreCase = true)) {
             locale = null
         }
         mLocale = locale
@@ -537,7 +537,7 @@ class LatinKeyboard @JvmOverloads constructor(
             } else {
                 val inside = key.isInsideSuper(adjustedX, adjustedY)
                 val nearby = getNearestKeys(adjustedX, adjustedY)
-                val nearbyKeys = keys
+                val nearbyKeys = getKeys()
                 if (inside) {
                     if (inPrefList(code, pref)) {
                         mPrefLetter = code
@@ -594,19 +594,19 @@ class LatinKeyboard @JvmOverloads constructor(
         }
     }
 
-    override fun getNearestKeys(x: Int, y: Int): IntArray {
+    fun getLatinNearestKeys(x: Int, y: Int): IntArray {
         return if (mCurrentlyInSpace) {
             mSpaceKeyIndexArray
         } else {
-            super.getNearestKeys(
-                maxOf(0, minOf(x, minWidth - 1)),
-                maxOf(0, minOf(y, height - 1))
+            getNearestKeys(
+                maxOf(0, minOf(x, getMinWidth() - 1)),
+                maxOf(0, minOf(y, getHeight() - 1))
             )
         }
     }
 
     private fun indexOf(code: Int): Int {
-        val keys = keys
+        val keys = getKeys()
         for (i in keys.indices) {
             if (keys[i].codes!![0] == code) return i
         }
@@ -636,21 +636,21 @@ class LatinKeyboard @JvmOverloads constructor(
 
         private fun isFunctionalKey(): Boolean = !sticky && modifier
 
-        override fun isInside(x: Int, y: Int): Boolean {
+        fun isInsideLatinKey(x: Int, y: Int): Boolean {
             return this@LatinKeyboard.isInside(this, x, y)
         }
 
-        fun isInsideSuper(x: Int, y: Int): Boolean = super.isInside(x, y)
+        fun isInsideSuper(x: Int, y: Int): Boolean = isInside(x, y)
 
-        override fun getCurrentDrawableState(): IntArray {
+        fun getCurrentDrawableStateLatinKey(): IntArray {
             return if (isFunctionalKey()) {
                 if (pressed) KEY_STATE_FUNCTIONAL_PRESSED else KEY_STATE_FUNCTIONAL_NORMAL
             } else {
-                super.getCurrentDrawableState()
+                getCurrentDrawableState()
             }
         }
 
-        override fun squaredDistanceFrom(x: Int, y: Int): Int {
+        fun squaredDistanceFromLatinKey(x: Int, y: Int): Int {
             val verticalGap = this@LatinKeyboard.mVerticalGap
             val xDist = this.x + width / 2 - x
             val yDist = this.y + (height + verticalGap) / 2 - y
@@ -717,9 +717,9 @@ class LatinKeyboard @JvmOverloads constructor(
                 val rArrow = mRightDrawable
                 canvas.clipRect(0, 0, width, height)
                 if (mCurrentLanguage == null) {
-                    mCurrentLanguage = getLanguageName(mLanguageSwitcher!!.inputLocale)
-                    mNextLanguage = getLanguageName(mLanguageSwitcher!!.nextInputLocale)
-                    mPrevLanguage = getLanguageName(mLanguageSwitcher!!.prevInputLocale)
+                    mCurrentLanguage = mLanguageSwitcher!!.inputLocale?.let { getLanguageName(it) } ?: ""
+                    mNextLanguage = mLanguageSwitcher!!.nextInputLocale?.let { getLanguageName(it) } ?: ""
+                    mPrevLanguage = mLanguageSwitcher!!.prevInputLocale?.let { getLanguageName(it) } ?: ""
                 }
                 val baseline = mHeight * SPACEBAR_LANGUAGE_BASELINE - paint.descent()
                 paint.color = mRes.getColor(R.color.latinkeyboard_feedback_language_text)

@@ -169,7 +169,7 @@ open class Keyboard {
         var icon: Drawable? = null
         var iconPreview: Drawable? = null
         var width = 0
-        private var realWidth = 0f
+        var realWidth = 0f
         var height = 0
         var gap = 0
         var realGap = 0f

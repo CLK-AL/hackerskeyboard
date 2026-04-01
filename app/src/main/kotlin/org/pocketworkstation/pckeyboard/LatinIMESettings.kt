@@ -95,9 +95,9 @@ class LatinIMESettings : PreferenceActivity(),
         var version = ""
         try {
             val info = packageManager.getPackageInfo(packageName, PackageManager.GET_SIGNATURES)
-            version = info.versionName
+            version = info.versionName ?: ""
             var isOfficial = false
-            for (sig in info.signatures) {
+            for (sig in info.signatures ?: emptyArray()) {
                 val b = sig.toByteArray()
                 var out = 0
                 for (i in b.indices) {

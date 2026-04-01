@@ -24,15 +24,27 @@ abstract class KeyDetector {
     protected var keys: List<Keyboard.Key>? = null
     protected var correctionX: Int = 0
     protected var correctionY: Int = 0
-    protected var proximityThreshold: Int = 0
+    @JvmField protected var proximityThreshold: Int = 0
+    var isProximityCorrectionEnabled: Boolean = false
+        private set
 
     open fun setKeyboard(keyboard: Keyboard, correctionX: Float, correctionY: Float) {
         require(googl_latin_ime_keyboard_null || keyboard != null)
         this.keyboard = keyboard
-        this.keys = keyboard.keys
+        this.keys = keyboard.getKeys()
         this.correctionX = correctionX.toInt()
         this.correctionY = correctionY.toInt()
     }
+
+    fun setProximityCorrectionEnabled(enabled: Boolean) {
+        isProximityCorrectionEnabled = enabled
+    }
+
+    fun updateProximityThreshold(threshold: Int) {
+        proximityThreshold = threshold * threshold
+    }
+
+    fun newCodeArray(): IntArray = IntArray(MAX_NEARBY_KEYS)
 
     protected fun getTouchX(x: Int): Int = x + correctionX
 
@@ -43,5 +55,6 @@ abstract class KeyDetector {
     companion object {
         const val NOT_A_KEY = -1
         private const val googl_latin_ime_keyboard_null = false
+        private const val MAX_NEARBY_KEYS = 12
     }
 }

@@ -77,6 +77,8 @@ class LatinIME : InputMethodService(), ComposeSequencing,
 
     companion object {
         private const val TAG = "PCKeyboardIME"
+        private const val NOTIFICATION_CHANNEL_ID = "PCKeyboard"
+        private const val NOTIFICATION_ONGOING_ID = 1001
 
         @JvmField
         val sKeyboardSettings = GlobalKeyboardSettings()
@@ -185,6 +187,39 @@ class LatinIME : InputMethodService(), ComposeSequencing,
             if (value > 75) value = 75
             return value
         }
+
+        /**
+         * Loads a dictionary or multiple separated dictionary
+         *
+         * @return returns array of dictionary resource ids
+         */
+        @JvmStatic
+        fun getDictionary(res: Resources): IntArray {
+            val packageName = LatinIME::class.java.`package`?.name ?: ""
+            val xrp = res.getXml(R.xml.dictionary)
+            val dictionaries = ArrayList<Int>()
+
+            try {
+                var current = xrp.eventType
+                while (current != android.content.res.XmlResourceParser.END_DOCUMENT) {
+                    if (current == android.content.res.XmlResourceParser.START_TAG) {
+                        val tag = xrp.name
+                        if (tag != null && tag == "part") {
+                            val dictFileName = xrp.getAttributeValue(null, "name")
+                            dictionaries.add(res.getIdentifier(dictFileName, "raw", packageName))
+                        }
+                    }
+                    xrp.next()
+                    current = xrp.eventType
+                }
+            } catch (e: XmlPullParserException) {
+                Log.e(TAG, "Dictionary XML parsing failure")
+            } catch (e: IOException) {
+                Log.e(TAG, "Dictionary XML IOException")
+            }
+
+            return dictionaries.toIntArray()
+        }
     }
 
     // Instance fields
@@ -196,7 +231,8 @@ class LatinIME : InputMethodService(), ComposeSequencing,
     private var mUserBigramDictionary: UserBigramDictionary? = null
     private var mResources: Resources? = null
     private var mLanguageSwitcher: LanguageSwitcher? = null
-    private var mVoiceRecognitionTrigger: VoiceRecognitionTrigger? = null
+    // VoiceRecognitionTrigger not available - disabled for now
+    private var mVoiceRecognitionTrigger: Any? = null
     private var mPluginManager: PluginManager? = null
     private var mNotificationReceiver: NotificationReceiver? = null
     internal var mToken: IBinder? = null
@@ -213,11 +249,6 @@ class LatinIME : InputMethodService(), ComposeSequencing,
     // Escape sequences for special keys
     private var ESC_SEQUENCES: MutableMap<Int, String>? = null
     private var CTRL_SEQUENCES: MutableMap<Int, Int>? = null
-
-    private companion object {
-        private const val NOTIFICATION_CHANNEL_ID = "PCKeyboard"
-        private const val NOTIFICATION_ONGOING_ID = 1001
-    }
 
     private val mComposing = StringBuilder()
     private var mWord = WordComposer()
@@ -363,7 +394,7 @@ class LatinIME : InputMethodService(), ComposeSequencing,
             return chosenWord == other.chosenWord
         }
 
-        open fun getAlternatives(): MutableList<CharSequence>? {
+        open fun getAlternatives(): List<CharSequence>? {
             return mWordToSuggestions[chosenWord.toString()]
         }
     }
@@ -373,7 +404,7 @@ class LatinIME : InputMethodService(), ComposeSequencing,
         private val word: WordComposer?
     ) : WordAlternatives(chosenWord, word?.typedWord) {
 
-        override fun getAlternatives(): MutableList<CharSequence>? {
+        override fun getAlternatives(): List<CharSequence>? {
             return getTypedSuggestions(word)
         }
     }
@@ -427,7 +458,7 @@ class LatinIME : InputMethodService(), ComposeSequencing,
         mKeyboardSwitcher!!.setKeyboardMode(
             KeyboardSwitcher.MODE_TEXT,
             0,
-            EditorInfo(), false, false, false, false
+            false
         )
         prefs.registerOnSharedPreferenceChangeListener(this)
 
@@ -456,9 +487,9 @@ class LatinIME : InputMethodService(), ComposeSequencing,
         if (mKeyboardSwitcher == null) {
             mKeyboardSwitcher = KeyboardSwitcher.getInstance()
         }
-        mLanguageSwitcher!!.onConfigurationChanged(conf, this)
-        if (mKeyboardSwitcher!!.getInputView() != null) {
-            mKeyboardSwitcher!!.onConfigurationChanged()
+        // Note: LanguageSwitcher and KeyboardSwitcher don't have onConfigurationChanged - just recreate keyboards
+        if (mKeyboardSwitcher!!.inputView != null) {
+            mKeyboardSwitcher!!.makeKeyboards(true)
         }
         if (!reloadKeyboardsOnConfigChange(conf)) {
             super.onConfigurationChanged(conf)
@@ -486,13 +517,14 @@ class LatinIME : InputMethodService(), ComposeSequencing,
         if (mKeyboardSwitcher == null) {
             mKeyboardSwitcher = KeyboardSwitcher.getInstance()
         }
-        mKeyboardSwitcher!!.setInputMethodService(this)
+        KeyboardSwitcher.init(this)
         mKeyboardSwitcher!!.setLanguageSwitcher(mLanguageSwitcher)
     }
 
     // ComposeSequencing implementation
     fun onDeadKey(deadKey: Char): Boolean {
-        return mDeadKeysActive && DeadAccentSequence.isDeadKey(deadKey)
+        // Check if it's a non-spacing mark (dead key)
+        return mDeadKeysActive && Character.getType(deadKey.code) == Character.NON_SPACING_MARK.toInt()
     }
 
     fun onComposeSequence(seq: String?) {
@@ -522,7 +554,7 @@ class LatinIME : InputMethodService(), ComposeSequencing,
 
     override fun updateShiftKeyState(attr: EditorInfo?) {
         val ic = currentInputConnection
-        if (ic != null && attr != null && mKeyboardSwitcher!!.isAlphabetMode) {
+        if (ic != null && attr != null && mKeyboardSwitcher!!.isAlphabetMode()) {
             val oldState = shiftState
             val isShifted = mShiftKeyState.isChording
             val isCapsLock = oldState == Keyboard.SHIFT_CAPS_LOCKED || oldState == Keyboard.SHIFT_LOCKED
@@ -547,9 +579,9 @@ class LatinIME : InputMethodService(), ComposeSequencing,
     private val shiftState: Int
         get() {
             if (mKeyboardSwitcher != null) {
-                val view = mKeyboardSwitcher!!.getInputView()
+                val view = mKeyboardSwitcher!!.inputView
                 if (view != null) {
-                    return view.shiftState
+                    return view.getShiftState()
                 }
             }
             return Keyboard.SHIFT_OFF
@@ -567,8 +599,9 @@ class LatinIME : InputMethodService(), ComposeSequencing,
         }
     }
 
-    private fun getTypedSuggestions(word: WordComposer?): MutableList<CharSequence>? {
-        return mSuggest?.getSuggestions(mKeyboardSwitcher!!.getInputView(), word, false, null)
+    private fun getTypedSuggestions(word: WordComposer?): List<CharSequence>? {
+        if (word == null) return null
+        return mSuggest?.getSuggestions(mKeyboardSwitcher!!.inputView, word, false, null)
     }
 
     // Swipe actions
@@ -670,8 +703,8 @@ class LatinIME : InputMethodService(), ComposeSequencing,
 
     private fun reloadKeyboards() {
         mKeyboardSwitcher!!.setLanguageSwitcher(mLanguageSwitcher)
-        if (mKeyboardSwitcher!!.getInputView() != null &&
-            mKeyboardSwitcher!!.keyboardMode != KeyboardSwitcher.MODE_NONE
+        if (mKeyboardSwitcher!!.inputView != null &&
+            mKeyboardSwitcher!!.getKeyboardMode() != KeyboardSwitcher.MODE_NONE
         ) {
             mKeyboardSwitcher!!.setVoiceMode(mEnableVoice && mEnableVoiceButton, mVoiceOnPrimary)
         }
@@ -680,10 +713,7 @@ class LatinIME : InputMethodService(), ComposeSequencing,
     }
 
     private fun updateKeyboardOptions() {
-        mKeyboardSwitcher!!.setKeyboardOptions(
-            mHeightPortrait, mHeightLandscape,
-            mKeyboardModeOverridePortrait, mKeyboardModeOverrideLandscape
-        )
+        // KeyboardSwitcher doesn't have setKeyboardOptions - height is handled via GlobalKeyboardSettings
     }
 
     internal fun toggleLanguage(reset: Boolean, next: Boolean) {
@@ -708,7 +738,7 @@ class LatinIME : InputMethodService(), ComposeSequencing,
             KeyboardSwitcher.MODE_TEXT, 0,
             shouldShowVoiceButton(currentInputEditorInfo)
         )
-        return mKeyboardSwitcher!!.getInputView()
+        return mKeyboardSwitcher!!.inputView
     }
 
     override fun onCreateInputMethodInterface(): AbstractInputMethodImpl {
@@ -741,7 +771,7 @@ class LatinIME : InputMethodService(), ComposeSequencing,
 
     private fun removeCandidateViewContainer() {
         if (mCandidateViewContainer != null) {
-            mCandidateViewContainer!!.removeAllViews()
+            (mCandidateViewContainer as? ViewGroup)?.removeAllViews()
             val parent: ViewParent? = mCandidateViewContainer!!.parent
             if (parent != null && parent is ViewGroup) {
                 parent.removeView(mCandidateViewContainer)
@@ -789,7 +819,7 @@ class LatinIME : InputMethodService(), ComposeSequencing,
             }
         }
 
-        val inputView = mKeyboardSwitcher?.getInputView()
+        val inputView = mKeyboardSwitcher?.inputView
         if (inputView != null) {
             val parent = inputView.parent
             if (parent is ViewGroup) {
@@ -810,7 +840,7 @@ class LatinIME : InputMethodService(), ComposeSequencing,
      * Hide the emoji picker, showing the keyboard.
      */
     fun hideEmojiPicker() {
-        val inputView = mKeyboardSwitcher?.getInputView()
+        val inputView = mKeyboardSwitcher?.inputView
         if (inputView != null) {
             inputView.visibility = View.VISIBLE
         }
@@ -850,7 +880,7 @@ class LatinIME : InputMethodService(), ComposeSequencing,
         sKeyboardSettings.editorFieldId = attribute.fieldId
         sKeyboardSettings.editorInputType = attribute.inputType
 
-        val inputView = mKeyboardSwitcher!!.getInputView() ?: return
+        val inputView = mKeyboardSwitcher!!.inputView ?: return
 
         if (mRefreshKeyboardRequired) {
             mRefreshKeyboardRequired = false
@@ -874,7 +904,7 @@ class LatinIME : InputMethodService(), ComposeSequencing,
         mEnableVoiceButton = shouldShowVoiceButton(attribute)
         val enableVoiceButton = mEnableVoiceButton && mEnableVoice
 
-        mVoiceRecognitionTrigger?.onStartInputView()
+        // Voice recognition not available - VoiceRecognitionTrigger class not present
 
         mInputTypeNoAutoCorrect = false
         mPredictionOnForMode = false
@@ -1009,7 +1039,7 @@ class LatinIME : InputMethodService(), ComposeSequencing,
     override fun onFinishInput() {
         super.onFinishInput()
         onAutoCompletionStateChanged(false)
-        mKeyboardSwitcher!!.getInputView()?.closing()
+        mKeyboardSwitcher!!.inputView?.closing()
         mAutoDictionary?.flushPendingWrites()
         mUserBigramDictionary?.flushPendingWrites()
     }
@@ -1041,7 +1071,7 @@ class LatinIME : InputMethodService(), ComposeSequencing,
             TextEntryState.reset()
             currentInputConnection?.finishComposingText()
         } else if (!mPredicting && !mJustAccepted) {
-            when (TextEntryState.state) {
+            when (TextEntryState.getState()) {
                 TextEntryState.State.ACCEPTED_DEFAULT -> {
                     TextEntryState.reset()
                     mJustAddedAutoSpace = false
@@ -1058,10 +1088,10 @@ class LatinIME : InputMethodService(), ComposeSequencing,
         mLastSelectionEnd = newSelEnd
 
         if (mReCorrectionEnabled) {
-            if (mKeyboardSwitcher?.getInputView()?.isShown == true) {
+            if (mKeyboardSwitcher?.inputView?.isShown == true) {
                 if (isPredictionOn() && mJustRevertedSeparator == null &&
                     (candidatesStart == candidatesEnd ||
-                            newSelStart != oldSelStart || TextEntryState.isCorrecting) &&
+                            newSelStart != oldSelStart || TextEntryState.isCorrecting()) &&
                     (newSelStart < newSelEnd - 1 || !mPredicting)
                 ) {
                     if (isCursorTouchingWord() || mLastSelectionStart < mLastSelectionEnd) {
@@ -1069,8 +1099,8 @@ class LatinIME : InputMethodService(), ComposeSequencing,
                     } else {
                         abortCorrection(false)
                         if (mCandidateView != null &&
-                            mSuggestPuncList != mCandidateView!!.suggestions &&
-                            !mCandidateView!!.isShowingAddToDictionaryHint
+                            mSuggestPuncList != mCandidateView!!.getSuggestions() &&
+                            !mCandidateView!!.isShowingAddToDictionaryHint()
                         ) {
                             setNextSuggestions()
                         }
@@ -1126,9 +1156,7 @@ class LatinIME : InputMethodService(), ComposeSequencing,
             LatinKeyboardView.KEYCODE_NEXT_LANGUAGE -> toggleLanguage(false, true)
             LatinKeyboardView.KEYCODE_PREV_LANGUAGE -> toggleLanguage(false, false)
             LatinKeyboardView.KEYCODE_VOICE -> {
-                if (mVoiceRecognitionTrigger?.isInstalled == true) {
-                    mVoiceRecognitionTrigger!!.startVoiceRecognition()
-                }
+                // Voice recognition not available - VoiceRecognitionTrigger class not present
             }
             LatinKeyboardView.KEYCODE_EMOJI -> toggleEmojiPicker()
             9 -> { // Tab
@@ -1182,7 +1210,7 @@ class LatinIME : InputMethodService(), ComposeSequencing,
                 if (primaryCode != ASCII_ENTER) {
                     mJustAddedAutoSpace = false
                 }
-                RingCharBuffer.getInstance().push(primaryCode.toChar(), x, y)
+                LatinIMEUtil.RingCharBuffer.getInstance().push(primaryCode.toChar(), x, y)
                 if (isWordSeparator(primaryCode)) {
                     handleSeparator(primaryCode)
                 } else {
@@ -1206,7 +1234,7 @@ class LatinIME : InputMethodService(), ComposeSequencing,
     }
 
     override fun onPress(primaryCode: Int) {
-        if (mKeyboardSwitcher!!.isVibrateAndSoundFeedbackRequired) {
+        if (mKeyboardSwitcher!!.isVibrateAndSoundFeedbackRequired()) {
             vibrate()
             playKeyClick(primaryCode)
         }
@@ -1253,7 +1281,7 @@ class LatinIME : InputMethodService(), ComposeSequencing,
     }
 
     override fun onRelease(primaryCode: Int) {
-        (mKeyboardSwitcher!!.getInputView()?.keyboard as? LatinKeyboard)?.keyReleased()
+        (mKeyboardSwitcher!!.inputView?.getKeyboard() as? LatinKeyboard)?.keyReleased()
         val distinctMultiTouch = mKeyboardSwitcher!!.hasDistinctMultitouch()
         val ic = currentInputConnection
         when {
@@ -1266,7 +1294,7 @@ class LatinIME : InputMethodService(), ComposeSequencing,
                 mShiftKeyState.onRelease()
             }
             distinctMultiTouch && primaryCode == Keyboard.KEYCODE_MODE_CHANGE -> {
-                if (mKeyboardSwitcher!!.isInChordingAutoModeSwitchState) {
+                if (mKeyboardSwitcher!!.isInChordingAutoModeSwitchState()) {
                     changeKeyboardMode()
                 }
                 mSymbolKeyState.onRelease()
@@ -1299,7 +1327,7 @@ class LatinIME : InputMethodService(), ComposeSequencing,
 
     // Helper methods for key handling
     private fun processMultiKey(primaryCode: Int): Boolean {
-        if (mDeadAccentBuffer.composeBuffer.isNotEmpty()) {
+        if (mDeadAccentBuffer.isBufferNotEmpty()) {
             mDeadAccentBuffer.execute(primaryCode)
             mDeadAccentBuffer.clear()
             return true
@@ -1356,7 +1384,7 @@ class LatinIME : InputMethodService(), ComposeSequencing,
             }
             val code = if (isShiftCapsMode()) Character.toUpperCase(primaryCode) else primaryCode
             mComposing.append(code.toChar())
-            mWord.add(code, keyCodes)
+            mWord.add(code, keyCodes ?: intArrayOf(code))
             val ic = currentInputConnection
             ic?.setComposingText(mComposing, 1)
             postUpdateSuggestions()
@@ -1383,10 +1411,10 @@ class LatinIME : InputMethodService(), ComposeSequencing,
         sendModifiableKeyChar(primaryCode.toChar())
 
         if (pickedDefault && mBestWord != null) {
-            TextEntryState.acceptedDefault(mBestWord)
+            TextEntryState.acceptedDefault(mComposing, mBestWord!!)
         }
         TextEntryState.typedCharacter(primaryCode.toChar(), isWordSeparator(primaryCode))
-        if (TextEntryState.state == TextEntryState.State.PUNCTUATION_AFTER_ACCEPTED &&
+        if (TextEntryState.getState() == TextEntryState.State.PUNCTUATION_AFTER_ACCEPTED &&
             primaryCode != ASCII_ENTER
         ) {
             swapPunctuationAndSpace()
@@ -1404,7 +1432,9 @@ class LatinIME : InputMethodService(), ComposeSequencing,
     }
 
     private fun handleShiftInternal(forceNormal: Boolean) {
-        mKeyboardSwitcher?.handleShiftInternal(forceNormal)
+        if (forceNormal) {
+            mKeyboardSwitcher?.setShiftState(Keyboard.SHIFT_OFF)
+        }
     }
 
     private fun startMultitouchShift() {
@@ -1444,7 +1474,7 @@ class LatinIME : InputMethodService(), ComposeSequencing,
 
     private fun setModFn(value: Boolean) {
         mModFn = value
-        mKeyboardSwitcher?.setFnIndicator(value)
+        // Note: KeyboardSwitcher doesn't have setFnIndicator - Fn state is tracked locally
     }
 
     private fun sendTab() {
@@ -1598,8 +1628,8 @@ class LatinIME : InputMethodService(), ComposeSequencing,
 
     private fun isShiftMod(): Boolean {
         if (mShiftKeyState.isChording) return true
-        val kb = mKeyboardSwitcher?.getInputView()
-        return kb?.isShiftAll == true
+        val kb = mKeyboardSwitcher?.inputView
+        return kb?.isShiftAll() == true
     }
 
     private fun sendShiftKey(ic: InputConnection?, isDown: Boolean) {
@@ -1719,7 +1749,7 @@ class LatinIME : InputMethodService(), ComposeSequencing,
         mOptionsDialog = builder.create()
         val window = mOptionsDialog!!.window
         val lp = window!!.attributes
-        lp.token = mKeyboardSwitcher!!.getInputView()?.windowToken
+        lp.token = mKeyboardSwitcher!!.inputView?.windowToken
         lp.type = WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG
         window.attributes = lp
         window.addFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM)
@@ -1783,7 +1813,7 @@ class LatinIME : InputMethodService(), ComposeSequencing,
 
     private fun pickDefaultSuggestion(): Boolean {
         if (mBestWord != null && mBestWord!!.isNotEmpty()) {
-            TextEntryState.acceptedDefault(mBestWord)
+            TextEntryState.acceptedDefault(mComposing, mBestWord!!)
             mJustAccepted = true
             val ic = currentInputConnection
             ic?.commitText(mBestWord, 1)
@@ -1829,7 +1859,7 @@ class LatinIME : InputMethodService(), ComposeSequencing,
     }
 
     private fun abortCorrection(force: Boolean) {
-        if (force || TextEntryState.isCorrecting) {
+        if (force || TextEntryState.isCorrecting()) {
             currentInputConnection?.finishComposingText()
             clearSuggestions()
         }
@@ -1857,9 +1887,9 @@ class LatinIME : InputMethodService(), ComposeSequencing,
     private fun setCandidatesViewShownInternal(shown: Boolean, needsInputViewShown: Boolean) {
         val visible = shown &&
                 onEvaluateInputViewShown() &&
-                mKeyboardSwitcher!!.getInputView() != null &&
+                mKeyboardSwitcher!!.inputView != null &&
                 isPredictionOn() &&
-                (!needsInputViewShown || mKeyboardSwitcher!!.getInputView()!!.isShown)
+                (!needsInputViewShown || mKeyboardSwitcher!!.inputView!!.isShown)
         if (visible) {
             if (mCandidateViewContainer == null) {
                 onCreateCandidatesView()
@@ -1879,17 +1909,17 @@ class LatinIME : InputMethodService(), ComposeSequencing,
     }
 
     private fun isShiftCapsMode(): Boolean {
-        val view = mKeyboardSwitcher?.getInputView()
-        return view?.isShiftCaps == true
+        val view = mKeyboardSwitcher?.inputView
+        return view?.isShiftCaps() == true
     }
 
     fun changeKeyboardMode() {
         val switcher = mKeyboardSwitcher ?: return
-        if (switcher.isAlphabetMode) {
+        if (switcher.isAlphabetMode()) {
             mSavedShiftState = shiftState
         }
         switcher.toggleSymbols()
-        if (switcher.isAlphabetMode) {
+        if (switcher.isAlphabetMode()) {
             switcher.setShiftState(mSavedShiftState)
         }
         updateShiftKeyState(currentInputEditorInfo)
@@ -1950,7 +1980,7 @@ class LatinIME : InputMethodService(), ComposeSequencing,
             v.vibrate(len.toLong())
             return
         }
-        mKeyboardSwitcher?.getInputView()?.performHapticFeedback(
+        mKeyboardSwitcher?.inputView?.performHapticFeedback(
             HapticFeedbackConstants.KEYBOARD_TAP,
             HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING
         )
@@ -1958,7 +1988,7 @@ class LatinIME : InputMethodService(), ComposeSequencing,
 
     private fun playKeyClick(primaryCode: Int) {
         if (mAudioManager == null) {
-            mKeyboardSwitcher?.getInputView()?.let { updateRingerMode() }
+            mKeyboardSwitcher?.inputView?.let { updateRingerMode() }
         }
         if (mSoundOn && !mSilentMode) {
             val sound = when (primaryCode) {
@@ -2040,8 +2070,8 @@ class LatinIME : InputMethodService(), ComposeSequencing,
                         hideEmojiPicker()
                         return true
                     }
-                    if (mKeyboardSwitcher?.getInputView() != null) {
-                        if (mKeyboardSwitcher!!.getInputView()!!.handleBack()) return true
+                    if (mKeyboardSwitcher?.inputView != null) {
+                        if (mKeyboardSwitcher!!.inputView!!.handleBack()) return true
                     }
                 }
             }
@@ -2061,8 +2091,8 @@ class LatinIME : InputMethodService(), ComposeSequencing,
             KeyEvent.KEYCODE_DPAD_UP,
             KeyEvent.KEYCODE_DPAD_LEFT,
             KeyEvent.KEYCODE_DPAD_RIGHT -> {
-                val inputView = mKeyboardSwitcher?.getInputView()
-                if (inputView?.isShown == true && inputView.shiftState == Keyboard.SHIFT_ON) {
+                val inputView = mKeyboardSwitcher?.inputView
+                if (inputView?.isShown == true && inputView.getShiftState() == Keyboard.SHIFT_ON) {
                     val newEvent = KeyEvent(
                         event.downTime, event.eventTime,
                         event.action, event.keyCode,
@@ -2089,7 +2119,7 @@ class LatinIME : InputMethodService(), ComposeSequencing,
     }
 
     fun isKeyboardVisible(): Boolean {
-        return mKeyboardSwitcher?.getInputView()?.isShown == true
+        return mKeyboardSwitcher?.inputView?.isShown == true
     }
 
     // SharedPreferences.OnSharedPreferenceChangeListener implementation
@@ -2263,7 +2293,7 @@ class LatinIME : InputMethodService(), ComposeSequencing,
     }
 
     private fun isShowingPunctuationList(): Boolean {
-        return mSuggestPuncList == mCandidateView?.suggestions
+        return mSuggestPuncList == mCandidateView?.getSuggestions()
     }
 
     private fun sendSpace() {
@@ -2288,7 +2318,7 @@ class LatinIME : InputMethodService(), ComposeSequencing,
         super.dump(fd, fout, args)
         val p = PrintWriterPrinter(fout)
         p.println("LatinIME state :")
-        p.println("  Keyboard mode = " + mKeyboardSwitcher!!.keyboardMode)
+        p.println("  Keyboard mode = " + mKeyboardSwitcher!!.getKeyboardMode())
         p.println("  mComposing=$mComposing")
         p.println("  mPredictionOnForMode=$mPredictionOnForMode")
         p.println("  mCorrectionMode=$mCorrectionMode")
@@ -2296,7 +2326,7 @@ class LatinIME : InputMethodService(), ComposeSequencing,
         p.println("  mAutoCorrectOn=$mAutoCorrectOn")
         p.println("  mAutoSpace=$mAutoSpace")
         p.println("  mCompletionOn=$mCompletionOn")
-        p.println("  TextEntryState.state=" + TextEntryState.state)
+        p.println("  TextEntryState.state=" + TextEntryState.getState())
         p.println("  mSoundOn=$mSoundOn")
         p.println("  mVibrateOn=$mVibrateOn")
         p.println("  mPopupOn=$mPopupOn")

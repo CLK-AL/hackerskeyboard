@@ -11,7 +11,7 @@ import java.util.regex.Pattern
  * This is for compatibility with existing preferences, switching types
  * leads to runtime errors when upgrading or downgrading.
  */
-class SeekBarPreferenceString(context: Context, attrs: AttributeSet) : SeekBarPreference(context, attrs) {
+open class SeekBarPreferenceString(context: Context, attrs: AttributeSet) : SeekBarPreference(context, attrs) {
 
     init {
         init(context, attrs)
