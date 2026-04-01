@@ -13,14 +13,65 @@ data class KeyboardLayout(
 )
 
 /**
- * A single key in a layout
+ * A single key in a layout - immutable phonetic key definition
+ * Modifiers (shift, ctrl, alt) reference other LayoutKeys
  */
 data class LayoutKey(
-    val char: String,           // The character
-    val shift: String? = null,  // Shifted character
-    val ipa: String = "",       // IPA pronunciation
-    val name: String? = null    // Name of the character (for non-Latin)
-)
+    val char: String,                    // The character output
+    val ipa: String,                     // IPA pronunciation (required)
+    val name: String,                    // Name of the character (required)
+    val modifiers: Map<Modifier, LayoutKey> = emptyMap()  // Modified versions
+) {
+    /**
+     * Get the key for a given modifier combination
+     */
+    fun withModifier(mod: Modifier): LayoutKey? = modifiers[mod]
+
+    /**
+     * Get the key for shift modifier (convenience)
+     */
+    val shift: LayoutKey? get() = modifiers[Modifier.SHIFT]
+
+    /**
+     * Get the key for ctrl modifier (convenience)
+     */
+    val ctrl: LayoutKey? get() = modifiers[Modifier.CTRL]
+
+    /**
+     * Get the key for alt modifier (convenience)
+     */
+    val alt: LayoutKey? get() = modifiers[Modifier.ALT]
+
+    companion object {
+        /**
+         * Create a simple key without modifiers
+         */
+        fun of(char: String, ipa: String, name: String) = LayoutKey(char, ipa, name)
+
+        /**
+         * Create a key with shift modifier
+         */
+        fun withShift(
+            char: String, ipa: String, name: String,
+            shiftChar: String, shiftIpa: String, shiftName: String
+        ) = LayoutKey(
+            char, ipa, name,
+            mapOf(Modifier.SHIFT to LayoutKey(shiftChar, shiftIpa, shiftName))
+        )
+    }
+}
+
+/**
+ * Keyboard modifiers that can alter key output
+ */
+enum class Modifier {
+    SHIFT,
+    CTRL,
+    ALT,
+    CTRL_SHIFT,
+    ALT_SHIFT,
+    CTRL_ALT
+}
 
 /**
  * All keyboard layouts for Chatterbox 23 languages
@@ -31,6 +82,39 @@ object KeyboardLayouts {
     private val QWERTY_ROW2 = listOf("a", "s", "d", "f", "g", "h", "j", "k", "l")
     private val QWERTY_ROW3 = listOf("z", "x", "c", "v", "b", "n", "m")
 
+    /**
+     * Helper to create a LayoutKey with optional shift modifier
+     * @param char Base character
+     * @param ipa IPA pronunciation
+     * @param name Character name
+     * @param shiftChar Shifted character (null if none)
+     * @param shiftIpa Shifted IPA (defaults to same as base)
+     * @param shiftName Shifted name (defaults to "shift-" + name)
+     */
+    private fun key(
+        char: String,
+        ipa: String,
+        name: String,
+        shiftChar: String? = null,
+        shiftIpa: String? = null,
+        shiftName: String? = null
+    ): LayoutKey {
+        val modifiers = if (shiftChar != null) {
+            mapOf(Modifier.SHIFT to LayoutKey(
+                shiftChar,
+                shiftIpa ?: ipa,
+                shiftName ?: "shift-$name"
+            ))
+        } else emptyMap()
+        return LayoutKey(char, ipa, name, modifiers)
+    }
+
+    /**
+     * Helper for simple key without shift
+     */
+    private fun key(char: String, ipa: String, name: String): LayoutKey =
+        LayoutKey(char, ipa, name)
+
     // ═══ Arabic (ar) ═══
     val AR = KeyboardLayout(
         code = "ar",
@@ -38,35 +122,35 @@ object KeyboardLayouts {
         nativeName = "العربية",
         script = UniKeySyllable.Companion.Script.ARABIC,
         keys = mapOf(
-            "q" to LayoutKey("ض", "َ", "dˤ", "dad"),
-            "w" to LayoutKey("ص", "ً", "sˤ", "sad"),
-            "e" to LayoutKey("ث", "ُ", "θ", "tha"),
-            "r" to LayoutKey("ق", "ٌ", "q", "qaf"),
-            "t" to LayoutKey("ف", "ِ", "f", "fa"),
-            "y" to LayoutKey("غ", "ٍ", "ɣ", "ghain"),
-            "u" to LayoutKey("ع", "ّ", "ʕ", "ain"),
-            "i" to LayoutKey("ه", "ْ", "h", "ha"),
-            "o" to LayoutKey("خ", "ـ", "x", "kha"),
-            "p" to LayoutKey("ح", "؛", "ħ", "ha"),
-            "a" to LayoutKey("ش", "\\", "ʃ", "shin"),
-            "s" to LayoutKey("س", null, "s", "sin"),
-            "d" to LayoutKey("ي", "]", "j", "ya"),
-            "f" to LayoutKey("ب", "[", "b", "ba"),
-            "g" to LayoutKey("ل", "لأ", "l", "lam"),
-            "h" to LayoutKey("ا", "أ", "", "alif"),
-            "j" to LayoutKey("ت", "ـ", "t", "ta"),
-            "k" to LayoutKey("ن", "،", "n", "nun"),
-            "l" to LayoutKey("م", "/", "m", "mim"),
-            "z" to LayoutKey("ئ", "~", "ʔ", "hamza"),
-            "x" to LayoutKey("ء", "ْ", "ʔ", "hamza"),
-            "c" to LayoutKey("ؤ", "}", "ʔ", "hamza"),
-            "v" to LayoutKey("ر", "{", "r", "ra"),
-            "b" to LayoutKey("لا", "لآ", "la", "lam-alif"),
-            "n" to LayoutKey("ى", "آ", "aː", "alif-maqsura"),
-            "m" to LayoutKey("ة", "'", "a", "ta-marbuta"),
-            "," to LayoutKey("و", ",", "w", "waw"),
-            "." to LayoutKey("ز", ".", "z", "zay"),
-            "/" to LayoutKey("ظ", "؟", "ðˤ", "za")
+            "q" to key("ض", "dˤ", "dad", "َ", "a", "fatha"),
+            "w" to key("ص", "sˤ", "sad", "ً", "an", "tanwin-fath"),
+            "e" to key("ث", "θ", "tha", "ُ", "u", "damma"),
+            "r" to key("ق", "q", "qaf", "ٌ", "un", "tanwin-damm"),
+            "t" to key("ف", "f", "fa", "ِ", "i", "kasra"),
+            "y" to key("غ", "ɣ", "ghain", "ٍ", "in", "tanwin-kasr"),
+            "u" to key("ع", "ʕ", "ain", "ّ", "", "shadda"),
+            "i" to key("ه", "h", "ha", "ْ", "", "sukun"),
+            "o" to key("خ", "x", "kha", "ـ", "", "tatweel"),
+            "p" to key("ح", "ħ", "ha", "؛", "", "semicolon"),
+            "a" to key("ش", "ʃ", "shin", "\\", "", "backslash"),
+            "s" to key("س", "s", "sin"),
+            "d" to key("ي", "j", "ya", "]", "", "bracket-right"),
+            "f" to key("ب", "b", "ba", "[", "", "bracket-left"),
+            "g" to key("ل", "l", "lam", "لأ", "laʔ", "lam-hamza"),
+            "h" to key("ا", "", "alif", "أ", "ʔ", "alif-hamza"),
+            "j" to key("ت", "t", "ta", "ـ", "", "tatweel"),
+            "k" to key("ن", "n", "nun", "،", "", "comma"),
+            "l" to key("م", "m", "mim", "/", "", "slash"),
+            "z" to key("ئ", "ʔ", "hamza-ya", "~", "", "tilde"),
+            "x" to key("ء", "ʔ", "hamza", "ْ", "", "sukun"),
+            "c" to key("ؤ", "ʔ", "hamza-waw", "}", "", "brace-right"),
+            "v" to key("ر", "r", "ra", "{", "", "brace-left"),
+            "b" to key("لا", "la", "lam-alif", "لآ", "laː", "lam-alif-madda"),
+            "n" to key("ى", "aː", "alif-maqsura", "آ", "ʔaː", "alif-madda"),
+            "m" to key("ة", "a", "ta-marbuta", "'", "", "quote"),
+            "," to key("و", "w", "waw", ",", "", "comma"),
+            "." to key("ز", "z", "zay", ".", "", "period"),
+            "/" to key("ظ", "ðˤ", "za", "؟", "", "question")
         )
     )
 
@@ -76,10 +160,10 @@ object KeyboardLayouts {
         name = "Danish",
         nativeName = "Dansk",
         script = UniKeySyllable.Companion.Script.LATIN,
-        keys = buildLatinLayout(mapOf(
-            ";" to LayoutKey("æ", "Æ", "ɛ"),
-            "'" to LayoutKey("ø", "Ø", "ø"),
-            "[" to LayoutKey("å", "Å", "ɔ")
+        keys = buildLatinLayout("kr", "krone", mapOf(
+            ";" to key("æ", "ɛ", "ae", "Æ", "ɛ", "AE"),
+            "'" to key("ø", "ø", "oe", "Ø", "ø", "OE"),
+            "[" to key("å", "ɔ", "aa", "Å", "ɔ", "AA")
         ))
     )
 
@@ -89,11 +173,11 @@ object KeyboardLayouts {
         name = "German",
         nativeName = "Deutsch",
         script = UniKeySyllable.Companion.Script.LATIN,
-        keys = buildLatinLayout(mapOf(
-            ";" to LayoutKey("ö", "Ö", "ø"),
-            "'" to LayoutKey("ä", "Ä", "ɛ"),
-            "[" to LayoutKey("ü", "Ü", "y"),
-            "]" to LayoutKey("ß", "ẞ", "s")
+        keys = buildLatinLayout("€", "euro", mapOf(
+            ";" to key("ö", "ø", "o-umlaut", "Ö", "ø", "O-umlaut"),
+            "'" to key("ä", "ɛ", "a-umlaut", "Ä", "ɛ", "A-umlaut"),
+            "[" to key("ü", "y", "u-umlaut", "Ü", "y", "U-umlaut"),
+            "]" to key("ß", "s", "eszett", "ẞ", "s", "Eszett")
         ))
     )
 
@@ -104,42 +188,53 @@ object KeyboardLayouts {
         nativeName = "Ελληνικά",
         script = UniKeySyllable.Companion.Script.GREEK,
         keys = mapOf(
-            "q" to LayoutKey(";", ":", "", "semicolon"),
-            "w" to LayoutKey("ς", "΅", "s", "final sigma"),
-            "e" to LayoutKey("ε", "Ε", "e", "epsilon"),
-            "r" to LayoutKey("ρ", "Ρ", "r", "rho"),
-            "t" to LayoutKey("τ", "Τ", "t", "tau"),
-            "y" to LayoutKey("υ", "Υ", "i", "upsilon"),
-            "u" to LayoutKey("θ", "Θ", "θ", "theta"),
-            "i" to LayoutKey("ι", "Ι", "i", "iota"),
-            "o" to LayoutKey("ο", "Ο", "o", "omicron"),
-            "p" to LayoutKey("π", "Π", "p", "pi"),
-            "a" to LayoutKey("α", "Α", "a", "alpha"),
-            "s" to LayoutKey("σ", "Σ", "s", "sigma"),
-            "d" to LayoutKey("δ", "Δ", "ð", "delta"),
-            "f" to LayoutKey("φ", "Φ", "f", "phi"),
-            "g" to LayoutKey("γ", "Γ", "ɣ", "gamma"),
-            "h" to LayoutKey("η", "Η", "i", "eta"),
-            "j" to LayoutKey("ξ", "Ξ", "ks", "xi"),
-            "k" to LayoutKey("κ", "Κ", "k", "kappa"),
-            "l" to LayoutKey("λ", "Λ", "l", "lambda"),
-            "z" to LayoutKey("ζ", "Ζ", "z", "zeta"),
-            "x" to LayoutKey("χ", "Χ", "x", "chi"),
-            "c" to LayoutKey("ψ", "Ψ", "ps", "psi"),
-            "v" to LayoutKey("ω", "Ω", "o", "omega"),
-            "b" to LayoutKey("β", "Β", "v", "beta"),
-            "n" to LayoutKey("ν", "Ν", "n", "nu"),
-            "m" to LayoutKey("μ", "Μ", "m", "mu")
+            "q" to key(";", "", "semicolon", ":", "", "colon"),
+            "w" to key("ς", "s", "final-sigma", "΅", "", "dialytika-tonos"),
+            "e" to key("ε", "e", "epsilon", "Ε", "e", "Epsilon"),
+            "r" to key("ρ", "r", "rho", "Ρ", "r", "Rho"),
+            "t" to key("τ", "t", "tau", "Τ", "t", "Tau"),
+            "y" to key("υ", "i", "upsilon", "Υ", "i", "Upsilon"),
+            "u" to key("θ", "θ", "theta", "Θ", "θ", "Theta"),
+            "i" to key("ι", "i", "iota", "Ι", "i", "Iota"),
+            "o" to key("ο", "o", "omicron", "Ο", "o", "Omicron"),
+            "p" to key("π", "p", "pi", "Π", "p", "Pi"),
+            "a" to key("α", "a", "alpha", "Α", "a", "Alpha"),
+            "s" to key("σ", "s", "sigma", "Σ", "s", "Sigma"),
+            "d" to key("δ", "ð", "delta", "Δ", "ð", "Delta"),
+            "f" to key("φ", "f", "phi", "Φ", "f", "Phi"),
+            "g" to key("γ", "ɣ", "gamma", "Γ", "ɣ", "Gamma"),
+            "h" to key("η", "i", "eta", "Η", "i", "Eta"),
+            "j" to key("ξ", "ks", "xi", "Ξ", "ks", "Xi"),
+            "k" to key("κ", "k", "kappa", "Κ", "k", "Kappa"),
+            "l" to key("λ", "l", "lambda", "Λ", "l", "Lambda"),
+            "z" to key("ζ", "z", "zeta", "Ζ", "z", "Zeta"),
+            "x" to key("χ", "x", "chi", "Χ", "x", "Chi"),
+            "c" to key("ψ", "ps", "psi", "Ψ", "ps", "Psi"),
+            "v" to key("ω", "o", "omega", "Ω", "o", "Omega"),
+            "b" to key("β", "v", "beta", "Β", "v", "Beta"),
+            "n" to key("ν", "n", "nu", "Ν", "n", "Nu"),
+            "m" to key("μ", "m", "mu", "Μ", "m", "Mu")
         )
     )
 
-    // ═══ English (en) ═══
+    // ═══ English US (en) ═══
     val EN = KeyboardLayout(
         code = "en",
-        name = "English",
+        name = "English (US)",
         nativeName = "English",
         script = UniKeySyllable.Companion.Script.LATIN,
-        keys = buildLatinLayout(emptyMap())
+        keys = buildLatinLayout("$", "dollar", emptyMap())
+    )
+
+    // ═══ English GB (en-gb) ═══
+    val EN_GB = KeyboardLayout(
+        code = "en-gb",
+        name = "English (UK)",
+        nativeName = "English",
+        script = UniKeySyllable.Companion.Script.LATIN,
+        keys = buildLatinLayout("£", "pound", mapOf(
+            "3" to key("3", "", "three", "£", "", "pound")
+        ))
     )
 
     // ═══ Spanish (es) ═══
@@ -148,10 +243,10 @@ object KeyboardLayouts {
         name = "Spanish",
         nativeName = "Español",
         script = UniKeySyllable.Companion.Script.LATIN,
-        keys = buildLatinLayout(mapOf(
-            ";" to LayoutKey("ñ", "Ñ", "ɲ"),
-            "'" to LayoutKey("´", "¨", ""),
-            "[" to LayoutKey("¿", "¡", "")
+        keys = buildLatinLayout("€", "euro", mapOf(
+            ";" to key("ñ", "ɲ", "ene", "Ñ", "ɲ", "Ene"),
+            "'" to key("´", "", "acute", "¨", "", "diaeresis"),
+            "[" to key("¿", "", "inverted-question", "¡", "", "inverted-exclamation")
         ))
     )
 
@@ -161,9 +256,9 @@ object KeyboardLayouts {
         name = "Finnish",
         nativeName = "Suomi",
         script = UniKeySyllable.Companion.Script.LATIN,
-        keys = buildLatinLayout(mapOf(
-            ";" to LayoutKey("ö", "Ö", "ø"),
-            "'" to LayoutKey("ä", "Ä", "æ")
+        keys = buildLatinLayout("€", "euro", mapOf(
+            ";" to key("ö", "ø", "o-umlaut", "Ö", "ø", "O-umlaut"),
+            "'" to key("ä", "æ", "a-umlaut", "Ä", "æ", "A-umlaut")
         ))
     )
 
@@ -173,11 +268,11 @@ object KeyboardLayouts {
         name = "French",
         nativeName = "Français",
         script = UniKeySyllable.Companion.Script.LATIN,
-        keys = buildLatinLayout(mapOf(
-            ";" to LayoutKey("é", "É", "e"),
-            "'" to LayoutKey("è", "È", "ɛ"),
-            "[" to LayoutKey("ç", "Ç", "s"),
-            "]" to LayoutKey("à", "À", "a")
+        keys = buildLatinLayout("€", "euro", mapOf(
+            ";" to key("é", "e", "e-acute", "É", "e", "E-acute"),
+            "'" to key("è", "ɛ", "e-grave", "È", "ɛ", "E-grave"),
+            "[" to key("ç", "s", "c-cedilla", "Ç", "s", "C-cedilla"),
+            "]" to key("à", "a", "a-grave", "À", "a", "A-grave")
         ))
     )
 
@@ -188,33 +283,34 @@ object KeyboardLayouts {
         nativeName = "עברית",
         script = UniKeySyllable.Companion.Script.HEBREW,
         keys = mapOf(
-            "t" to LayoutKey("א", null, "ʔ", "alef"),
-            "c" to LayoutKey("ב", null, "v", "bet"),
-            "d" to LayoutKey("ג", null, "g", "gimel"),
-            "s" to LayoutKey("ד", null, "d", "dalet"),
-            "v" to LayoutKey("ה", null, "h", "he"),
-            "u" to LayoutKey("ו", null, "v", "vav"),
-            "z" to LayoutKey("ז", null, "z", "zayin"),
-            "j" to LayoutKey("ח", null, "x", "chet"),
-            "y" to LayoutKey("ט", null, "t", "tet"),
-            "h" to LayoutKey("י", null, "j", "yod"),
-            "l" to LayoutKey("ך", null, "x", "kaf-sofit"),
-            "f" to LayoutKey("כ", null, "x", "kaf"),
-            "k" to LayoutKey("ל", null, "l", "lamed"),
-            "o" to LayoutKey("ם", null, "m", "mem-sofit"),
-            "n" to LayoutKey("מ", null, "m", "mem"),
-            "i" to LayoutKey("ן", null, "n", "nun-sofit"),
-            "b" to LayoutKey("נ", null, "n", "nun"),
-            "x" to LayoutKey("ס", null, "s", "samech"),
-            "g" to LayoutKey("ע", null, "ʕ", "ayin"),
-            ";" to LayoutKey("ף", null, "f", "pe-sofit"),
-            "p" to LayoutKey("פ", null, "f", "pe"),
-            "." to LayoutKey("ץ", null, "ts", "tsadi-sofit"),
-            "m" to LayoutKey("צ", null, "ts", "tsadi"),
-            "e" to LayoutKey("ק", null, "k", "qof"),
-            "r" to LayoutKey("ר", null, "ʁ", "resh"),
-            "a" to LayoutKey("ש", null, "ʃ", "shin"),
-            "," to LayoutKey("ת", null, "t", "tav")
+            "t" to key("א", "ʔ", "alef"),
+            "c" to key("ב", "v", "bet"),
+            "d" to key("ג", "g", "gimel"),
+            "s" to key("ד", "d", "dalet"),
+            "v" to key("ה", "h", "he"),
+            "u" to key("ו", "v", "vav"),
+            "z" to key("ז", "z", "zayin"),
+            "j" to key("ח", "x", "chet"),
+            "y" to key("ט", "t", "tet"),
+            "h" to key("י", "j", "yod"),
+            "l" to key("ך", "x", "kaf-sofit"),
+            "f" to key("כ", "x", "kaf"),
+            "k" to key("ל", "l", "lamed"),
+            "o" to key("ם", "m", "mem-sofit"),
+            "n" to key("מ", "m", "mem"),
+            "i" to key("ן", "n", "nun-sofit"),
+            "b" to key("נ", "n", "nun"),
+            "x" to key("ס", "s", "samech"),
+            "g" to key("ע", "ʕ", "ayin"),
+            ";" to key("ף", "f", "pe-sofit"),
+            "p" to key("פ", "f", "pe"),
+            "." to key("ץ", "ts", "tsadi-sofit"),
+            "m" to key("צ", "ts", "tsadi"),
+            "e" to key("ק", "k", "qof"),
+            "r" to key("ר", "ʁ", "resh"),
+            "a" to key("ש", "ʃ", "shin"),
+            "," to key("ת", "t", "tav"),
+            "4" to key("₪", "", "shekel", "$", "", "dollar")
         )
     )
 
@@ -225,39 +321,40 @@ object KeyboardLayouts {
         nativeName = "हिन्दी",
         script = UniKeySyllable.Companion.Script.DEVANAGARI,
         keys = mapOf(
-            // Vowels
-            "q" to LayoutKey("औ", "ौ", "ɔː", "au"),
-            "w" to LayoutKey("ऐ", "ै", "ɛː", "ai"),
-            "e" to LayoutKey("आ", "ा", "aː", "aa"),
-            "r" to LayoutKey("ई", "ी", "iː", "ii"),
-            "t" to LayoutKey("ऊ", "ू", "uː", "uu"),
+            // Vowels (with matra shifts)
+            "q" to key("औ", "ɔː", "au", "ौ", "ɔː", "au-matra"),
+            "w" to key("ऐ", "ɛː", "ai", "ै", "ɛː", "ai-matra"),
+            "e" to key("आ", "aː", "aa", "ा", "aː", "aa-matra"),
+            "r" to key("ई", "iː", "ii", "ी", "iː", "ii-matra"),
+            "t" to key("ऊ", "uː", "uu", "ू", "uː", "uu-matra"),
             // Consonants row 1
-            "y" to LayoutKey("भ", null, "bʱ", "bha"),
-            "u" to LayoutKey("ङ", null, "ŋ", "nga"),
-            "i" to LayoutKey("घ", null, "ɡʱ", "gha"),
-            "o" to LayoutKey("ध", null, "dʱ", "dha"),
-            "p" to LayoutKey("झ", null, "dʒʱ", "jha"),
+            "y" to key("भ", "bʱ", "bha"),
+            "u" to key("ङ", "ŋ", "nga"),
+            "i" to key("घ", "ɡʱ", "gha"),
+            "o" to key("ध", "dʱ", "dha"),
+            "p" to key("झ", "dʒʱ", "jha"),
             // Consonants row 2
-            "a" to LayoutKey("ओ", "ो", "oː", "o"),
-            "s" to LayoutKey("ए", "े", "eː", "e"),
-            "d" to LayoutKey("अ", null, "ə", "a"),
-            "f" to LayoutKey("इ", "ि", "ɪ", "i"),
-            "g" to LayoutKey("उ", "ु", "ʊ", "u"),
-            "h" to LayoutKey("प", null, "p", "pa"),
-            "j" to LayoutKey("र", "्", "r", "ra"),
-            "k" to LayoutKey("क", null, "k", "ka"),
-            "l" to LayoutKey("त", null, "t", "ta"),
+            "a" to key("ओ", "oː", "o", "ो", "oː", "o-matra"),
+            "s" to key("ए", "eː", "e", "े", "eː", "e-matra"),
+            "d" to key("अ", "ə", "a"),
+            "f" to key("इ", "ɪ", "i", "ि", "ɪ", "i-matra"),
+            "g" to key("उ", "ʊ", "u", "ु", "ʊ", "u-matra"),
+            "h" to key("प", "p", "pa"),
+            "j" to key("र", "r", "ra", "्", "", "virama"),
+            "k" to key("क", "k", "ka"),
+            "l" to key("त", "t", "ta"),
             // Consonants row 3
-            "z" to LayoutKey("ॉ", null, "ɔ", "candra-o"),
-            "x" to LayoutKey("ँ", null, "̃", "chandrabindu"),
-            "c" to LayoutKey("म", null, "m", "ma"),
-            "v" to LayoutKey("न", null, "n", "na"),
-            "b" to LayoutKey("ब", null, "b", "ba"),
-            "n" to LayoutKey("ल", null, "l", "la"),
-            "m" to LayoutKey("स", null, "s", "sa"),
-            "," to LayoutKey("व", "ृ", "ʋ", "va"),
-            "." to LayoutKey("य", null, "j", "ya"),
-            "/" to LayoutKey("ज", null, "dʒ", "ja")
+            "z" to key("ॉ", "ɔ", "candra-o"),
+            "x" to key("ँ", "̃", "chandrabindu"),
+            "c" to key("म", "m", "ma"),
+            "v" to key("न", "n", "na"),
+            "b" to key("ब", "b", "ba"),
+            "n" to key("ल", "l", "la"),
+            "m" to key("स", "s", "sa"),
+            "," to key("व", "ʋ", "va", "ृ", "ɻ", "ri-matra"),
+            "." to key("य", "j", "ya"),
+            "/" to key("ज", "dʒ", "ja"),
+            "4" to key("₹", "", "rupee", "$", "", "dollar")
         )
     )
 
@@ -267,12 +364,12 @@ object KeyboardLayouts {
         name = "Italian",
         nativeName = "Italiano",
         script = UniKeySyllable.Companion.Script.LATIN,
-        keys = buildLatinLayout(mapOf(
-            ";" to LayoutKey("ò", "Ò", "ɔ"),
-            "'" to LayoutKey("à", "À", "a"),
-            "[" to LayoutKey("è", "È", "ɛ"),
-            "]" to LayoutKey("ù", "Ù", "u"),
-            "\\" to LayoutKey("ì", "Ì", "i")
+        keys = buildLatinLayout("€", "euro", mapOf(
+            ";" to key("ò", "ɔ", "o-grave", "Ò", "ɔ", "O-grave"),
+            "'" to key("à", "a", "a-grave", "À", "a", "A-grave"),
+            "[" to key("è", "ɛ", "e-grave", "È", "ɛ", "E-grave"),
+            "]" to key("ù", "u", "u-grave", "Ù", "u", "U-grave"),
+            "\\" to key("ì", "i", "i-grave", "Ì", "i", "I-grave")
         ))
     )
 
@@ -283,34 +380,35 @@ object KeyboardLayouts {
         nativeName = "日本語",
         script = UniKeySyllable.Companion.Script.HIRAGANA,
         keys = mapOf(
-            // Hiragana mapped to romaji input
-            "a" to LayoutKey("あ", "ア", "a", "a"),
-            "i" to LayoutKey("い", "イ", "i", "i"),
-            "u" to LayoutKey("う", "ウ", "ɯ", "u"),
-            "e" to LayoutKey("え", "エ", "e", "e"),
-            "o" to LayoutKey("お", "オ", "o", "o"),
-            "k" to LayoutKey("か", "カ", "k", "ka"),
-            "s" to LayoutKey("さ", "サ", "s", "sa"),
-            "t" to LayoutKey("た", "タ", "t", "ta"),
-            "n" to LayoutKey("な", "ナ", "n", "na"),
-            "h" to LayoutKey("は", "ハ", "h", "ha"),
-            "m" to LayoutKey("ま", "マ", "m", "ma"),
-            "y" to LayoutKey("や", "ヤ", "j", "ya"),
-            "r" to LayoutKey("ら", "ラ", "ɾ", "ra"),
-            "w" to LayoutKey("わ", "ワ", "w", "wa"),
-            "g" to LayoutKey("が", "ガ", "ɡ", "ga"),
-            "z" to LayoutKey("ざ", "ザ", "z", "za"),
-            "d" to LayoutKey("だ", "ダ", "d", "da"),
-            "b" to LayoutKey("ば", "バ", "b", "ba"),
-            "p" to LayoutKey("ぱ", "パ", "p", "pa"),
-            "f" to LayoutKey("ふ", "フ", "ɸ", "fu"),
-            "j" to LayoutKey("じ", "ジ", "dʒ", "ji"),
-            "c" to LayoutKey("ち", "チ", "tɕ", "chi"),
-            "x" to LayoutKey("っ", "ッ", "", "small-tsu"),
-            "v" to LayoutKey("ん", "ン", "n", "n"),
-            "l" to LayoutKey("ー", "ー", "ː", "long-vowel"),
-            "q" to LayoutKey("。", "。", "", "period"),
-            "/" to LayoutKey("・", "・", "", "middle-dot")
+            // Hiragana with katakana shift
+            "a" to key("あ", "a", "a", "ア", "a", "a-katakana"),
+            "i" to key("い", "i", "i", "イ", "i", "i-katakana"),
+            "u" to key("う", "ɯ", "u", "ウ", "ɯ", "u-katakana"),
+            "e" to key("え", "e", "e", "エ", "e", "e-katakana"),
+            "o" to key("お", "o", "o", "オ", "o", "o-katakana"),
+            "k" to key("か", "k", "ka", "カ", "k", "ka-katakana"),
+            "s" to key("さ", "s", "sa", "サ", "s", "sa-katakana"),
+            "t" to key("た", "t", "ta", "タ", "t", "ta-katakana"),
+            "n" to key("な", "n", "na", "ナ", "n", "na-katakana"),
+            "h" to key("は", "h", "ha", "ハ", "h", "ha-katakana"),
+            "m" to key("ま", "m", "ma", "マ", "m", "ma-katakana"),
+            "y" to key("や", "j", "ya", "ヤ", "j", "ya-katakana"),
+            "r" to key("ら", "ɾ", "ra", "ラ", "ɾ", "ra-katakana"),
+            "w" to key("わ", "w", "wa", "ワ", "w", "wa-katakana"),
+            "g" to key("が", "ɡ", "ga", "ガ", "ɡ", "ga-katakana"),
+            "z" to key("ざ", "z", "za", "ザ", "z", "za-katakana"),
+            "d" to key("だ", "d", "da", "ダ", "d", "da-katakana"),
+            "b" to key("ば", "b", "ba", "バ", "b", "ba-katakana"),
+            "p" to key("ぱ", "p", "pa", "パ", "p", "pa-katakana"),
+            "f" to key("ふ", "ɸ", "fu", "フ", "ɸ", "fu-katakana"),
+            "j" to key("じ", "dʒ", "ji", "ジ", "dʒ", "ji-katakana"),
+            "c" to key("ち", "tɕ", "chi", "チ", "tɕ", "chi-katakana"),
+            "x" to key("っ", "", "small-tsu", "ッ", "", "small-tsu-katakana"),
+            "v" to key("ん", "n", "n", "ン", "n", "n-katakana"),
+            "l" to key("ー", "ː", "long-vowel"),
+            "q" to key("。", "", "period"),
+            "/" to key("・", "", "middle-dot"),
+            "4" to key("¥", "", "yen", "$", "", "dollar")
         )
     )
 
@@ -321,34 +419,35 @@ object KeyboardLayouts {
         nativeName = "한국어",
         script = UniKeySyllable.Companion.Script.HANGUL,
         keys = mapOf(
-            // Consonants (초성)
-            "q" to LayoutKey("ㅂ", "ㅃ", "p", "bieup"),
-            "w" to LayoutKey("ㅈ", "ㅉ", "tɕ", "jieut"),
-            "e" to LayoutKey("ㄷ", "ㄸ", "t", "digeut"),
-            "r" to LayoutKey("ㄱ", "ㄲ", "k", "giyeok"),
-            "t" to LayoutKey("ㅅ", "ㅆ", "s", "siot"),
-            "a" to LayoutKey("ㅁ", null, "m", "mieum"),
-            "s" to LayoutKey("ㄴ", null, "n", "nieun"),
-            "d" to LayoutKey("ㅇ", null, "ŋ", "ieung"),
-            "f" to LayoutKey("ㄹ", null, "ɾ", "rieul"),
-            "g" to LayoutKey("ㅎ", null, "h", "hieut"),
-            "z" to LayoutKey("ㅋ", null, "kʰ", "kieuk"),
-            "x" to LayoutKey("ㅌ", null, "tʰ", "tieut"),
-            "c" to LayoutKey("ㅊ", null, "tɕʰ", "chieut"),
-            "v" to LayoutKey("ㅍ", null, "pʰ", "pieup"),
+            // Consonants (초성) with tensed shift
+            "q" to key("ㅂ", "p", "bieup", "ㅃ", "p͈", "ssang-bieup"),
+            "w" to key("ㅈ", "tɕ", "jieut", "ㅉ", "t͈ɕ", "ssang-jieut"),
+            "e" to key("ㄷ", "t", "digeut", "ㄸ", "t͈", "ssang-digeut"),
+            "r" to key("ㄱ", "k", "giyeok", "ㄲ", "k͈", "ssang-giyeok"),
+            "t" to key("ㅅ", "s", "siot", "ㅆ", "s͈", "ssang-siot"),
+            "a" to key("ㅁ", "m", "mieum"),
+            "s" to key("ㄴ", "n", "nieun"),
+            "d" to key("ㅇ", "ŋ", "ieung"),
+            "f" to key("ㄹ", "ɾ", "rieul"),
+            "g" to key("ㅎ", "h", "hieut"),
+            "z" to key("ㅋ", "kʰ", "kieuk"),
+            "x" to key("ㅌ", "tʰ", "tieut"),
+            "c" to key("ㅊ", "tɕʰ", "chieut"),
+            "v" to key("ㅍ", "pʰ", "pieup"),
             // Vowels (중성)
-            "y" to LayoutKey("ㅛ", null, "jo", "yo"),
-            "u" to LayoutKey("ㅕ", null, "jʌ", "yeo"),
-            "i" to LayoutKey("ㅑ", null, "ja", "ya"),
-            "o" to LayoutKey("ㅐ", "ㅒ", "ɛ", "ae"),
-            "p" to LayoutKey("ㅔ", "ㅖ", "e", "e"),
-            "h" to LayoutKey("ㅗ", null, "o", "o"),
-            "j" to LayoutKey("ㅓ", null, "ʌ", "eo"),
-            "k" to LayoutKey("ㅏ", null, "a", "a"),
-            "l" to LayoutKey("ㅣ", null, "i", "i"),
-            "b" to LayoutKey("ㅠ", null, "ju", "yu"),
-            "n" to LayoutKey("ㅜ", null, "u", "u"),
-            "m" to LayoutKey("ㅡ", null, "ɨ", "eu")
+            "y" to key("ㅛ", "jo", "yo"),
+            "u" to key("ㅕ", "jʌ", "yeo"),
+            "i" to key("ㅑ", "ja", "ya"),
+            "o" to key("ㅐ", "ɛ", "ae", "ㅒ", "jɛ", "yae"),
+            "p" to key("ㅔ", "e", "e", "ㅖ", "je", "ye"),
+            "h" to key("ㅗ", "o", "o"),
+            "j" to key("ㅓ", "ʌ", "eo"),
+            "k" to key("ㅏ", "a", "a"),
+            "l" to key("ㅣ", "i", "i"),
+            "b" to key("ㅠ", "ju", "yu"),
+            "n" to key("ㅜ", "u", "u"),
+            "m" to key("ㅡ", "ɨ", "eu"),
+            "4" to key("₩", "", "won", "$", "", "dollar")
         )
     )
 
@@ -358,7 +457,7 @@ object KeyboardLayouts {
         name = "Malay",
         nativeName = "Bahasa Melayu",
         script = UniKeySyllable.Companion.Script.LATIN,
-        keys = buildLatinLayout(emptyMap())
+        keys = buildLatinLayout("RM", "ringgit", emptyMap())
     )
 
     // ═══ Dutch (nl) ═══
@@ -367,9 +466,9 @@ object KeyboardLayouts {
         name = "Dutch",
         nativeName = "Nederlands",
         script = UniKeySyllable.Companion.Script.LATIN,
-        keys = buildLatinLayout(mapOf(
-            "'" to LayoutKey("´", "¨", ""),
-            "[" to LayoutKey("ij", "IJ", "ɛi")
+        keys = buildLatinLayout("€", "euro", mapOf(
+            "'" to key("´", "", "acute", "¨", "", "diaeresis"),
+            "[" to key("ij", "ɛi", "ij", "IJ", "ɛi", "IJ")
         ))
     )
 
@@ -379,10 +478,10 @@ object KeyboardLayouts {
         name = "Norwegian",
         nativeName = "Norsk",
         script = UniKeySyllable.Companion.Script.LATIN,
-        keys = buildLatinLayout(mapOf(
-            ";" to LayoutKey("ø", "Ø", "ø"),
-            "'" to LayoutKey("æ", "Æ", "æ"),
-            "[" to LayoutKey("å", "Å", "ɔ")
+        keys = buildLatinLayout("kr", "krone", mapOf(
+            ";" to key("ø", "ø", "oe", "Ø", "ø", "OE"),
+            "'" to key("æ", "æ", "ae", "Æ", "æ", "AE"),
+            "[" to key("å", "ɔ", "aa", "Å", "ɔ", "AA")
         ))
     )
 
@@ -392,16 +491,16 @@ object KeyboardLayouts {
         name = "Polish",
         nativeName = "Polski",
         script = UniKeySyllable.Companion.Script.LATIN,
-        keys = buildLatinLayout(mapOf(
-            "a" to LayoutKey("a", "ą", "a"),
-            "c" to LayoutKey("c", "ć", "ts"),
-            "e" to LayoutKey("e", "ę", "e"),
-            "l" to LayoutKey("l", "ł", "w"),
-            "n" to LayoutKey("n", "ń", "ɲ"),
-            "o" to LayoutKey("o", "ó", "u"),
-            "s" to LayoutKey("s", "ś", "ɕ"),
-            "z" to LayoutKey("z", "ż", "ʐ"),
-            "x" to LayoutKey("x", "ź", "ʑ")
+        keys = buildLatinLayout("zł", "zloty", mapOf(
+            "a" to key("a", "a", "a", "ą", "ɔ̃", "a-ogonek"),
+            "c" to key("c", "ts", "c", "ć", "tɕ", "c-acute"),
+            "e" to key("e", "e", "e", "ę", "ɛ̃", "e-ogonek"),
+            "l" to key("l", "l", "l", "ł", "w", "l-stroke"),
+            "n" to key("n", "n", "n", "ń", "ɲ", "n-acute"),
+            "o" to key("o", "o", "o", "ó", "u", "o-acute"),
+            "s" to key("s", "s", "s", "ś", "ɕ", "s-acute"),
+            "z" to key("z", "z", "z", "ż", "ʐ", "z-dot"),
+            "x" to key("x", "ks", "x", "ź", "ʑ", "z-acute")
         ))
     )
 
@@ -411,11 +510,25 @@ object KeyboardLayouts {
         name = "Portuguese",
         nativeName = "Português",
         script = UniKeySyllable.Companion.Script.LATIN,
-        keys = buildLatinLayout(mapOf(
-            ";" to LayoutKey("ç", "Ç", "s"),
-            "'" to LayoutKey("~", "^", ""),
-            "[" to LayoutKey("´", "`", ""),
-            "]" to LayoutKey("ã", "Ã", "ɐ̃")
+        keys = buildLatinLayout("€", "euro", mapOf(
+            ";" to key("ç", "s", "c-cedilla", "Ç", "s", "C-cedilla"),
+            "'" to key("~", "", "tilde", "^", "", "circumflex"),
+            "[" to key("´", "", "acute", "`", "", "grave"),
+            "]" to key("ã", "ɐ̃", "a-tilde", "Ã", "ɐ̃", "A-tilde")
+        ))
+    )
+
+    // ═══ Portuguese Brazil (pt-br) ═══
+    val PT_BR = KeyboardLayout(
+        code = "pt-br",
+        name = "Portuguese (Brazil)",
+        nativeName = "Português (Brasil)",
+        script = UniKeySyllable.Companion.Script.LATIN,
+        keys = buildLatinLayout("R$", "real", mapOf(
+            ";" to key("ç", "s", "c-cedilla", "Ç", "s", "C-cedilla"),
+            "'" to key("~", "", "tilde", "^", "", "circumflex"),
+            "[" to key("´", "", "acute", "`", "", "grave"),
+            "]" to key("ã", "ɐ̃", "a-tilde", "Ã", "ɐ̃", "A-tilde")
         ))
     )
 
@@ -426,38 +539,39 @@ object KeyboardLayouts {
         nativeName = "Русский",
         script = UniKeySyllable.Companion.Script.CYRILLIC,
         keys = mapOf(
-            "q" to LayoutKey("й", "Й", "j", "short-i"),
-            "w" to LayoutKey("ц", "Ц", "ts", "tse"),
-            "e" to LayoutKey("у", "У", "u", "u"),
-            "r" to LayoutKey("к", "К", "k", "ka"),
-            "t" to LayoutKey("е", "Е", "je", "ye"),
-            "y" to LayoutKey("н", "Н", "n", "en"),
-            "u" to LayoutKey("г", "Г", "ɡ", "ge"),
-            "i" to LayoutKey("ш", "Ш", "ʃ", "sha"),
-            "o" to LayoutKey("щ", "Щ", "ʃtʃ", "shcha"),
-            "p" to LayoutKey("з", "З", "z", "ze"),
-            "[" to LayoutKey("х", "Х", "x", "kha"),
-            "]" to LayoutKey("ъ", "Ъ", "", "hard-sign"),
-            "a" to LayoutKey("ф", "Ф", "f", "ef"),
-            "s" to LayoutKey("ы", "Ы", "ɨ", "yeru"),
-            "d" to LayoutKey("в", "В", "v", "ve"),
-            "f" to LayoutKey("а", "А", "a", "a"),
-            "g" to LayoutKey("п", "П", "p", "pe"),
-            "h" to LayoutKey("р", "Р", "r", "er"),
-            "j" to LayoutKey("о", "О", "o", "o"),
-            "k" to LayoutKey("л", "Л", "l", "el"),
-            "l" to LayoutKey("д", "Д", "d", "de"),
-            ";" to LayoutKey("ж", "Ж", "ʒ", "zhe"),
-            "'" to LayoutKey("э", "Э", "e", "e"),
-            "z" to LayoutKey("я", "Я", "ja", "ya"),
-            "x" to LayoutKey("ч", "Ч", "tʃ", "che"),
-            "c" to LayoutKey("с", "С", "s", "es"),
-            "v" to LayoutKey("м", "М", "m", "em"),
-            "b" to LayoutKey("и", "И", "i", "i"),
-            "n" to LayoutKey("т", "Т", "t", "te"),
-            "m" to LayoutKey("ь", "Ь", "", "soft-sign"),
-            "," to LayoutKey("б", "Б", "b", "be"),
-            "." to LayoutKey("ю", "Ю", "ju", "yu")
+            "q" to key("й", "j", "short-i", "Й", "j", "Short-I"),
+            "w" to key("ц", "ts", "tse", "Ц", "ts", "Tse"),
+            "e" to key("у", "u", "u", "У", "u", "U"),
+            "r" to key("к", "k", "ka", "К", "k", "Ka"),
+            "t" to key("е", "je", "ye", "Е", "je", "Ye"),
+            "y" to key("н", "n", "en", "Н", "n", "En"),
+            "u" to key("г", "ɡ", "ge", "Г", "ɡ", "Ge"),
+            "i" to key("ш", "ʃ", "sha", "Ш", "ʃ", "Sha"),
+            "o" to key("щ", "ʃtʃ", "shcha", "Щ", "ʃtʃ", "Shcha"),
+            "p" to key("з", "z", "ze", "З", "z", "Ze"),
+            "[" to key("х", "x", "kha", "Х", "x", "Kha"),
+            "]" to key("ъ", "", "hard-sign", "Ъ", "", "Hard-sign"),
+            "a" to key("ф", "f", "ef", "Ф", "f", "Ef"),
+            "s" to key("ы", "ɨ", "yeru", "Ы", "ɨ", "Yeru"),
+            "d" to key("в", "v", "ve", "В", "v", "Ve"),
+            "f" to key("а", "a", "a", "А", "a", "A"),
+            "g" to key("п", "p", "pe", "П", "p", "Pe"),
+            "h" to key("р", "r", "er", "Р", "r", "Er"),
+            "j" to key("о", "o", "o", "О", "o", "O"),
+            "k" to key("л", "l", "el", "Л", "l", "El"),
+            "l" to key("д", "d", "de", "Д", "d", "De"),
+            ";" to key("ж", "ʒ", "zhe", "Ж", "ʒ", "Zhe"),
+            "'" to key("э", "e", "e", "Э", "e", "E"),
+            "z" to key("я", "ja", "ya", "Я", "ja", "Ya"),
+            "x" to key("ч", "tʃ", "che", "Ч", "tʃ", "Che"),
+            "c" to key("с", "s", "es", "С", "s", "Es"),
+            "v" to key("м", "m", "em", "М", "m", "Em"),
+            "b" to key("и", "i", "i", "И", "i", "I"),
+            "n" to key("т", "t", "te", "Т", "t", "Te"),
+            "m" to key("ь", "", "soft-sign", "Ь", "", "Soft-sign"),
+            "," to key("б", "b", "be", "Б", "b", "Be"),
+            "." to key("ю", "ju", "yu", "Ю", "ju", "Yu"),
+            "4" to key("₽", "", "ruble", "$", "", "dollar")
         )
     )
 
@@ -467,10 +581,10 @@ object KeyboardLayouts {
         name = "Swedish",
         nativeName = "Svenska",
         script = UniKeySyllable.Companion.Script.LATIN,
-        keys = buildLatinLayout(mapOf(
-            ";" to LayoutKey("ö", "Ö", "ø"),
-            "'" to LayoutKey("ä", "Ä", "ɛ"),
-            "[" to LayoutKey("å", "Å", "ɔ")
+        keys = buildLatinLayout("kr", "krona", mapOf(
+            ";" to key("ö", "ø", "o-umlaut", "Ö", "ø", "O-umlaut"),
+            "'" to key("ä", "ɛ", "a-umlaut", "Ä", "ɛ", "A-umlaut"),
+            "[" to key("å", "ɔ", "a-ring", "Å", "ɔ", "A-ring")
         ))
     )
 
@@ -480,7 +594,7 @@ object KeyboardLayouts {
         name = "Swahili",
         nativeName = "Kiswahili",
         script = UniKeySyllable.Companion.Script.LATIN,
-        keys = buildLatinLayout(emptyMap())
+        keys = buildLatinLayout("TSh", "shilling", emptyMap())
     )
 
     // ═══ Turkish (tr) ═══
@@ -489,14 +603,14 @@ object KeyboardLayouts {
         name = "Turkish",
         nativeName = "Türkçe",
         script = UniKeySyllable.Companion.Script.LATIN,
-        keys = buildLatinLayout(mapOf(
-            "i" to LayoutKey("ı", "I", "ɯ"),  // dotless i
-            ";" to LayoutKey("ş", "Ş", "ʃ"),
-            "'" to LayoutKey("i", "İ", "i"),  // dotted i
-            "[" to LayoutKey("ğ", "Ğ", "ɣ"),
-            "]" to LayoutKey("ü", "Ü", "y"),
-            "\\" to LayoutKey("ç", "Ç", "tʃ"),
-            "/" to LayoutKey("ö", "Ö", "ø")
+        keys = buildLatinLayout("₺", "lira", mapOf(
+            "i" to key("ı", "ɯ", "dotless-i", "I", "ɯ", "Dotless-I"),
+            ";" to key("ş", "ʃ", "s-cedilla", "Ş", "ʃ", "S-cedilla"),
+            "'" to key("i", "i", "dotted-i", "İ", "i", "Dotted-I"),
+            "[" to key("ğ", "ɣ", "g-breve", "Ğ", "ɣ", "G-breve"),
+            "]" to key("ü", "y", "u-umlaut", "Ü", "y", "U-umlaut"),
+            "\\" to key("ç", "tʃ", "c-cedilla", "Ç", "tʃ", "C-cedilla"),
+            "/" to key("ö", "ø", "o-umlaut", "Ö", "ø", "O-umlaut")
         ))
     )
 
@@ -508,59 +622,106 @@ object KeyboardLayouts {
         script = UniKeySyllable.Companion.Script.CJK,
         keys = mapOf(
             // Pinyin initials
-            "b" to LayoutKey("b", null, "p", "bo"),
-            "p" to LayoutKey("p", null, "pʰ", "po"),
-            "m" to LayoutKey("m", null, "m", "mo"),
-            "f" to LayoutKey("f", null, "f", "fo"),
-            "d" to LayoutKey("d", null, "t", "de"),
-            "t" to LayoutKey("t", null, "tʰ", "te"),
-            "n" to LayoutKey("n", null, "n", "ne"),
-            "l" to LayoutKey("l", null, "l", "le"),
-            "g" to LayoutKey("g", null, "k", "ge"),
-            "k" to LayoutKey("k", null, "kʰ", "ke"),
-            "h" to LayoutKey("h", null, "x", "he"),
-            "j" to LayoutKey("j", null, "tɕ", "ji"),
-            "q" to LayoutKey("q", null, "tɕʰ", "qi"),
-            "x" to LayoutKey("x", null, "ɕ", "xi"),
-            "z" to LayoutKey("z", null, "ts", "zi"),
-            "c" to LayoutKey("c", null, "tsʰ", "ci"),
-            "s" to LayoutKey("s", null, "s", "si"),
-            "r" to LayoutKey("r", null, "ɻ", "ri"),
-            "y" to LayoutKey("y", null, "j", "yi"),
-            "w" to LayoutKey("w", null, "w", "wu"),
-            // Pinyin finals (as combinations)
-            "a" to LayoutKey("a", null, "a", "a"),
-            "o" to LayoutKey("o", null, "o", "o"),
-            "e" to LayoutKey("e", null, "ə", "e"),
-            "i" to LayoutKey("i", null, "i", "i"),
-            "u" to LayoutKey("u", null, "u", "u"),
-            "v" to LayoutKey("ü", null, "y", "ü")
+            "b" to key("b", "p", "bo"),
+            "p" to key("p", "pʰ", "po"),
+            "m" to key("m", "m", "mo"),
+            "f" to key("f", "f", "fo"),
+            "d" to key("d", "t", "de"),
+            "t" to key("t", "tʰ", "te"),
+            "n" to key("n", "n", "ne"),
+            "l" to key("l", "l", "le"),
+            "g" to key("g", "k", "ge"),
+            "k" to key("k", "kʰ", "ke"),
+            "h" to key("h", "x", "he"),
+            "j" to key("j", "tɕ", "ji"),
+            "q" to key("q", "tɕʰ", "qi"),
+            "x" to key("x", "ɕ", "xi"),
+            "z" to key("z", "ts", "zi"),
+            "c" to key("c", "tsʰ", "ci"),
+            "s" to key("s", "s", "si"),
+            "r" to key("r", "ɻ", "ri"),
+            "y" to key("y", "j", "yi"),
+            "w" to key("w", "w", "wu"),
+            // Pinyin finals
+            "a" to key("a", "a", "a"),
+            "o" to key("o", "o", "o"),
+            "e" to key("e", "ə", "e"),
+            "i" to key("i", "i", "i"),
+            "u" to key("u", "u", "u"),
+            "v" to key("ü", "y", "u-umlaut"),
+            "4" to key("¥", "", "yuan", "$", "", "dollar")
         )
     )
 
+    // ═══ English Australia (en-au) ═══
+    val EN_AU = KeyboardLayout(
+        code = "en-au",
+        name = "English (Australia)",
+        nativeName = "English",
+        script = UniKeySyllable.Companion.Script.LATIN,
+        keys = buildLatinLayout("$", "dollar", emptyMap())
+    )
+
+    // ═══ English Canada (en-ca) ═══
+    val EN_CA = KeyboardLayout(
+        code = "en-ca",
+        name = "English (Canada)",
+        nativeName = "English",
+        script = UniKeySyllable.Companion.Script.LATIN,
+        keys = buildLatinLayout("$", "dollar", emptyMap())
+    )
+
+    // ═══ English India (en-in) ═══
+    val EN_IN = KeyboardLayout(
+        code = "en-in",
+        name = "English (India)",
+        nativeName = "English",
+        script = UniKeySyllable.Companion.Script.LATIN,
+        keys = buildLatinLayout("₹", "rupee", emptyMap())
+    )
+
+    // ═══ Spanish Latin America (es-419) ═══
+    val ES_419 = KeyboardLayout(
+        code = "es-419",
+        name = "Spanish (Latin America)",
+        nativeName = "Español (Latinoamérica)",
+        script = UniKeySyllable.Companion.Script.LATIN,
+        keys = buildLatinLayout("$", "dollar", mapOf(
+            ";" to key("ñ", "ɲ", "ene", "Ñ", "ɲ", "Ene"),
+            "'" to key("´", "", "acute", "¨", "", "diaeresis"),
+            "[" to key("¿", "", "inverted-question", "¡", "", "inverted-exclamation")
+        ))
+    )
+
     /**
-     * Build a Latin-based layout with overrides
+     * Build a Latin-based layout with currency and overrides
      */
-    private fun buildLatinLayout(overrides: Map<String, LayoutKey>): Map<String, LayoutKey> {
+    private fun buildLatinLayout(
+        currency: String,
+        currencyName: String,
+        overrides: Map<String, LayoutKey>
+    ): Map<String, LayoutKey> {
         val base = mutableMapOf<String, LayoutKey>()
 
-        // Standard QWERTY
+        // Standard QWERTY letters with shift for uppercase
         for (c in 'a'..'z') {
-            val key = c.toString()
-            base[key] = LayoutKey(key, key.uppercase(), getLatinIpa(c))
+            val lower = c.toString()
+            val upper = lower.uppercase()
+            val ipa = getLatinIpa(c)
+            base[lower] = key(lower, ipa, lower, upper, ipa, upper)
         }
 
-        // Numbers and symbols
-        base["1"] = LayoutKey("1", "!", "")
-        base["2"] = LayoutKey("2", "@", "")
-        base["3"] = LayoutKey("3", "#", "")
-        base["4"] = LayoutKey("4", "$", "")
-        base["5"] = LayoutKey("5", "%", "")
-        base["6"] = LayoutKey("6", "^", "")
-        base["7"] = LayoutKey("7", "&", "")
-        base["8"] = LayoutKey("8", "*", "")
-        base["9"] = LayoutKey("9", "(", "")
-        base["0"] = LayoutKey("0", ")", "")
+        // Numbers and symbols - currency on shift+4
+        base["1"] = key("1", "", "one", "!", "", "exclamation")
+        base["2"] = key("2", "", "two", "@", "", "at")
+        base["3"] = key("3", "", "three", "#", "", "hash")
+        base["4"] = key("4", "", "four", currency, "", currencyName)
+        base["5"] = key("5", "", "five", "%", "", "percent")
+        base["6"] = key("6", "", "six", "^", "", "caret")
+        base["7"] = key("7", "", "seven", "&", "", "ampersand")
+        base["8"] = key("8", "", "eight", "*", "", "asterisk")
+        base["9"] = key("9", "", "nine", "(", "", "left-paren")
+        base["0"] = key("0", "", "zero", ")", "", "right-paren")
 
         // Apply overrides
         base.putAll(overrides)
@@ -600,8 +761,10 @@ object KeyboardLayouts {
 
     /**
      * All layouts by language code
+     * Includes regional variants (en-gb, en-au, etc.)
      */
     val layouts: Map<String, KeyboardLayout> = mapOf(
+        // Core 23 Chatterbox languages
         "ar" to AR,
         "da" to DA,
         "de" to DE,
@@ -624,16 +787,29 @@ object KeyboardLayouts {
         "sv" to SV,
         "sw" to SW,
         "tr" to TR,
-        "zh" to ZH
+        "zh" to ZH,
+        // Regional variants
+        "en-us" to EN,        // US English (alias)
+        "en-gb" to EN_GB,     // UK English
+        "en-au" to EN_AU,     // Australian English
+        "en-ca" to EN_CA,     // Canadian English
+        "en-in" to EN_IN,     // Indian English
+        "pt-br" to PT_BR,     // Brazilian Portuguese
+        "es-419" to ES_419    // Latin American Spanish
     )
 
     /**
-     * Get layout by language code
+     * Get layout by language code (case-insensitive)
      */
     fun get(code: String): KeyboardLayout? = layouts[code.lowercase()]
 
     /**
-     * Get all supported language codes
+     * Get all supported language codes (base languages only)
      */
-    val supportedLanguages: List<String> = layouts.keys.toList().sorted()
+    val supportedLanguages: List<String> = layouts.keys.filter { !it.contains("-") || it == "en-gb" || it == "pt-br" || it == "es-419" }.sorted()
+
+    /**
+     * Get all supported language codes including all variants
+     */
+    val allLanguageCodes: List<String> = layouts.keys.toList().sorted()
 }
