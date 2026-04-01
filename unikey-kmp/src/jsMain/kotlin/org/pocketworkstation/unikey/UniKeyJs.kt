@@ -341,3 +341,139 @@ fun rhymes(word1: String, isHebrew1: Boolean, word2: String, isHebrew2: Boolean)
 @JsName("rhymeDistance")
 fun rhymeDistance(word1: String, isHebrew1: Boolean, word2: String, isHebrew2: Boolean): Int =
     UniKeySyllable.rhymeDistance(word1, isHebrew1, word2, isHebrew2)
+
+// ═══ Keyboard Layouts (23 languages) ═══
+
+@JsName("getSupportedLanguages")
+fun getSupportedLanguages(): Array<String> = KeyboardLayouts.supportedLanguages.toTypedArray()
+
+@JsName("getLayout")
+fun getLayout(langCode: String): dynamic? {
+    val layout = KeyboardLayouts.get(langCode) ?: return null
+    val obj = js("{}")
+    obj["code"] = layout.code
+    obj["name"] = layout.name
+    obj["nativeName"] = layout.nativeName
+    obj["script"] = layout.script.name
+    obj["keys"] = layoutKeysToDynamic(layout.keys)
+    return obj
+}
+
+private fun layoutKeysToDynamic(keys: Map<String, LayoutKey>): dynamic {
+    val obj = js("{}")
+    keys.forEach { (keyId, key) ->
+        val keyObj = js("{}")
+        keyObj["char"] = key.char
+        keyObj["shift"] = key.shift
+        keyObj["ipa"] = key.ipa
+        keyObj["name"] = key.name
+        obj[keyId] = keyObj
+    }
+    return obj
+}
+
+@JsName("getLayoutKey")
+fun getLayoutKey(langCode: String, keyId: String): dynamic? {
+    val layout = KeyboardLayouts.get(langCode) ?: return null
+    val key = layout.keys[keyId] ?: return null
+    val obj = js("{}")
+    obj["char"] = key.char
+    obj["shift"] = key.shift
+    obj["ipa"] = key.ipa
+    obj["name"] = key.name
+    return obj
+}
+
+// ═══ IPA Matrix ═══
+
+@JsName("getIpaConsonant")
+fun getIpaConsonant(ipa: String): dynamic? {
+    val cons = IpaMatrix.getConsonant(ipa) ?: return null
+    val obj = js("{}")
+    obj["ipa"] = cons.ipa
+    obj["name"] = cons.name
+    obj["place"] = cons.place.name
+    obj["manner"] = cons.manner.name
+    obj["voiced"] = cons.voiced
+    obj["aspirated"] = cons.aspirated
+    obj["breathy"] = cons.breathy
+    obj["emphatic"] = cons.emphatic
+    obj["hue"] = cons.hue
+    obj["languages"] = cons.languages.toTypedArray()
+    return obj
+}
+
+@JsName("getIpaVowelFull")
+fun getIpaVowelFull(ipa: String): dynamic? {
+    val vowel = IpaMatrix.getVowel(ipa) ?: return null
+    val obj = js("{}")
+    obj["ipa"] = vowel.ipa
+    obj["name"] = vowel.name
+    obj["height"] = vowel.height.name
+    obj["backness"] = vowel.backness.name
+    obj["rounded"] = vowel.rounded
+    obj["long"] = vowel.long
+    obj["nasal"] = vowel.nasal
+    obj["hue"] = vowel.hue
+    obj["languages"] = vowel.languages.toTypedArray()
+    return obj
+}
+
+@JsName("getConsonantsForLanguage")
+fun getConsonantsForLanguage(langCode: String): Array<dynamic> {
+    return IpaMatrix.getConsonantsForLanguage(langCode).map { cons ->
+        val obj = js("{}")
+        obj["ipa"] = cons.ipa
+        obj["name"] = cons.name
+        obj["place"] = cons.place.name
+        obj["manner"] = cons.manner.name
+        obj["voiced"] = cons.voiced
+        obj["hue"] = cons.hue
+        obj
+    }.toTypedArray()
+}
+
+@JsName("getVowelsForLanguage")
+fun getVowelsForLanguage(langCode: String): Array<dynamic> {
+    return IpaMatrix.getVowelsForLanguage(langCode).map { vowel ->
+        val obj = js("{}")
+        obj["ipa"] = vowel.ipa
+        obj["name"] = vowel.name
+        obj["height"] = vowel.height.name
+        obj["backness"] = vowel.backness.name
+        obj["rounded"] = vowel.rounded
+        obj["hue"] = vowel.hue
+        obj
+    }.toTypedArray()
+}
+
+@JsName("getPhonemeHue")
+fun getPhonemeHue(ipa: String): Int = IpaMatrix.getPhonemeHue(ipa)
+
+@JsName("getAllConsonants")
+fun getAllConsonants(): Array<dynamic> {
+    return IpaMatrix.consonants.map { cons ->
+        val obj = js("{}")
+        obj["ipa"] = cons.ipa
+        obj["name"] = cons.name
+        obj["place"] = cons.place.name
+        obj["manner"] = cons.manner.name
+        obj["voiced"] = cons.voiced
+        obj["hue"] = cons.hue
+        obj
+    }.toTypedArray()
+}
+
+@JsName("getAllVowels")
+fun getAllVowels(): Array<dynamic> {
+    return IpaMatrix.vowels.map { vowel ->
+        val obj = js("{}")
+        obj["ipa"] = vowel.ipa
+        obj["name"] = vowel.name
+        obj["height"] = vowel.height.name
+        obj["backness"] = vowel.backness.name
+        obj["rounded"] = vowel.rounded
+        obj["hue"] = vowel.hue
+        obj
+    }.toTypedArray()
+}
