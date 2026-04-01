@@ -182,3 +182,39 @@ fun rhymeScheme(ipas: Array<String>): Array<dynamic> {
         obj
     }.toTypedArray()
 }
+
+// ═══ UniKey Syllable System ═══
+
+@JsName("parseHebrewSyllables")
+fun parseHebrewSyllables(word: String): Array<dynamic> {
+    return UniKeySyllable.parseHebrew(word).map { syl ->
+        val obj = js("{}")
+        obj["consonant"] = syl.consonant
+        obj["vowel"] = syl.vowel
+        obj["original"] = syl.original
+        obj["hue"] = syl.hue
+        obj
+    }.toTypedArray()
+}
+
+@JsName("parseEnglishSyllables")
+fun parseEnglishSyllables(word: String): Array<dynamic> {
+    return UniKeySyllable.parseEnglish(word).map { syl ->
+        val obj = js("{}")
+        obj["consonant"] = syl.consonant
+        obj["vowel"] = syl.vowel
+        obj["original"] = syl.original
+        obj["hue"] = syl.hue
+        obj
+    }.toTypedArray()
+}
+
+@JsName("wordHue")
+fun wordHue(word: String, isHebrew: Boolean): Int = UniKeySyllable.wordHue(word, isHebrew)
+
+@JsName("wordEndColor")
+fun wordEndColor(word: String, isHebrew: Boolean): String = UniKeySyllable.wordEndColor(word, isHebrew)
+
+@JsName("syllableHsl")
+fun syllableHsl(hue: Int, saturation: Int = 70, lightness: Int = 65): String =
+    UniKeySyllable.hsl(hue, saturation, lightness)

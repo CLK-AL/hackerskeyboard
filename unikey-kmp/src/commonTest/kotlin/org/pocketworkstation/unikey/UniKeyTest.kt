@@ -294,3 +294,81 @@ class IpaColorTest {
         assertEquals(hue1, hue2, "Rhyming words should get same hue")
     }
 }
+
+class UniKeySyllableTest {
+
+    @Test
+    fun testParseHebrewSyllables() {
+        // בַּזֶּלֶת = ba-ze-let
+        val syllables = UniKeySyllable.parseHebrew("\u05D1\u05B7\u05BC\u05D6\u05B6\u05BC\u05DC\u05B6\u05EA")
+        assertTrue(syllables.isNotEmpty(), "Should parse syllables")
+
+        // First syllable should be "ba" (bet with dagesh + patach)
+        val first = syllables.first()
+        assertEquals("b", first.consonant, "First consonant should be b (dagesh)")
+        assertEquals("a", first.vowel, "First vowel should be a (patach)")
+    }
+
+    @Test
+    fun testParseEnglishSyllables() {
+        val syllables = UniKeySyllable.parseEnglish("raging")
+        assertTrue(syllables.isNotEmpty())
+
+        // Should have syllables like ra-gi-ng or similar
+        val first = syllables.first()
+        assertEquals("r", first.consonant)
+        assertEquals("a", first.vowel)
+    }
+
+    @Test
+    fun testSimilarSyllablesHaveSimilarHue() {
+        // "ba" and "pa" should have similar hues (both labial + 'a')
+        val ba = UniKeySyllable("b", "a", "ba")
+        val pa = UniKeySyllable("p", "a", "pa")
+        val ma = UniKeySyllable("m", "a", "ma")
+
+        // All labials with 'a' should be in similar hue range
+        val hueDiffBaPa = kotlin.math.abs(ba.hue - pa.hue)
+        val hueDiffBaMa = kotlin.math.abs(ba.hue - ma.hue)
+
+        assertTrue(hueDiffBaPa < 30, "ba and pa should have similar hue (diff=$hueDiffBaPa)")
+        assertTrue(hueDiffBaMa < 30, "ba and ma should have similar hue (diff=$hueDiffBaMa)")
+    }
+
+    @Test
+    fun testDifferentVowelsHaveDifferentHue() {
+        // "ba" and "bi" should have different hues (different vowels)
+        val ba = UniKeySyllable("b", "a", "ba")
+        val bi = UniKeySyllable("b", "i", "bi")
+
+        val hueDiff = kotlin.math.abs(ba.hue - bi.hue)
+        assertTrue(hueDiff > 60, "ba and bi should have different hue regions (diff=$hueDiff)")
+    }
+
+    @Test
+    fun testWordHue() {
+        val hue1 = UniKeySyllable.wordHue("raging", false)
+        val hue2 = UniKeySyllable.wordHue("staging", false)
+
+        // Both end in "-ing" so should have same/similar hue
+        val diff = kotlin.math.abs(hue1 - hue2)
+        assertTrue(diff < 30, "Rhyming words should have similar hue (diff=$diff)")
+    }
+
+    @Test
+    fun testHebrewRhymeHue() {
+        // Words ending in same pattern should have similar hue
+        // סוֹעֶרֶת and צוֹבֶרֶת both end in -eret
+        val hue1 = UniKeySyllable.wordHue("\u05E1\u05D5\u05B9\u05E2\u05B6\u05E8\u05B6\u05EA", true)
+        val hue2 = UniKeySyllable.wordHue("\u05E6\u05D5\u05B9\u05D1\u05B6\u05E8\u05B6\u05EA", true)
+
+        val diff = kotlin.math.abs(hue1 - hue2)
+        assertTrue(diff < 60, "Hebrew rhyming words should have similar hue (diff=$diff)")
+    }
+
+    @Test
+    fun testHslColor() {
+        val color = UniKeySyllable.hsl(120, 70, 65)
+        assertEquals("hsl(120, 70%, 65%)", color)
+    }
+}
