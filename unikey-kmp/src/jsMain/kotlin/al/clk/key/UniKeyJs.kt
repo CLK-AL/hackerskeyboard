@@ -69,11 +69,11 @@ fun resetModifiers() = UniKeyModifiers.reset()
 
 // Nikud helpers
 @JsName("getNikudForIpa")
-fun getNikudForIpa(ipa: String): Array<String> = Nikud.forIpa(ipa).map { it.mark }.toTypedArray()
+fun getNikudForIpa(ipa: String): Array<String> = NikudVowel.forIpa(ipa).map { it.mark }.toTypedArray()
 
 @JsName("applyNikud")
 fun applyNikud(letter: String, ipa: String, useMale: Boolean = false): String {
-    return if (letter.length == 1) Nikud.apply(letter[0], ipa, useMale) else letter
+    return if (letter.length == 1) NikudVowel.apply(letter[0], ipa, useMale) else letter
 }
 
 // Hebrew letter helpers
@@ -96,17 +96,16 @@ fun getHebrewLetterInfo(letter: String): dynamic? {
 
 // BGDKPT helpers
 @JsName("isBgdkpt")
-fun isBgdkpt(letter: String): Boolean = letter.length == 1 && Bgdkpt.isBgdkpt(letter[0])
+fun isBgdkpt(letter: String): Boolean = letter.length == 1 && HebrewBgdkpt.isBgdkpt(letter[0])
 
 @JsName("getBgdkptSound")
 fun getBgdkptSound(letter: String, hasDagesh: Boolean, useClassical: Boolean = false): dynamic? {
     if (letter.length != 1) return null
-    val bgdkpt = Bgdkpt.fromChar(letter[0]) ?: return null
-    val sound = bgdkpt.getSound(hasDagesh, useClassical)
+    val bgdkpt = HebrewBgdkpt.fromChar(letter[0]) ?: return null
     val obj = js("{}")
-    obj["letter"] = sound.letter
-    obj["ipa"] = sound.ipa
-    obj["en"] = sound.en
+    obj["letter"] = bgdkpt.getForm(hasDagesh)
+    obj["ipa"] = bgdkpt.getIpa(hasDagesh, useClassical)
+    obj["en"] = bgdkpt.getIpa(hasDagesh, useClassical)  // Use IPA as EN approximation
     return obj
 }
 

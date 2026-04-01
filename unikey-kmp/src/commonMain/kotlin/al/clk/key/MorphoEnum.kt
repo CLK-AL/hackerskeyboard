@@ -86,6 +86,115 @@ enum class NikudVowel(
         }
 
         fun fromCodePoint(cp: Int): NikudVowel? = byCode[cp]
+
+        /**
+         * Get nikud options for an IPA sound
+         */
+        fun forIpa(ipa: String): List<NikudVowel> = when (ipa) {
+            "a" -> listOf(PATACH, KAMATZ, HATAF_PATACH)
+            "e" -> listOf(TZERE, SEGOL, HATAF_SEGOL)
+            "ɛ" -> listOf(SEGOL, HATAF_SEGOL)
+            "i" -> listOf(CHIRIK, CHIRIK_MALE)
+            "o" -> listOf(CHOLAM, CHOLAM_MALE, KAMATZ, HATAF_KAMATZ)
+            "u" -> listOf(KUBUTZ, SHURUK)
+            "ə" -> listOf(SHVA)
+            "ɪ" -> listOf(CHIRIK)
+            "ʊ" -> listOf(KUBUTZ)
+            "æ" -> listOf(SEGOL, PATACH)
+            "ʌ" -> listOf(PATACH)
+            "ɔ" -> listOf(KAMATZ)
+            "ɑ" -> listOf(KAMATZ)
+            else -> emptyList()
+        }
+
+        /**
+         * Apply nikud to a letter
+         */
+        fun apply(letter: Char, ipa: String, useMale: Boolean = false): String {
+            val nikudList = forIpa(ipa)
+            if (nikudList.isEmpty()) return letter.toString()
+
+            // Use hataf for gutturals with schwa
+            val gutturals = setOf('\u05D0', '\u05D4', '\u05D7', '\u05E2', '\u05E8')
+            if (letter in gutturals && ipa == "ə") {
+                return "$letter${HATAF_PATACH.mark}"
+            }
+
+            val nikud = nikudList.first()
+
+            // Use male form if requested
+            if (useMale) {
+                return when (ipa) {
+                    "i" -> "$letter${CHIRIK_MALE.mark}"
+                    "o" -> "$letter${CHOLAM_MALE.mark}"
+                    "u" -> "$letter${SHURUK.mark}"
+                    else -> "$letter${nikud.mark}"
+                }
+            }
+
+            return "$letter${nikud.mark}"
+        }
+    }
+}
+
+/**
+ * Hebrew diacritical modifiers (non-vowel marks)
+ */
+enum class HebrewModifier(
+    val mark: String,
+    val unicode: Int,
+    val ipa: String,
+    val effect: String
+) {
+    DAGESH("ּ", 0x05BC, "", "double/hard"),
+    SHIN_DOT("ׁ", 0x05C1, "ʃ", "shin"),
+    SIN_DOT("ׂ", 0x05C2, "s", "sin"),
+    RAFE("ֿ", 0x05BF, "", "soft"),
+    MAPPIQ("ּ", 0x05BC, "h", "pronounced-he");
+
+    companion object {
+        private val byCode = entries.associateBy { it.unicode }
+        fun fromCodePoint(cp: Int): HebrewModifier? = byCode[cp]
+    }
+}
+
+/**
+ * BGDKPT letters - consonants affected by dagesh
+ */
+enum class HebrewBgdkpt(
+    val letter: Char,
+    val withDagesh: String,
+    val ipaDagesh: String,
+    val withoutDagesh: String,
+    val ipaWithout: String,
+    val classical: String? = null,
+    val classicalIpa: String? = null
+) {
+    BET('\u05D1', "בּ", "b", "ב", "v", null, null),
+    GIMEL('\u05D2', "גּ", "g", "ג", "g", "ג", "ɣ"),
+    DALET('\u05D3', "דּ", "d", "ד", "d", "ד", "ð"),
+    KAF('\u05DB', "כּ", "k", "כ", "x", null, null),
+    PE('\u05E4', "פּ", "p", "פ", "f", null, null),
+    TAV('\u05EA', "תּ", "t", "ת", "t", "ת", "θ");
+
+    /** Whether this letter has distinct modern sounds with/without dagesh */
+    val hasDistinctModernSounds: Boolean get() = ipaDagesh != ipaWithout
+
+    /** Get IPA for dagesh state */
+    fun getIpa(hasDagesh: Boolean, useClassical: Boolean = false): String = when {
+        hasDagesh -> ipaDagesh
+        useClassical && classicalIpa != null -> classicalIpa
+        else -> ipaWithout
+    }
+
+    /** Get letter form for dagesh state */
+    fun getForm(hasDagesh: Boolean): String = if (hasDagesh) withDagesh else withoutDagesh
+
+    companion object {
+        private val byLetter = entries.associateBy { it.letter }
+        fun fromChar(c: Char): HebrewBgdkpt? = byLetter[c]
+        fun isBgdkpt(c: Char): Boolean = byLetter.containsKey(c)
+        val modernDistinct = entries.filter { it.hasDistinctModernSounds }
     }
 }
 

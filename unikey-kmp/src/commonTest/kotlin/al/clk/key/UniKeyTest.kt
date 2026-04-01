@@ -100,21 +100,21 @@ class NikudTest {
 
     @Test
     fun testNikudForIpa() {
-        val patach = Nikud.forIpa("a")
+        val patach = NikudVowel.forIpa("a")
         assertTrue(patach.isNotEmpty())
-        assertTrue(patach.any { it == Nikud.PATACH })
+        assertTrue(patach.any { it == NikudVowel.PATACH })
     }
 
     @Test
     fun testApplyNikud() {
-        val result = Nikud.apply('\u05D1', "a") // bet + patach
+        val result = NikudVowel.apply('\u05D1', "a") // bet + patach
         assertEquals("\u05D1\u05B7", result)
     }
 
     @Test
     fun testGutturalWithSchwa() {
         // Gutturals use hataf instead of shva
-        val result = Nikud.apply('\u05D0', "\u0259") // alef + schwa
+        val result = NikudVowel.apply('\u05D0', "ə") // alef + schwa
         assertEquals("\u05D0\u05B2", result) // alef + hataf patach
     }
 }
@@ -152,35 +152,33 @@ class BgdkptTest {
 
     @Test
     fun testBetWithDagesh() {
-        val bet = Bgdkpt.BET
-        val withDagesh = bet.getSound(hasDagesh = true)
-        assertEquals("b", withDagesh.ipa)
-        assertEquals("b", withDagesh.en)
+        val bet = HebrewBgdkpt.BET
+        val ipa = bet.getIpa(hasDagesh = true)
+        assertEquals("b", ipa)
     }
 
     @Test
     fun testBetWithoutDagesh() {
-        val bet = Bgdkpt.BET
-        val withoutDagesh = bet.getSound(hasDagesh = false)
-        assertEquals("v", withoutDagesh.ipa)
-        assertEquals("v", withoutDagesh.en)
+        val bet = HebrewBgdkpt.BET
+        val ipa = bet.getIpa(hasDagesh = false)
+        assertEquals("v", ipa)
     }
 
     @Test
     fun testClassicalPronunciation() {
-        val tav = Bgdkpt.TAV
-        assertNotNull(tav.classical)
-        val classical = tav.getSound(hasDagesh = false, useClassical = true)
-        assertEquals("\u03B8", classical.ipa) // theta
+        val tav = HebrewBgdkpt.TAV
+        assertNotNull(tav.classicalIpa)
+        val ipa = tav.getIpa(hasDagesh = false, useClassical = true)
+        assertEquals("θ", ipa) // theta
     }
 
     @Test
     fun testModernDistinct() {
         // Only BET, KAF, PE have distinct sounds in modern Hebrew
-        val distinct = Bgdkpt.modernDistinct
-        assertTrue(distinct.contains(Bgdkpt.BET))
-        assertTrue(distinct.contains(Bgdkpt.KAF))
-        assertTrue(distinct.contains(Bgdkpt.PE))
+        val distinct = HebrewBgdkpt.modernDistinct
+        assertTrue(distinct.contains(HebrewBgdkpt.BET))
+        assertTrue(distinct.contains(HebrewBgdkpt.KAF))
+        assertTrue(distinct.contains(HebrewBgdkpt.PE))
     }
 }
 
