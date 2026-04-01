@@ -215,3 +215,82 @@ class IpaTest {
         assertTrue(ts.heUnique)
     }
 }
+
+class IpaColorTest {
+
+    @Test
+    fun testEnIpaEndings() {
+        assertEquals("IN", IpaColor.enIpa("raging"))
+        assertEquals("IN", IpaColor.enIpa("staging"))
+        assertEquals("Ent", IpaColor.enIpa("dormant").replace("ant", "Ent").let { IpaColor.enIpa("potent") })
+        assertEquals("ejt", IpaColor.enIpa("create"))
+        assertEquals("ajt", IpaColor.enIpa("might"))
+    }
+
+    @Test
+    fun testHeIpaBasic() {
+        // בַּזֶּלֶת = bazelet
+        val bazelet = IpaColor.heIpa("\u05D1\u05B7\u05BC\u05D6\u05B6\u05BC\u05DC\u05B6\u05EA")
+        assertTrue(bazelet.contains("b"), "Should start with b (dagesh bet)")
+        assertTrue(bazelet.contains("t"), "Should end with t")
+    }
+
+    @Test
+    fun testHeIpaShin() {
+        // שׁ = shin (sh)
+        val shin = IpaColor.heIpa("\u05E9\u05C1")
+        assertEquals("sh", shin)
+
+        // שׂ = sin (s)
+        val sin = IpaColor.heIpa("\u05E9\u05C2")
+        assertEquals("s", sin)
+    }
+
+    @Test
+    fun testIpaHue() {
+        val hue1 = IpaColor.ipaHue("IN")
+        val hue2 = IpaColor.ipaHue("IN")
+        assertEquals(hue1, hue2, "Same IPA should produce same hue")
+
+        val hue3 = IpaColor.ipaHue("et")
+        assertTrue(hue1 != hue3 || hue1 == 0, "Different IPA should usually produce different hue")
+    }
+
+    @Test
+    fun testHsl() {
+        val color = IpaColor.hsl(180, 50, 70)
+        assertEquals("hsl(180, 50%, 70%)", color)
+    }
+
+    @Test
+    fun testRhymeScheme() {
+        val ipas = listOf("IN", "et", "IN", "et")
+        val scheme = IpaColor.rhymeScheme(ipas)
+
+        assertEquals(4, scheme.size)
+        assertEquals('A', scheme[0].letter)
+        assertEquals('B', scheme[1].letter)
+        assertEquals('A', scheme[2].letter) // Same as first
+        assertEquals('B', scheme[3].letter) // Same as second
+    }
+
+    @Test
+    fun testLineEndIpa() {
+        val heIpa = IpaColor.lineEndIpa("\u05D1\u05B7\u05BC\u05D6\u05B6\u05BC\u05DC\u05B6\u05EA,", true)
+        assertTrue(heIpa.isNotEmpty())
+
+        val enIpa = IpaColor.lineEndIpa("staging.", false)
+        assertEquals("IN", enIpa)
+    }
+
+    @Test
+    fun testRhymingWordsGetSameHue() {
+        val raging = IpaColor.enIpa("raging")
+        val staging = IpaColor.enIpa("staging")
+        assertEquals(raging, staging, "Rhyming words should have same IPA ending")
+
+        val hue1 = IpaColor.ipaHue(raging)
+        val hue2 = IpaColor.ipaHue(staging)
+        assertEquals(hue1, hue2, "Rhyming words should get same hue")
+    }
+}

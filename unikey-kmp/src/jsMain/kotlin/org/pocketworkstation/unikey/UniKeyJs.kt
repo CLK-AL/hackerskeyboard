@@ -148,3 +148,37 @@ fun getIpaConsonantInfo(ipa: String): dynamic? {
     obj["warning"] = consonant.warning
     return obj
 }
+
+// ═══ IPA Color System ═══
+
+@JsName("heIpa")
+fun heIpa(word: String): String = IpaColor.heIpa(word)
+
+@JsName("enIpa")
+fun enIpa(word: String): String = IpaColor.enIpa(word)
+
+@JsName("lineEndIpa")
+fun lineEndIpa(line: String, isHebrew: Boolean): String = IpaColor.lineEndIpa(line, isHebrew)
+
+@JsName("ipaHue")
+fun ipaHue(ipa: String): Int = IpaColor.ipaHue(ipa)
+
+@JsName("hsl")
+fun hsl(hue: Int, saturation: Int, lightness: Int): String = IpaColor.hsl(hue, saturation, lightness)
+
+@JsName("ipaEndColor")
+fun ipaEndColor(ipa: String): String = IpaColor.ipaEndColor(ipa)
+
+@JsName("ipaMidColor")
+fun ipaMidColor(ipa: String): String = IpaColor.ipaMidColor(ipa)
+
+@JsName("rhymeScheme")
+fun rhymeScheme(ipas: Array<String>): Array<dynamic> {
+    return IpaColor.rhymeScheme(ipas.toList()).map { item ->
+        val obj = js("{}")
+        obj["ch"] = item.letter.toString()
+        obj["ipa"] = item.ipa
+        obj["hue"] = item.hue
+        obj
+    }.toTypedArray()
+}
