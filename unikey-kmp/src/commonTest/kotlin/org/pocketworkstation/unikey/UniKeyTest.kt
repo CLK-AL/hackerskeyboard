@@ -371,4 +371,45 @@ class UniKeySyllableTest {
         val color = UniKeySyllable.hsl(120, 70, 65)
         assertEquals("hsl(120, 70%, 65%)", color)
     }
+
+    @Test
+    fun testRhymeKey() {
+        val key1 = UniKeySyllable.rhymeKey("raging", false)
+        val key2 = UniKeySyllable.rhymeKey("staging", false)
+        assertEquals(key1, key2, "Rhyming words should have same rhyme key")
+    }
+
+    @Test
+    fun testRhymes() {
+        assertTrue(UniKeySyllable.rhymes("raging", false, "staging", false))
+        assertTrue(UniKeySyllable.rhymes("night", false, "light", false))
+    }
+
+    @Test
+    fun testCrossLanguageRhyme() {
+        // Hebrew סוֹעֶרֶת (soeret) ends in -ret
+        // English "threat" ends in -ret
+        // They should have similar rhyme patterns
+        val heKey = UniKeySyllable.rhymeKey("\u05E1\u05D5\u05B9\u05E2\u05B6\u05E8\u05B6\u05EA", true)
+        val enKey = UniKeySyllable.rhymeKey("threat", false)
+
+        // Both should end in consonant 't' with vowel 'e'
+        assertTrue(heKey.contains("t"), "Hebrew should end in t")
+        assertTrue(enKey.contains("t"), "English should end in t")
+    }
+
+    @Test
+    fun testRhymeDistance() {
+        // Perfect rhyme = 0
+        val dist1 = UniKeySyllable.rhymeDistance("raging", false, "staging", false)
+        assertEquals(0, dist1, "Perfect rhyme should have distance 0")
+
+        // Near rhyme (same vowel, different consonant) > 0
+        val dist2 = UniKeySyllable.rhymeDistance("cat", false, "bat", false)
+        assertTrue(dist2 < 20, "Near rhyme should have low distance")
+
+        // Different ending = high distance
+        val dist3 = UniKeySyllable.rhymeDistance("cat", false, "dog", false)
+        assertTrue(dist3 > 30, "Non-rhyming words should have high distance")
+    }
 }

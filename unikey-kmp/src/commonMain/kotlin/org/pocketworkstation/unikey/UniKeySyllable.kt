@@ -318,5 +318,69 @@ data class UniKeySyllable(
         fun wordEndColor(word: String, isHebrew: Boolean): String {
             return hsl(wordHue(word, isHebrew), 80, 72)
         }
+
+        /**
+         * Get rhyme key for a word - the IPA pattern of its ending syllable(s).
+         * Words with same rhyme key rhyme together regardless of language.
+         */
+        fun rhymeKey(word: String, isHebrew: Boolean, syllableCount: Int = 1): String {
+            val syllables = if (isHebrew) parseHebrew(word) else parseEnglish(word)
+            return syllables.takeLast(syllableCount)
+                .joinToString("-") { "${it.consonant}${it.vowel}" }
+        }
+
+        /**
+         * Check if two words rhyme (same ending IPA pattern).
+         */
+        fun rhymes(word1: String, isHebrew1: Boolean, word2: String, isHebrew2: Boolean): Boolean {
+            val key1 = rhymeKey(word1, isHebrew1)
+            val key2 = rhymeKey(word2, isHebrew2)
+            return key1 == key2
+        }
+
+        /**
+         * Get rhyme distance - how similar two word endings are.
+         * 0 = perfect rhyme, higher = less similar.
+         */
+        fun rhymeDistance(word1: String, isHebrew1: Boolean, word2: String, isHebrew2: Boolean): Int {
+            val syl1 = if (isHebrew1) parseHebrew(word1) else parseEnglish(word1)
+            val syl2 = if (isHebrew2) parseHebrew(word2) else parseEnglish(word2)
+
+            if (syl1.isEmpty() || syl2.isEmpty()) return 100
+
+            val last1 = syl1.last()
+            val last2 = syl2.last()
+
+            // Perfect rhyme = same consonant + same vowel
+            if (last1.consonant == last2.consonant && last1.vowel == last2.vowel) return 0
+
+            // Same vowel, different consonant = near rhyme
+            if (last1.vowel == last2.vowel) return 10 + consonantDistance(last1.consonant, last2.consonant)
+
+            // Different vowel = assonance at best
+            return 50 + vowelDistance(last1.vowel, last2.vowel)
+        }
+
+        private fun consonantDistance(c1: String, c2: String): Int {
+            val f1 = CONSONANT_FEATURES[c1]
+            val f2 = CONSONANT_FEATURES[c2]
+            if (f1 == null || f2 == null) return 10
+
+            // Same place = close, same manner = close
+            var dist = 0
+            if (f1.place != f2.place) dist += kotlin.math.abs(f1.place - f2.place) * 2
+            if (f1.manner != f2.manner) dist += kotlin.math.abs(f1.manner - f2.manner)
+            if (f1.voiced != f2.voiced) dist += 1
+            return dist
+        }
+
+        private fun vowelDistance(v1: String, v2: String): Int {
+            val h1 = VOWEL_HUE[v1] ?: 0
+            val h2 = VOWEL_HUE[v2] ?: 0
+            return kotlin.math.min(
+                kotlin.math.abs(h1 - h2),
+                360 - kotlin.math.abs(h1 - h2)
+            ) / 10
+        }
     }
 }

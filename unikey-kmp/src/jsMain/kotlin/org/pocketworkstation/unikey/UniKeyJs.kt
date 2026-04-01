@@ -218,3 +218,15 @@ fun wordEndColor(word: String, isHebrew: Boolean): String = UniKeySyllable.wordE
 @JsName("syllableHsl")
 fun syllableHsl(hue: Int, saturation: Int = 70, lightness: Int = 65): String =
     UniKeySyllable.hsl(hue, saturation, lightness)
+
+@JsName("rhymeKey")
+fun rhymeKey(word: String, isHebrew: Boolean, syllableCount: Int = 1): String =
+    UniKeySyllable.rhymeKey(word, isHebrew, syllableCount)
+
+@JsName("rhymes")
+fun rhymes(word1: String, isHebrew1: Boolean, word2: String, isHebrew2: Boolean): Boolean =
+    UniKeySyllable.rhymes(word1, isHebrew1, word2, isHebrew2)
+
+@JsName("rhymeDistance")
+fun rhymeDistance(word1: String, isHebrew1: Boolean, word2: String, isHebrew2: Boolean): Int =
+    UniKeySyllable.rhymeDistance(word1, isHebrew1, word2, isHebrew2)
