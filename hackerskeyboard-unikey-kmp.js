@@ -33,7 +33,7 @@
   var toString = kotlin_kotlin.$_$.j;
   var Char__hashCode_impl_otmys = kotlin_kotlin.$_$.h;
   var Regex_init_$Create$ = kotlin_kotlin.$_$.e;
-  var to = kotlin_kotlin.$_$.p2;
+  var to = kotlin_kotlin.$_$.q2;
   var mapOf = kotlin_kotlin.$_$.w;
   var charSequenceLength = kotlin_kotlin.$_$.i1;
   var takeLast = kotlin_kotlin.$_$.f2;
@@ -61,12 +61,13 @@
   var initMetadataForObject = kotlin_kotlin.$_$.q1;
   var emptyList = kotlin_kotlin.$_$.o;
   var first = kotlin_kotlin.$_$.p;
-  var noWhenBranchMatchedException = kotlin_kotlin.$_$.n2;
-  var toString_1 = kotlin_kotlin.$_$.o2;
+  var noWhenBranchMatchedException = kotlin_kotlin.$_$.o2;
+  var toString_1 = kotlin_kotlin.$_$.p2;
   var hashCode = kotlin_kotlin.$_$.n1;
   var getBooleanHashCode = kotlin_kotlin.$_$.k1;
   var take = kotlin_kotlin.$_$.g2;
   var firstOrNull = kotlin_kotlin.$_$.c2;
+  var Triple = kotlin_kotlin.$_$.m2;
   var abs = kotlin_kotlin.$_$.w1;
   var KtMap = kotlin_kotlin.$_$.l;
   var isInterface = kotlin_kotlin.$_$.s1;
@@ -75,7 +76,7 @@
   var takeLast_0 = kotlin_kotlin.$_$.x;
   var joinToString = kotlin_kotlin.$_$.q;
   var last = kotlin_kotlin.$_$.s;
-  var lazy = kotlin_kotlin.$_$.m2;
+  var lazy = kotlin_kotlin.$_$.n2;
   var KProperty1 = kotlin_kotlin.$_$.z1;
   var getPropertyCallableRef = kotlin_kotlin.$_$.l1;
   var isLetter = kotlin_kotlin.$_$.d2;
@@ -103,6 +104,7 @@
   initMetadataForClass(Modifiers, 'Modifiers', Modifiers);
   initMetadataForClass(ConsonantFeatures, 'ConsonantFeatures');
   initMetadataForClass(VowelResult, 'VowelResult');
+  initMetadataForClass(Script, 'Script', VOID, Enum);
   initMetadataForCompanion(Companion_4);
   initMetadataForClass(UniKeySyllable, 'UniKeySyllable');
   initMetadataForObject(UniKeys, 'UniKeys');
@@ -126,10 +128,10 @@
     var _iterator__ex2g4s = this_0.h();
     while (_iterator__ex2g4s.i()) {
       var element = _iterator__ex2g4s.j();
-      var tmp$ret$0 = new Char(element.ca_1);
+      var tmp$ret$0 = new Char(element.ga_1);
       destination.c3(tmp$ret$0, element);
     }
-    tmp.ga_1 = destination;
+    tmp.ka_1 = destination;
     var tmp_0 = this;
     // Inline function 'kotlin.collections.filter' call
     var tmp0 = get_entries();
@@ -138,17 +140,17 @@
     var _iterator__ex2g4s_0 = tmp0.h();
     while (_iterator__ex2g4s_0.i()) {
       var element_0 = _iterator__ex2g4s_0.j();
-      if (element_0.ia()) {
+      if (element_0.ma()) {
         destination_0.f(element_0);
       }
     }
-    tmp_0.ha_1 = destination_0;
+    tmp_0.la_1 = destination_0;
   }
-  protoOf(Companion).ja = function (c) {
-    return this.ga_1.n1(new Char(c));
+  protoOf(Companion).na = function (c) {
+    return this.ka_1.n1(new Char(c));
   };
-  protoOf(Companion).ka = function (c) {
-    return this.ga_1.l1(new Char(c));
+  protoOf(Companion).oa = function (c) {
+    return this.ka_1.l1(new Char(c));
   };
   var Companion_instance;
   function Companion_getInstance() {
@@ -182,29 +184,29 @@
   function Bgdkpt(name, ordinal, letter, withDagesh, withoutDagesh, classical) {
     classical = classical === VOID ? null : classical;
     Enum.call(this, name, ordinal);
-    this.ca_1 = letter;
-    this.da_1 = withDagesh;
-    this.ea_1 = withoutDagesh;
-    this.fa_1 = classical;
+    this.ga_1 = letter;
+    this.ha_1 = withDagesh;
+    this.ia_1 = withoutDagesh;
+    this.ja_1 = classical;
   }
-  protoOf(Bgdkpt).la = function (hasDagesh, useClassical) {
-    return hasDagesh ? this.da_1 : useClassical && !(this.fa_1 == null) ? this.fa_1 : this.ea_1;
+  protoOf(Bgdkpt).pa = function (hasDagesh, useClassical) {
+    return hasDagesh ? this.ha_1 : useClassical && !(this.ja_1 == null) ? this.ja_1 : this.ia_1;
   };
-  protoOf(Bgdkpt).ia = function () {
-    return !(this.da_1.na_1 === this.ea_1.na_1);
+  protoOf(Bgdkpt).ma = function () {
+    return !(this.ha_1.ra_1 === this.ia_1.ra_1);
   };
   function BgdkptSound(letter, ipa, en) {
-    this.ma_1 = letter;
-    this.na_1 = ipa;
-    this.oa_1 = en;
+    this.qa_1 = letter;
+    this.ra_1 = ipa;
+    this.sa_1 = en;
   }
   protoOf(BgdkptSound).toString = function () {
-    return 'BgdkptSound(letter=' + this.ma_1 + ', ipa=' + this.na_1 + ', en=' + this.oa_1 + ')';
+    return 'BgdkptSound(letter=' + this.qa_1 + ', ipa=' + this.ra_1 + ', en=' + this.sa_1 + ')';
   };
   protoOf(BgdkptSound).hashCode = function () {
-    var result = getStringHashCode(this.ma_1);
-    result = imul(result, 31) + getStringHashCode(this.na_1) | 0;
-    result = imul(result, 31) + getStringHashCode(this.oa_1) | 0;
+    var result = getStringHashCode(this.qa_1);
+    result = imul(result, 31) + getStringHashCode(this.ra_1) | 0;
+    result = imul(result, 31) + getStringHashCode(this.sa_1) | 0;
     return result;
   };
   protoOf(BgdkptSound).equals = function (other) {
@@ -212,11 +214,11 @@
       return true;
     if (!(other instanceof BgdkptSound))
       return false;
-    if (!(this.ma_1 === other.ma_1))
+    if (!(this.qa_1 === other.qa_1))
       return false;
-    if (!(this.na_1 === other.na_1))
+    if (!(this.ra_1 === other.ra_1))
       return false;
-    if (!(this.oa_1 === other.oa_1))
+    if (!(this.sa_1 === other.sa_1))
       return false;
     return true;
   };
@@ -282,13 +284,13 @@
     var _iterator__ex2g4s = this_0.h();
     while (_iterator__ex2g4s.i()) {
       var element = _iterator__ex2g4s.j();
-      var tmp$ret$0 = new Char(element.ra_1);
+      var tmp$ret$0 = new Char(element.va_1);
       destination.c3(tmp$ret$0, element);
     }
-    tmp.bb_1 = destination;
+    tmp.fb_1 = destination;
   }
-  protoOf(Companion_0).ja = function (c) {
-    return this.bb_1.n1(new Char(c));
+  protoOf(Companion_0).na = function (c) {
+    return this.fb_1.n1(new Char(c));
   };
   var Companion_instance_0;
   function Companion_getInstance_0() {
@@ -348,25 +350,25 @@
     silentEnd = silentEnd === VOID ? false : silentEnd;
     classical = classical === VOID ? null : classical;
     Enum.call(this, name, ordinal);
-    this.ra_1 = letter;
-    this.sa_1 = ipa;
-    this.ta_1 = ipaDagesh;
-    this.ua_1 = displayName;
-    this.va_1 = type;
-    this.wa_1 = en;
-    this.xa_1 = enDagesh;
-    this.ya_1 = finalForm;
-    this.za_1 = silentEnd;
-    this.ab_1 = classical;
+    this.va_1 = letter;
+    this.wa_1 = ipa;
+    this.xa_1 = ipaDagesh;
+    this.ya_1 = displayName;
+    this.za_1 = type;
+    this.ab_1 = en;
+    this.bb_1 = enDagesh;
+    this.cb_1 = finalForm;
+    this.db_1 = silentEnd;
+    this.eb_1 = classical;
   }
-  protoOf(HebrewLetter).cb = function () {
+  protoOf(HebrewLetter).gb = function () {
     return listOf([HebrewLetter_KAF_SOFIT_getInstance(), HebrewLetter_MEM_SOFIT_getInstance(), HebrewLetter_NUN_SOFIT_getInstance(), HebrewLetter_PE_SOFIT_getInstance(), HebrewLetter_TSADI_SOFIT_getInstance()]).g1(this);
   };
-  protoOf(HebrewLetter).db = function () {
-    return this.va_1.equals(LetterType_GUTTURAL_getInstance());
+  protoOf(HebrewLetter).hb = function () {
+    return this.za_1.equals(LetterType_GUTTURAL_getInstance());
   };
-  protoOf(HebrewLetter).eb = function () {
-    return this.va_1.equals(LetterType_BGDKPT_getInstance());
+  protoOf(HebrewLetter).ib = function () {
+    return this.za_1.equals(LetterType_BGDKPT_getInstance());
   };
   var LetterType_REGULAR_instance;
   var LetterType_GUTTURAL_instance;
@@ -560,13 +562,13 @@
     var _iterator__ex2g4s = this_0.h();
     while (_iterator__ex2g4s.i()) {
       var element = _iterator__ex2g4s.j();
-      var tmp$ret$0 = element.hb_1;
+      var tmp$ret$0 = element.lb_1;
       destination.c3(tmp$ret$0, element);
     }
-    tmp.ob_1 = destination;
+    tmp.sb_1 = destination;
   }
-  protoOf(Companion_1).pb = function (ipa) {
-    return this.ob_1.n1(ipa);
+  protoOf(Companion_1).tb = function (ipa) {
+    return this.sb_1.n1(ipa);
   };
   var Companion_instance_1;
   function Companion_getInstance_1() {
@@ -607,13 +609,13 @@
   function IpaVowel(name, ordinal, ipa, displayName, heNikud, heName, enSpellings, quality, warning) {
     warning = warning === VOID ? null : warning;
     Enum.call(this, name, ordinal);
-    this.hb_1 = ipa;
-    this.ib_1 = displayName;
-    this.jb_1 = heNikud;
-    this.kb_1 = heName;
-    this.lb_1 = enSpellings;
-    this.mb_1 = quality;
-    this.nb_1 = warning;
+    this.lb_1 = ipa;
+    this.mb_1 = displayName;
+    this.nb_1 = heNikud;
+    this.ob_1 = heName;
+    this.pb_1 = enSpellings;
+    this.qb_1 = quality;
+    this.rb_1 = warning;
   }
   var IpaConsonant_P_instance;
   var IpaConsonant_B_instance;
@@ -654,13 +656,13 @@
     var _iterator__ex2g4s = this_0.h();
     while (_iterator__ex2g4s.i()) {
       var element = _iterator__ex2g4s.j();
-      var tmp$ret$0 = element.sb_1;
+      var tmp$ret$0 = element.wb_1;
       destination.c3(tmp$ret$0, element);
     }
-    tmp.zb_1 = destination;
+    tmp.dc_1 = destination;
   }
-  protoOf(Companion_2).pb = function (ipa) {
-    return this.zb_1.n1(ipa);
+  protoOf(Companion_2).tb = function (ipa) {
+    return this.dc_1.n1(ipa);
   };
   var Companion_instance_2;
   function Companion_getInstance_2() {
@@ -718,13 +720,13 @@
     heUnique = heUnique === VOID ? false : heUnique;
     warning = warning === VOID ? null : warning;
     Enum.call(this, name, ordinal);
-    this.sb_1 = ipa;
-    this.tb_1 = displayName;
-    this.ub_1 = he;
-    this.vb_1 = en;
-    this.wb_1 = geresh;
-    this.xb_1 = heUnique;
-    this.yb_1 = warning;
+    this.wb_1 = ipa;
+    this.xb_1 = displayName;
+    this.yb_1 = he;
+    this.zb_1 = en;
+    this.ac_1 = geresh;
+    this.bc_1 = heUnique;
+    this.cc_1 = warning;
   }
   function IpaQuality_EXACT_getInstance() {
     IpaQuality_initEntries();
@@ -903,17 +905,17 @@
     return IpaConsonant_W_instance;
   }
   function RhymeSchemeItem(letter, ipa, hue) {
-    this.ac_1 = letter;
-    this.bc_1 = ipa;
-    this.cc_1 = hue;
+    this.ec_1 = letter;
+    this.fc_1 = ipa;
+    this.gc_1 = hue;
   }
   protoOf(RhymeSchemeItem).toString = function () {
-    return 'RhymeSchemeItem(letter=' + toString(this.ac_1) + ', ipa=' + this.bc_1 + ', hue=' + this.cc_1 + ')';
+    return 'RhymeSchemeItem(letter=' + toString(this.ec_1) + ', ipa=' + this.fc_1 + ', hue=' + this.gc_1 + ')';
   };
   protoOf(RhymeSchemeItem).hashCode = function () {
-    var result = Char__hashCode_impl_otmys(this.ac_1);
-    result = imul(result, 31) + getStringHashCode(this.bc_1) | 0;
-    result = imul(result, 31) + this.cc_1 | 0;
+    var result = Char__hashCode_impl_otmys(this.ec_1);
+    result = imul(result, 31) + getStringHashCode(this.fc_1) | 0;
+    result = imul(result, 31) + this.gc_1 | 0;
     return result;
   };
   protoOf(RhymeSchemeItem).equals = function (other) {
@@ -921,22 +923,22 @@
       return true;
     if (!(other instanceof RhymeSchemeItem))
       return false;
-    if (!(this.ac_1 === other.ac_1))
+    if (!(this.ec_1 === other.ec_1))
       return false;
-    if (!(this.bc_1 === other.bc_1))
+    if (!(this.fc_1 === other.fc_1))
       return false;
-    if (!(this.cc_1 === other.cc_1))
+    if (!(this.gc_1 === other.gc_1))
       return false;
     return true;
   };
   function IpaColor() {
     IpaColor_instance = this;
-    this.dc_1 = listOf([to(Regex_init_$Create$('ing$'), 'IN'), to(Regex_init_$Create$('tion$'), 'shEn'), to(Regex_init_$Create$('ting$'), 'tIN'), to(Regex_init_$Create$('ring$'), 'rIN'), to(Regex_init_$Create$('ling$'), 'lIN'), to(Regex_init_$Create$('ning$'), 'nIN'), to(Regex_init_$Create$('ent$'), 'Ent'), to(Regex_init_$Create$('ant$'), 'ant'), to(Regex_init_$Create$('ine$'), 'ajn'), to(Regex_init_$Create$('ate$'), 'ejt'), to(Regex_init_$Create$('ight$'), 'ajt'), to(Regex_init_$Create$('ite$'), 'ajt'), to(Regex_init_$Create$('ake$'), 'ejk'), to(Regex_init_$Create$('ade$'), 'ejd'), to(Regex_init_$Create$('age$'), 'Ij'), to(Regex_init_$Create$('ound$'), 'awnd'), to(Regex_init_$Create$('own$'), 'awn'), to(Regex_init_$Create$('out$'), 'awt'), to(Regex_init_$Create$('ash$'), 'ash'), to(Regex_init_$Create$('ush$'), 'ush'), to(Regex_init_$Create$('ay$'), 'ej'), to(Regex_init_$Create$('ey$'), 'ej'), to(Regex_init_$Create$('oy$'), 'oj'), to(Regex_init_$Create$('er$'), 'Er'), to(Regex_init_$Create$('or$'), 'Er'), to(Regex_init_$Create$('ar$'), 'ar'), to(Regex_init_$Create$('le$'), 'El'), to(Regex_init_$Create$('al$'), 'El'), to(Regex_init_$Create$('ed$'), 'd'), to(Regex_init_$Create$('es$'), 'z'), to(Regex_init_$Create$('ly$'), 'li'), to(Regex_init_$Create$('ck$'), 'k'), to(Regex_init_$Create$('ss$'), 's'), to(Regex_init_$Create$('ll$'), 'l')]);
-    this.ec_1 = mapOf([to(new Char(_Char___init__impl__6a9atx(1488)), ''), to(new Char(_Char___init__impl__6a9atx(1489)), 'v'), to(new Char(_Char___init__impl__6a9atx(1490)), 'g'), to(new Char(_Char___init__impl__6a9atx(1491)), 'd'), to(new Char(_Char___init__impl__6a9atx(1492)), 'h'), to(new Char(_Char___init__impl__6a9atx(1493)), 'v'), to(new Char(_Char___init__impl__6a9atx(1494)), 'z'), to(new Char(_Char___init__impl__6a9atx(1495)), 'x'), to(new Char(_Char___init__impl__6a9atx(1496)), 't'), to(new Char(_Char___init__impl__6a9atx(1497)), 'j'), to(new Char(_Char___init__impl__6a9atx(1498)), 'x'), to(new Char(_Char___init__impl__6a9atx(1499)), 'x'), to(new Char(_Char___init__impl__6a9atx(1500)), 'l'), to(new Char(_Char___init__impl__6a9atx(1501)), 'm'), to(new Char(_Char___init__impl__6a9atx(1502)), 'm'), to(new Char(_Char___init__impl__6a9atx(1503)), 'n'), to(new Char(_Char___init__impl__6a9atx(1504)), 'n'), to(new Char(_Char___init__impl__6a9atx(1505)), 's'), to(new Char(_Char___init__impl__6a9atx(1506)), ''), to(new Char(_Char___init__impl__6a9atx(1507)), 'f'), to(new Char(_Char___init__impl__6a9atx(1508)), 'f'), to(new Char(_Char___init__impl__6a9atx(1509)), 'ts'), to(new Char(_Char___init__impl__6a9atx(1510)), 'ts'), to(new Char(_Char___init__impl__6a9atx(1511)), 'k'), to(new Char(_Char___init__impl__6a9atx(1512)), 'r'), to(new Char(_Char___init__impl__6a9atx(1513)), 'sh'), to(new Char(_Char___init__impl__6a9atx(1514)), 't')]);
-    this.fc_1 = mapOf([to(new Char(_Char___init__impl__6a9atx(1489)), 'b'), to(new Char(_Char___init__impl__6a9atx(1499)), 'k'), to(new Char(_Char___init__impl__6a9atx(1508)), 'p')]);
-    this.gc_1 = mapOf([to(1456, '@'), to(1457, 'e'), to(1458, 'a'), to(1459, 'o'), to(1460, 'i'), to(1461, 'e'), to(1462, 'E'), to(1463, 'a'), to(1464, 'a'), to(1465, 'o'), to(1466, 'o'), to(1467, 'u')]);
+    this.hc_1 = listOf([to(Regex_init_$Create$('ing$'), 'IN'), to(Regex_init_$Create$('tion$'), 'shEn'), to(Regex_init_$Create$('ting$'), 'tIN'), to(Regex_init_$Create$('ring$'), 'rIN'), to(Regex_init_$Create$('ling$'), 'lIN'), to(Regex_init_$Create$('ning$'), 'nIN'), to(Regex_init_$Create$('ent$'), 'Ent'), to(Regex_init_$Create$('ant$'), 'ant'), to(Regex_init_$Create$('ine$'), 'ajn'), to(Regex_init_$Create$('ate$'), 'ejt'), to(Regex_init_$Create$('ight$'), 'ajt'), to(Regex_init_$Create$('ite$'), 'ajt'), to(Regex_init_$Create$('ake$'), 'ejk'), to(Regex_init_$Create$('ade$'), 'ejd'), to(Regex_init_$Create$('age$'), 'Ij'), to(Regex_init_$Create$('ound$'), 'awnd'), to(Regex_init_$Create$('own$'), 'awn'), to(Regex_init_$Create$('out$'), 'awt'), to(Regex_init_$Create$('ash$'), 'ash'), to(Regex_init_$Create$('ush$'), 'ush'), to(Regex_init_$Create$('ay$'), 'ej'), to(Regex_init_$Create$('ey$'), 'ej'), to(Regex_init_$Create$('oy$'), 'oj'), to(Regex_init_$Create$('er$'), 'Er'), to(Regex_init_$Create$('or$'), 'Er'), to(Regex_init_$Create$('ar$'), 'ar'), to(Regex_init_$Create$('le$'), 'El'), to(Regex_init_$Create$('al$'), 'El'), to(Regex_init_$Create$('ed$'), 'd'), to(Regex_init_$Create$('es$'), 'z'), to(Regex_init_$Create$('ly$'), 'li'), to(Regex_init_$Create$('ck$'), 'k'), to(Regex_init_$Create$('ss$'), 's'), to(Regex_init_$Create$('ll$'), 'l')]);
+    this.ic_1 = mapOf([to(new Char(_Char___init__impl__6a9atx(1488)), ''), to(new Char(_Char___init__impl__6a9atx(1489)), 'v'), to(new Char(_Char___init__impl__6a9atx(1490)), 'g'), to(new Char(_Char___init__impl__6a9atx(1491)), 'd'), to(new Char(_Char___init__impl__6a9atx(1492)), 'h'), to(new Char(_Char___init__impl__6a9atx(1493)), 'v'), to(new Char(_Char___init__impl__6a9atx(1494)), 'z'), to(new Char(_Char___init__impl__6a9atx(1495)), 'x'), to(new Char(_Char___init__impl__6a9atx(1496)), 't'), to(new Char(_Char___init__impl__6a9atx(1497)), 'j'), to(new Char(_Char___init__impl__6a9atx(1498)), 'x'), to(new Char(_Char___init__impl__6a9atx(1499)), 'x'), to(new Char(_Char___init__impl__6a9atx(1500)), 'l'), to(new Char(_Char___init__impl__6a9atx(1501)), 'm'), to(new Char(_Char___init__impl__6a9atx(1502)), 'm'), to(new Char(_Char___init__impl__6a9atx(1503)), 'n'), to(new Char(_Char___init__impl__6a9atx(1504)), 'n'), to(new Char(_Char___init__impl__6a9atx(1505)), 's'), to(new Char(_Char___init__impl__6a9atx(1506)), ''), to(new Char(_Char___init__impl__6a9atx(1507)), 'f'), to(new Char(_Char___init__impl__6a9atx(1508)), 'f'), to(new Char(_Char___init__impl__6a9atx(1509)), 'ts'), to(new Char(_Char___init__impl__6a9atx(1510)), 'ts'), to(new Char(_Char___init__impl__6a9atx(1511)), 'k'), to(new Char(_Char___init__impl__6a9atx(1512)), 'r'), to(new Char(_Char___init__impl__6a9atx(1513)), 'sh'), to(new Char(_Char___init__impl__6a9atx(1514)), 't')]);
+    this.jc_1 = mapOf([to(new Char(_Char___init__impl__6a9atx(1489)), 'b'), to(new Char(_Char___init__impl__6a9atx(1499)), 'k'), to(new Char(_Char___init__impl__6a9atx(1508)), 'p')]);
+    this.kc_1 = mapOf([to(1456, '@'), to(1457, 'e'), to(1458, 'a'), to(1459, 'o'), to(1460, 'i'), to(1461, 'e'), to(1462, 'E'), to(1463, 'a'), to(1464, 'a'), to(1465, 'o'), to(1466, 'o'), to(1467, 'u')]);
   }
-  protoOf(IpaColor).hc = function (word) {
+  protoOf(IpaColor).lc = function (word) {
     // Inline function 'kotlin.text.lowercase' call
     // Inline function 'kotlin.js.asDynamic' call
     var tmp0 = word.toLowerCase();
@@ -945,7 +947,7 @@
     // Inline function 'kotlin.text.isEmpty' call
     if (charSequenceLength(w) === 0)
       return '';
-    var _iterator__ex2g4s = this.dc_1.h();
+    var _iterator__ex2g4s = this.hc_1.h();
     while (_iterator__ex2g4s.i()) {
       var _destruct__k2r9zo = _iterator__ex2g4s.j();
       var pattern = _destruct__k2r9zo.r8();
@@ -955,7 +957,7 @@
     }
     return takeLast(w, 3);
   };
-  protoOf(IpaColor).ic = function (word) {
+  protoOf(IpaColor).mc = function (word) {
     // Inline function 'kotlin.text.replace' call
     var w = Regex_init_$Create$('[,.\\-;:!?\\s]+$').b7(word, '');
     var result = StringBuilder_init_$Create$();
@@ -971,7 +973,7 @@
       if (1488 <= cp ? cp <= 1514 : false) {
         lastConsonant = c;
         lastConsonantPos = result.a();
-        var tmp0_elvis_lhs = this.ec_1.n1(new Char(c));
+        var tmp0_elvis_lhs = this.ic_1.n1(new Char(c));
         result.a6(tmp0_elvis_lhs == null ? '' : tmp0_elvis_lhs);
       } else if (cp === 1468) {
         var tmp1_safe_receiver = lastConsonant;
@@ -982,7 +984,7 @@
           var tmp_0 = tmp1_safe_receiver;
           // Inline function 'kotlin.let' call
           var lc = (tmp_0 == null ? null : new Char(tmp_0)).t_1;
-          var tmp0_safe_receiver = IpaColor_getInstance().fc_1.n1(new Char(lc));
+          var tmp0_safe_receiver = IpaColor_getInstance().jc_1.n1(new Char(lc));
           var tmp_1;
           if (tmp0_safe_receiver == null) {
             tmp_1 = null;
@@ -990,7 +992,7 @@
             // Inline function 'kotlin.let' call
             if (lastConsonantPos >= 0) {
               var before = result.l6(0, lastConsonantPos);
-              var tmp0_safe_receiver_0 = IpaColor_getInstance().ec_1.n1(new Char(lc));
+              var tmp0_safe_receiver_0 = IpaColor_getInstance().ic_1.n1(new Char(lc));
               var tmp1_elvis_lhs = tmp0_safe_receiver_0 == null ? null : tmp0_safe_receiver_0.length;
               var consonantLen = tmp1_elvis_lhs == null ? 0 : tmp1_elvis_lhs;
               var after = (lastConsonantPos + consonantLen | 0) <= result.a() ? result.k6(lastConsonantPos + consonantLen | 0) : '';
@@ -1020,7 +1022,7 @@
             result.a6(after_0);
           }
         } else {
-          var tmp2_safe_receiver = this.gc_1.n1(cp);
+          var tmp2_safe_receiver = this.kc_1.n1(cp);
           if (tmp2_safe_receiver == null)
             null;
           else {
@@ -1031,7 +1033,7 @@
     }
     return result.toString();
   };
-  protoOf(IpaColor).jc = function (line, isHebrew) {
+  protoOf(IpaColor).nc = function (line, isHebrew) {
     // Inline function 'kotlin.text.replace' call
     // Inline function 'kotlin.text.trim' call
     var this_0 = Regex_init_$Create$('[,.\\-;:!?\\s]+$').b7(line, '');
@@ -1046,7 +1048,7 @@
       tmp = tmp0_elvis_lhs;
     }
     var lastWord = tmp;
-    var ipa = isHebrew ? this.ic(lastWord) : this.hc(lastWord);
+    var ipa = isHebrew ? this.mc(lastWord) : this.lc(lastWord);
     var tmp_0;
     if (isHebrew) {
       // Inline function 'kotlin.text.ifEmpty' call
@@ -1064,7 +1066,7 @@
     }
     return tmp_0;
   };
-  protoOf(IpaColor).kc = function (ipa) {
+  protoOf(IpaColor).oc = function (ipa) {
     // Inline function 'kotlin.text.isEmpty' call
     if (charSequenceLength(ipa) === 0)
       return 0;
@@ -1108,18 +1110,18 @@
     var tmp$ret$8 = toNumber(this_5) * 0.15;
     return numberToInt(tmp_1 + tmp$ret$8) % 360 | 0;
   };
-  protoOf(IpaColor).lc = function (hue, saturation, lightness) {
+  protoOf(IpaColor).pc = function (hue, saturation, lightness) {
     return 'hsl(' + hue + ', ' + saturation + '%, ' + lightness + '%)';
   };
-  protoOf(IpaColor).mc = function (ipa) {
-    var hue = this.kc(ipa);
-    return this.lc(hue, 80, 72);
+  protoOf(IpaColor).qc = function (ipa) {
+    var hue = this.oc(ipa);
+    return this.pc(hue, 80, 72);
   };
-  protoOf(IpaColor).nc = function (ipa) {
-    var hue = this.kc(ipa);
-    return this.lc(hue, 45, 55);
+  protoOf(IpaColor).rc = function (ipa) {
+    var hue = this.oc(ipa);
+    return this.pc(hue, 45, 55);
   };
-  protoOf(IpaColor).oc = function (ipas) {
+  protoOf(IpaColor).sc = function (ipas) {
     // Inline function 'kotlin.collections.mutableListOf' call
     var groups = ArrayList_init_$Create$();
     var letters = 'ABCDEFGHIJKLM';
@@ -1135,7 +1137,7 @@
         tmp = new RhymeSchemeItem(_Char___init__impl__6a9atx(120), '?', 0);
       } else {
         var key = takeLast(item, 3);
-        var hue = IpaColor_getInstance().kc(item);
+        var hue = IpaColor_getInstance().oc(item);
         // Inline function 'kotlin.collections.find' call
         var tmp$ret$3;
         $l$block: {
@@ -1204,7 +1206,7 @@
   var Nikud_MAPPIQ_instance;
   function Companion_3() {
   }
-  protoOf(Companion_3).pc = function (ipa) {
+  protoOf(Companion_3).tc = function (ipa) {
     switch (ipa) {
       case 'a':
         return listOf([Nikud_PATACH_getInstance(), Nikud_KAMATZ_getInstance(), Nikud_HATAF_PATACH_getInstance()]);
@@ -1236,27 +1238,27 @@
         return emptyList();
     }
   };
-  protoOf(Companion_3).qc = function (letter, ipa, useMale) {
-    var nikudList = this.pc(ipa);
+  protoOf(Companion_3).uc = function (letter, ipa, useMale) {
+    var nikudList = this.tc(ipa);
     if (nikudList.m())
       return toString(letter);
     if (isGuttural(this, letter) && ipa === '\u0259') {
-      return toString(letter) + Nikud_HATAF_PATACH_getInstance().tc_1;
+      return toString(letter) + Nikud_HATAF_PATACH_getInstance().xc_1;
     }
     var nikud = first(nikudList);
     if (useMale) {
       switch (ipa) {
         case 'i':
-          return toString(letter) + Nikud_CHIRIK_MALE_getInstance().tc_1;
+          return toString(letter) + Nikud_CHIRIK_MALE_getInstance().xc_1;
         case 'o':
-          return toString(letter) + Nikud_CHOLAM_MALE_getInstance().tc_1;
+          return toString(letter) + Nikud_CHOLAM_MALE_getInstance().xc_1;
         case 'u':
-          return toString(letter) + Nikud_SHURUK_getInstance().tc_1;
+          return toString(letter) + Nikud_SHURUK_getInstance().xc_1;
         default:
-          return toString(letter) + nikud.tc_1;
+          return toString(letter) + nikud.xc_1;
       }
     }
-    return toString(letter) + nikud.tc_1;
+    return toString(letter) + nikud.xc_1;
   };
   var Companion_instance_3;
   function Companion_getInstance_3() {
@@ -1291,11 +1293,11 @@
     ipaAlt = ipaAlt === VOID ? null : ipaAlt;
     modifier = modifier === VOID ? null : modifier;
     Enum.call(this, name, ordinal);
-    this.tc_1 = mark;
-    this.uc_1 = displayName;
-    this.vc_1 = ipa;
-    this.wc_1 = ipaAlt;
-    this.xc_1 = modifier;
+    this.xc_1 = mark;
+    this.yc_1 = displayName;
+    this.zc_1 = ipa;
+    this.ad_1 = ipaAlt;
+    this.bd_1 = modifier;
   }
   function Nikud_KAMATZ_getInstance() {
     Nikud_initEntries();
@@ -1364,34 +1366,34 @@
     dagesh = dagesh === VOID ? null : dagesh;
     guttural = guttural === VOID ? false : guttural;
     isFinal = isFinal === VOID ? false : isFinal;
-    this.yc_1 = id;
-    this.zc_1 = en;
-    this.ad_1 = EN;
-    this.bd_1 = he;
-    this.cd_1 = ipa;
-    this.dd_1 = shift;
-    this.ed_1 = heShift;
-    this.fd_1 = syl;
-    this.gd_1 = enSyl;
-    this.hd_1 = mg;
-    this.id_1 = mgSyl;
-    this.jd_1 = dagesh;
-    this.kd_1 = guttural;
-    this.ld_1 = isFinal;
+    this.cd_1 = id;
+    this.dd_1 = en;
+    this.ed_1 = EN;
+    this.fd_1 = he;
+    this.gd_1 = ipa;
+    this.hd_1 = shift;
+    this.id_1 = heShift;
+    this.jd_1 = syl;
+    this.kd_1 = enSyl;
+    this.ld_1 = mg;
+    this.md_1 = mgSyl;
+    this.nd_1 = dagesh;
+    this.od_1 = guttural;
+    this.pd_1 = isFinal;
   }
-  protoOf(UniKey).md = function (mode, mods) {
-    if (mods.pd_1)
-      return this.cd_1;
-    if (mods.od_1 && !(this.hd_1 == null)) {
-      var mf = mods.nd_1;
+  protoOf(UniKey).qd = function (mode, mods) {
+    if (mods.td_1)
+      return this.gd_1;
+    if (mods.sd_1 && !(this.ld_1 == null)) {
+      var mf = mods.rd_1;
       var tmp;
       switch (mode.s1_1) {
         case 2:
         case 1:
-          tmp = mf ? this.hd_1.xd_1 : this.hd_1.wd_1;
+          tmp = mf ? this.ld_1.be_1 : this.ld_1.ae_1;
           break;
         case 0:
-          tmp = mf ? this.hd_1.td_1 : this.hd_1.sd_1;
+          tmp = mf ? this.ld_1.xd_1 : this.ld_1.wd_1;
           break;
         default:
           noWhenBranchMatchedException();
@@ -1399,18 +1401,18 @@
       }
       return tmp;
     }
-    if (mods.nd_1 && !mods.od_1) {
+    if (mods.rd_1 && !mods.sd_1) {
       var tmp_0;
       switch (mode.s1_1) {
         case 0:
           var tmp_1;
           // Inline function 'kotlin.collections.isNullOrEmpty' call
 
-          var this_0 = this.fd_1;
+          var this_0 = this.jd_1;
           if (!(this_0 == null || this_0.m())) {
-            tmp_1 = this.bd_1 + '\xB7';
+            tmp_1 = this.fd_1 + '\xB7';
           } else {
-            tmp_1 = this.bd_1;
+            tmp_1 = this.fd_1;
           }
 
           tmp_0 = tmp_1;
@@ -1419,18 +1421,18 @@
           var tmp_2;
           // Inline function 'kotlin.collections.isNullOrEmpty' call
 
-          var this_1 = this.gd_1;
+          var this_1 = this.kd_1;
           if (!(this_1 == null || this_1.m())) {
-            tmp_2 = this.zc_1 + '\xB7';
+            tmp_2 = this.dd_1 + '\xB7';
           } else {
             // Inline function 'kotlin.text.ifEmpty' call
-            var this_2 = this.ad_1;
+            var this_2 = this.ed_1;
             var tmp_3;
             // Inline function 'kotlin.text.isEmpty' call
             if (charSequenceLength(this_2) === 0) {
               // Inline function 'kotlin.text.uppercase' call
               // Inline function 'kotlin.js.asDynamic' call
-              tmp_3 = this.zc_1.toUpperCase();
+              tmp_3 = this.dd_1.toUpperCase();
             } else {
               tmp_3 = this_2;
             }
@@ -1440,8 +1442,8 @@
           tmp_0 = tmp_2;
           break;
         case 2:
-          var tmp2_elvis_lhs = this.dd_1;
-          tmp_0 = tmp2_elvis_lhs == null ? this.ad_1 : tmp2_elvis_lhs;
+          var tmp2_elvis_lhs = this.hd_1;
+          tmp_0 = tmp2_elvis_lhs == null ? this.ed_1 : tmp2_elvis_lhs;
           break;
         default:
           noWhenBranchMatchedException();
@@ -1452,19 +1454,19 @@
     var tmp_4;
     switch (mode.s1_1) {
       case 1:
-        tmp_4 = this.zc_1;
+        tmp_4 = this.dd_1;
         break;
       case 2:
         // Inline function 'kotlin.text.ifEmpty' call
 
-        var this_3 = this.ad_1;
+        var this_3 = this.ed_1;
         var tmp_5;
         // Inline function 'kotlin.text.isEmpty' call
 
         if (charSequenceLength(this_3) === 0) {
           // Inline function 'kotlin.text.uppercase' call
           // Inline function 'kotlin.js.asDynamic' call
-          tmp_5 = this.zc_1.toUpperCase();
+          tmp_5 = this.dd_1.toUpperCase();
         } else {
           tmp_5 = this_3;
         }
@@ -1472,7 +1474,7 @@
         tmp_4 = tmp_5;
         break;
       case 0:
-        tmp_4 = this.bd_1;
+        tmp_4 = this.fd_1;
         break;
       default:
         noWhenBranchMatchedException();
@@ -1481,23 +1483,23 @@
     return tmp_4;
   };
   protoOf(UniKey).toString = function () {
-    return 'UniKey(id=' + this.yc_1 + ', en=' + this.zc_1 + ', EN=' + this.ad_1 + ', he=' + this.bd_1 + ', ipa=' + this.cd_1 + ', shift=' + this.dd_1 + ', heShift=' + this.ed_1 + ', syl=' + toString_1(this.fd_1) + ', enSyl=' + toString_1(this.gd_1) + ', mg=' + toString_1(this.hd_1) + ', mgSyl=' + toString_1(this.id_1) + ', dagesh=' + this.jd_1 + ', guttural=' + this.kd_1 + ', isFinal=' + this.ld_1 + ')';
+    return 'UniKey(id=' + this.cd_1 + ', en=' + this.dd_1 + ', EN=' + this.ed_1 + ', he=' + this.fd_1 + ', ipa=' + this.gd_1 + ', shift=' + this.hd_1 + ', heShift=' + this.id_1 + ', syl=' + toString_1(this.jd_1) + ', enSyl=' + toString_1(this.kd_1) + ', mg=' + toString_1(this.ld_1) + ', mgSyl=' + toString_1(this.md_1) + ', dagesh=' + this.nd_1 + ', guttural=' + this.od_1 + ', isFinal=' + this.pd_1 + ')';
   };
   protoOf(UniKey).hashCode = function () {
-    var result = getStringHashCode(this.yc_1);
-    result = imul(result, 31) + getStringHashCode(this.zc_1) | 0;
-    result = imul(result, 31) + getStringHashCode(this.ad_1) | 0;
-    result = imul(result, 31) + getStringHashCode(this.bd_1) | 0;
-    result = imul(result, 31) + getStringHashCode(this.cd_1) | 0;
-    result = imul(result, 31) + (this.dd_1 == null ? 0 : getStringHashCode(this.dd_1)) | 0;
-    result = imul(result, 31) + (this.ed_1 == null ? 0 : getStringHashCode(this.ed_1)) | 0;
-    result = imul(result, 31) + (this.fd_1 == null ? 0 : hashCode(this.fd_1)) | 0;
-    result = imul(result, 31) + (this.gd_1 == null ? 0 : hashCode(this.gd_1)) | 0;
-    result = imul(result, 31) + (this.hd_1 == null ? 0 : this.hd_1.hashCode()) | 0;
-    result = imul(result, 31) + (this.id_1 == null ? 0 : hashCode(this.id_1)) | 0;
-    result = imul(result, 31) + (this.jd_1 == null ? 0 : getStringHashCode(this.jd_1)) | 0;
-    result = imul(result, 31) + getBooleanHashCode(this.kd_1) | 0;
-    result = imul(result, 31) + getBooleanHashCode(this.ld_1) | 0;
+    var result = getStringHashCode(this.cd_1);
+    result = imul(result, 31) + getStringHashCode(this.dd_1) | 0;
+    result = imul(result, 31) + getStringHashCode(this.ed_1) | 0;
+    result = imul(result, 31) + getStringHashCode(this.fd_1) | 0;
+    result = imul(result, 31) + getStringHashCode(this.gd_1) | 0;
+    result = imul(result, 31) + (this.hd_1 == null ? 0 : getStringHashCode(this.hd_1)) | 0;
+    result = imul(result, 31) + (this.id_1 == null ? 0 : getStringHashCode(this.id_1)) | 0;
+    result = imul(result, 31) + (this.jd_1 == null ? 0 : hashCode(this.jd_1)) | 0;
+    result = imul(result, 31) + (this.kd_1 == null ? 0 : hashCode(this.kd_1)) | 0;
+    result = imul(result, 31) + (this.ld_1 == null ? 0 : this.ld_1.hashCode()) | 0;
+    result = imul(result, 31) + (this.md_1 == null ? 0 : hashCode(this.md_1)) | 0;
+    result = imul(result, 31) + (this.nd_1 == null ? 0 : getStringHashCode(this.nd_1)) | 0;
+    result = imul(result, 31) + getBooleanHashCode(this.od_1) | 0;
+    result = imul(result, 31) + getBooleanHashCode(this.pd_1) | 0;
     return result;
   };
   protoOf(UniKey).equals = function (other) {
@@ -1505,33 +1507,33 @@
       return true;
     if (!(other instanceof UniKey))
       return false;
-    if (!(this.yc_1 === other.yc_1))
-      return false;
-    if (!(this.zc_1 === other.zc_1))
-      return false;
-    if (!(this.ad_1 === other.ad_1))
-      return false;
-    if (!(this.bd_1 === other.bd_1))
-      return false;
     if (!(this.cd_1 === other.cd_1))
       return false;
-    if (!(this.dd_1 == other.dd_1))
+    if (!(this.dd_1 === other.dd_1))
       return false;
-    if (!(this.ed_1 == other.ed_1))
+    if (!(this.ed_1 === other.ed_1))
       return false;
-    if (!equals(this.fd_1, other.fd_1))
+    if (!(this.fd_1 === other.fd_1))
       return false;
-    if (!equals(this.gd_1, other.gd_1))
+    if (!(this.gd_1 === other.gd_1))
       return false;
-    if (!equals(this.hd_1, other.hd_1))
+    if (!(this.hd_1 == other.hd_1))
       return false;
-    if (!equals(this.id_1, other.id_1))
+    if (!(this.id_1 == other.id_1))
       return false;
-    if (!(this.jd_1 == other.jd_1))
+    if (!equals(this.jd_1, other.jd_1))
       return false;
-    if (!(this.kd_1 === other.kd_1))
+    if (!equals(this.kd_1, other.kd_1))
       return false;
-    if (!(this.ld_1 === other.ld_1))
+    if (!equals(this.ld_1, other.ld_1))
+      return false;
+    if (!equals(this.md_1, other.md_1))
+      return false;
+    if (!(this.nd_1 == other.nd_1))
+      return false;
+    if (!(this.od_1 === other.od_1))
+      return false;
+    if (!(this.pd_1 === other.pd_1))
       return false;
     return true;
   };
@@ -1554,17 +1556,17 @@
     shift = shift === VOID ? false : shift;
     alt = alt === VOID ? false : alt;
     ctrl = ctrl === VOID ? false : ctrl;
-    this.nd_1 = shift;
-    this.od_1 = alt;
-    this.pd_1 = ctrl;
+    this.rd_1 = shift;
+    this.sd_1 = alt;
+    this.td_1 = ctrl;
   }
   protoOf(Modifiers).toString = function () {
-    return 'Modifiers(shift=' + this.nd_1 + ', alt=' + this.od_1 + ', ctrl=' + this.pd_1 + ')';
+    return 'Modifiers(shift=' + this.rd_1 + ', alt=' + this.sd_1 + ', ctrl=' + this.td_1 + ')';
   };
   protoOf(Modifiers).hashCode = function () {
-    var result = getBooleanHashCode(this.nd_1);
-    result = imul(result, 31) + getBooleanHashCode(this.od_1) | 0;
-    result = imul(result, 31) + getBooleanHashCode(this.pd_1) | 0;
+    var result = getBooleanHashCode(this.rd_1);
+    result = imul(result, 31) + getBooleanHashCode(this.sd_1) | 0;
+    result = imul(result, 31) + getBooleanHashCode(this.td_1) | 0;
     return result;
   };
   protoOf(Modifiers).equals = function (other) {
@@ -1572,11 +1574,11 @@
       return true;
     if (!(other instanceof Modifiers))
       return false;
-    if (!(this.nd_1 === other.nd_1))
+    if (!(this.rd_1 === other.rd_1))
       return false;
-    if (!(this.od_1 === other.od_1))
+    if (!(this.sd_1 === other.sd_1))
       return false;
-    if (!(this.pd_1 === other.pd_1))
+    if (!(this.td_1 === other.td_1))
       return false;
     return true;
   };
@@ -1592,18 +1594,44 @@
     KeyMode_initEntries();
     return KeyMode_EN_instance;
   }
+  var Script_HEBREW_instance;
+  var Script_LATIN_instance;
+  var Script_ARABIC_instance;
+  var Script_GREEK_instance;
+  var Script_DEVANAGARI_instance;
+  var Script_CYRILLIC_instance;
+  var Script_HANGUL_instance;
+  var Script_HIRAGANA_instance;
+  var Script_CJK_instance;
+  var Script_UNKNOWN_instance;
+  var Script_entriesInitialized;
+  function Script_initEntries() {
+    if (Script_entriesInitialized)
+      return Unit_instance;
+    Script_entriesInitialized = true;
+    Script_HEBREW_instance = new Script('HEBREW', 0);
+    Script_LATIN_instance = new Script('LATIN', 1);
+    Script_ARABIC_instance = new Script('ARABIC', 2);
+    Script_GREEK_instance = new Script('GREEK', 3);
+    Script_DEVANAGARI_instance = new Script('DEVANAGARI', 4);
+    Script_CYRILLIC_instance = new Script('CYRILLIC', 5);
+    Script_HANGUL_instance = new Script('HANGUL', 6);
+    Script_HIRAGANA_instance = new Script('HIRAGANA', 7);
+    Script_CJK_instance = new Script('CJK', 8);
+    Script_UNKNOWN_instance = new Script('UNKNOWN', 9);
+  }
   function ConsonantFeatures(place, manner, voiced) {
-    this.yd_1 = place;
-    this.zd_1 = manner;
-    this.ae_1 = voiced;
+    this.ce_1 = place;
+    this.de_1 = manner;
+    this.ee_1 = voiced;
   }
   protoOf(ConsonantFeatures).toString = function () {
-    return 'ConsonantFeatures(place=' + this.yd_1 + ', manner=' + this.zd_1 + ', voiced=' + this.ae_1 + ')';
+    return 'ConsonantFeatures(place=' + this.ce_1 + ', manner=' + this.de_1 + ', voiced=' + this.ee_1 + ')';
   };
   protoOf(ConsonantFeatures).hashCode = function () {
-    var result = this.yd_1;
-    result = imul(result, 31) + this.zd_1 | 0;
-    result = imul(result, 31) + getBooleanHashCode(this.ae_1) | 0;
+    var result = this.ce_1;
+    result = imul(result, 31) + this.de_1 | 0;
+    result = imul(result, 31) + getBooleanHashCode(this.ee_1) | 0;
     return result;
   };
   protoOf(ConsonantFeatures).equals = function (other) {
@@ -1611,11 +1639,11 @@
       return true;
     if (!(other instanceof ConsonantFeatures))
       return false;
-    if (!(this.yd_1 === other.yd_1))
+    if (!(this.ce_1 === other.ce_1))
       return false;
-    if (!(this.zd_1 === other.zd_1))
+    if (!(this.de_1 === other.de_1))
       return false;
-    if (!(this.ae_1 === other.ae_1))
+    if (!(this.ee_1 === other.ee_1))
       return false;
     return true;
   };
@@ -1703,26 +1731,26 @@
     return tmp_0;
   }
   function VowelResult(ipa, length, original) {
-    this.be_1 = ipa;
-    this.ce_1 = length;
-    this.de_1 = original;
+    this.fe_1 = ipa;
+    this.ge_1 = length;
+    this.he_1 = original;
   }
   protoOf(VowelResult).r8 = function () {
-    return this.be_1;
+    return this.fe_1;
   };
   protoOf(VowelResult).s8 = function () {
-    return this.ce_1;
+    return this.ge_1;
   };
-  protoOf(VowelResult).ee = function () {
-    return this.de_1;
+  protoOf(VowelResult).da = function () {
+    return this.he_1;
   };
   protoOf(VowelResult).toString = function () {
-    return 'VowelResult(ipa=' + this.be_1 + ', length=' + this.ce_1 + ', original=' + this.de_1 + ')';
+    return 'VowelResult(ipa=' + this.fe_1 + ', length=' + this.ge_1 + ', original=' + this.he_1 + ')';
   };
   protoOf(VowelResult).hashCode = function () {
-    var result = getStringHashCode(this.be_1);
-    result = imul(result, 31) + this.ce_1 | 0;
-    result = imul(result, 31) + getStringHashCode(this.de_1) | 0;
+    var result = getStringHashCode(this.fe_1);
+    result = imul(result, 31) + this.ge_1 | 0;
+    result = imul(result, 31) + getStringHashCode(this.he_1) | 0;
     return result;
   };
   protoOf(VowelResult).equals = function (other) {
@@ -1730,11 +1758,11 @@
       return true;
     if (!(other instanceof VowelResult))
       return false;
-    if (!(this.be_1 === other.be_1))
+    if (!(this.fe_1 === other.fe_1))
       return false;
-    if (!(this.ce_1 === other.ce_1))
+    if (!(this.ge_1 === other.ge_1))
       return false;
-    if (!(this.de_1 === other.de_1))
+    if (!(this.he_1 === other.he_1))
       return false;
     return true;
   };
@@ -1891,24 +1919,246 @@
     }
     return tmp;
   }
+  function arabicConsonantIpa($this, c) {
+    return c === _Char___init__impl__6a9atx(1575) ? '' : c === _Char___init__impl__6a9atx(1576) ? 'b' : c === _Char___init__impl__6a9atx(1578) ? 't' : c === _Char___init__impl__6a9atx(1579) ? '\u03B8' : c === _Char___init__impl__6a9atx(1580) ? 'd\u0292' : c === _Char___init__impl__6a9atx(1581) ? '\u0127' : c === _Char___init__impl__6a9atx(1582) ? 'x' : c === _Char___init__impl__6a9atx(1583) ? 'd' : c === _Char___init__impl__6a9atx(1584) ? '\xF0' : c === _Char___init__impl__6a9atx(1585) ? 'r' : c === _Char___init__impl__6a9atx(1586) ? 'z' : c === _Char___init__impl__6a9atx(1587) ? 's' : c === _Char___init__impl__6a9atx(1588) ? '\u0283' : c === _Char___init__impl__6a9atx(1589) ? 's\u02E4' : c === _Char___init__impl__6a9atx(1590) ? 'd\u02E4' : c === _Char___init__impl__6a9atx(1591) ? 't\u02E4' : c === _Char___init__impl__6a9atx(1592) ? '\xF0\u02E4' : c === _Char___init__impl__6a9atx(1593) ? '\u0295' : c === _Char___init__impl__6a9atx(1594) ? '\u0263' : c === _Char___init__impl__6a9atx(1601) ? 'f' : c === _Char___init__impl__6a9atx(1602) ? 'q' : c === _Char___init__impl__6a9atx(1603) ? 'k' : c === _Char___init__impl__6a9atx(1604) ? 'l' : c === _Char___init__impl__6a9atx(1605) ? 'm' : c === _Char___init__impl__6a9atx(1606) ? 'n' : c === _Char___init__impl__6a9atx(1607) ? 'h' : c === _Char___init__impl__6a9atx(1608) ? 'w' : c === _Char___init__impl__6a9atx(1610) ? 'j' : c === _Char___init__impl__6a9atx(1569) ? '\u0294' : '';
+  }
+  function collectArabicVowel($this, word, start) {
+    if (start >= word.length)
+      return to('a', 0);
+    // Inline function 'kotlin.code' call
+    var this_0 = charCodeAt(word, start);
+    var cp = Char__toInt_impl_vasixd(this_0);
+    switch (cp) {
+      case 1614:
+        return to('a', 1);
+      case 1615:
+        return to('u', 1);
+      case 1616:
+        return to('i', 1);
+      case 1617:
+        return to('a', 1);
+      case 1618:
+        return to('', 1);
+      default:
+        return to('a', 0);
+    }
+  }
+  function parseGreekChar($this, word, pos) {
+    var c = charCodeAt(word, pos);
+    return c === _Char___init__impl__6a9atx(945) || c === _Char___init__impl__6a9atx(940) ? new Triple('', 'a', 1) : c === _Char___init__impl__6a9atx(949) || c === _Char___init__impl__6a9atx(941) ? new Triple('', 'e', 1) : c === _Char___init__impl__6a9atx(951) || c === _Char___init__impl__6a9atx(942) ? new Triple('', 'i', 1) : c === _Char___init__impl__6a9atx(953) || c === _Char___init__impl__6a9atx(943) || (c === _Char___init__impl__6a9atx(970) || c === _Char___init__impl__6a9atx(912)) ? new Triple('', 'i', 1) : c === _Char___init__impl__6a9atx(959) || c === _Char___init__impl__6a9atx(972) ? new Triple('', 'o', 1) : c === _Char___init__impl__6a9atx(965) || c === _Char___init__impl__6a9atx(973) || (c === _Char___init__impl__6a9atx(971) || c === _Char___init__impl__6a9atx(944)) ? new Triple('', 'i', 1) : c === _Char___init__impl__6a9atx(969) || c === _Char___init__impl__6a9atx(974) ? new Triple('', 'o', 1) : c === _Char___init__impl__6a9atx(946) ? new Triple('v', '', 1) : c === _Char___init__impl__6a9atx(947) ? new Triple('\u0263', '', 1) : c === _Char___init__impl__6a9atx(948) ? new Triple('\xF0', '', 1) : c === _Char___init__impl__6a9atx(950) ? new Triple('z', '', 1) : c === _Char___init__impl__6a9atx(952) ? new Triple('\u03B8', '', 1) : c === _Char___init__impl__6a9atx(954) ? new Triple('k', '', 1) : c === _Char___init__impl__6a9atx(955) ? new Triple('l', '', 1) : c === _Char___init__impl__6a9atx(956) ? new Triple('m', '', 1) : c === _Char___init__impl__6a9atx(957) ? new Triple('n', '', 1) : c === _Char___init__impl__6a9atx(958) ? new Triple('ks', '', 1) : c === _Char___init__impl__6a9atx(960) ? new Triple('p', '', 1) : c === _Char___init__impl__6a9atx(961) ? new Triple('r', '', 1) : c === _Char___init__impl__6a9atx(963) || c === _Char___init__impl__6a9atx(962) ? new Triple('s', '', 1) : c === _Char___init__impl__6a9atx(964) ? new Triple('t', '', 1) : c === _Char___init__impl__6a9atx(966) ? new Triple('f', '', 1) : c === _Char___init__impl__6a9atx(967) ? new Triple('x', '', 1) : c === _Char___init__impl__6a9atx(968) ? new Triple('ps', '', 1) : new Triple('', '', 1);
+  }
+  function devanagariConsonantIpa($this, c) {
+    return c === _Char___init__impl__6a9atx(2325) ? 'k' : c === _Char___init__impl__6a9atx(2326) ? 'k\u02B0' : c === _Char___init__impl__6a9atx(2327) ? '\u0261' : c === _Char___init__impl__6a9atx(2328) ? '\u0261\u02B1' : c === _Char___init__impl__6a9atx(2329) ? '\u014B' : c === _Char___init__impl__6a9atx(2330) ? 't\u0283' : c === _Char___init__impl__6a9atx(2331) ? 't\u0283\u02B0' : c === _Char___init__impl__6a9atx(2332) ? 'd\u0292' : c === _Char___init__impl__6a9atx(2333) ? 'd\u0292\u02B1' : c === _Char___init__impl__6a9atx(2334) ? '\u0272' : c === _Char___init__impl__6a9atx(2335) ? '\u0288' : c === _Char___init__impl__6a9atx(2336) ? '\u0288\u02B0' : c === _Char___init__impl__6a9atx(2337) ? '\u0256' : c === _Char___init__impl__6a9atx(2338) ? '\u0256\u02B1' : c === _Char___init__impl__6a9atx(2339) ? '\u0273' : c === _Char___init__impl__6a9atx(2340) ? 't' : c === _Char___init__impl__6a9atx(2341) ? 't\u02B0' : c === _Char___init__impl__6a9atx(2342) ? 'd' : c === _Char___init__impl__6a9atx(2343) ? 'd\u02B1' : c === _Char___init__impl__6a9atx(2344) ? 'n' : c === _Char___init__impl__6a9atx(2346) ? 'p' : c === _Char___init__impl__6a9atx(2347) ? 'p\u02B0' : c === _Char___init__impl__6a9atx(2348) ? 'b' : c === _Char___init__impl__6a9atx(2349) ? 'b\u02B1' : c === _Char___init__impl__6a9atx(2350) ? 'm' : c === _Char___init__impl__6a9atx(2351) ? 'j' : c === _Char___init__impl__6a9atx(2352) ? 'r' : c === _Char___init__impl__6a9atx(2354) ? 'l' : c === _Char___init__impl__6a9atx(2357) ? '\u028B' : c === _Char___init__impl__6a9atx(2358) ? '\u0283' : c === _Char___init__impl__6a9atx(2359) ? '\u0282' : c === _Char___init__impl__6a9atx(2360) ? 's' : c === _Char___init__impl__6a9atx(2361) ? '\u0266' : '';
+  }
+  function devanagariVowelIpa($this, c) {
+    return c === _Char___init__impl__6a9atx(2309) ? '\u0259' : c === _Char___init__impl__6a9atx(2310) || c === _Char___init__impl__6a9atx(2366) ? 'a\u02D0' : c === _Char___init__impl__6a9atx(2311) || c === _Char___init__impl__6a9atx(2367) ? '\u026A' : c === _Char___init__impl__6a9atx(2312) || c === _Char___init__impl__6a9atx(2368) ? 'i\u02D0' : c === _Char___init__impl__6a9atx(2313) || c === _Char___init__impl__6a9atx(2369) ? '\u028A' : c === _Char___init__impl__6a9atx(2314) || c === _Char___init__impl__6a9atx(2370) ? 'u\u02D0' : c === _Char___init__impl__6a9atx(2319) || c === _Char___init__impl__6a9atx(2375) ? 'e\u02D0' : c === _Char___init__impl__6a9atx(2320) || c === _Char___init__impl__6a9atx(2376) ? '\u025B\u02D0' : c === _Char___init__impl__6a9atx(2323) || c === _Char___init__impl__6a9atx(2379) ? 'o\u02D0' : c === _Char___init__impl__6a9atx(2324) || c === _Char___init__impl__6a9atx(2380) ? '\u0254\u02D0' : '\u0259';
+  }
+  function collectDevanagariVowel($this, word, start) {
+    if (start >= word.length)
+      return to('\u0259', 0);
+    var c = charCodeAt(word, start);
+    // Inline function 'kotlin.code' call
+    var cp = Char__toInt_impl_vasixd(c);
+    if (2366 <= cp ? cp <= 2380 : false) {
+      return to(devanagariVowelIpa($this, c), 1);
+    }
+    if (cp === 2381)
+      return to('', 1);
+    return to('\u0259', 0);
+  }
+  function cyrillicCharIpa($this, c) {
+    return c === _Char___init__impl__6a9atx(1072) ? to('', 'a') : c === _Char___init__impl__6a9atx(1073) ? to('b', '') : c === _Char___init__impl__6a9atx(1074) ? to('v', '') : c === _Char___init__impl__6a9atx(1075) ? to('\u0261', '') : c === _Char___init__impl__6a9atx(1076) ? to('d', '') : c === _Char___init__impl__6a9atx(1077) ? to('j', 'e') : c === _Char___init__impl__6a9atx(1105) ? to('j', 'o') : c === _Char___init__impl__6a9atx(1078) ? to('\u0292', '') : c === _Char___init__impl__6a9atx(1079) ? to('z', '') : c === _Char___init__impl__6a9atx(1080) ? to('', 'i') : c === _Char___init__impl__6a9atx(1081) ? to('j', '') : c === _Char___init__impl__6a9atx(1082) ? to('k', '') : c === _Char___init__impl__6a9atx(1083) ? to('l', '') : c === _Char___init__impl__6a9atx(1084) ? to('m', '') : c === _Char___init__impl__6a9atx(1085) ? to('n', '') : c === _Char___init__impl__6a9atx(1086) ? to('', 'o') : c === _Char___init__impl__6a9atx(1087) ? to('p', '') : c === _Char___init__impl__6a9atx(1088) ? to('r', '') : c === _Char___init__impl__6a9atx(1089) ? to('s', '') : c === _Char___init__impl__6a9atx(1090) ? to('t', '') : c === _Char___init__impl__6a9atx(1091) ? to('', 'u') : c === _Char___init__impl__6a9atx(1092) ? to('f', '') : c === _Char___init__impl__6a9atx(1093) ? to('x', '') : c === _Char___init__impl__6a9atx(1094) ? to('ts', '') : c === _Char___init__impl__6a9atx(1095) ? to('t\u0283', '') : c === _Char___init__impl__6a9atx(1096) ? to('\u0283', '') : c === _Char___init__impl__6a9atx(1097) ? to('\u0283t\u0283', '') : c === _Char___init__impl__6a9atx(1098) ? to('', '') : c === _Char___init__impl__6a9atx(1099) ? to('', '\u0268') : c === _Char___init__impl__6a9atx(1100) ? to('', '') : c === _Char___init__impl__6a9atx(1101) ? to('', 'e') : c === _Char___init__impl__6a9atx(1102) ? to('j', 'u') : c === _Char___init__impl__6a9atx(1103) ? to('j', 'a') : to('', '');
+  }
+  function decomposeHangul($this, syllable) {
+    var base = syllable - 44032 | 0;
+    var initial = base / 588 | 0;
+    var medial = (base % 588 | 0) / 28 | 0;
+    var finalC = base % 28 | 0;
+    var initIpa = hangulInitialIpa($this, initial);
+    var medIpa = hangulMedialIpa($this, medial);
+    var finIpa = finalC > 0 ? hangulFinalIpa($this, finalC) : '';
+    return new Triple(initIpa, medIpa, finIpa);
+  }
+  function hangulInitialIpa($this, i) {
+    switch (i) {
+      case 0:
+        return '\u0261';
+      case 1:
+        return 'k';
+      case 2:
+        return 'n';
+      case 3:
+        return 'd';
+      case 4:
+        return 't';
+      case 5:
+        return 'r';
+      case 6:
+        return 'm';
+      case 7:
+        return 'b';
+      case 8:
+        return 'p';
+      case 9:
+        return 's';
+      case 10:
+        return 's';
+      case 11:
+        return '';
+      case 12:
+        return 'd\u0292';
+      case 13:
+        return 't\u0283';
+      case 14:
+        return 't\u0283\u02B0';
+      case 15:
+        return 'k\u02B0';
+      case 16:
+        return 't\u02B0';
+      case 17:
+        return 'p\u02B0';
+      case 18:
+        return 'h';
+      default:
+        return '';
+    }
+  }
+  function hangulMedialIpa($this, m) {
+    switch (m) {
+      case 0:
+        return 'a';
+      case 1:
+        return '\u025B';
+      case 2:
+        return 'ja';
+      case 3:
+        return 'j\u025B';
+      case 4:
+        return '\u028C';
+      case 5:
+        return 'e';
+      case 6:
+        return 'j\u028C';
+      case 7:
+        return 'je';
+      case 8:
+        return 'o';
+      case 9:
+        return 'wa';
+      case 10:
+        return 'w\u025B';
+      case 11:
+        return 'we';
+      case 12:
+        return 'jo';
+      case 13:
+        return 'u';
+      case 14:
+        return 'w\u028C';
+      case 15:
+        return 'we';
+      case 16:
+        return 'wi';
+      case 17:
+        return 'ju';
+      case 18:
+        return '\u0268';
+      case 19:
+        return '\u0270i';
+      case 20:
+        return 'i';
+      default:
+        return '';
+    }
+  }
+  function hangulFinalIpa($this, f) {
+    switch (f) {
+      case 1:
+        return 'k';
+      case 2:
+        return 'k';
+      case 3:
+        return 'k';
+      case 4:
+        return 'n';
+      case 5:
+        return 'n';
+      case 6:
+        return 'n';
+      case 7:
+        return 't';
+      case 8:
+        return 'l';
+      case 9:
+        return 'k';
+      case 10:
+        return 'm';
+      case 11:
+        return 'p';
+      case 12:
+        return 'l';
+      case 13:
+        return 'l';
+      case 14:
+        return 'l';
+      case 15:
+        return 'p';
+      case 16:
+        return 'm';
+      case 17:
+        return 'p';
+      case 18:
+        return 'p';
+      case 19:
+        return 't';
+      case 20:
+        return 't';
+      case 21:
+        return '\u014B';
+      case 22:
+        return 't';
+      case 23:
+        return 't';
+      case 24:
+        return 'k';
+      case 25:
+        return 't';
+      case 26:
+        return 'p';
+      case 27:
+        return 't';
+      default:
+        return '';
+    }
+  }
+  function hiraganaIpa($this, c) {
+    return c === _Char___init__impl__6a9atx(12354) ? to('', 'a') : c === _Char___init__impl__6a9atx(12356) ? to('', 'i') : c === _Char___init__impl__6a9atx(12358) ? to('', '\u026F') : c === _Char___init__impl__6a9atx(12360) ? to('', 'e') : c === _Char___init__impl__6a9atx(12362) ? to('', 'o') : c === _Char___init__impl__6a9atx(12363) ? to('k', 'a') : c === _Char___init__impl__6a9atx(12365) ? to('k', 'i') : c === _Char___init__impl__6a9atx(12367) ? to('k', '\u026F') : c === _Char___init__impl__6a9atx(12369) ? to('k', 'e') : c === _Char___init__impl__6a9atx(12371) ? to('k', 'o') : c === _Char___init__impl__6a9atx(12373) ? to('s', 'a') : c === _Char___init__impl__6a9atx(12375) ? to('\u0255', 'i') : c === _Char___init__impl__6a9atx(12377) ? to('s', '\u026F') : c === _Char___init__impl__6a9atx(12379) ? to('s', 'e') : c === _Char___init__impl__6a9atx(12381) ? to('s', 'o') : c === _Char___init__impl__6a9atx(12383) ? to('t', 'a') : c === _Char___init__impl__6a9atx(12385) ? to('t\u0255', 'i') : c === _Char___init__impl__6a9atx(12388) ? to('ts', '\u026F') : c === _Char___init__impl__6a9atx(12390) ? to('t', 'e') : c === _Char___init__impl__6a9atx(12392) ? to('t', 'o') : c === _Char___init__impl__6a9atx(12394) ? to('n', 'a') : c === _Char___init__impl__6a9atx(12395) ? to('\u0272', 'i') : c === _Char___init__impl__6a9atx(12396) ? to('n', '\u026F') : c === _Char___init__impl__6a9atx(12397) ? to('n', 'e') : c === _Char___init__impl__6a9atx(12398) ? to('n', 'o') : c === _Char___init__impl__6a9atx(12399) ? to('h', 'a') : c === _Char___init__impl__6a9atx(12402) ? to('\xE7', 'i') : c === _Char___init__impl__6a9atx(12405) ? to('\u0278', '\u026F') : c === _Char___init__impl__6a9atx(12408) ? to('h', 'e') : c === _Char___init__impl__6a9atx(12411) ? to('h', 'o') : c === _Char___init__impl__6a9atx(12414) ? to('m', 'a') : c === _Char___init__impl__6a9atx(12415) ? to('m', 'i') : c === _Char___init__impl__6a9atx(12416) ? to('m', '\u026F') : c === _Char___init__impl__6a9atx(12417) ? to('m', 'e') : c === _Char___init__impl__6a9atx(12418) ? to('m', 'o') : c === _Char___init__impl__6a9atx(12420) ? to('j', 'a') : c === _Char___init__impl__6a9atx(12422) ? to('j', '\u026F') : c === _Char___init__impl__6a9atx(12424) ? to('j', 'o') : c === _Char___init__impl__6a9atx(12425) ? to('\u027E', 'a') : c === _Char___init__impl__6a9atx(12426) ? to('\u027E', 'i') : c === _Char___init__impl__6a9atx(12427) ? to('\u027E', '\u026F') : c === _Char___init__impl__6a9atx(12428) ? to('\u027E', 'e') : c === _Char___init__impl__6a9atx(12429) ? to('\u027E', 'o') : c === _Char___init__impl__6a9atx(12431) ? to('w', 'a') : c === _Char___init__impl__6a9atx(12434) ? to('', 'o') : c === _Char___init__impl__6a9atx(12435) ? to('n', '') : to('', '');
+  }
+  function katakanaIpa($this, c) {
+    var hiragana = c === _Char___init__impl__6a9atx(12450) ? _Char___init__impl__6a9atx(12354) : c === _Char___init__impl__6a9atx(12452) ? _Char___init__impl__6a9atx(12356) : c === _Char___init__impl__6a9atx(12454) ? _Char___init__impl__6a9atx(12358) : c === _Char___init__impl__6a9atx(12456) ? _Char___init__impl__6a9atx(12360) : c === _Char___init__impl__6a9atx(12458) ? _Char___init__impl__6a9atx(12362) : c === _Char___init__impl__6a9atx(12459) ? _Char___init__impl__6a9atx(12363) : c === _Char___init__impl__6a9atx(12461) ? _Char___init__impl__6a9atx(12365) : c === _Char___init__impl__6a9atx(12463) ? _Char___init__impl__6a9atx(12367) : c === _Char___init__impl__6a9atx(12465) ? _Char___init__impl__6a9atx(12369) : c === _Char___init__impl__6a9atx(12467) ? _Char___init__impl__6a9atx(12371) : c === _Char___init__impl__6a9atx(12469) ? _Char___init__impl__6a9atx(12373) : c === _Char___init__impl__6a9atx(12471) ? _Char___init__impl__6a9atx(12375) : c === _Char___init__impl__6a9atx(12473) ? _Char___init__impl__6a9atx(12377) : c === _Char___init__impl__6a9atx(12475) ? _Char___init__impl__6a9atx(12379) : c === _Char___init__impl__6a9atx(12477) ? _Char___init__impl__6a9atx(12381) : c === _Char___init__impl__6a9atx(12479) ? _Char___init__impl__6a9atx(12383) : c === _Char___init__impl__6a9atx(12481) ? _Char___init__impl__6a9atx(12385) : c === _Char___init__impl__6a9atx(12484) ? _Char___init__impl__6a9atx(12388) : c === _Char___init__impl__6a9atx(12486) ? _Char___init__impl__6a9atx(12390) : c === _Char___init__impl__6a9atx(12488) ? _Char___init__impl__6a9atx(12392) : c === _Char___init__impl__6a9atx(12490) ? _Char___init__impl__6a9atx(12394) : c === _Char___init__impl__6a9atx(12491) ? _Char___init__impl__6a9atx(12395) : c === _Char___init__impl__6a9atx(12492) ? _Char___init__impl__6a9atx(12396) : c === _Char___init__impl__6a9atx(12493) ? _Char___init__impl__6a9atx(12397) : c === _Char___init__impl__6a9atx(12494) ? _Char___init__impl__6a9atx(12398) : c === _Char___init__impl__6a9atx(12495) ? _Char___init__impl__6a9atx(12399) : c === _Char___init__impl__6a9atx(12498) ? _Char___init__impl__6a9atx(12402) : c === _Char___init__impl__6a9atx(12501) ? _Char___init__impl__6a9atx(12405) : c === _Char___init__impl__6a9atx(12504) ? _Char___init__impl__6a9atx(12408) : c === _Char___init__impl__6a9atx(12507) ? _Char___init__impl__6a9atx(12411) : c === _Char___init__impl__6a9atx(12510) ? _Char___init__impl__6a9atx(12414) : c === _Char___init__impl__6a9atx(12511) ? _Char___init__impl__6a9atx(12415) : c === _Char___init__impl__6a9atx(12512) ? _Char___init__impl__6a9atx(12416) : c === _Char___init__impl__6a9atx(12513) ? _Char___init__impl__6a9atx(12417) : c === _Char___init__impl__6a9atx(12514) ? _Char___init__impl__6a9atx(12418) : c === _Char___init__impl__6a9atx(12516) ? _Char___init__impl__6a9atx(12420) : c === _Char___init__impl__6a9atx(12518) ? _Char___init__impl__6a9atx(12422) : c === _Char___init__impl__6a9atx(12520) ? _Char___init__impl__6a9atx(12424) : c === _Char___init__impl__6a9atx(12521) ? _Char___init__impl__6a9atx(12425) : c === _Char___init__impl__6a9atx(12522) ? _Char___init__impl__6a9atx(12426) : c === _Char___init__impl__6a9atx(12523) ? _Char___init__impl__6a9atx(12427) : c === _Char___init__impl__6a9atx(12524) ? _Char___init__impl__6a9atx(12428) : c === _Char___init__impl__6a9atx(12525) ? _Char___init__impl__6a9atx(12429) : c === _Char___init__impl__6a9atx(12527) ? _Char___init__impl__6a9atx(12431) : c === _Char___init__impl__6a9atx(12530) ? _Char___init__impl__6a9atx(12434) : c === _Char___init__impl__6a9atx(12531) ? _Char___init__impl__6a9atx(12435) : c;
+    return hiraganaIpa($this, hiragana);
+  }
+  function Script(name, ordinal) {
+    Enum.call(this, name, ordinal);
+  }
   function consonantDistance($this, c1, c2) {
-    var f1 = $this.ge_1.n1(c1);
-    var f2 = $this.ge_1.n1(c2);
+    var f1 = $this.je_1.n1(c1);
+    var f2 = $this.je_1.n1(c2);
     if (f1 == null || f2 == null)
       return 10;
     var dist = 0;
-    if (!(f1.yd_1 === f2.yd_1))
-      dist = dist + imul(abs(f1.yd_1 - f2.yd_1 | 0), 2) | 0;
-    if (!(f1.zd_1 === f2.zd_1))
-      dist = dist + abs(f1.zd_1 - f2.zd_1 | 0) | 0;
-    if (!(f1.ae_1 === f2.ae_1))
+    if (!(f1.ce_1 === f2.ce_1))
+      dist = dist + imul(abs(f1.ce_1 - f2.ce_1 | 0), 2) | 0;
+    if (!(f1.de_1 === f2.de_1))
+      dist = dist + abs(f1.de_1 - f2.de_1 | 0) | 0;
+    if (!(f1.ee_1 === f2.ee_1))
       dist = dist + 1 | 0;
     return dist;
   }
   function vowelDistance($this, v1, v2) {
-    var tmp0_elvis_lhs = $this.fe_1.n1(v1);
+    var tmp0_elvis_lhs = $this.ie_1.n1(v1);
     var h1 = tmp0_elvis_lhs == null ? 0 : tmp0_elvis_lhs;
-    var tmp1_elvis_lhs = $this.fe_1.n1(v2);
+    var tmp1_elvis_lhs = $this.ie_1.n1(v2);
     var h2 = tmp1_elvis_lhs == null ? 0 : tmp1_elvis_lhs;
     var tmp0 = abs(h1 - h2 | 0);
     // Inline function 'kotlin.math.min' call
@@ -1916,14 +2166,57 @@
     return Math.min(tmp0, b) / 10 | 0;
   }
   function UniKeySyllable$Companion$rhymeKey$lambda(it) {
-    return it.he_1 + it.ie_1;
+    return it.me_1 + it.ne_1;
+  }
+  function UniKeySyllable$Companion$rhymeKey$lambda_0(it) {
+    return it.me_1 + it.ne_1;
+  }
+  function Script_HEBREW_getInstance() {
+    Script_initEntries();
+    return Script_HEBREW_instance;
+  }
+  function Script_LATIN_getInstance() {
+    Script_initEntries();
+    return Script_LATIN_instance;
+  }
+  function Script_ARABIC_getInstance() {
+    Script_initEntries();
+    return Script_ARABIC_instance;
+  }
+  function Script_GREEK_getInstance() {
+    Script_initEntries();
+    return Script_GREEK_instance;
+  }
+  function Script_DEVANAGARI_getInstance() {
+    Script_initEntries();
+    return Script_DEVANAGARI_instance;
+  }
+  function Script_CYRILLIC_getInstance() {
+    Script_initEntries();
+    return Script_CYRILLIC_instance;
+  }
+  function Script_HANGUL_getInstance() {
+    Script_initEntries();
+    return Script_HANGUL_instance;
+  }
+  function Script_HIRAGANA_getInstance() {
+    Script_initEntries();
+    return Script_HIRAGANA_instance;
+  }
+  function Script_CJK_getInstance() {
+    Script_initEntries();
+    return Script_CJK_instance;
+  }
+  function Script_UNKNOWN_getInstance() {
+    Script_initEntries();
+    return Script_UNKNOWN_instance;
   }
   function computeHue($this) {
-    var tmp0_elvis_lhs = Companion_getInstance_4().fe_1.n1($this.ie_1);
+    var tmp0_elvis_lhs = Companion_getInstance_4().ie_1.n1($this.ne_1);
     var tmp;
     if (tmp0_elvis_lhs == null) {
-      var tmp0 = Companion_getInstance_4().fe_1;
-      var tmp1_safe_receiver = firstOrNull($this.ie_1);
+      var tmp0 = Companion_getInstance_4().ie_1;
+      var tmp1_safe_receiver = firstOrNull($this.ne_1);
       var tmp_0;
       var tmp_1 = tmp1_safe_receiver;
       if ((tmp_1 == null ? null : new Char(tmp_1)) == null) {
@@ -1944,28 +2237,30 @@
   }
   function computeConsonantOffset($this) {
     // Inline function 'kotlin.text.isEmpty' call
-    var this_0 = $this.he_1;
+    var this_0 = $this.me_1;
     if (charSequenceLength(this_0) === 0)
       return 0;
-    var tmp0_elvis_lhs = Companion_getInstance_4().ge_1.n1($this.he_1);
+    var tmp0_elvis_lhs = Companion_getInstance_4().je_1.n1($this.me_1);
     var tmp;
     if (tmp0_elvis_lhs == null) {
-      return getStringHashCode($this.he_1) % 30 | 0;
+      return getStringHashCode($this.me_1) % 30 | 0;
     } else {
       tmp = tmp0_elvis_lhs;
     }
     var features = tmp;
-    var placeOffset = imul(features.yd_1, 5);
-    var mannerOffset = imul(features.zd_1, 2);
-    var voiceOffset = features.ae_1 ? 0 : 1;
+    var placeOffset = imul(features.ce_1, 5);
+    var mannerOffset = imul(features.de_1, 2);
+    var voiceOffset = features.ee_1 ? 0 : 1;
     return ((placeOffset + mannerOffset | 0) + voiceOffset | 0) % 50 | 0;
   }
   function Companion_4() {
     Companion_instance_4 = this;
-    this.fe_1 = mapOf([to('a', 0), to('A', 5), to('\u0251', 10), to('\xE6', 15), to('\u025B', 40), to('E', 45), to('e', 50), to('i', 120), to('\u026A', 125), to('I', 120), to('o', 180), to('\u0254', 185), to('O', 180), to('u', 240), to('\u028A', 245), to('U', 240), to('\u0259', 300), to('@', 300), to('\u028C', 310)]);
-    this.ge_1 = mapOf([to('p', new ConsonantFeatures(0, 0, false)), to('b', new ConsonantFeatures(0, 0, true)), to('m', new ConsonantFeatures(0, 2, true)), to('f', new ConsonantFeatures(0, 1, false)), to('v', new ConsonantFeatures(0, 1, true)), to('t', new ConsonantFeatures(2, 0, false)), to('d', new ConsonantFeatures(2, 0, true)), to('n', new ConsonantFeatures(2, 2, true)), to('s', new ConsonantFeatures(2, 1, false)), to('z', new ConsonantFeatures(2, 1, true)), to('l', new ConsonantFeatures(2, 3, true)), to('r', new ConsonantFeatures(2, 4, true)), to('ts', new ConsonantFeatures(2, 5, false)), to('\u0283', new ConsonantFeatures(3, 1, false)), to('sh', new ConsonantFeatures(3, 1, false)), to('\u0292', new ConsonantFeatures(3, 1, true)), to('j', new ConsonantFeatures(3, 3, true)), to('y', new ConsonantFeatures(3, 3, true)), to('t\u0283', new ConsonantFeatures(3, 5, false)), to('ch', new ConsonantFeatures(3, 5, false)), to('d\u0292', new ConsonantFeatures(3, 5, true)), to('k', new ConsonantFeatures(4, 0, false)), to('g', new ConsonantFeatures(4, 0, true)), to('x', new ConsonantFeatures(4, 1, false)), to('\u014B', new ConsonantFeatures(4, 2, true)), to('h', new ConsonantFeatures(5, 1, false)), to('\u0294', new ConsonantFeatures(5, 0, false)), to('', new ConsonantFeatures(5, 0, false))]);
+    this.ie_1 = mapOf([to('a', 0), to('A', 5), to('\u0251', 10), to('\xE6', 15), to('a\u02D0', 5), to('\u025B\u02D0', 35), to('\u025B', 40), to('E', 45), to('e', 50), to('e\u02D0', 55), to('i', 120), to('\u026A', 125), to('I', 120), to('i\u02D0', 115), to('y', 130), to('o', 180), to('\u0254', 185), to('O', 180), to('o\u02D0', 175), to('\u0254\u02D0', 190), to('\xF8', 160), to('u', 240), to('\u028A', 245), to('U', 240), to('u\u02D0', 235), to('\u026F', 250), to('\xFC', 255), to('\u0259', 300), to('@', 300), to('\u028C', 310), to('\u0268', 290), to('ja', 10), to('j\u025B', 45), to('j\u028C', 315), to('je', 55), to('jo', 185), to('ju', 245), to('wa', 5), to('w\u025B', 40), to('w\u028C', 315), to('we', 50), to('wi', 125), to('\u0270i', 120), to('ai', 120), to('ei', 50), to('ao', 180), to('ou', 240), to('an', 0), to('en', 50), to('ang', 5), to('eng', 55), to('ong', 185)]);
+    this.je_1 = mapOf([to('p', new ConsonantFeatures(0, 0, false)), to('b', new ConsonantFeatures(0, 0, true)), to('p\u02B0', new ConsonantFeatures(0, 0, false)), to('b\u02B1', new ConsonantFeatures(0, 0, true)), to('m', new ConsonantFeatures(0, 2, true)), to('f', new ConsonantFeatures(0, 1, false)), to('v', new ConsonantFeatures(0, 1, true)), to('\u0278', new ConsonantFeatures(0, 1, false)), to('\u028B', new ConsonantFeatures(0, 3, true)), to('w', new ConsonantFeatures(0, 3, true)), to('\u03B8', new ConsonantFeatures(1, 1, false)), to('\xF0', new ConsonantFeatures(1, 1, true)), to('t', new ConsonantFeatures(2, 0, false)), to('d', new ConsonantFeatures(2, 0, true)), to('t\u02B0', new ConsonantFeatures(2, 0, false)), to('d\u02B1', new ConsonantFeatures(2, 0, true)), to('n', new ConsonantFeatures(2, 2, true)), to('s', new ConsonantFeatures(2, 1, false)), to('z', new ConsonantFeatures(2, 1, true)), to('l', new ConsonantFeatures(2, 3, true)), to('r', new ConsonantFeatures(2, 4, true)), to('\u027E', new ConsonantFeatures(2, 4, true)), to('ts', new ConsonantFeatures(2, 5, false)), to('\u0288', new ConsonantFeatures(2, 0, false)), to('\u0288\u02B0', new ConsonantFeatures(2, 0, false)), to('\u0256', new ConsonantFeatures(2, 0, true)), to('\u0256\u02B1', new ConsonantFeatures(2, 0, true)), to('\u0273', new ConsonantFeatures(2, 2, true)), to('\u0282', new ConsonantFeatures(2, 1, false)), to('\u0283', new ConsonantFeatures(3, 1, false)), to('sh', new ConsonantFeatures(3, 1, false)), to('\u0292', new ConsonantFeatures(3, 1, true)), to('\u0255', new ConsonantFeatures(3, 1, false)), to('j', new ConsonantFeatures(3, 3, true)), to('y', new ConsonantFeatures(3, 3, true)), to('\u0272', new ConsonantFeatures(3, 2, true)), to('\xE7', new ConsonantFeatures(3, 1, false)), to('t\u0283', new ConsonantFeatures(3, 5, false)), to('t\u0283\u02B0', new ConsonantFeatures(3, 5, false)), to('ch', new ConsonantFeatures(3, 5, false)), to('d\u0292', new ConsonantFeatures(3, 5, true)), to('d\u0292\u02B1', new ConsonantFeatures(3, 5, true)), to('t\u0255', new ConsonantFeatures(3, 5, false)), to('k', new ConsonantFeatures(4, 0, false)), to('k\u02B0', new ConsonantFeatures(4, 0, false)), to('g', new ConsonantFeatures(4, 0, true)), to('\u0261', new ConsonantFeatures(4, 0, true)), to('\u0261\u02B1', new ConsonantFeatures(4, 0, true)), to('x', new ConsonantFeatures(4, 1, false)), to('\u0263', new ConsonantFeatures(4, 1, true)), to('\u014B', new ConsonantFeatures(4, 2, true)), to('q', new ConsonantFeatures(4, 0, false)), to('\u0127', new ConsonantFeatures(5, 1, false)), to('\u0295', new ConsonantFeatures(5, 1, true)), to('h', new ConsonantFeatures(5, 1, false)), to('\u0266', new ConsonantFeatures(5, 1, true)), to('\u0294', new ConsonantFeatures(5, 0, false)), to('', new ConsonantFeatures(5, 0, false)), to('s\u02E4', new ConsonantFeatures(2, 1, false)), to('d\u02E4', new ConsonantFeatures(2, 0, true)), to('t\u02E4', new ConsonantFeatures(2, 0, false)), to('\xF0\u02E4', new ConsonantFeatures(1, 1, true)), to('ks', new ConsonantFeatures(4, 5, false)), to('ps', new ConsonantFeatures(0, 5, false)), to('\u0283t\u0283', new ConsonantFeatures(3, 5, false)), to('zh', new ConsonantFeatures(3, 5, false))]);
+    this.ke_1 = listOf(['', 'b', 'p', 'm', 'f', 'd', 't', 'n', 'l', 'g', 'k', 'h', 'j', 'q', 'x', 'zh', 'ch', 'sh', 'r', 'z', 'c', 's']);
+    this.le_1 = listOf(['a', 'o', 'e', 'i', 'u', '\xFC', 'ai', 'ei', 'ao', 'ou', 'an', 'en', 'ang', 'eng', 'ong']);
   }
-  protoOf(Companion_4).le = function (word) {
+  protoOf(Companion_4).qe = function (word) {
     // Inline function 'kotlin.collections.mutableListOf' call
     var syllables = ArrayList_init_$Create$();
     // Inline function 'kotlin.text.replace' call
@@ -1980,7 +2275,7 @@
         var _destruct__k2r9zo = collectVowels(this, w, i + 1 | 0);
         var vowelIpa = _destruct__k2r9zo.r8();
         var vowelLen = _destruct__k2r9zo.s8();
-        var originalVowels = _destruct__k2r9zo.ee();
+        var originalVowels = _destruct__k2r9zo.da();
         syllables.f(new UniKeySyllable(consonantIpa, vowelIpa, toString(c) + originalVowels));
         i = i + (1 + vowelLen | 0) | 0;
       } else {
@@ -1989,7 +2284,7 @@
     }
     return syllables;
   };
-  protoOf(Companion_4).me = function (word) {
+  protoOf(Companion_4).re = function (word) {
     // Inline function 'kotlin.collections.mutableListOf' call
     var syllables = ArrayList_init_$Create$();
     // Inline function 'kotlin.text.lowercase' call
@@ -2023,44 +2318,324 @@
     }
     return syllables;
   };
-  protoOf(Companion_4).ne = function (word, isHebrew) {
-    var syllables = isHebrew ? this.le(word) : this.me(word);
+  protoOf(Companion_4).se = function (word) {
+    // Inline function 'kotlin.collections.mutableListOf' call
+    var syllables = ArrayList_init_$Create$();
+    // Inline function 'kotlin.text.replace' call
+    var w = Regex_init_$Create$('[\\s,.!?]+').b7(word, '');
+    var i = 0;
+    while (i < w.length) {
+      // Inline function 'kotlin.code' call
+      var this_0 = charCodeAt(w, i);
+      var cp = Char__toInt_impl_vasixd(this_0);
+      if (1536 <= cp ? cp <= 1791 : false) {
+        var consonant = arabicConsonantIpa(this, charCodeAt(w, i));
+        var _destruct__k2r9zo = collectArabicVowel(this, w, i + 1 | 0);
+        var vowel = _destruct__k2r9zo.r8();
+        var len = _destruct__k2r9zo.s8();
+        var tmp = i;
+        var tmp0 = (i + 1 | 0) + len | 0;
+        // Inline function 'kotlin.comparisons.minOf' call
+        var b = w.length;
+        var tmp$ret$3 = Math.min(tmp0, b);
+        syllables.f(new UniKeySyllable(consonant, vowel, substring(w, tmp, tmp$ret$3)));
+        i = i + (1 + len | 0) | 0;
+      } else {
+        i = i + 1 | 0;
+      }
+    }
+    return syllables;
+  };
+  protoOf(Companion_4).te = function (word) {
+    // Inline function 'kotlin.collections.mutableListOf' call
+    var syllables = ArrayList_init_$Create$();
+    // Inline function 'kotlin.text.lowercase' call
+    // Inline function 'kotlin.js.asDynamic' call
+    var w = word.toLowerCase();
+    var i = 0;
+    while (i < w.length) {
+      // Inline function 'kotlin.code' call
+      var this_0 = charCodeAt(w, i);
+      var cp = Char__toInt_impl_vasixd(this_0);
+      if ((945 <= cp ? cp <= 969 : false) || (902 <= cp ? cp <= 974 : false)) {
+        var _destruct__k2r9zo = parseGreekChar(this, w, i);
+        var cons = _destruct__k2r9zo.r8();
+        var vowel = _destruct__k2r9zo.s8();
+        var len = _destruct__k2r9zo.da();
+        syllables.f(new UniKeySyllable(cons, vowel, substring(w, i, i + len | 0)));
+        i = i + len | 0;
+      } else {
+        i = i + 1 | 0;
+      }
+    }
+    return syllables;
+  };
+  protoOf(Companion_4).ue = function (word) {
+    // Inline function 'kotlin.collections.mutableListOf' call
+    var syllables = ArrayList_init_$Create$();
+    var i = 0;
+    while (i < word.length) {
+      // Inline function 'kotlin.code' call
+      var this_0 = charCodeAt(word, i);
+      var cp = Char__toInt_impl_vasixd(this_0);
+      if (2325 <= cp ? cp <= 2361 : false) {
+        var cons = devanagariConsonantIpa(this, charCodeAt(word, i));
+        var _destruct__k2r9zo = collectDevanagariVowel(this, word, i + 1 | 0);
+        var vowel = _destruct__k2r9zo.r8();
+        var len = _destruct__k2r9zo.s8();
+        var tmp = i;
+        var tmp0 = (i + 1 | 0) + len | 0;
+        // Inline function 'kotlin.comparisons.minOf' call
+        var b = word.length;
+        var tmp$ret$2 = Math.min(tmp0, b);
+        syllables.f(new UniKeySyllable(cons, vowel, substring(word, tmp, tmp$ret$2)));
+        i = i + (1 + len | 0) | 0;
+      } else if (2309 <= cp ? cp <= 2324 : false) {
+        var vowel_0 = devanagariVowelIpa(this, charCodeAt(word, i));
+        syllables.f(new UniKeySyllable('', vowel_0, toString(charCodeAt(word, i))));
+        i = i + 1 | 0;
+      } else {
+        i = i + 1 | 0;
+      }
+    }
+    return syllables;
+  };
+  protoOf(Companion_4).ve = function (word) {
+    // Inline function 'kotlin.collections.mutableListOf' call
+    var syllables = ArrayList_init_$Create$();
+    // Inline function 'kotlin.text.lowercase' call
+    // Inline function 'kotlin.js.asDynamic' call
+    var w = word.toLowerCase();
+    var i = 0;
+    while (i < w.length) {
+      // Inline function 'kotlin.code' call
+      var this_0 = charCodeAt(w, i);
+      var cp = Char__toInt_impl_vasixd(this_0);
+      if ((1072 <= cp ? cp <= 1103 : false) || (1105 <= cp ? cp <= 1105 : false)) {
+        var _destruct__k2r9zo = cyrillicCharIpa(this, charCodeAt(w, i));
+        var cons = _destruct__k2r9zo.r8();
+        var vowel = _destruct__k2r9zo.s8();
+        syllables.f(new UniKeySyllable(cons, vowel, toString(charCodeAt(w, i))));
+        i = i + 1 | 0;
+      } else {
+        i = i + 1 | 0;
+      }
+    }
+    return syllables;
+  };
+  protoOf(Companion_4).we = function (word) {
+    // Inline function 'kotlin.collections.mutableListOf' call
+    var syllables = ArrayList_init_$Create$();
+    var inductionVariable = 0;
+    var last = word.length;
+    while (inductionVariable < last) {
+      var c = charCodeAt(word, inductionVariable);
+      inductionVariable = inductionVariable + 1 | 0;
+      // Inline function 'kotlin.code' call
+      var cp = Char__toInt_impl_vasixd(c);
+      if (44032 <= cp ? cp <= 55215 : false) {
+        var _destruct__k2r9zo = decomposeHangul(this, cp);
+        var cons = _destruct__k2r9zo.r8();
+        var vowel = _destruct__k2r9zo.s8();
+        var final = _destruct__k2r9zo.da();
+        syllables.f(new UniKeySyllable(cons, vowel, toString(c)));
+        // Inline function 'kotlin.text.isNotEmpty' call
+        if (charSequenceLength(final) > 0) {
+          syllables.f(new UniKeySyllable(final, '', ''));
+        }
+      }
+    }
+    return syllables;
+  };
+  protoOf(Companion_4).xe = function (word) {
+    // Inline function 'kotlin.collections.mutableListOf' call
+    var syllables = ArrayList_init_$Create$();
+    var i = 0;
+    while (i < word.length) {
+      var c = charCodeAt(word, i);
+      // Inline function 'kotlin.code' call
+      var cp = Char__toInt_impl_vasixd(c);
+      if (12352 <= cp ? cp <= 12447 : false) {
+        var _destruct__k2r9zo = hiraganaIpa(this, c);
+        var cons = _destruct__k2r9zo.r8();
+        var vowel = _destruct__k2r9zo.s8();
+        syllables.f(new UniKeySyllable(cons, vowel, toString(c)));
+      } else if (12448 <= cp ? cp <= 12543 : false) {
+        var _destruct__k2r9zo_0 = katakanaIpa(this, c);
+        var cons_0 = _destruct__k2r9zo_0.r8();
+        var vowel_0 = _destruct__k2r9zo_0.s8();
+        syllables.f(new UniKeySyllable(cons_0, vowel_0, toString(c)));
+      }
+      i = i + 1 | 0;
+    }
+    return syllables;
+  };
+  protoOf(Companion_4).ye = function (word) {
+    // Inline function 'kotlin.collections.mutableListOf' call
+    var syllables = ArrayList_init_$Create$();
+    var inductionVariable = 0;
+    var last = word.length;
+    while (inductionVariable < last) {
+      var c = charCodeAt(word, inductionVariable);
+      inductionVariable = inductionVariable + 1 | 0;
+      // Inline function 'kotlin.code' call
+      var cp = Char__toInt_impl_vasixd(c);
+      if (19968 <= cp ? cp <= 40959 : false) {
+        var hash = Char__hashCode_impl_otmys(c) % 25 | 0;
+        var tmp0 = this.ke_1;
+        // Inline function 'kotlin.collections.getOrElse' call
+        var index = hash % this.ke_1.k() | 0;
+        var tmp;
+        if (0 <= index ? index < tmp0.k() : false) {
+          tmp = tmp0.l(index);
+        } else {
+          tmp = '';
+        }
+        var consonant = tmp;
+        var tmp0_0 = this.le_1;
+        // Inline function 'kotlin.collections.getOrElse' call
+        var index_0 = hash % this.le_1.k() | 0;
+        var tmp_0;
+        if (0 <= index_0 ? index_0 < tmp0_0.k() : false) {
+          tmp_0 = tmp0_0.l(index_0);
+        } else {
+          tmp_0 = 'a';
+        }
+        var vowel = tmp_0;
+        syllables.f(new UniKeySyllable(consonant, vowel, toString(c)));
+      }
+    }
+    return syllables;
+  };
+  protoOf(Companion_4).ze = function (text) {
+    var inductionVariable = 0;
+    var last = text.length;
+    while (inductionVariable < last) {
+      var c = charCodeAt(text, inductionVariable);
+      inductionVariable = inductionVariable + 1 | 0;
+      // Inline function 'kotlin.code' call
+      var cp = Char__toInt_impl_vasixd(c);
+      if ((1488 <= cp ? cp <= 1514 : false) || (1456 <= cp ? cp <= 1479 : false)) {
+        return Script_HEBREW_getInstance();
+      }
+      if ((1536 <= cp ? cp <= 1791 : false) || (1872 <= cp ? cp <= 1919 : false)) {
+        return Script_ARABIC_getInstance();
+      }
+      if (880 <= cp ? cp <= 1023 : false) {
+        return Script_GREEK_getInstance();
+      }
+      if (2304 <= cp ? cp <= 2431 : false) {
+        return Script_DEVANAGARI_getInstance();
+      }
+      if (1024 <= cp ? cp <= 1279 : false) {
+        return Script_CYRILLIC_getInstance();
+      }
+      if ((44032 <= cp ? cp <= 55215 : false) || (4352 <= cp ? cp <= 4607 : false)) {
+        return Script_HANGUL_getInstance();
+      }
+      if ((12352 <= cp ? cp <= 12447 : false) || (12448 <= cp ? cp <= 12543 : false)) {
+        return Script_HIRAGANA_getInstance();
+      }
+      if (19968 <= cp ? cp <= 40959 : false) {
+        return Script_CJK_getInstance();
+      }
+      if ((65 <= cp ? cp <= 90 : false) || (97 <= cp ? cp <= 122 : false) || (192 <= cp ? cp <= 591 : false)) {
+        return Script_LATIN_getInstance();
+      }
+    }
+    return Script_UNKNOWN_getInstance();
+  };
+  protoOf(Companion_4).af = function (word) {
+    var tmp;
+    switch (this.ze(word).s1_1) {
+      case 0:
+        tmp = this.qe(word);
+        break;
+      case 1:
+        tmp = this.re(word);
+        break;
+      case 2:
+        tmp = this.se(word);
+        break;
+      case 3:
+        tmp = this.te(word);
+        break;
+      case 4:
+        tmp = this.ue(word);
+        break;
+      case 5:
+        tmp = this.ve(word);
+        break;
+      case 6:
+        tmp = this.we(word);
+        break;
+      case 7:
+        tmp = this.xe(word);
+        break;
+      case 8:
+        tmp = this.ye(word);
+        break;
+      case 9:
+        tmp = this.re(word);
+        break;
+      default:
+        noWhenBranchMatchedException();
+        break;
+    }
+    return tmp;
+  };
+  protoOf(Companion_4).bf = function (word) {
+    var syllables = this.af(word);
     var tmp0_safe_receiver = lastOrNull(syllables);
-    var tmp1_elvis_lhs = tmp0_safe_receiver == null ? null : tmp0_safe_receiver.oe();
+    var tmp1_elvis_lhs = tmp0_safe_receiver == null ? null : tmp0_safe_receiver.cf();
     return tmp1_elvis_lhs == null ? 0 : tmp1_elvis_lhs;
   };
-  protoOf(Companion_4).lc = function (hue, saturation, lightness) {
+  protoOf(Companion_4).df = function (word, isHebrew) {
+    var syllables = isHebrew ? this.qe(word) : this.re(word);
+    var tmp0_safe_receiver = lastOrNull(syllables);
+    var tmp1_elvis_lhs = tmp0_safe_receiver == null ? null : tmp0_safe_receiver.cf();
+    return tmp1_elvis_lhs == null ? 0 : tmp1_elvis_lhs;
+  };
+  protoOf(Companion_4).pc = function (hue, saturation, lightness) {
     return 'hsl(' + hue + ', ' + saturation + '%, ' + lightness + '%)';
   };
-  protoOf(Companion_4).pe = function (word, isHebrew) {
-    return this.lc(this.ne(word, isHebrew), 80, 72);
+  protoOf(Companion_4).ef = function (word) {
+    return this.pc(this.bf(word), 80, 72);
   };
-  protoOf(Companion_4).qe = function (word, isHebrew, syllableCount) {
-    var syllables = isHebrew ? this.le(word) : this.me(word);
+  protoOf(Companion_4).ff = function (word, isHebrew) {
+    return this.pc(this.df(word, isHebrew), 80, 72);
+  };
+  protoOf(Companion_4).gf = function (word, syllableCount) {
+    var syllables = this.af(word);
     var tmp = takeLast_0(syllables, syllableCount);
     return joinToString(tmp, '-', VOID, VOID, VOID, VOID, UniKeySyllable$Companion$rhymeKey$lambda);
   };
-  protoOf(Companion_4).re = function (word, isHebrew, syllableCount, $super) {
-    syllableCount = syllableCount === VOID ? 1 : syllableCount;
-    return $super === VOID ? this.qe(word, isHebrew, syllableCount) : $super.qe.call(this, word, isHebrew, syllableCount);
+  protoOf(Companion_4).hf = function (word, isHebrew, syllableCount) {
+    var syllables = isHebrew ? this.qe(word) : this.re(word);
+    var tmp = takeLast_0(syllables, syllableCount);
+    return joinToString(tmp, '-', VOID, VOID, VOID, VOID, UniKeySyllable$Companion$rhymeKey$lambda_0);
   };
-  protoOf(Companion_4).se = function (word1, isHebrew1, word2, isHebrew2) {
-    var key1 = this.re(word1, isHebrew1);
-    var key2 = this.re(word2, isHebrew2);
+  protoOf(Companion_4).if = function (word, isHebrew, syllableCount, $super) {
+    syllableCount = syllableCount === VOID ? 1 : syllableCount;
+    return $super === VOID ? this.hf(word, isHebrew, syllableCount) : $super.hf.call(this, word, isHebrew, syllableCount);
+  };
+  protoOf(Companion_4).jf = function (word1, isHebrew1, word2, isHebrew2) {
+    var key1 = this.if(word1, isHebrew1);
+    var key2 = this.if(word2, isHebrew2);
     return key1 === key2;
   };
-  protoOf(Companion_4).te = function (word1, isHebrew1, word2, isHebrew2) {
-    var syl1 = isHebrew1 ? this.le(word1) : this.me(word1);
-    var syl2 = isHebrew2 ? this.le(word2) : this.me(word2);
+  protoOf(Companion_4).kf = function (word1, isHebrew1, word2, isHebrew2) {
+    var syl1 = isHebrew1 ? this.qe(word1) : this.re(word1);
+    var syl2 = isHebrew2 ? this.qe(word2) : this.re(word2);
     if (syl1.m() || syl2.m())
       return 100;
     var last1 = last(syl1);
     var last2 = last(syl2);
-    if (last1.he_1 === last2.he_1 && last1.ie_1 === last2.ie_1)
+    if (last1.me_1 === last2.me_1 && last1.ne_1 === last2.ne_1)
       return 0;
-    if (last1.ie_1 === last2.ie_1)
-      return 10 + consonantDistance(this, last1.he_1, last2.he_1) | 0;
-    return 50 + vowelDistance(this, last1.ie_1, last2.ie_1) | 0;
+    if (last1.ne_1 === last2.ne_1)
+      return 10 + consonantDistance(this, last1.me_1, last2.me_1) | 0;
+    return 50 + vowelDistance(this, last1.ne_1, last2.ne_1) | 0;
   };
   var Companion_instance_4;
   function Companion_getInstance_4() {
@@ -2075,31 +2650,31 @@
   }
   function UniKeySyllable$_get_hue_$ref_61carx() {
     return function (p0) {
-      return p0.oe();
+      return p0.cf();
     };
   }
   function UniKeySyllable(consonant, vowel, original) {
     Companion_getInstance_4();
-    this.he_1 = consonant;
-    this.ie_1 = vowel;
-    this.je_1 = original;
+    this.me_1 = consonant;
+    this.ne_1 = vowel;
+    this.oe_1 = original;
     var tmp = this;
-    tmp.ke_1 = lazy(UniKeySyllable$hue$delegate$lambda(this));
+    tmp.pe_1 = lazy(UniKeySyllable$hue$delegate$lambda(this));
   }
-  protoOf(UniKeySyllable).oe = function () {
-    var tmp0 = this.ke_1;
+  protoOf(UniKeySyllable).cf = function () {
+    var tmp0 = this.pe_1;
     var tmp = KProperty1;
     // Inline function 'kotlin.getValue' call
     getPropertyCallableRef('hue', 1, tmp, UniKeySyllable$_get_hue_$ref_61carx(), null);
     return tmp0.k1();
   };
   protoOf(UniKeySyllable).toString = function () {
-    return 'UniKeySyllable(consonant=' + this.he_1 + ', vowel=' + this.ie_1 + ', original=' + this.je_1 + ')';
+    return 'UniKeySyllable(consonant=' + this.me_1 + ', vowel=' + this.ne_1 + ', original=' + this.oe_1 + ')';
   };
   protoOf(UniKeySyllable).hashCode = function () {
-    var result = getStringHashCode(this.he_1);
-    result = imul(result, 31) + getStringHashCode(this.ie_1) | 0;
-    result = imul(result, 31) + getStringHashCode(this.je_1) | 0;
+    var result = getStringHashCode(this.me_1);
+    result = imul(result, 31) + getStringHashCode(this.ne_1) | 0;
+    result = imul(result, 31) + getStringHashCode(this.oe_1) | 0;
     return result;
   };
   protoOf(UniKeySyllable).equals = function (other) {
@@ -2107,41 +2682,41 @@
       return true;
     if (!(other instanceof UniKeySyllable))
       return false;
-    if (!(this.he_1 === other.he_1))
+    if (!(this.me_1 === other.me_1))
       return false;
-    if (!(this.ie_1 === other.ie_1))
+    if (!(this.ne_1 === other.ne_1))
       return false;
-    if (!(this.je_1 === other.je_1))
+    if (!(this.oe_1 === other.oe_1))
       return false;
     return true;
   };
   function UniKeys() {
     UniKeys_instance = this;
-    this.ue_1 = mapOf([to('t', new UniKey('t', 't', 'T', '\u05D0', '\u0294', VOID, VOID, VOID, VOID, VOID, VOID, VOID, true)), to('c', new UniKey('c', 'c', 'C', '\u05D1', 'v', VOID, VOID, VOID, VOID, VOID, VOID, 'b')), to('d', new UniKey('d', 'd', 'D', '\u05D2', 'g')), to('s', new UniKey('s', 's', 'S', '\u05D3', 'd')), to('v', new UniKey('v', 'v', 'V', '\u05D4', 'h', VOID, VOID, VOID, VOID, VOID, VOID, VOID, true)), to('u', new UniKey('u', 'u', 'U', '\u05D5', 'v')), to('z', new UniKey('z', 'z', 'Z', '\u05D6', 'z')), to('j', new UniKey('j', 'j', 'J', '\u05D7', '\u0127', VOID, VOID, VOID, VOID, VOID, VOID, VOID, true)), to('y', new UniKey('y', 'y', 'Y', '\u05D8', 't')), to('h', new UniKey('h', 'h', 'H', '\u05D9', 'j')), to('f', new UniKey('f', 'f', 'F', '\u05DB', 'x', VOID, VOID, VOID, VOID, VOID, VOID, 'k')), to('l', new UniKey('l', 'l', 'L', '\u05DA', 'x', VOID, VOID, VOID, VOID, VOID, VOID, VOID, VOID, true)), to('k', new UniKey('k', 'k', 'K', '\u05DC', 'l')), to('n', new UniKey('n', 'n', 'N', '\u05DE', 'm')), to('o', new UniKey('o', 'o', 'O', '\u05DD', 'm', VOID, VOID, VOID, VOID, VOID, VOID, VOID, VOID, true)), to('b', new UniKey('b', 'b', 'B', '\u05E0', 'n')), to('i', new UniKey('i', 'i', 'I', '\u05DF', 'n', VOID, VOID, VOID, VOID, VOID, VOID, VOID, VOID, true)), to('x', new UniKey('x', 'x', 'X', '\u05E1', 's')), to('g', new UniKey('g', 'g', 'G', '\u05E2', '\u0295', VOID, VOID, VOID, VOID, VOID, VOID, VOID, true)), to('p', new UniKey('p', 'p', 'P', '\u05E4', 'f', VOID, VOID, VOID, VOID, VOID, VOID, 'p')), to(';', new UniKey(';', ';', ':', '\u05E3', 'f', ':', ':', VOID, VOID, VOID, VOID, VOID, VOID, true)), to('m', new UniKey('m', 'm', 'M', '\u05E6', 'ts')), to('.', new UniKey('.', '.', '>', '\u05E5', 'ts', '>', '>', VOID, VOID, VOID, VOID, VOID, VOID, true)), to('e', new UniKey('e', 'e', 'E', '\u05E7', 'k')), to('r', new UniKey('r', 'r', 'R', '\u05E8', '\u0281')), to('a', new UniKey('a', 'a', 'A', '\u05E9', '\u0283')), to(',', new UniKey(',', ',', '<', '\u05EA', 't', '<', '<')), to('q', new UniKey('q', 'q', 'Q', '/', 'kw')), to('w', new UniKey('w', 'w', 'W', "'", 'w')), to('/', new UniKey('/', '/', '?', '.', VOID, '?', '?')), to("'", new UniKey("'", "'", '"', ',', VOID, '"', '"')), to('`', new UniKey('`', '`', '~', '`', VOID, '~', '~')), to('1', new UniKey('1', '1', '!', '1', VOID, '!', '!')), to('2', new UniKey('2', '2', '@', '2', VOID, '@', '@')), to('3', new UniKey('3', '3', '#', '3', VOID, '#', '#')), to('4', new UniKey('4', '4', '$', '4', VOID, '$', '\u20AA')), to('5', new UniKey('5', '5', '%', '5', VOID, '%', '%')), to('6', new UniKey('6', '6', '^', '6', VOID, '^', '^')), to('7', new UniKey('7', '7', '&', '7', VOID, '&', '&')), to('8', new UniKey('8', '8', '*', '8', VOID, '*', '*')), to('9', new UniKey('9', '9', '(', '9', VOID, '(', ')')), to('0', new UniKey('0', '0', ')', '0', VOID, ')', '(')), to('-', new UniKey('-', '-', '_', '-', VOID, '_', '_')), to('=', new UniKey('=', '=', '+', '=', VOID, '+', '+')), to('[', new UniKey('[', '[', '{', '[', VOID, '{', '{')), to(']', new UniKey(']', ']', '}', ']', VOID, '}', '}')), to('\\', new UniKey('\\', '\\', '|', '\\', VOID, '|', '|'))]);
+    this.lf_1 = mapOf([to('t', new UniKey('t', 't', 'T', '\u05D0', '\u0294', VOID, VOID, VOID, VOID, VOID, VOID, VOID, true)), to('c', new UniKey('c', 'c', 'C', '\u05D1', 'v', VOID, VOID, VOID, VOID, VOID, VOID, 'b')), to('d', new UniKey('d', 'd', 'D', '\u05D2', 'g')), to('s', new UniKey('s', 's', 'S', '\u05D3', 'd')), to('v', new UniKey('v', 'v', 'V', '\u05D4', 'h', VOID, VOID, VOID, VOID, VOID, VOID, VOID, true)), to('u', new UniKey('u', 'u', 'U', '\u05D5', 'v')), to('z', new UniKey('z', 'z', 'Z', '\u05D6', 'z')), to('j', new UniKey('j', 'j', 'J', '\u05D7', '\u0127', VOID, VOID, VOID, VOID, VOID, VOID, VOID, true)), to('y', new UniKey('y', 'y', 'Y', '\u05D8', 't')), to('h', new UniKey('h', 'h', 'H', '\u05D9', 'j')), to('f', new UniKey('f', 'f', 'F', '\u05DB', 'x', VOID, VOID, VOID, VOID, VOID, VOID, 'k')), to('l', new UniKey('l', 'l', 'L', '\u05DA', 'x', VOID, VOID, VOID, VOID, VOID, VOID, VOID, VOID, true)), to('k', new UniKey('k', 'k', 'K', '\u05DC', 'l')), to('n', new UniKey('n', 'n', 'N', '\u05DE', 'm')), to('o', new UniKey('o', 'o', 'O', '\u05DD', 'm', VOID, VOID, VOID, VOID, VOID, VOID, VOID, VOID, true)), to('b', new UniKey('b', 'b', 'B', '\u05E0', 'n')), to('i', new UniKey('i', 'i', 'I', '\u05DF', 'n', VOID, VOID, VOID, VOID, VOID, VOID, VOID, VOID, true)), to('x', new UniKey('x', 'x', 'X', '\u05E1', 's')), to('g', new UniKey('g', 'g', 'G', '\u05E2', '\u0295', VOID, VOID, VOID, VOID, VOID, VOID, VOID, true)), to('p', new UniKey('p', 'p', 'P', '\u05E4', 'f', VOID, VOID, VOID, VOID, VOID, VOID, 'p')), to(';', new UniKey(';', ';', ':', '\u05E3', 'f', ':', ':', VOID, VOID, VOID, VOID, VOID, VOID, true)), to('m', new UniKey('m', 'm', 'M', '\u05E6', 'ts')), to('.', new UniKey('.', '.', '>', '\u05E5', 'ts', '>', '>', VOID, VOID, VOID, VOID, VOID, VOID, true)), to('e', new UniKey('e', 'e', 'E', '\u05E7', 'k')), to('r', new UniKey('r', 'r', 'R', '\u05E8', '\u0281')), to('a', new UniKey('a', 'a', 'A', '\u05E9', '\u0283')), to(',', new UniKey(',', ',', '<', '\u05EA', 't', '<', '<')), to('q', new UniKey('q', 'q', 'Q', '/', 'kw')), to('w', new UniKey('w', 'w', 'W', "'", 'w')), to('/', new UniKey('/', '/', '?', '.', VOID, '?', '?')), to("'", new UniKey("'", "'", '"', ',', VOID, '"', '"')), to('`', new UniKey('`', '`', '~', '`', VOID, '~', '~')), to('1', new UniKey('1', '1', '!', '1', VOID, '!', '!')), to('2', new UniKey('2', '2', '@', '2', VOID, '@', '@')), to('3', new UniKey('3', '3', '#', '3', VOID, '#', '#')), to('4', new UniKey('4', '4', '$', '4', VOID, '$', '\u20AA')), to('5', new UniKey('5', '5', '%', '5', VOID, '%', '%')), to('6', new UniKey('6', '6', '^', '6', VOID, '^', '^')), to('7', new UniKey('7', '7', '&', '7', VOID, '&', '&')), to('8', new UniKey('8', '8', '*', '8', VOID, '*', '*')), to('9', new UniKey('9', '9', '(', '9', VOID, '(', ')')), to('0', new UniKey('0', '0', ')', '0', VOID, ')', '(')), to('-', new UniKey('-', '-', '_', '-', VOID, '_', '_')), to('=', new UniKey('=', '=', '+', '=', VOID, '+', '+')), to('[', new UniKey('[', '[', '{', '[', VOID, '{', '{')), to(']', new UniKey(']', ']', '}', ']', VOID, '}', '}')), to('\\', new UniKey('\\', '\\', '|', '\\', VOID, '|', '|'))]);
     var tmp = this;
     // Inline function 'kotlin.collections.filter' call
-    var tmp0 = this.ue_1.p1();
+    var tmp0 = this.lf_1.p1();
     // Inline function 'kotlin.collections.filterTo' call
     var destination = ArrayList_init_$Create$();
     var _iterator__ex2g4s = tmp0.h();
     while (_iterator__ex2g4s.i()) {
       var element = _iterator__ex2g4s.j();
-      if (element.yc_1.length === 1 && isLetter(charCodeAt(element.yc_1, 0))) {
+      if (element.cd_1.length === 1 && isLetter(charCodeAt(element.cd_1, 0))) {
         destination.f(element);
       }
     }
-    tmp.ve_1 = destination;
+    tmp.mf_1 = destination;
     var tmp_0 = this;
     // Inline function 'kotlin.collections.filter' call
-    var tmp0_0 = this.ue_1.p1();
+    var tmp0_0 = this.lf_1.p1();
     // Inline function 'kotlin.collections.filterTo' call
     var destination_0 = ArrayList_init_$Create$();
     var _iterator__ex2g4s_0 = tmp0_0.h();
     while (_iterator__ex2g4s_0.i()) {
       var element_0 = _iterator__ex2g4s_0.j();
       var tmp_1;
-      if (element_0.bd_1.length === 1) {
-        var containsArg = charCodeAt(element_0.bd_1, 0);
+      if (element_0.fd_1.length === 1) {
+        var containsArg = charCodeAt(element_0.fd_1, 0);
         tmp_1 = _Char___init__impl__6a9atx(1488) <= containsArg ? containsArg <= _Char___init__impl__6a9atx(1514) : false;
       } else {
         tmp_1 = false;
@@ -2150,60 +2725,60 @@
         destination_0.f(element_0);
       }
     }
-    tmp_0.we_1 = destination_0;
+    tmp_0.nf_1 = destination_0;
     var tmp_2 = this;
     // Inline function 'kotlin.collections.filter' call
-    var tmp0_1 = this.ue_1.p1();
+    var tmp0_1 = this.lf_1.p1();
     // Inline function 'kotlin.collections.filterTo' call
     var destination_1 = ArrayList_init_$Create$();
     var _iterator__ex2g4s_1 = tmp0_1.h();
     while (_iterator__ex2g4s_1.i()) {
       var element_1 = _iterator__ex2g4s_1.j();
-      if (!(element_1.jd_1 == null)) {
+      if (!(element_1.nd_1 == null)) {
         destination_1.f(element_1);
       }
     }
-    tmp_2.xe_1 = destination_1;
+    tmp_2.of_1 = destination_1;
     var tmp_3 = this;
     // Inline function 'kotlin.collections.filter' call
-    var tmp0_2 = this.ue_1.p1();
+    var tmp0_2 = this.lf_1.p1();
     // Inline function 'kotlin.collections.filterTo' call
     var destination_2 = ArrayList_init_$Create$();
     var _iterator__ex2g4s_2 = tmp0_2.h();
     while (_iterator__ex2g4s_2.i()) {
       var element_2 = _iterator__ex2g4s_2.j();
-      if (element_2.kd_1) {
+      if (element_2.od_1) {
         destination_2.f(element_2);
       }
     }
-    tmp_3.ye_1 = destination_2;
+    tmp_3.pf_1 = destination_2;
     var tmp_4 = this;
     // Inline function 'kotlin.collections.filter' call
-    var tmp0_3 = this.ue_1.p1();
+    var tmp0_3 = this.lf_1.p1();
     // Inline function 'kotlin.collections.filterTo' call
     var destination_3 = ArrayList_init_$Create$();
     var _iterator__ex2g4s_3 = tmp0_3.h();
     while (_iterator__ex2g4s_3.i()) {
       var element_3 = _iterator__ex2g4s_3.j();
-      if (element_3.ld_1) {
+      if (element_3.pd_1) {
         destination_3.f(element_3);
       }
     }
-    tmp_4.ze_1 = destination_3;
+    tmp_4.qf_1 = destination_3;
   }
   protoOf(UniKeys).m7 = function (id) {
-    return this.ue_1.n1(id);
+    return this.lf_1.n1(id);
   };
-  protoOf(UniKeys).af = function (he) {
+  protoOf(UniKeys).rf = function (he) {
     // Inline function 'kotlin.collections.find' call
-    var tmp0 = this.ue_1.p1();
+    var tmp0 = this.lf_1.p1();
     var tmp$ret$1;
     $l$block: {
       // Inline function 'kotlin.collections.firstOrNull' call
       var _iterator__ex2g4s = tmp0.h();
       while (_iterator__ex2g4s.i()) {
         var element = _iterator__ex2g4s.j();
-        if (element.bd_1 === he) {
+        if (element.fd_1 === he) {
           tmp$ret$1 = element;
           break $l$block;
         }
@@ -2212,16 +2787,16 @@
     }
     return tmp$ret$1;
   };
-  protoOf(UniKeys).bf = function (en) {
+  protoOf(UniKeys).sf = function (en) {
     // Inline function 'kotlin.collections.find' call
-    var tmp0 = this.ue_1.p1();
+    var tmp0 = this.lf_1.p1();
     var tmp$ret$1;
     $l$block: {
       // Inline function 'kotlin.collections.firstOrNull' call
       var _iterator__ex2g4s = tmp0.h();
       while (_iterator__ex2g4s.i()) {
         var element = _iterator__ex2g4s.j();
-        if (element.zc_1 === en) {
+        if (element.dd_1 === en) {
           tmp$ret$1 = element;
           break $l$block;
         }
@@ -2230,10 +2805,10 @@
     }
     return tmp$ret$1;
   };
-  protoOf(UniKeys).cf = function (key, mode, mods) {
+  protoOf(UniKeys).tf = function (key, mode, mods) {
     var tmp0_elvis_lhs = this.m7(key);
-    var tmp1_elvis_lhs = tmp0_elvis_lhs == null ? this.af(key) : tmp0_elvis_lhs;
-    var tmp2_elvis_lhs = tmp1_elvis_lhs == null ? this.bf(key) : tmp1_elvis_lhs;
+    var tmp1_elvis_lhs = tmp0_elvis_lhs == null ? this.rf(key) : tmp0_elvis_lhs;
+    var tmp2_elvis_lhs = tmp1_elvis_lhs == null ? this.sf(key) : tmp1_elvis_lhs;
     var tmp;
     if (tmp2_elvis_lhs == null) {
       return null;
@@ -2241,7 +2816,7 @@
       tmp = tmp2_elvis_lhs;
     }
     var uk = tmp;
-    return uk.md(mode, mods);
+    return uk.qd(mode, mods);
   };
   var UniKeys_instance;
   function UniKeys_getInstance() {
@@ -2251,16 +2826,16 @@
   }
   function UniKeyMode() {
     UniKeyMode_instance = this;
-    this.df_1 = listOf([KeyMode_he_getInstance(), KeyMode_en_getInstance(), KeyMode_EN_getInstance()]);
-    this.ef_1 = 0;
+    this.uf_1 = listOf([KeyMode_he_getInstance(), KeyMode_en_getInstance(), KeyMode_EN_getInstance()]);
+    this.vf_1 = 0;
   }
-  protoOf(UniKeyMode).ff = function () {
-    return this.df_1.l(this.ef_1);
+  protoOf(UniKeyMode).wf = function () {
+    return this.uf_1.l(this.vf_1);
   };
-  protoOf(UniKeyMode).gf = function (mode) {
+  protoOf(UniKeyMode).xf = function (mode) {
     var tmp = this;
     // Inline function 'kotlin.takeIf' call
-    var this_0 = this.df_1.h1(mode);
+    var this_0 = this.uf_1.h1(mode);
     var tmp_0;
     if (this_0 >= 0) {
       tmp_0 = this_0;
@@ -2268,11 +2843,11 @@
       tmp_0 = null;
     }
     var tmp0_elvis_lhs = tmp_0;
-    tmp.ef_1 = tmp0_elvis_lhs == null ? 0 : tmp0_elvis_lhs;
+    tmp.vf_1 = tmp0_elvis_lhs == null ? 0 : tmp0_elvis_lhs;
   };
-  protoOf(UniKeyMode).hf = function () {
-    this.ef_1 = (this.ef_1 + 1 | 0) % this.df_1.k() | 0;
-    return this.ff();
+  protoOf(UniKeyMode).yf = function () {
+    this.vf_1 = (this.vf_1 + 1 | 0) % this.uf_1.k() | 0;
+    return this.wf();
   };
   var UniKeyMode_instance;
   function UniKeyMode_getInstance() {
@@ -2281,14 +2856,14 @@
     return UniKeyMode_instance;
   }
   function UniKeyModifiers() {
-    this.if_1 = false;
-    this.jf_1 = false;
-    this.kf_1 = false;
+    this.zf_1 = false;
+    this.ag_1 = false;
+    this.bg_1 = false;
   }
-  protoOf(UniKeyModifiers).lf = function () {
-    this.if_1 = false;
-    this.jf_1 = false;
-    this.kf_1 = false;
+  protoOf(UniKeyModifiers).cg = function () {
+    this.zf_1 = false;
+    this.ag_1 = false;
+    this.bg_1 = false;
   };
   var UniKeyModifiers_instance;
   function UniKeyModifiers_getInstance() {
@@ -2298,10 +2873,10 @@
     return UniKeys_getInstance().m7(id);
   }
   function getUniKeyByHe(he) {
-    return UniKeys_getInstance().af(he);
+    return UniKeys_getInstance().rf(he);
   }
   function getUniKeyByEn(en) {
-    return UniKeys_getInstance().bf(en);
+    return UniKeys_getInstance().sf(en);
   }
   function getDisplay(key, mode, shift, alt, ctrl) {
     shift = shift === VOID ? false : shift;
@@ -2322,10 +2897,10 @@
         keyMode = KeyMode_en_getInstance();
         break;
     }
-    return UniKeys_getInstance().cf(key, keyMode, new Modifiers(shift, alt, ctrl));
+    return UniKeys_getInstance().tf(key, keyMode, new Modifiers(shift, alt, ctrl));
   }
   function getUkMode() {
-    return UniKeyMode_getInstance().ff().r1_1;
+    return UniKeyMode_getInstance().wf().r1_1;
   }
   function setUkMode(mode) {
     var tmp;
@@ -2343,43 +2918,43 @@
         return Unit_instance;
     }
     var keyMode = tmp;
-    UniKeyMode_getInstance().gf(keyMode);
+    UniKeyMode_getInstance().xf(keyMode);
   }
   function cycleUkMode() {
-    return UniKeyMode_getInstance().hf().r1_1;
+    return UniKeyMode_getInstance().yf().r1_1;
   }
   function setModifier(mod, value) {
     switch (mod) {
       case 'shift':
-        UniKeyModifiers_instance.if_1 = value;
+        UniKeyModifiers_instance.zf_1 = value;
         break;
       case 'alt':
-        UniKeyModifiers_instance.jf_1 = value;
+        UniKeyModifiers_instance.ag_1 = value;
         break;
       case 'ctrl':
-        UniKeyModifiers_instance.kf_1 = value;
+        UniKeyModifiers_instance.bg_1 = value;
         break;
     }
   }
   function getModifiers() {
     var obj = {};
-    obj['shift'] = UniKeyModifiers_instance.if_1;
-    obj['alt'] = UniKeyModifiers_instance.jf_1;
-    obj['ctrl'] = UniKeyModifiers_instance.kf_1;
+    obj['shift'] = UniKeyModifiers_instance.zf_1;
+    obj['alt'] = UniKeyModifiers_instance.ag_1;
+    obj['ctrl'] = UniKeyModifiers_instance.bg_1;
     return obj;
   }
   function resetModifiers() {
-    return UniKeyModifiers_instance.lf();
+    return UniKeyModifiers_instance.cg();
   }
   function getNikudForIpa(ipa) {
     // Inline function 'kotlin.collections.map' call
-    var this_0 = Companion_instance_3.pc(ipa);
+    var this_0 = Companion_instance_3.tc(ipa);
     // Inline function 'kotlin.collections.mapTo' call
     var destination = ArrayList_init_$Create$_0(collectionSizeOrDefault(this_0, 10));
     var _iterator__ex2g4s = this_0.h();
     while (_iterator__ex2g4s.i()) {
       var item = _iterator__ex2g4s.j();
-      var tmp$ret$0 = item.tc_1;
+      var tmp$ret$0 = item.xc_1;
       destination.f(tmp$ret$0);
     }
     // Inline function 'kotlin.collections.toTypedArray' call
@@ -2387,12 +2962,12 @@
   }
   function applyNikud(letter, ipa, useMale) {
     useMale = useMale === VOID ? false : useMale;
-    return letter.length === 1 ? Companion_instance_3.qc(charCodeAt(letter, 0), ipa, useMale) : letter;
+    return letter.length === 1 ? Companion_instance_3.uc(charCodeAt(letter, 0), ipa, useMale) : letter;
   }
   function getHebrewLetterInfo(letter) {
     if (!(letter.length === 1))
       return null;
-    var tmp0_elvis_lhs = Companion_getInstance_0().ja(charCodeAt(letter, 0));
+    var tmp0_elvis_lhs = Companion_getInstance_0().na(charCodeAt(letter, 0));
     var tmp;
     if (tmp0_elvis_lhs == null) {
       return null;
@@ -2401,25 +2976,25 @@
     }
     var heLetter = tmp;
     var obj = {};
-    obj['letter'] = toString(heLetter.ra_1);
-    obj['ipa'] = heLetter.sa_1;
-    obj['ipaDagesh'] = heLetter.ta_1;
-    obj['name'] = heLetter.ua_1;
-    obj['type'] = heLetter.va_1.r1_1;
-    obj['en'] = heLetter.wa_1;
-    obj['isGuttural'] = heLetter.db();
-    obj['isBgdkpt'] = heLetter.eb();
-    obj['isFinal'] = heLetter.cb();
+    obj['letter'] = toString(heLetter.va_1);
+    obj['ipa'] = heLetter.wa_1;
+    obj['ipaDagesh'] = heLetter.xa_1;
+    obj['name'] = heLetter.ya_1;
+    obj['type'] = heLetter.za_1.r1_1;
+    obj['en'] = heLetter.ab_1;
+    obj['isGuttural'] = heLetter.hb();
+    obj['isBgdkpt'] = heLetter.ib();
+    obj['isFinal'] = heLetter.gb();
     return obj;
   }
   function isBgdkpt(letter) {
-    return letter.length === 1 && Companion_getInstance().ka(charCodeAt(letter, 0));
+    return letter.length === 1 && Companion_getInstance().oa(charCodeAt(letter, 0));
   }
   function getBgdkptSound(letter, hasDagesh, useClassical) {
     useClassical = useClassical === VOID ? false : useClassical;
     if (!(letter.length === 1))
       return null;
-    var tmp0_elvis_lhs = Companion_getInstance().ja(charCodeAt(letter, 0));
+    var tmp0_elvis_lhs = Companion_getInstance().na(charCodeAt(letter, 0));
     var tmp;
     if (tmp0_elvis_lhs == null) {
       return null;
@@ -2427,27 +3002,27 @@
       tmp = tmp0_elvis_lhs;
     }
     var bgdkpt = tmp;
-    var sound = bgdkpt.la(hasDagesh, useClassical);
+    var sound = bgdkpt.pa(hasDagesh, useClassical);
     var obj = {};
-    obj['letter'] = sound.ma_1;
-    obj['ipa'] = sound.na_1;
-    obj['en'] = sound.oa_1;
+    obj['letter'] = sound.qa_1;
+    obj['ipa'] = sound.ra_1;
+    obj['en'] = sound.sa_1;
     return obj;
   }
   function getAllKeys() {
     // Inline function 'kotlin.collections.toTypedArray' call
-    var this_0 = UniKeys_getInstance().ue_1.o1();
+    var this_0 = UniKeys_getInstance().lf_1.o1();
     return copyToArray(this_0);
   }
   function getLetterKeys() {
     // Inline function 'kotlin.collections.map' call
-    var this_0 = UniKeys_getInstance().ve_1;
+    var this_0 = UniKeys_getInstance().mf_1;
     // Inline function 'kotlin.collections.mapTo' call
     var destination = ArrayList_init_$Create$_0(collectionSizeOrDefault(this_0, 10));
     var _iterator__ex2g4s = this_0.h();
     while (_iterator__ex2g4s.i()) {
       var item = _iterator__ex2g4s.j();
-      var tmp$ret$0 = item.yc_1;
+      var tmp$ret$0 = item.cd_1;
       destination.f(tmp$ret$0);
     }
     // Inline function 'kotlin.collections.toTypedArray' call
@@ -2455,20 +3030,20 @@
   }
   function getHebrewKeys() {
     // Inline function 'kotlin.collections.map' call
-    var this_0 = UniKeys_getInstance().we_1;
+    var this_0 = UniKeys_getInstance().nf_1;
     // Inline function 'kotlin.collections.mapTo' call
     var destination = ArrayList_init_$Create$_0(collectionSizeOrDefault(this_0, 10));
     var _iterator__ex2g4s = this_0.h();
     while (_iterator__ex2g4s.i()) {
       var item = _iterator__ex2g4s.j();
-      var tmp$ret$0 = item.yc_1;
+      var tmp$ret$0 = item.cd_1;
       destination.f(tmp$ret$0);
     }
     // Inline function 'kotlin.collections.toTypedArray' call
     return copyToArray(destination);
   }
   function getIpaVowelInfo(ipa) {
-    var tmp0_elvis_lhs = Companion_getInstance_1().pb(ipa);
+    var tmp0_elvis_lhs = Companion_getInstance_1().tb(ipa);
     var tmp;
     if (tmp0_elvis_lhs == null) {
       return null;
@@ -2477,19 +3052,19 @@
     }
     var vowel = tmp;
     var obj = {};
-    obj['ipa'] = vowel.hb_1;
-    obj['name'] = vowel.ib_1;
-    obj['heNikud'] = vowel.jb_1;
-    obj['heName'] = vowel.kb_1;
+    obj['ipa'] = vowel.lb_1;
+    obj['name'] = vowel.mb_1;
+    obj['heNikud'] = vowel.nb_1;
+    obj['heName'] = vowel.ob_1;
     // Inline function 'kotlin.collections.toTypedArray' call
-    var this_0 = vowel.lb_1;
+    var this_0 = vowel.pb_1;
     obj['enSpellings'] = copyToArray(this_0);
-    obj['quality'] = vowel.mb_1.r1_1;
-    obj['warning'] = vowel.nb_1;
+    obj['quality'] = vowel.qb_1.r1_1;
+    obj['warning'] = vowel.rb_1;
     return obj;
   }
   function getIpaConsonantInfo(ipa) {
-    var tmp0_elvis_lhs = Companion_getInstance_2().pb(ipa);
+    var tmp0_elvis_lhs = Companion_getInstance_2().tb(ipa);
     var tmp;
     if (tmp0_elvis_lhs == null) {
       return null;
@@ -2498,48 +3073,69 @@
     }
     var consonant = tmp;
     var obj = {};
-    obj['ipa'] = consonant.sb_1;
-    obj['name'] = consonant.tb_1;
-    obj['he'] = consonant.ub_1;
-    obj['en'] = consonant.vb_1;
-    obj['geresh'] = consonant.wb_1;
-    obj['heUnique'] = consonant.xb_1;
-    obj['warning'] = consonant.yb_1;
+    obj['ipa'] = consonant.wb_1;
+    obj['name'] = consonant.xb_1;
+    obj['he'] = consonant.yb_1;
+    obj['en'] = consonant.zb_1;
+    obj['geresh'] = consonant.ac_1;
+    obj['heUnique'] = consonant.bc_1;
+    obj['warning'] = consonant.cc_1;
     return obj;
   }
   function heIpa(word) {
-    return IpaColor_getInstance().ic(word);
+    return IpaColor_getInstance().mc(word);
   }
   function enIpa(word) {
-    return IpaColor_getInstance().hc(word);
+    return IpaColor_getInstance().lc(word);
   }
   function lineEndIpa(line, isHebrew) {
-    return IpaColor_getInstance().jc(line, isHebrew);
+    return IpaColor_getInstance().nc(line, isHebrew);
   }
   function ipaHue(ipa) {
-    return IpaColor_getInstance().kc(ipa);
+    return IpaColor_getInstance().oc(ipa);
   }
   function hsl(hue, saturation, lightness) {
-    return IpaColor_getInstance().lc(hue, saturation, lightness);
+    return IpaColor_getInstance().pc(hue, saturation, lightness);
   }
   function ipaEndColor(ipa) {
-    return IpaColor_getInstance().mc(ipa);
+    return IpaColor_getInstance().qc(ipa);
   }
   function ipaMidColor(ipa) {
-    return IpaColor_getInstance().nc(ipa);
+    return IpaColor_getInstance().rc(ipa);
   }
   function rhymeScheme(ipas) {
     // Inline function 'kotlin.collections.map' call
-    var this_0 = IpaColor_getInstance().oc(toList(ipas));
+    var this_0 = IpaColor_getInstance().sc(toList(ipas));
     // Inline function 'kotlin.collections.mapTo' call
     var destination = ArrayList_init_$Create$_0(collectionSizeOrDefault(this_0, 10));
     var _iterator__ex2g4s = this_0.h();
     while (_iterator__ex2g4s.i()) {
       var item = _iterator__ex2g4s.j();
       var obj = {};
-      obj['ch'] = toString(item.ac_1);
-      obj['ipa'] = item.bc_1;
-      obj['hue'] = item.cc_1;
+      obj['ch'] = toString(item.ec_1);
+      obj['ipa'] = item.fc_1;
+      obj['hue'] = item.gc_1;
+      destination.f(obj);
+    }
+    // Inline function 'kotlin.collections.toTypedArray' call
+    return copyToArray(destination);
+  }
+  function detectScript(text) {
+    return Companion_getInstance_4().ze(text).r1_1;
+  }
+  function toIpa(word) {
+    // Inline function 'kotlin.collections.map' call
+    var this_0 = Companion_getInstance_4().af(word);
+    // Inline function 'kotlin.collections.mapTo' call
+    var destination = ArrayList_init_$Create$_0(collectionSizeOrDefault(this_0, 10));
+    var _iterator__ex2g4s = this_0.h();
+    while (_iterator__ex2g4s.i()) {
+      var item = _iterator__ex2g4s.j();
+      var obj = {};
+      obj['consonant'] = item.me_1;
+      obj['vowel'] = item.ne_1;
+      obj['original'] = item.oe_1;
+      obj['hue'] = item.cf();
       destination.f(obj);
     }
     // Inline function 'kotlin.collections.toTypedArray' call
@@ -2547,17 +3143,17 @@
   }
   function parseHebrewSyllables(word) {
     // Inline function 'kotlin.collections.map' call
-    var this_0 = Companion_getInstance_4().le(word);
+    var this_0 = Companion_getInstance_4().qe(word);
     // Inline function 'kotlin.collections.mapTo' call
     var destination = ArrayList_init_$Create$_0(collectionSizeOrDefault(this_0, 10));
     var _iterator__ex2g4s = this_0.h();
     while (_iterator__ex2g4s.i()) {
       var item = _iterator__ex2g4s.j();
       var obj = {};
-      obj['consonant'] = item.he_1;
-      obj['vowel'] = item.ie_1;
-      obj['original'] = item.je_1;
-      obj['hue'] = item.oe();
+      obj['consonant'] = item.me_1;
+      obj['vowel'] = item.ne_1;
+      obj['original'] = item.oe_1;
+      obj['hue'] = item.cf();
       destination.f(obj);
     }
     // Inline function 'kotlin.collections.toTypedArray' call
@@ -2565,42 +3161,178 @@
   }
   function parseEnglishSyllables(word) {
     // Inline function 'kotlin.collections.map' call
-    var this_0 = Companion_getInstance_4().me(word);
+    var this_0 = Companion_getInstance_4().re(word);
     // Inline function 'kotlin.collections.mapTo' call
     var destination = ArrayList_init_$Create$_0(collectionSizeOrDefault(this_0, 10));
     var _iterator__ex2g4s = this_0.h();
     while (_iterator__ex2g4s.i()) {
       var item = _iterator__ex2g4s.j();
       var obj = {};
-      obj['consonant'] = item.he_1;
-      obj['vowel'] = item.ie_1;
-      obj['original'] = item.je_1;
-      obj['hue'] = item.oe();
+      obj['consonant'] = item.me_1;
+      obj['vowel'] = item.ne_1;
+      obj['original'] = item.oe_1;
+      obj['hue'] = item.cf();
       destination.f(obj);
     }
     // Inline function 'kotlin.collections.toTypedArray' call
     return copyToArray(destination);
   }
+  function parseArabicSyllables(word) {
+    // Inline function 'kotlin.collections.map' call
+    var this_0 = Companion_getInstance_4().se(word);
+    // Inline function 'kotlin.collections.mapTo' call
+    var destination = ArrayList_init_$Create$_0(collectionSizeOrDefault(this_0, 10));
+    var _iterator__ex2g4s = this_0.h();
+    while (_iterator__ex2g4s.i()) {
+      var item = _iterator__ex2g4s.j();
+      var obj = {};
+      obj['consonant'] = item.me_1;
+      obj['vowel'] = item.ne_1;
+      obj['original'] = item.oe_1;
+      obj['hue'] = item.cf();
+      destination.f(obj);
+    }
+    // Inline function 'kotlin.collections.toTypedArray' call
+    return copyToArray(destination);
+  }
+  function parseGreekSyllables(word) {
+    // Inline function 'kotlin.collections.map' call
+    var this_0 = Companion_getInstance_4().te(word);
+    // Inline function 'kotlin.collections.mapTo' call
+    var destination = ArrayList_init_$Create$_0(collectionSizeOrDefault(this_0, 10));
+    var _iterator__ex2g4s = this_0.h();
+    while (_iterator__ex2g4s.i()) {
+      var item = _iterator__ex2g4s.j();
+      var obj = {};
+      obj['consonant'] = item.me_1;
+      obj['vowel'] = item.ne_1;
+      obj['original'] = item.oe_1;
+      obj['hue'] = item.cf();
+      destination.f(obj);
+    }
+    // Inline function 'kotlin.collections.toTypedArray' call
+    return copyToArray(destination);
+  }
+  function parseHindiSyllables(word) {
+    // Inline function 'kotlin.collections.map' call
+    var this_0 = Companion_getInstance_4().ue(word);
+    // Inline function 'kotlin.collections.mapTo' call
+    var destination = ArrayList_init_$Create$_0(collectionSizeOrDefault(this_0, 10));
+    var _iterator__ex2g4s = this_0.h();
+    while (_iterator__ex2g4s.i()) {
+      var item = _iterator__ex2g4s.j();
+      var obj = {};
+      obj['consonant'] = item.me_1;
+      obj['vowel'] = item.ne_1;
+      obj['original'] = item.oe_1;
+      obj['hue'] = item.cf();
+      destination.f(obj);
+    }
+    // Inline function 'kotlin.collections.toTypedArray' call
+    return copyToArray(destination);
+  }
+  function parseRussianSyllables(word) {
+    // Inline function 'kotlin.collections.map' call
+    var this_0 = Companion_getInstance_4().ve(word);
+    // Inline function 'kotlin.collections.mapTo' call
+    var destination = ArrayList_init_$Create$_0(collectionSizeOrDefault(this_0, 10));
+    var _iterator__ex2g4s = this_0.h();
+    while (_iterator__ex2g4s.i()) {
+      var item = _iterator__ex2g4s.j();
+      var obj = {};
+      obj['consonant'] = item.me_1;
+      obj['vowel'] = item.ne_1;
+      obj['original'] = item.oe_1;
+      obj['hue'] = item.cf();
+      destination.f(obj);
+    }
+    // Inline function 'kotlin.collections.toTypedArray' call
+    return copyToArray(destination);
+  }
+  function parseKoreanSyllables(word) {
+    // Inline function 'kotlin.collections.map' call
+    var this_0 = Companion_getInstance_4().we(word);
+    // Inline function 'kotlin.collections.mapTo' call
+    var destination = ArrayList_init_$Create$_0(collectionSizeOrDefault(this_0, 10));
+    var _iterator__ex2g4s = this_0.h();
+    while (_iterator__ex2g4s.i()) {
+      var item = _iterator__ex2g4s.j();
+      var obj = {};
+      obj['consonant'] = item.me_1;
+      obj['vowel'] = item.ne_1;
+      obj['original'] = item.oe_1;
+      obj['hue'] = item.cf();
+      destination.f(obj);
+    }
+    // Inline function 'kotlin.collections.toTypedArray' call
+    return copyToArray(destination);
+  }
+  function parseJapaneseSyllables(word) {
+    // Inline function 'kotlin.collections.map' call
+    var this_0 = Companion_getInstance_4().xe(word);
+    // Inline function 'kotlin.collections.mapTo' call
+    var destination = ArrayList_init_$Create$_0(collectionSizeOrDefault(this_0, 10));
+    var _iterator__ex2g4s = this_0.h();
+    while (_iterator__ex2g4s.i()) {
+      var item = _iterator__ex2g4s.j();
+      var obj = {};
+      obj['consonant'] = item.me_1;
+      obj['vowel'] = item.ne_1;
+      obj['original'] = item.oe_1;
+      obj['hue'] = item.cf();
+      destination.f(obj);
+    }
+    // Inline function 'kotlin.collections.toTypedArray' call
+    return copyToArray(destination);
+  }
+  function parseChineseSyllables(word) {
+    // Inline function 'kotlin.collections.map' call
+    var this_0 = Companion_getInstance_4().ye(word);
+    // Inline function 'kotlin.collections.mapTo' call
+    var destination = ArrayList_init_$Create$_0(collectionSizeOrDefault(this_0, 10));
+    var _iterator__ex2g4s = this_0.h();
+    while (_iterator__ex2g4s.i()) {
+      var item = _iterator__ex2g4s.j();
+      var obj = {};
+      obj['consonant'] = item.me_1;
+      obj['vowel'] = item.ne_1;
+      obj['original'] = item.oe_1;
+      obj['hue'] = item.cf();
+      destination.f(obj);
+    }
+    // Inline function 'kotlin.collections.toTypedArray' call
+    return copyToArray(destination);
+  }
+  function wordHueAuto(word) {
+    return Companion_getInstance_4().bf(word);
+  }
   function wordHue(word, isHebrew) {
-    return Companion_getInstance_4().ne(word, isHebrew);
+    return Companion_getInstance_4().df(word, isHebrew);
+  }
+  function wordEndColorAuto(word) {
+    return Companion_getInstance_4().ef(word);
   }
   function wordEndColor(word, isHebrew) {
-    return Companion_getInstance_4().pe(word, isHebrew);
+    return Companion_getInstance_4().ff(word, isHebrew);
   }
   function syllableHsl(hue, saturation, lightness) {
     saturation = saturation === VOID ? 70 : saturation;
     lightness = lightness === VOID ? 65 : lightness;
-    return Companion_getInstance_4().lc(hue, saturation, lightness);
+    return Companion_getInstance_4().pc(hue, saturation, lightness);
+  }
+  function rhymeKeyAuto(word, syllableCount) {
+    syllableCount = syllableCount === VOID ? 1 : syllableCount;
+    return Companion_getInstance_4().gf(word, syllableCount);
   }
   function rhymeKey(word, isHebrew, syllableCount) {
     syllableCount = syllableCount === VOID ? 1 : syllableCount;
-    return Companion_getInstance_4().qe(word, isHebrew, syllableCount);
+    return Companion_getInstance_4().hf(word, isHebrew, syllableCount);
   }
   function rhymes(word1, isHebrew1, word2, isHebrew2) {
-    return Companion_getInstance_4().se(word1, isHebrew1, word2, isHebrew2);
+    return Companion_getInstance_4().jf(word1, isHebrew1, word2, isHebrew2);
   }
   function rhymeDistance(word1, isHebrew1, word2, isHebrew2) {
-    return Companion_getInstance_4().te(word1, isHebrew1, word2, isHebrew2);
+    return Companion_getInstance_4().kf(word1, isHebrew1, word2, isHebrew2);
   }
   //region block: init
   Companion_instance_3 = new Companion_3();
@@ -2639,11 +3371,23 @@
     $org$pocketworkstation$unikey.ipaEndColor = ipaEndColor;
     $org$pocketworkstation$unikey.ipaMidColor = ipaMidColor;
     $org$pocketworkstation$unikey.rhymeScheme = rhymeScheme;
+    $org$pocketworkstation$unikey.detectScript = detectScript;
+    $org$pocketworkstation$unikey.toIpa = toIpa;
     $org$pocketworkstation$unikey.parseHebrewSyllables = parseHebrewSyllables;
     $org$pocketworkstation$unikey.parseEnglishSyllables = parseEnglishSyllables;
+    $org$pocketworkstation$unikey.parseArabicSyllables = parseArabicSyllables;
+    $org$pocketworkstation$unikey.parseGreekSyllables = parseGreekSyllables;
+    $org$pocketworkstation$unikey.parseHindiSyllables = parseHindiSyllables;
+    $org$pocketworkstation$unikey.parseRussianSyllables = parseRussianSyllables;
+    $org$pocketworkstation$unikey.parseKoreanSyllables = parseKoreanSyllables;
+    $org$pocketworkstation$unikey.parseJapaneseSyllables = parseJapaneseSyllables;
+    $org$pocketworkstation$unikey.parseChineseSyllables = parseChineseSyllables;
+    $org$pocketworkstation$unikey.wordHueAuto = wordHueAuto;
     $org$pocketworkstation$unikey.wordHue = wordHue;
+    $org$pocketworkstation$unikey.wordEndColorAuto = wordEndColorAuto;
     $org$pocketworkstation$unikey.wordEndColor = wordEndColor;
     $org$pocketworkstation$unikey.syllableHsl = syllableHsl;
+    $org$pocketworkstation$unikey.rhymeKeyAuto = rhymeKeyAuto;
     $org$pocketworkstation$unikey.rhymeKey = rhymeKey;
     $org$pocketworkstation$unikey.rhymes = rhymes;
     $org$pocketworkstation$unikey.rhymeDistance = rhymeDistance;

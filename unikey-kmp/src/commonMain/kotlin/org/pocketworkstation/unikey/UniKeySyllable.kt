@@ -43,38 +43,76 @@ data class UniKeySyllable(
     companion object {
         /**
          * Primary hue by vowel quality (6 vowel regions, 60° each).
+         * Covers all vowels from 23 Chatterbox languages.
          */
         private val VOWEL_HUE = mapOf(
-            // Low vowels - warm (red/orange)
+            // Low vowels - warm (red/orange) [0-40]
             "a" to 0,
             "A" to 5,
             "ɑ" to 10,
             "æ" to 15,
+            "aː" to 5,      // Hindi long a
+            "ɛː" to 35,     // Hindi long e
 
-            // Mid-low vowels - orange/yellow
+            // Mid-low vowels - orange/yellow [40-80]
             "ɛ" to 40,
             "E" to 45,
             "e" to 50,
+            "eː" to 55,     // Hindi long e
 
-            // High front - green
+            // High front - green [80-140]
             "i" to 120,
             "ɪ" to 125,
             "I" to 120,
+            "iː" to 115,    // Hindi long i
+            "y" to 130,     // French/German ü
 
-            // Mid back - cyan/teal
+            // Mid back - cyan/teal [160-200]
             "o" to 180,
             "ɔ" to 185,
             "O" to 180,
+            "oː" to 175,    // Hindi long o
+            "ɔː" to 190,    // Hindi long ɔ
+            "ø" to 160,     // French eu, German ö
 
-            // High back - blue
+            // High back - blue [220-280]
             "u" to 240,
             "ʊ" to 245,
             "U" to 240,
+            "uː" to 235,    // Hindi long u
+            "ɯ" to 250,     // Japanese u
+            "ü" to 255,     // Chinese ü
 
-            // Central/schwa - purple
+            // Central - purple [280-340]
             "ə" to 300,
             "@" to 300,
-            "ʌ" to 310
+            "ʌ" to 310,
+            "ɨ" to 290,     // Russian ы, Korean ㅡ
+
+            // Diphthongs (use ending vowel hue)
+            "ja" to 10,
+            "jɛ" to 45,
+            "jʌ" to 315,
+            "je" to 55,
+            "jo" to 185,
+            "ju" to 245,
+            "wa" to 5,
+            "wɛ" to 40,
+            "wʌ" to 315,
+            "we" to 50,
+            "wi" to 125,
+            "ɰi" to 120,
+
+            // Pinyin finals
+            "ai" to 120,
+            "ei" to 50,
+            "ao" to 180,
+            "ou" to 240,
+            "an" to 0,
+            "en" to 50,
+            "ang" to 5,
+            "eng" to 55,
+            "ong" to 185
         )
 
         /**
@@ -87,43 +125,93 @@ data class UniKeySyllable(
         )
 
         private val CONSONANT_FEATURES = mapOf(
-            // Labials
+            // Labials (place=0)
             "p" to ConsonantFeatures(0, 0, false),
             "b" to ConsonantFeatures(0, 0, true),
+            "pʰ" to ConsonantFeatures(0, 0, false),  // Hindi aspirated
+            "bʱ" to ConsonantFeatures(0, 0, true),   // Hindi breathy
             "m" to ConsonantFeatures(0, 2, true),
             "f" to ConsonantFeatures(0, 1, false),
             "v" to ConsonantFeatures(0, 1, true),
+            "ɸ" to ConsonantFeatures(0, 1, false),   // Japanese fu
+            "ʋ" to ConsonantFeatures(0, 3, true),    // Hindi va
+            "w" to ConsonantFeatures(0, 3, true),
 
-            // Dentals/Alveolars
+            // Dentals (place=1)
+            "θ" to ConsonantFeatures(1, 1, false),   // Arabic tha, Greek theta
+            "ð" to ConsonantFeatures(1, 1, true),    // Arabic dhal, Greek delta
+
+            // Alveolars (place=2)
             "t" to ConsonantFeatures(2, 0, false),
             "d" to ConsonantFeatures(2, 0, true),
+            "tʰ" to ConsonantFeatures(2, 0, false),  // Hindi/Korean aspirated
+            "dʱ" to ConsonantFeatures(2, 0, true),   // Hindi breathy
             "n" to ConsonantFeatures(2, 2, true),
             "s" to ConsonantFeatures(2, 1, false),
             "z" to ConsonantFeatures(2, 1, true),
             "l" to ConsonantFeatures(2, 3, true),
             "r" to ConsonantFeatures(2, 4, true),
+            "ɾ" to ConsonantFeatures(2, 4, true),    // Japanese/Spanish flap
             "ts" to ConsonantFeatures(2, 5, false),
 
-            // Palatals
+            // Retroflex (place=2.5, using 2)
+            "ʈ" to ConsonantFeatures(2, 0, false),   // Hindi retroflex t
+            "ʈʰ" to ConsonantFeatures(2, 0, false),
+            "ɖ" to ConsonantFeatures(2, 0, true),    // Hindi retroflex d
+            "ɖʱ" to ConsonantFeatures(2, 0, true),
+            "ɳ" to ConsonantFeatures(2, 2, true),    // Hindi retroflex n
+            "ʂ" to ConsonantFeatures(2, 1, false),   // Hindi retroflex sh
+
+            // Palatals (place=3)
             "ʃ" to ConsonantFeatures(3, 1, false),
             "sh" to ConsonantFeatures(3, 1, false),
             "ʒ" to ConsonantFeatures(3, 1, true),
+            "ɕ" to ConsonantFeatures(3, 1, false),   // Japanese sh
             "j" to ConsonantFeatures(3, 3, true),
             "y" to ConsonantFeatures(3, 3, true),
+            "ɲ" to ConsonantFeatures(3, 2, true),    // Japanese ny, Hindi ña
+            "ç" to ConsonantFeatures(3, 1, false),   // Japanese hi
             "tʃ" to ConsonantFeatures(3, 5, false),
+            "tʃʰ" to ConsonantFeatures(3, 5, false), // Hindi/Korean aspirated
             "ch" to ConsonantFeatures(3, 5, false),
             "dʒ" to ConsonantFeatures(3, 5, true),
+            "dʒʱ" to ConsonantFeatures(3, 5, true),  // Hindi breathy
+            "tɕ" to ConsonantFeatures(3, 5, false),  // Japanese chi
 
-            // Velars
+            // Velars (place=4)
             "k" to ConsonantFeatures(4, 0, false),
+            "kʰ" to ConsonantFeatures(4, 0, false),  // Hindi/Korean aspirated
             "g" to ConsonantFeatures(4, 0, true),
-            "x" to ConsonantFeatures(4, 1, false),  // Hebrew chet/khaf
+            "ɡ" to ConsonantFeatures(4, 0, true),    // IPA g
+            "ɡʱ" to ConsonantFeatures(4, 0, true),   // Hindi breathy
+            "x" to ConsonantFeatures(4, 1, false),   // Hebrew chet, Greek chi
+            "ɣ" to ConsonantFeatures(4, 1, true),    // Arabic ghain, Greek gamma
             "ŋ" to ConsonantFeatures(4, 2, true),
 
-            // Glottals
+            // Uvulars (place=4.5, using 4)
+            "q" to ConsonantFeatures(4, 0, false),   // Arabic qaf
+
+            // Pharyngeals (place=5)
+            "ħ" to ConsonantFeatures(5, 1, false),   // Arabic ḥa
+            "ʕ" to ConsonantFeatures(5, 1, true),    // Arabic ain
+
+            // Glottals (place=5)
             "h" to ConsonantFeatures(5, 1, false),
-            "ʔ" to ConsonantFeatures(5, 0, false),
-            "" to ConsonantFeatures(5, 0, false)  // silent (alef/ayin)
+            "ɦ" to ConsonantFeatures(5, 1, true),    // Hindi voiced h
+            "ʔ" to ConsonantFeatures(5, 0, false),   // glottal stop
+            "" to ConsonantFeatures(5, 0, false),    // silent (alef/ayin)
+
+            // Emphatics (Arabic) - treated as alveolar
+            "sˤ" to ConsonantFeatures(2, 1, false),
+            "dˤ" to ConsonantFeatures(2, 0, true),
+            "tˤ" to ConsonantFeatures(2, 0, false),
+            "ðˤ" to ConsonantFeatures(1, 1, true),
+
+            // Clusters
+            "ks" to ConsonantFeatures(4, 5, false),  // Greek xi
+            "ps" to ConsonantFeatures(0, 5, false),  // Greek psi
+            "ʃtʃ" to ConsonantFeatures(3, 5, false), // Russian shch
+            "zh" to ConsonantFeatures(3, 5, false)   // Chinese zh
         )
 
         /**
@@ -297,6 +385,576 @@ data class UniKeySyllable(
             }
         }
 
+        // ═══ Arabic (ar) ═══
+        fun parseArabic(word: String): List<UniKeySyllable> {
+            val syllables = mutableListOf<UniKeySyllable>()
+            val w = word.replace(Regex("[\\s,.!?]+"), "")
+
+            var i = 0
+            while (i < w.length) {
+                val cp = w[i].code
+                if (cp in 0x0600..0x06FF) {
+                    val consonant = arabicConsonantIpa(w[i])
+                    val (vowel, len) = collectArabicVowel(w, i + 1)
+                    syllables.add(UniKeySyllable(consonant, vowel, w.substring(i, minOf(i + 1 + len, w.length))))
+                    i += 1 + len
+                } else {
+                    i++
+                }
+            }
+            return syllables
+        }
+
+        private fun arabicConsonantIpa(c: Char): String = when (c) {
+            '\u0627' -> ""      // alif - vowel carrier
+            '\u0628' -> "b"     // ba
+            '\u062A' -> "t"     // ta
+            '\u062B' -> "θ"     // tha
+            '\u062C' -> "dʒ"    // jeem
+            '\u062D' -> "ħ"     // ḥa
+            '\u062E' -> "x"     // kha
+            '\u062F' -> "d"     // dal
+            '\u0630' -> "ð"     // dhal
+            '\u0631' -> "r"     // ra
+            '\u0632' -> "z"     // zay
+            '\u0633' -> "s"     // sin
+            '\u0634' -> "ʃ"     // shin
+            '\u0635' -> "sˤ"    // ṣad (emphatic)
+            '\u0636' -> "dˤ"    // ḍad (emphatic)
+            '\u0637' -> "tˤ"    // ṭa (emphatic)
+            '\u0638' -> "ðˤ"    // ẓa (emphatic)
+            '\u0639' -> "ʕ"     // ain
+            '\u063A' -> "ɣ"     // ghain
+            '\u0641' -> "f"     // fa
+            '\u0642' -> "q"     // qaf
+            '\u0643' -> "k"     // kaf
+            '\u0644' -> "l"     // lam
+            '\u0645' -> "m"     // mim
+            '\u0646' -> "n"     // nun
+            '\u0647' -> "h"     // ha
+            '\u0648' -> "w"     // waw
+            '\u064A' -> "j"     // ya
+            '\u0621' -> "ʔ"     // hamza
+            else -> ""
+        }
+
+        private fun collectArabicVowel(word: String, start: Int): Pair<String, Int> {
+            if (start >= word.length) return "a" to 0
+            val cp = word[start].code
+            return when (cp) {
+                0x064E -> "a" to 1  // fatha
+                0x064F -> "u" to 1  // damma
+                0x0650 -> "i" to 1  // kasra
+                0x0651 -> "a" to 1  // shadda (gemination)
+                0x0652 -> "" to 1   // sukun (no vowel)
+                else -> "a" to 0    // default short a
+            }
+        }
+
+        // ═══ Greek (el) ═══
+        fun parseGreek(word: String): List<UniKeySyllable> {
+            val syllables = mutableListOf<UniKeySyllable>()
+            val w = word.lowercase()
+            var i = 0
+            while (i < w.length) {
+                val cp = w[i].code
+                if (cp in 0x03B1..0x03C9 || cp in 0x0386..0x03CE) { // Greek letters
+                    val (cons, vowel, len) = parseGreekChar(w, i)
+                    syllables.add(UniKeySyllable(cons, vowel, w.substring(i, i + len)))
+                    i += len
+                } else {
+                    i++
+                }
+            }
+            return syllables
+        }
+
+        private fun parseGreekChar(word: String, pos: Int): Triple<String, String, Int> {
+            val c = word[pos]
+            return when (c) {
+                'α', 'ά' -> Triple("", "a", 1)
+                'ε', 'έ' -> Triple("", "e", 1)
+                'η', 'ή' -> Triple("", "i", 1)
+                'ι', 'ί', 'ϊ', 'ΐ' -> Triple("", "i", 1)
+                'ο', 'ό' -> Triple("", "o", 1)
+                'υ', 'ύ', 'ϋ', 'ΰ' -> Triple("", "i", 1)
+                'ω', 'ώ' -> Triple("", "o", 1)
+                'β' -> Triple("v", "", 1)
+                'γ' -> Triple("ɣ", "", 1)
+                'δ' -> Triple("ð", "", 1)
+                'ζ' -> Triple("z", "", 1)
+                'θ' -> Triple("θ", "", 1)
+                'κ' -> Triple("k", "", 1)
+                'λ' -> Triple("l", "", 1)
+                'μ' -> Triple("m", "", 1)
+                'ν' -> Triple("n", "", 1)
+                'ξ' -> Triple("ks", "", 1)
+                'π' -> Triple("p", "", 1)
+                'ρ' -> Triple("r", "", 1)
+                'σ', 'ς' -> Triple("s", "", 1)
+                'τ' -> Triple("t", "", 1)
+                'φ' -> Triple("f", "", 1)
+                'χ' -> Triple("x", "", 1)
+                'ψ' -> Triple("ps", "", 1)
+                else -> Triple("", "", 1)
+            }
+        }
+
+        // ═══ Devanagari/Hindi (hi) ═══
+        fun parseDevanagari(word: String): List<UniKeySyllable> {
+            val syllables = mutableListOf<UniKeySyllable>()
+            var i = 0
+            while (i < word.length) {
+                val cp = word[i].code
+                if (cp in 0x0915..0x0939) { // consonants
+                    val cons = devanagariConsonantIpa(word[i])
+                    val (vowel, len) = collectDevanagariVowel(word, i + 1)
+                    syllables.add(UniKeySyllable(cons, vowel, word.substring(i, minOf(i + 1 + len, word.length))))
+                    i += 1 + len
+                } else if (cp in 0x0905..0x0914) { // independent vowels
+                    val vowel = devanagariVowelIpa(word[i])
+                    syllables.add(UniKeySyllable("", vowel, word[i].toString()))
+                    i++
+                } else {
+                    i++
+                }
+            }
+            return syllables
+        }
+
+        private fun devanagariConsonantIpa(c: Char): String = when (c) {
+            'क' -> "k"
+            'ख' -> "kʰ"
+            'ग' -> "ɡ"
+            'घ' -> "ɡʱ"
+            'ङ' -> "ŋ"
+            'च' -> "tʃ"
+            'छ' -> "tʃʰ"
+            'ज' -> "dʒ"
+            'झ' -> "dʒʱ"
+            'ञ' -> "ɲ"
+            'ट' -> "ʈ"
+            'ठ' -> "ʈʰ"
+            'ड' -> "ɖ"
+            'ढ' -> "ɖʱ"
+            'ण' -> "ɳ"
+            'त' -> "t"
+            'थ' -> "tʰ"
+            'द' -> "d"
+            'ध' -> "dʱ"
+            'न' -> "n"
+            'प' -> "p"
+            'फ' -> "pʰ"
+            'ब' -> "b"
+            'भ' -> "bʱ"
+            'म' -> "m"
+            'य' -> "j"
+            'र' -> "r"
+            'ल' -> "l"
+            'व' -> "ʋ"
+            'श' -> "ʃ"
+            'ष' -> "ʂ"
+            'स' -> "s"
+            'ह' -> "ɦ"
+            else -> ""
+        }
+
+        private fun devanagariVowelIpa(c: Char): String = when (c) {
+            'अ' -> "ə"
+            'आ', 'ा' -> "aː"
+            'इ', 'ि' -> "ɪ"
+            'ई', 'ी' -> "iː"
+            'उ', 'ु' -> "ʊ"
+            'ऊ', 'ू' -> "uː"
+            'ए', 'े' -> "eː"
+            'ऐ', 'ै' -> "ɛː"
+            'ओ', 'ो' -> "oː"
+            'औ', 'ौ' -> "ɔː"
+            else -> "ə"
+        }
+
+        private fun collectDevanagariVowel(word: String, start: Int): Pair<String, Int> {
+            if (start >= word.length) return "ə" to 0
+            val c = word[start]
+            val cp = c.code
+            // Matras (vowel signs)
+            if (cp in 0x093E..0x094C) {
+                return devanagariVowelIpa(c) to 1
+            }
+            // Virama (halant) - no vowel
+            if (cp == 0x094D) return "" to 1
+            return "ə" to 0 // inherent schwa
+        }
+
+        // ═══ Cyrillic/Russian (ru) ═══
+        fun parseCyrillic(word: String): List<UniKeySyllable> {
+            val syllables = mutableListOf<UniKeySyllable>()
+            val w = word.lowercase()
+            var i = 0
+            while (i < w.length) {
+                val cp = w[i].code
+                if (cp in 0x0430..0x044F || cp in 0x0451..0x0451) { // Cyrillic lowercase
+                    val (cons, vowel) = cyrillicCharIpa(w[i])
+                    syllables.add(UniKeySyllable(cons, vowel, w[i].toString()))
+                    i++
+                } else {
+                    i++
+                }
+            }
+            return syllables
+        }
+
+        private fun cyrillicCharIpa(c: Char): Pair<String, String> = when (c) {
+            'а' -> "" to "a"
+            'б' -> "b" to ""
+            'в' -> "v" to ""
+            'г' -> "ɡ" to ""
+            'д' -> "d" to ""
+            'е' -> "j" to "e"
+            'ё' -> "j" to "o"
+            'ж' -> "ʒ" to ""
+            'з' -> "z" to ""
+            'и' -> "" to "i"
+            'й' -> "j" to ""
+            'к' -> "k" to ""
+            'л' -> "l" to ""
+            'м' -> "m" to ""
+            'н' -> "n" to ""
+            'о' -> "" to "o"
+            'п' -> "p" to ""
+            'р' -> "r" to ""
+            'с' -> "s" to ""
+            'т' -> "t" to ""
+            'у' -> "" to "u"
+            'ф' -> "f" to ""
+            'х' -> "x" to ""
+            'ц' -> "ts" to ""
+            'ч' -> "tʃ" to ""
+            'ш' -> "ʃ" to ""
+            'щ' -> "ʃtʃ" to ""
+            'ъ' -> "" to ""  // hard sign
+            'ы' -> "" to "ɨ"
+            'ь' -> "" to ""  // soft sign
+            'э' -> "" to "e"
+            'ю' -> "j" to "u"
+            'я' -> "j" to "a"
+            else -> "" to ""
+        }
+
+        // ═══ Hangul/Korean (ko) ═══
+        fun parseHangul(word: String): List<UniKeySyllable> {
+            val syllables = mutableListOf<UniKeySyllable>()
+            for (c in word) {
+                val cp = c.code
+                // Hangul syllable block (AC00-D7AF)
+                if (cp in 0xAC00..0xD7AF) {
+                    val (cons, vowel, final) = decomposeHangul(cp)
+                    syllables.add(UniKeySyllable(cons, vowel, c.toString()))
+                    if (final.isNotEmpty()) {
+                        syllables.add(UniKeySyllable(final, "", ""))
+                    }
+                }
+            }
+            return syllables
+        }
+
+        private fun decomposeHangul(syllable: Int): Triple<String, String, String> {
+            val base = syllable - 0xAC00
+            val initial = base / 588
+            val medial = (base % 588) / 28
+            val finalC = base % 28
+
+            val initIpa = hangulInitialIpa(initial)
+            val medIpa = hangulMedialIpa(medial)
+            val finIpa = if (finalC > 0) hangulFinalIpa(finalC) else ""
+
+            return Triple(initIpa, medIpa, finIpa)
+        }
+
+        private fun hangulInitialIpa(i: Int): String = when (i) {
+            0 -> "ɡ"   // ㄱ
+            1 -> "k"   // ㄲ
+            2 -> "n"   // ㄴ
+            3 -> "d"   // ㄷ
+            4 -> "t"   // ㄸ
+            5 -> "r"   // ㄹ
+            6 -> "m"   // ㅁ
+            7 -> "b"   // ㅂ
+            8 -> "p"   // ㅃ
+            9 -> "s"   // ㅅ
+            10 -> "s"  // ㅆ
+            11 -> ""   // ㅇ (silent)
+            12 -> "dʒ" // ㅈ
+            13 -> "tʃ" // ㅉ
+            14 -> "tʃʰ"// ㅊ
+            15 -> "kʰ" // ㅋ
+            16 -> "tʰ" // ㅌ
+            17 -> "pʰ" // ㅍ
+            18 -> "h"  // ㅎ
+            else -> ""
+        }
+
+        private fun hangulMedialIpa(m: Int): String = when (m) {
+            0 -> "a"   // ㅏ
+            1 -> "ɛ"   // ㅐ
+            2 -> "ja"  // ㅑ
+            3 -> "jɛ"  // ㅒ
+            4 -> "ʌ"   // ㅓ
+            5 -> "e"   // ㅔ
+            6 -> "jʌ"  // ㅕ
+            7 -> "je"  // ㅖ
+            8 -> "o"   // ㅗ
+            9 -> "wa"  // ㅘ
+            10 -> "wɛ" // ㅙ
+            11 -> "we" // ㅚ
+            12 -> "jo" // ㅛ
+            13 -> "u"  // ㅜ
+            14 -> "wʌ" // ㅝ
+            15 -> "we" // ㅞ
+            16 -> "wi" // ㅟ
+            17 -> "ju" // ㅠ
+            18 -> "ɨ"  // ㅡ
+            19 -> "ɰi" // ㅢ
+            20 -> "i"  // ㅣ
+            else -> ""
+        }
+
+        private fun hangulFinalIpa(f: Int): String = when (f) {
+            1 -> "k"   // ㄱ
+            2 -> "k"   // ㄲ
+            3 -> "k"   // ㄳ
+            4 -> "n"   // ㄴ
+            5 -> "n"   // ㄵ
+            6 -> "n"   // ㄶ
+            7 -> "t"   // ㄷ
+            8 -> "l"   // ㄹ
+            9 -> "k"   // ㄺ
+            10 -> "m"  // ㄻ
+            11 -> "p"  // ㄼ
+            12 -> "l"  // ㄽ
+            13 -> "l"  // ㄾ
+            14 -> "l"  // ㄿ
+            15 -> "p"  // ㅀ
+            16 -> "m"  // ㅁ
+            17 -> "p"  // ㅂ
+            18 -> "p"  // ㅄ
+            19 -> "t"  // ㅅ
+            20 -> "t"  // ㅆ
+            21 -> "ŋ"  // ㅇ
+            22 -> "t"  // ㅈ
+            23 -> "t"  // ㅊ
+            24 -> "k"  // ㅋ
+            25 -> "t"  // ㅌ
+            26 -> "p"  // ㅍ
+            27 -> "t"  // ㅎ
+            else -> ""
+        }
+
+        // ═══ Japanese (ja) - Hiragana/Katakana ═══
+        fun parseJapanese(word: String): List<UniKeySyllable> {
+            val syllables = mutableListOf<UniKeySyllable>()
+            var i = 0
+            while (i < word.length) {
+                val c = word[i]
+                val cp = c.code
+                when {
+                    cp in 0x3040..0x309F -> { // Hiragana
+                        val (cons, vowel) = hiraganaIpa(c)
+                        syllables.add(UniKeySyllable(cons, vowel, c.toString()))
+                    }
+                    cp in 0x30A0..0x30FF -> { // Katakana
+                        val (cons, vowel) = katakanaIpa(c)
+                        syllables.add(UniKeySyllable(cons, vowel, c.toString()))
+                    }
+                }
+                i++
+            }
+            return syllables
+        }
+
+        private fun hiraganaIpa(c: Char): Pair<String, String> = when (c) {
+            'あ' -> "" to "a"
+            'い' -> "" to "i"
+            'う' -> "" to "ɯ"
+            'え' -> "" to "e"
+            'お' -> "" to "o"
+            'か' -> "k" to "a"
+            'き' -> "k" to "i"
+            'く' -> "k" to "ɯ"
+            'け' -> "k" to "e"
+            'こ' -> "k" to "o"
+            'さ' -> "s" to "a"
+            'し' -> "ɕ" to "i"
+            'す' -> "s" to "ɯ"
+            'せ' -> "s" to "e"
+            'そ' -> "s" to "o"
+            'た' -> "t" to "a"
+            'ち' -> "tɕ" to "i"
+            'つ' -> "ts" to "ɯ"
+            'て' -> "t" to "e"
+            'と' -> "t" to "o"
+            'な' -> "n" to "a"
+            'に' -> "ɲ" to "i"
+            'ぬ' -> "n" to "ɯ"
+            'ね' -> "n" to "e"
+            'の' -> "n" to "o"
+            'は' -> "h" to "a"
+            'ひ' -> "ç" to "i"
+            'ふ' -> "ɸ" to "ɯ"
+            'へ' -> "h" to "e"
+            'ほ' -> "h" to "o"
+            'ま' -> "m" to "a"
+            'み' -> "m" to "i"
+            'む' -> "m" to "ɯ"
+            'め' -> "m" to "e"
+            'も' -> "m" to "o"
+            'や' -> "j" to "a"
+            'ゆ' -> "j" to "ɯ"
+            'よ' -> "j" to "o"
+            'ら' -> "ɾ" to "a"
+            'り' -> "ɾ" to "i"
+            'る' -> "ɾ" to "ɯ"
+            'れ' -> "ɾ" to "e"
+            'ろ' -> "ɾ" to "o"
+            'わ' -> "w" to "a"
+            'を' -> "" to "o"
+            'ん' -> "n" to ""
+            else -> "" to ""
+        }
+
+        private fun katakanaIpa(c: Char): Pair<String, String> {
+            // Katakana maps directly to hiragana sounds
+            val hiragana = when (c) {
+                'ア' -> 'あ'; 'イ' -> 'い'; 'ウ' -> 'う'; 'エ' -> 'え'; 'オ' -> 'お'
+                'カ' -> 'か'; 'キ' -> 'き'; 'ク' -> 'く'; 'ケ' -> 'け'; 'コ' -> 'こ'
+                'サ' -> 'さ'; 'シ' -> 'し'; 'ス' -> 'す'; 'セ' -> 'せ'; 'ソ' -> 'そ'
+                'タ' -> 'た'; 'チ' -> 'ち'; 'ツ' -> 'つ'; 'テ' -> 'て'; 'ト' -> 'と'
+                'ナ' -> 'な'; 'ニ' -> 'に'; 'ヌ' -> 'ぬ'; 'ネ' -> 'ね'; 'ノ' -> 'の'
+                'ハ' -> 'は'; 'ヒ' -> 'ひ'; 'フ' -> 'ふ'; 'ヘ' -> 'へ'; 'ホ' -> 'ほ'
+                'マ' -> 'ま'; 'ミ' -> 'み'; 'ム' -> 'む'; 'メ' -> 'め'; 'モ' -> 'も'
+                'ヤ' -> 'や'; 'ユ' -> 'ゆ'; 'ヨ' -> 'よ'
+                'ラ' -> 'ら'; 'リ' -> 'り'; 'ル' -> 'る'; 'レ' -> 'れ'; 'ロ' -> 'ろ'
+                'ワ' -> 'わ'; 'ヲ' -> 'を'; 'ン' -> 'ん'
+                else -> c
+            }
+            return hiraganaIpa(hiragana)
+        }
+
+        // ═══ CJK/Chinese (zh) ═══
+        fun parseCjk(word: String): List<UniKeySyllable> {
+            // For CJK, we can't reliably map characters to IPA without a dictionary.
+            // Return syllables based on character count with neutral phonetic values.
+            // TTS systems use pinyin/pronunciation dictionaries for actual phonetics.
+            val syllables = mutableListOf<UniKeySyllable>()
+            for (c in word) {
+                val cp = c.code
+                if (cp in 0x4E00..0x9FFF) {
+                    // Use a hash-based pseudo-phonetic for consistent coloring
+                    val hash = c.hashCode() % 25
+                    val consonant = CJK_CONSONANTS.getOrElse(hash % CJK_CONSONANTS.size) { "" }
+                    val vowel = CJK_VOWELS.getOrElse(hash % CJK_VOWELS.size) { "a" }
+                    syllables.add(UniKeySyllable(consonant, vowel, c.toString()))
+                }
+            }
+            return syllables
+        }
+
+        private val CJK_CONSONANTS = listOf("", "b", "p", "m", "f", "d", "t", "n", "l", "g", "k", "h", "j", "q", "x", "zh", "ch", "sh", "r", "z", "c", "s")
+        private val CJK_VOWELS = listOf("a", "o", "e", "i", "u", "ü", "ai", "ei", "ao", "ou", "an", "en", "ang", "eng", "ong")
+
+        /**
+         * Script type for input text conversion to IPA.
+         * Covers all 23 Chatterbox multilingual TTS languages:
+         * ar, da, de, el, en, es, fi, fr, he, hi, it, ja, ko, ms, nl, no, pl, pt, ru, sv, sw, tr, zh
+         */
+        enum class Script {
+            HEBREW,     // he
+            LATIN,      // da, de, en, es, fi, fr, it, ms, nl, no, pl, pt, sv, sw, tr
+            ARABIC,     // ar
+            GREEK,      // el
+            DEVANAGARI, // hi
+            CYRILLIC,   // ru
+            HANGUL,     // ko
+            HIRAGANA,   // ja (also covers katakana)
+            CJK,        // zh, ja (kanji)
+            UNKNOWN
+        }
+
+        /**
+         * Detect script type from Unicode code points.
+         * This is only used to select the correct IPA converter.
+         * All downstream processing uses IPA as the universal representation.
+         */
+        fun detectScript(text: String): Script {
+            for (c in text) {
+                val cp = c.code
+                // Hebrew: letters 0x05D0-0x05EA, nikud 0x05B0-0x05C7
+                if (cp in 0x05D0..0x05EA || cp in 0x05B0..0x05C7) {
+                    return Script.HEBREW
+                }
+                // Arabic: 0x0600-0x06FF, 0x0750-0x077F (supplement)
+                if (cp in 0x0600..0x06FF || cp in 0x0750..0x077F) {
+                    return Script.ARABIC
+                }
+                // Greek: 0x0370-0x03FF
+                if (cp in 0x0370..0x03FF) {
+                    return Script.GREEK
+                }
+                // Devanagari (Hindi): 0x0900-0x097F
+                if (cp in 0x0900..0x097F) {
+                    return Script.DEVANAGARI
+                }
+                // Cyrillic (Russian): 0x0400-0x04FF
+                if (cp in 0x0400..0x04FF) {
+                    return Script.CYRILLIC
+                }
+                // Hangul (Korean): 0xAC00-0xD7AF (syllables), 0x1100-0x11FF (jamo)
+                if (cp in 0xAC00..0xD7AF || cp in 0x1100..0x11FF) {
+                    return Script.HANGUL
+                }
+                // Hiragana: 0x3040-0x309F, Katakana: 0x30A0-0x30FF
+                if (cp in 0x3040..0x309F || cp in 0x30A0..0x30FF) {
+                    return Script.HIRAGANA
+                }
+                // CJK (Chinese/Japanese Kanji): 0x4E00-0x9FFF
+                if (cp in 0x4E00..0x9FFF) {
+                    return Script.CJK
+                }
+                // Latin: A-Z, a-z, also extended Latin (0x00C0-0x024F for accented chars)
+                if (cp in 0x0041..0x005A || cp in 0x0061..0x007A || cp in 0x00C0..0x024F) {
+                    return Script.LATIN
+                }
+            }
+            return Script.UNKNOWN
+        }
+
+        /**
+         * Convert any text to IPA syllables (auto-detects script).
+         * IPA is the universal phonetic representation.
+         */
+        fun toIpa(word: String): List<UniKeySyllable> {
+            return when (detectScript(word)) {
+                Script.HEBREW -> parseHebrew(word)
+                Script.LATIN -> parseEnglish(word)
+                Script.ARABIC -> parseArabic(word)
+                Script.GREEK -> parseGreek(word)
+                Script.DEVANAGARI -> parseDevanagari(word)
+                Script.CYRILLIC -> parseCyrillic(word)
+                Script.HANGUL -> parseHangul(word)
+                Script.HIRAGANA -> parseJapanese(word)
+                Script.CJK -> parseCjk(word)
+                Script.UNKNOWN -> parseEnglish(word) // fallback
+            }
+        }
+
+        /**
+         * Get hue for word based on IPA (auto-detects script for conversion).
+         */
+        fun wordHue(word: String): Int {
+            val syllables = toIpa(word)
+            return syllables.lastOrNull()?.hue ?: 0
+        }
+
         /**
          * Get hue for a complete word (uses last syllable for rhyme coloring).
          */
@@ -313,10 +971,27 @@ data class UniKeySyllable(
         }
 
         /**
+         * Get color for word ending (IPA-based, auto-detects script).
+         */
+        fun wordEndColor(word: String): String {
+            return hsl(wordHue(word), 80, 72)
+        }
+
+        /**
          * Get color for word ending (for rhyme visualization).
          */
         fun wordEndColor(word: String, isHebrew: Boolean): String {
             return hsl(wordHue(word, isHebrew), 80, 72)
+        }
+
+        /**
+         * Get rhyme key - the IPA pattern of ending syllable(s).
+         * This is the universal representation for rhyme matching.
+         */
+        fun rhymeKey(word: String, syllableCount: Int = 1): String {
+            val syllables = toIpa(word)
+            return syllables.takeLast(syllableCount)
+                .joinToString("-") { "${it.consonant}${it.vowel}" }
         }
 
         /**

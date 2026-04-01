@@ -61,19 +61,27 @@ a,a:hover,a:visited,a:active{color:inherit;text-decoration:none}
 /* ═══ UniKey KMP API ═══ */
 var UK = globalThis['hackerskeyboard:unikey-kmp'].org.pocketworkstation.unikey;
 
-/* IPA functions from KMP - now shared between Android and JS */
+/* IPA functions from KMP - universal IPA layer */
 function heIpa(w) { return UK.heIpa(w); }
 function enIpa(w) { return UK.enIpa(w); }
-function lineEndIpa(line, lang) { return UK.lineEndIpa(line, lang === "he"); }
+function lineEndIpa(line, isHebrew) { return UK.lineEndIpa(line, isHebrew); }
 function ipaHue(ipa) { return UK.ipaHue(ipa); }
 function hl(h, s, l) { return UK.hsl(h, s, l); }
 
-/* UniKey syllable-based functions */
+/* UniKey syllable-based functions - auto-detect script from Unicode */
+function detectScript(text) { return UK.detectScript(text); }
+function toIpa(word) { return UK.toIpa(word); }
 function parseHebrewSyllables(word) { return UK.parseHebrewSyllables(word); }
 function parseEnglishSyllables(word) { return UK.parseEnglishSyllables(word); }
-function wordHue(word, isHebrew) { return UK.wordHue(word, isHebrew); }
-function wordEndColor(word, isHebrew) { return UK.wordEndColor(word, isHebrew); }
-function rhymeKey(word, isHebrew) { return UK.rhymeKey(word, isHebrew); }
+
+/* Auto-detect versions (infer script from Unicode code points) */
+function wordHue(word) { return UK.wordHueAuto(word); }
+function wordEndColor(word) { return UK.wordEndColorAuto(word); }
+function rhymeKey(word, syllableCount) { return UK.rhymeKeyAuto(word, syllableCount || 1); }
+
+/* Explicit script versions (for cross-language comparison) */
+function wordHueExplicit(word, isHebrew) { return UK.wordHue(word, isHebrew); }
+function rhymeKeyExplicit(word, isHebrew, syllableCount) { return UK.rhymeKey(word, isHebrew, syllableCount || 1); }
 function rhymes(w1, h1, w2, h2) { return UK.rhymes(w1, h1, w2, h2); }
 function rhymeDistance(w1, h1, w2, h2) { return UK.rhymeDistance(w1, h1, w2, h2); }
 
@@ -462,9 +470,8 @@ function h(tag,props,kids){
 }
 
 function colorWord(word, lang, isEnd, href){
-  /* Use UniKeySyllable for hue - phonetically similar syllables cluster */
-  var isHebrew = lang === "he";
-  var hue = wordHue(word, isHebrew);
+  /* Use UniKeySyllable for hue - auto-detects script from Unicode */
+  var hue = wordHue(word);
   var el = document.createElement("span");
   if(href){el.setAttribute("data-ref",href);el.style.cursor="pointer";}
   el.textContent = word;
@@ -662,7 +669,6 @@ function colorLineWithCursor(text, lang, pos, vi, li){
   var full = text + "";
   var segs = full.split(/(\s+)/);
   var offset = 0, wordIdx = 0;
-  var isHebrew = lang === "he";
 
   segs.forEach(function(seg){
     if(/^\s+$/.test(seg)){
@@ -673,8 +679,8 @@ function colorLineWithCursor(text, lang, pos, vi, li){
     var segStart = offset;
     var segEnd = offset + seg.length;
     var wi = wordIdx; wordIdx++;
-    /* Use UniKeySyllable wordHue for phonetic coloring */
-    var hue = wordHue(seg, isHebrew);
+    /* Use UniKeySyllable wordHue - auto-detects script from Unicode */
+    var hue = wordHue(seg);
     var hasCursor = pos >= segStart && pos < segEnd;
 
     if(hasCursor){

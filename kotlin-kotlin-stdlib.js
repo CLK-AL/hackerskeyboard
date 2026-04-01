@@ -99,23 +99,23 @@ if (typeof Math.clz32 === 'undefined') {
   initMetadataForClass(AbstractMutableCollection, 'AbstractMutableCollection', VOID, AbstractCollection, [AbstractCollection, Collection]);
   initMetadataForClass(IteratorImpl, 'IteratorImpl');
   initMetadataForClass(ListIteratorImpl, 'ListIteratorImpl', VOID, IteratorImpl);
-  initMetadataForClass(AbstractMutableList, 'AbstractMutableList', VOID, AbstractMutableCollection, [AbstractMutableCollection, Collection, KtList]);
+  initMetadataForClass(AbstractMutableList, 'AbstractMutableList', VOID, AbstractMutableCollection, [AbstractMutableCollection, KtList, Collection]);
   initMetadataForClass(AbstractMap, 'AbstractMap', VOID, VOID, [KtMap]);
   initMetadataForClass(AbstractMutableMap, 'AbstractMutableMap', VOID, AbstractMap, [AbstractMap, KtMap]);
-  initMetadataForClass(AbstractMutableSet, 'AbstractMutableSet', VOID, AbstractMutableCollection, [AbstractMutableCollection, KtSet, Collection]);
+  initMetadataForClass(AbstractMutableSet, 'AbstractMutableSet', VOID, AbstractMutableCollection, [AbstractMutableCollection, Collection, KtSet]);
   initMetadataForCompanion(Companion_2);
   initMetadataForInterface(RandomAccess, 'RandomAccess');
-  initMetadataForClass(ArrayList, 'ArrayList', ArrayList_init_$Create$, AbstractMutableList, [AbstractMutableList, Collection, KtList, RandomAccess]);
+  initMetadataForClass(ArrayList, 'ArrayList', ArrayList_init_$Create$, AbstractMutableList, [AbstractMutableList, KtList, Collection, RandomAccess]);
   initMetadataForClass(HashMap, 'HashMap', HashMap_init_$Create$, AbstractMutableMap, [AbstractMutableMap, KtMap]);
-  initMetadataForClass(HashMapKeys, 'HashMapKeys', VOID, AbstractMutableSet, [KtSet, Collection, AbstractMutableSet]);
+  initMetadataForClass(HashMapKeys, 'HashMapKeys', VOID, AbstractMutableSet, [Collection, KtSet, AbstractMutableSet]);
   initMetadataForClass(HashMapValues, 'HashMapValues', VOID, AbstractMutableCollection, [Collection, AbstractMutableCollection]);
-  initMetadataForClass(HashMapEntrySetBase, 'HashMapEntrySetBase', VOID, AbstractMutableSet, [KtSet, Collection, AbstractMutableSet]);
+  initMetadataForClass(HashMapEntrySetBase, 'HashMapEntrySetBase', VOID, AbstractMutableSet, [Collection, KtSet, AbstractMutableSet]);
   initMetadataForClass(HashMapEntrySet, 'HashMapEntrySet', VOID, HashMapEntrySetBase);
   initMetadataForClass(HashMapKeysDefault$iterator$1);
   initMetadataForClass(HashMapKeysDefault, 'HashMapKeysDefault', VOID, AbstractMutableSet);
   initMetadataForClass(HashMapValuesDefault$iterator$1);
   initMetadataForClass(HashMapValuesDefault, 'HashMapValuesDefault', VOID, AbstractMutableCollection);
-  initMetadataForClass(HashSet, 'HashSet', HashSet_init_$Create$, AbstractMutableSet, [AbstractMutableSet, KtSet, Collection]);
+  initMetadataForClass(HashSet, 'HashSet', HashSet_init_$Create$, AbstractMutableSet, [AbstractMutableSet, Collection, KtSet]);
   initMetadataForCompanion(Companion_3);
   initMetadataForClass(Itr, 'Itr');
   initMetadataForClass(KeysItr, 'KeysItr', VOID, Itr);
@@ -160,7 +160,7 @@ if (typeof Math.clz32 === 'undefined') {
   initMetadataForInterface(InternalMap, 'InternalMap');
   initMetadataForClass(InternalHashMap, 'InternalHashMap', InternalHashMap_init_$Create$, VOID, [InternalMap]);
   initMetadataForClass(LinkedHashMap, 'LinkedHashMap', LinkedHashMap_init_$Create$, HashMap, [HashMap, KtMap]);
-  initMetadataForClass(LinkedHashSet, 'LinkedHashSet', LinkedHashSet_init_$Create$, HashSet, [HashSet, KtSet, Collection]);
+  initMetadataForClass(LinkedHashSet, 'LinkedHashSet', LinkedHashSet_init_$Create$, HashSet, [HashSet, Collection, KtSet]);
   initMetadataForClass(Exception, 'Exception', Exception_init_$Create$, Error);
   initMetadataForClass(RuntimeException, 'RuntimeException', RuntimeException_init_$Create$, Exception);
   initMetadataForClass(UnsupportedOperationException, 'UnsupportedOperationException', UnsupportedOperationException_init_$Create$, RuntimeException);
@@ -219,6 +219,7 @@ if (typeof Math.clz32 === 'undefined') {
   initMetadataForClass(UnsafeLazyImpl, 'UnsafeLazyImpl');
   initMetadataForObject(UNINITIALIZED_VALUE, 'UNINITIALIZED_VALUE');
   initMetadataForClass(Pair, 'Pair');
+  initMetadataForClass(Triple, 'Triple');
   //endregion
   function CharSequence() {
   }
@@ -5161,6 +5162,42 @@ if (typeof Math.clz32 === 'undefined') {
   function to(_this__u8e3s4, that) {
     return new Pair(_this__u8e3s4, that);
   }
+  function Triple(first, second, third) {
+    this.aa_1 = first;
+    this.ba_1 = second;
+    this.ca_1 = third;
+  }
+  protoOf(Triple).toString = function () {
+    return '(' + toString_0(this.aa_1) + ', ' + toString_0(this.ba_1) + ', ' + toString_0(this.ca_1) + ')';
+  };
+  protoOf(Triple).r8 = function () {
+    return this.aa_1;
+  };
+  protoOf(Triple).s8 = function () {
+    return this.ba_1;
+  };
+  protoOf(Triple).da = function () {
+    return this.ca_1;
+  };
+  protoOf(Triple).hashCode = function () {
+    var result = this.aa_1 == null ? 0 : hashCode_0(this.aa_1);
+    result = imul(result, 31) + (this.ba_1 == null ? 0 : hashCode_0(this.ba_1)) | 0;
+    result = imul(result, 31) + (this.ca_1 == null ? 0 : hashCode_0(this.ca_1)) | 0;
+    return result;
+  };
+  protoOf(Triple).equals = function (other) {
+    if (this === other)
+      return true;
+    if (!(other instanceof Triple))
+      return false;
+    if (!equals(this.aa_1, other.aa_1))
+      return false;
+    if (!equals(this.ba_1, other.ba_1))
+      return false;
+    if (!equals(this.ca_1, other.ca_1))
+      return false;
+    return true;
+  };
   //region block: post-declaration
   protoOf(InternalHashMap).e4 = containsAllEntries;
   //endregion
@@ -5242,10 +5279,11 @@ if (typeof Math.clz32 === 'undefined') {
   _.$_$.j2 = Enum;
   _.$_$.k2 = Long;
   _.$_$.l2 = THROW_CCE;
-  _.$_$.m2 = lazy;
-  _.$_$.n2 = noWhenBranchMatchedException;
-  _.$_$.o2 = toString_0;
-  _.$_$.p2 = to;
+  _.$_$.m2 = Triple;
+  _.$_$.n2 = lazy;
+  _.$_$.o2 = noWhenBranchMatchedException;
+  _.$_$.p2 = toString_0;
+  _.$_$.q2 = to;
   //endregion
   return _;
 }));

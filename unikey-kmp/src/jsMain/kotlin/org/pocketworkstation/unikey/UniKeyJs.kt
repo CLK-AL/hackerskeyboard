@@ -185,6 +185,21 @@ fun rhymeScheme(ipas: Array<String>): Array<dynamic> {
 
 // ═══ UniKey Syllable System ═══
 
+@JsName("detectScript")
+fun detectScript(text: String): String = UniKeySyllable.detectScript(text).name
+
+@JsName("toIpa")
+fun toIpa(word: String): Array<dynamic> {
+    return UniKeySyllable.toIpa(word).map { syl ->
+        val obj = js("{}")
+        obj["consonant"] = syl.consonant
+        obj["vowel"] = syl.vowel
+        obj["original"] = syl.original
+        obj["hue"] = syl.hue
+        obj
+    }.toTypedArray()
+}
+
 @JsName("parseHebrewSyllables")
 fun parseHebrewSyllables(word: String): Array<dynamic> {
     return UniKeySyllable.parseHebrew(word).map { syl ->
@@ -209,8 +224,100 @@ fun parseEnglishSyllables(word: String): Array<dynamic> {
     }.toTypedArray()
 }
 
+// ═══ Multilingual Parsers (Chatterbox 23 languages) ═══
+
+@JsName("parseArabicSyllables")
+fun parseArabicSyllables(word: String): Array<dynamic> {
+    return UniKeySyllable.parseArabic(word).map { syl ->
+        val obj = js("{}")
+        obj["consonant"] = syl.consonant
+        obj["vowel"] = syl.vowel
+        obj["original"] = syl.original
+        obj["hue"] = syl.hue
+        obj
+    }.toTypedArray()
+}
+
+@JsName("parseGreekSyllables")
+fun parseGreekSyllables(word: String): Array<dynamic> {
+    return UniKeySyllable.parseGreek(word).map { syl ->
+        val obj = js("{}")
+        obj["consonant"] = syl.consonant
+        obj["vowel"] = syl.vowel
+        obj["original"] = syl.original
+        obj["hue"] = syl.hue
+        obj
+    }.toTypedArray()
+}
+
+@JsName("parseHindiSyllables")
+fun parseHindiSyllables(word: String): Array<dynamic> {
+    return UniKeySyllable.parseDevanagari(word).map { syl ->
+        val obj = js("{}")
+        obj["consonant"] = syl.consonant
+        obj["vowel"] = syl.vowel
+        obj["original"] = syl.original
+        obj["hue"] = syl.hue
+        obj
+    }.toTypedArray()
+}
+
+@JsName("parseRussianSyllables")
+fun parseRussianSyllables(word: String): Array<dynamic> {
+    return UniKeySyllable.parseCyrillic(word).map { syl ->
+        val obj = js("{}")
+        obj["consonant"] = syl.consonant
+        obj["vowel"] = syl.vowel
+        obj["original"] = syl.original
+        obj["hue"] = syl.hue
+        obj
+    }.toTypedArray()
+}
+
+@JsName("parseKoreanSyllables")
+fun parseKoreanSyllables(word: String): Array<dynamic> {
+    return UniKeySyllable.parseHangul(word).map { syl ->
+        val obj = js("{}")
+        obj["consonant"] = syl.consonant
+        obj["vowel"] = syl.vowel
+        obj["original"] = syl.original
+        obj["hue"] = syl.hue
+        obj
+    }.toTypedArray()
+}
+
+@JsName("parseJapaneseSyllables")
+fun parseJapaneseSyllables(word: String): Array<dynamic> {
+    return UniKeySyllable.parseJapanese(word).map { syl ->
+        val obj = js("{}")
+        obj["consonant"] = syl.consonant
+        obj["vowel"] = syl.vowel
+        obj["original"] = syl.original
+        obj["hue"] = syl.hue
+        obj
+    }.toTypedArray()
+}
+
+@JsName("parseChineseSyllables")
+fun parseChineseSyllables(word: String): Array<dynamic> {
+    return UniKeySyllable.parseCjk(word).map { syl ->
+        val obj = js("{}")
+        obj["consonant"] = syl.consonant
+        obj["vowel"] = syl.vowel
+        obj["original"] = syl.original
+        obj["hue"] = syl.hue
+        obj
+    }.toTypedArray()
+}
+
+@JsName("wordHueAuto")
+fun wordHueAuto(word: String): Int = UniKeySyllable.wordHue(word)
+
 @JsName("wordHue")
 fun wordHue(word: String, isHebrew: Boolean): Int = UniKeySyllable.wordHue(word, isHebrew)
+
+@JsName("wordEndColorAuto")
+fun wordEndColorAuto(word: String): String = UniKeySyllable.wordEndColor(word)
 
 @JsName("wordEndColor")
 fun wordEndColor(word: String, isHebrew: Boolean): String = UniKeySyllable.wordEndColor(word, isHebrew)
@@ -218,6 +325,10 @@ fun wordEndColor(word: String, isHebrew: Boolean): String = UniKeySyllable.wordE
 @JsName("syllableHsl")
 fun syllableHsl(hue: Int, saturation: Int = 70, lightness: Int = 65): String =
     UniKeySyllable.hsl(hue, saturation, lightness)
+
+@JsName("rhymeKeyAuto")
+fun rhymeKeyAuto(word: String, syllableCount: Int = 1): String =
+    UniKeySyllable.rhymeKey(word, syllableCount)
 
 @JsName("rhymeKey")
 fun rhymeKey(word: String, isHebrew: Boolean, syllableCount: Int = 1): String =
