@@ -1,0 +1,213 @@
+# en.txt - English Phoneme Database
+# Format: CHAR ; CODEPOINT ; CATEGORY ; SUBCATEGORY ; HE_LABEL ; HE_DESC ; EN_LABEL ; EN_DESC
+# Unified format for bilingual search
+# ═══════════════════════════════════════════════════════════════════════════════════════════
+
+# group: vowels-short
+# subgroup: monophthongs
+a     ; 0061 ; vowel        ; short-front  ; פתח קצר        ; תנועה קצרה a כמו cat     ; Short A        ; Short front vowel as in cat
+e     ; 0065 ; vowel        ; short-mid    ; סגול קצר       ; תנועה קצרה e כמו bed     ; Short E        ; Short mid vowel as in bed
+i     ; 0069 ; vowel        ; short-close  ; חיריק קצר      ; תנועה קצרה i כמו sit     ; Short I        ; Short close vowel as in sit
+o     ; 006F ; vowel        ; short-back   ; חולם קצר       ; תנועה קצרה o כמו hot     ; Short O        ; Short back vowel as in hot
+u     ; 0075 ; vowel        ; short-back   ; קובוץ קצר      ; תנועה קצרה u כמו put     ; Short U        ; Short back vowel as in put
+
+# group: vowels-long
+# subgroup: monophthongs
+ā     ; 0101 ; vowel        ; long-front   ; פתח ארוך       ; תנועה ארוכה a כמו face   ; Long A         ; Long front vowel as in face
+ē     ; 0113 ; vowel        ; long-mid     ; צירה ארוך      ; תנועה ארוכה e כמו feet   ; Long E         ; Long mid vowel as in feet
+ī     ; 012B ; vowel        ; long-close   ; חיריק ארוך     ; תנועה ארוכה i כמו machine; Long I         ; Long close vowel as in machine
+ō     ; 014D ; vowel        ; long-back    ; חולם ארוך      ; תנועה ארוכה o כמו go     ; Long O         ; Long back vowel as in go
+ū     ; 016B ; vowel        ; long-back    ; שורוק ארוך     ; תנועה ארוכה u כמו blue   ; Long U         ; Long back vowel as in blue
+
+# group: vowels-r-colored
+# subgroup: rhotic
+ar    ; -    ; vowel        ; r-colored    ; תנועת ר        ; תנועה עם r כמו car       ; Ar Sound       ; R-colored vowel as in car
+er    ; -    ; vowel        ; r-colored    ; שווא ר         ; תנועה עם r כמו her       ; Er Sound       ; R-colored schwa as in her
+ir    ; -    ; vowel        ; r-colored    ; חיריק ר        ; תנועה עם r כמו bird      ; Ir Sound       ; R-colored vowel as in bird
+or    ; -    ; vowel        ; r-colored    ; חולם ר         ; תנועה עם r כמו for       ; Or Sound       ; R-colored vowel as in for
+ur    ; -    ; vowel        ; r-colored    ; קובוץ ר        ; תנועה עם r כמו fur       ; Ur Sound       ; R-colored vowel as in fur
+
+# group: diphthongs
+# subgroup: common
+ai    ; -    ; diphthong    ; falling      ; דו תנועה אי    ; דיפתונג כמו rain         ; Ai Diphthong   ; Diphthong as in rain pay
+au    ; -    ; diphthong    ; falling      ; דו תנועה או    ; דיפתונג כמו house        ; Au Diphthong   ; Diphthong as in house cow
+oi    ; -    ; diphthong    ; falling      ; דו תנועה אוי   ; דיפתונג כמו boy          ; Oi Diphthong   ; Diphthong as in boy coin
+ou    ; -    ; diphthong    ; falling      ; דו תנועה או    ; דיפתונג כמו go           ; Ou Diphthong   ; Diphthong as in go boat
+ea    ; -    ; diphthong    ; falling      ; דו תנועה אי    ; דיפתונג כמו idea         ; Ea Diphthong   ; Diphthong as in idea
+ew    ; -    ; diphthong    ; falling      ; דו תנועה יו    ; דיפתונג כמו new          ; Ew Diphthong   ; Diphthong as in new few
+
+# group: consonants-stops
+# subgroup: plosives
+p     ; 0070 ; consonant    ; plosive-vl   ; פא אטום        ; עיצור סותם p כמו pen     ; P Sound        ; Voiceless bilabial plosive
+b     ; 0062 ; consonant    ; plosive-vd   ; בית קולי       ; עיצור סותם b כמו boy     ; B Sound        ; Voiced bilabial plosive
+t     ; 0074 ; consonant    ; plosive-vl   ; תו אטום        ; עיצור סותם t כמו top     ; T Sound        ; Voiceless alveolar plosive
+d     ; 0064 ; consonant    ; plosive-vd   ; דלת קולי       ; עיצור סותם d כמו dog     ; D Sound        ; Voiced alveolar plosive
+k     ; 006B ; consonant    ; plosive-vl   ; כף אטום        ; עיצור סותם k כמו king    ; K Sound        ; Voiceless velar plosive
+g     ; 0067 ; consonant    ; plosive-vd   ; גימל קולי      ; עיצור סותם g כמו go      ; G Sound        ; Voiced velar plosive
+
+# group: consonants-fricatives
+# subgroup: sibilants
+s     ; 0073 ; consonant    ; fricative-vl ; סמך אטום       ; עיצור חוכך s כמו sun     ; S Sound        ; Voiceless alveolar fricative
+z     ; 007A ; consonant    ; fricative-vd ; זין קולי       ; עיצור חוכך z כמו zoo     ; Z Sound        ; Voiced alveolar fricative
+sh    ; -    ; consonant    ; fricative-vl ; שין אטום       ; עיצור חוכך sh כמו ship   ; Sh Sound       ; Voiceless postalveolar fricative
+zh    ; -    ; consonant    ; fricative-vd ; שין קולי       ; עיצור חוכך zh כמו vision ; Zh Sound       ; Voiced postalveolar fricative
+
+# subgroup: non-sibilants
+f     ; 0066 ; consonant    ; fricative-vl ; פא חוכך        ; עיצור חוכך f כמו fan     ; F Sound        ; Voiceless labiodental fricative
+v     ; 0076 ; consonant    ; fricative-vd ; בית חוכך       ; עיצור חוכך v כמו van     ; V Sound        ; Voiced labiodental fricative
+th    ; -    ; consonant    ; fricative-vl ; תו חוכך        ; עיצור חוכך th כמו thin   ; Th Voiceless   ; Voiceless dental fricative
+dh    ; -    ; consonant    ; fricative-vd ; דלת חוכך       ; עיצור חוכך th כמו this   ; Th Voiced      ; Voiced dental fricative
+h     ; 0068 ; consonant    ; fricative-gl ; הא גרוני       ; עיצור גרוני h כמו hat    ; H Sound        ; Voiceless glottal fricative
+
+# group: consonants-affricates
+# subgroup: common
+ch    ; -    ; consonant    ; affricate-vl ; צדי אטום       ; עיצור מעורב ch כמו church; Ch Sound       ; Voiceless postalveolar affricate
+j     ; 006A ; consonant    ; affricate-vd ; ג׳ קולי        ; עיצור מעורב j כמו judge  ; J Sound        ; Voiced postalveolar affricate
+
+# group: consonants-nasals
+# subgroup: common
+m     ; 006D ; consonant    ; nasal        ; מם אפי         ; עיצור אפי m כמו mom      ; M Sound        ; Bilabial nasal
+n     ; 006E ; consonant    ; nasal        ; נון אפי        ; עיצור אפי n כמו no       ; N Sound        ; Alveolar nasal
+ng    ; -    ; consonant    ; nasal        ; נג אפי         ; עיצור אפי ng כמו sing    ; Ng Sound       ; Velar nasal
+
+# group: consonants-liquids
+# subgroup: laterals
+l     ; 006C ; consonant    ; lateral      ; למד צידי       ; עיצור צידי l כמו love    ; L Sound        ; Alveolar lateral approximant
+
+# subgroup: rhotics
+r     ; 0072 ; consonant    ; rhotic       ; ריש אמריקאי    ; עיצור r כמו run          ; R Sound        ; Alveolar approximant
+
+# group: consonants-glides
+# subgroup: semivowels
+w     ; 0077 ; consonant    ; glide        ; וו גלישה       ; עיצור גלישה w כמו way    ; W Sound        ; Labial-velar approximant
+y     ; 0079 ; consonant    ; glide        ; יוד גלישה      ; עיצור גלישה y כמו yes    ; Y Sound        ; Palatal approximant
+
+# group: digraphs
+# subgroup: consonant-pairs
+ck    ; -    ; digraph      ; stop         ; כף כפול        ; דיגרף k כמו back         ; Ck Digraph     ; Digraph for k sound
+ph    ; -    ; digraph      ; fricative    ; פא יווני       ; דיגרף f כמו phone        ; Ph Digraph     ; Digraph for f sound
+gh    ; -    ; digraph      ; silent       ; גימל שקט       ; דיגרף שקט כמו night      ; Gh Digraph     ; Often silent digraph
+wh    ; -    ; digraph      ; fricative    ; וו ה           ; דיגרף w כמו what         ; Wh Digraph     ; Digraph for w sound
+wr    ; -    ; digraph      ; silent       ; וו שקט         ; דיגרף r כמו write        ; Wr Digraph     ; Silent w digraph
+kn    ; -    ; digraph      ; silent       ; כף שקט         ; דיגרף n כמו know         ; Kn Digraph     ; Silent k digraph
+gn    ; -    ; digraph      ; silent       ; גימל שקט       ; דיגרף n כמו gnome        ; Gn Digraph     ; Silent g digraph
+mb    ; -    ; digraph      ; silent       ; מם שקט         ; דיגרף b כמו lamb         ; Mb Digraph     ; Silent b digraph
+
+# group: blends
+# subgroup: initial
+bl    ; -    ; blend        ; initial      ; בל ראשי        ; צירוף bl כמו blue        ; Bl Blend       ; Initial blend bl
+br    ; -    ; blend        ; initial      ; בר ראשי        ; צירוף br כמו brown       ; Br Blend       ; Initial blend br
+cl    ; -    ; blend        ; initial      ; כל ראשי        ; צירוף cl כמו clean       ; Cl Blend       ; Initial blend cl
+cr    ; -    ; blend        ; initial      ; כר ראשי        ; צירוף cr כמו cry         ; Cr Blend       ; Initial blend cr
+dr    ; -    ; blend        ; initial      ; דר ראשי        ; צירוף dr כמו draw        ; Dr Blend       ; Initial blend dr
+fl    ; -    ; blend        ; initial      ; פל ראשי        ; צירוף fl כמו fly         ; Fl Blend       ; Initial blend fl
+fr    ; -    ; blend        ; initial      ; פר ראשי        ; צירוף fr כמו from        ; Fr Blend       ; Initial blend fr
+gl    ; -    ; blend        ; initial      ; גל ראשי        ; צירוף gl כמו glow        ; Gl Blend       ; Initial blend gl
+gr    ; -    ; blend        ; initial      ; גר ראשי        ; צירוף gr כמו grow        ; Gr Blend       ; Initial blend gr
+pl    ; -    ; blend        ; initial      ; פל ראשי        ; צירוף pl כמו play        ; Pl Blend       ; Initial blend pl
+pr    ; -    ; blend        ; initial      ; פר ראשי        ; צירוף pr כמו proud       ; Pr Blend       ; Initial blend pr
+sc    ; -    ; blend        ; initial      ; סכ ראשי        ; צירוף sc כמו scale       ; Sc Blend       ; Initial blend sc
+sk    ; -    ; blend        ; initial      ; סק ראשי        ; צירוף sk כמו sky         ; Sk Blend       ; Initial blend sk
+sl    ; -    ; blend        ; initial      ; סל ראשי        ; צירוף sl כמו slow        ; Sl Blend       ; Initial blend sl
+sm    ; -    ; blend        ; initial      ; סמ ראשי        ; צירוף sm כמו small       ; Sm Blend       ; Initial blend sm
+sn    ; -    ; blend        ; initial      ; סנ ראשי        ; צירוף sn כמו snow        ; Sn Blend       ; Initial blend sn
+sp    ; -    ; blend        ; initial      ; ספ ראשי        ; צירוף sp כמו spin        ; Sp Blend       ; Initial blend sp
+st    ; -    ; blend        ; initial      ; סט ראשי        ; צירוף st כמו stop        ; St Blend       ; Initial blend st
+sw    ; -    ; blend        ; initial      ; סו ראשי        ; צירוף sw כמו swim        ; Sw Blend       ; Initial blend sw
+tr    ; -    ; blend        ; initial      ; טר ראשי        ; צירוף tr כמו tree        ; Tr Blend       ; Initial blend tr
+tw    ; -    ; blend        ; initial      ; טו ראשי        ; צירוף tw כמו twin        ; Tw Blend       ; Initial blend tw
+
+# subgroup: triple
+scr   ; -    ; blend        ; triple       ; סקר משולש      ; צירוף scr כמו scream     ; Scr Blend      ; Triple blend scr
+spl   ; -    ; blend        ; triple       ; ספל משולש      ; צירוף spl כמו splash     ; Spl Blend      ; Triple blend spl
+spr   ; -    ; blend        ; triple       ; ספר משולש      ; צירוף spr כמו spring     ; Spr Blend      ; Triple blend spr
+squ   ; -    ; blend        ; triple       ; סקו משולש      ; צירוף squ כמו square     ; Squ Blend      ; Triple blend squ
+str   ; -    ; blend        ; triple       ; סטר משולש      ; צירוף str כמו strong     ; Str Blend      ; Triple blend str
+
+# subgroup: final
+ld    ; -    ; blend        ; final        ; לד סופי        ; צירוף ld כמו cold        ; Ld Blend       ; Final blend ld
+lf    ; -    ; blend        ; final        ; לף סופי        ; צירוף lf כמו self        ; Lf Blend       ; Final blend lf
+lk    ; -    ; blend        ; final        ; לק סופי        ; צירוף lk כמו milk        ; Lk Blend       ; Final blend lk
+lp    ; -    ; blend        ; final        ; לפ סופי        ; צירוף lp כמו help        ; Lp Blend       ; Final blend lp
+lt    ; -    ; blend        ; final        ; לט סופי        ; צירוף lt כמו felt        ; Lt Blend       ; Final blend lt
+mp    ; -    ; blend        ; final        ; מפ סופי        ; צירוף mp כמו jump        ; Mp Blend       ; Final blend mp
+nd    ; -    ; blend        ; final        ; נד סופי        ; צירוף nd כמו hand        ; Nd Blend       ; Final blend nd
+nk    ; -    ; blend        ; final        ; נק סופי        ; צירוף nk כמו think       ; Nk Blend       ; Final blend nk
+nt    ; -    ; blend        ; final        ; נט סופי        ; צירוף nt כמו tent        ; Nt Blend       ; Final blend nt
+pt    ; -    ; blend        ; final        ; פט סופי        ; צירוף pt כמו kept        ; Pt Blend       ; Final blend pt
+sk    ; -    ; blend        ; final        ; סק סופי        ; צירוף sk כמו mask        ; Sk Final       ; Final blend sk
+sp    ; -    ; blend        ; final        ; ספ סופי        ; צירוף sp כמו wasp        ; Sp Final       ; Final blend sp
+st    ; -    ; blend        ; final        ; סט סופי        ; צירוף st כמו fast        ; St Final       ; Final blend st
+
+# group: suffixes
+# subgroup: common
+-s    ; -    ; suffix       ; plural       ; סיומת רבים     ; סיומת רבים s             ; Plural S       ; Regular plural suffix
+-es   ; -    ; suffix       ; plural       ; סיומת רבים אס  ; סיומת רבים es            ; Plural Es      ; Plural suffix after sibilants
+-ed   ; -    ; suffix       ; past         ; סיומת עבר      ; סיומת זמן עבר            ; Past Ed        ; Regular past tense suffix
+-ing  ; -    ; suffix       ; present      ; סיומת הווה     ; סיומת הווה מתמשך         ; Present Ing    ; Present participle suffix
+-er   ; -    ; suffix       ; comparative  ; סיומת השוואה   ; סיומת יותר               ; Comparative Er ; Comparative suffix
+-est  ; -    ; suffix       ; superlative  ; סיומת הפלגה    ; סיומת הכי                ; Superlative Est; Superlative suffix
+-ly   ; -    ; suffix       ; adverb       ; סיומת תואר פועל; סיומת תואר הפועל         ; Adverb Ly      ; Adverb forming suffix
+-tion ; -    ; suffix       ; noun         ; סיומת שם עצם   ; סיומת שם פעולה           ; Noun Tion      ; Noun forming suffix
+-ness ; -    ; suffix       ; noun         ; סיומת תכונה    ; סיומת שם תכונה           ; Noun Ness      ; Abstract noun suffix
+-ful  ; -    ; suffix       ; adjective    ; סיומת מלא      ; סיומת תואר מלא           ; Adjective Ful  ; Full of suffix
+-less ; -    ; suffix       ; adjective    ; סיומת חסר      ; סיומת תואר חסר           ; Adjective Less ; Without suffix
+-able ; -    ; suffix       ; adjective    ; סיומת יכולת    ; סיומת ניתן ל             ; Adjective Able ; Capable of suffix
+-ment ; -    ; suffix       ; noun         ; סיומת פעולה    ; סיומת שם פעולה           ; Noun Ment      ; Action noun suffix
+
+# group: prefixes
+# subgroup: common
+un-   ; -    ; prefix       ; negative     ; קידומת שלילה   ; קידומת לא                ; Prefix Un      ; Negative prefix
+re-   ; -    ; prefix       ; repetition   ; קידומת חזרה    ; קידומת שוב               ; Prefix Re      ; Repetition prefix
+pre-  ; -    ; prefix       ; before       ; קידומת לפני    ; קידומת מראש              ; Prefix Pre     ; Before prefix
+dis-  ; -    ; prefix       ; negative     ; קידומת היפוך   ; קידומת ניגוד             ; Prefix Dis     ; Reversal prefix
+mis-  ; -    ; prefix       ; wrong        ; קידומת טעות    ; קידומת שגוי              ; Prefix Mis     ; Wrong prefix
+over- ; -    ; prefix       ; excess       ; קידומת יתר     ; קידומת מעבר ל            ; Prefix Over    ; Excess prefix
+under-; -    ; prefix       ; below        ; קידומת תחת     ; קידומת מתחת ל            ; Prefix Under   ; Below prefix
+
+# group: mg-gendered
+# subgroup: pronouns
+he/she    ; MG:h ; mg       ; pronoun      ; הוא היא        ; כינוי נושא               ; He She         ; Subject pronoun
+he        ; MG:h.m ; mg     ; pronoun      ; הוא אנגלי      ; כינוי נושא זכר           ; He             ; Male subject pronoun
+she       ; MG:h.f ; mg     ; pronoun      ; היא אנגלי      ; כינוי נושא נקבה          ; She            ; Female subject pronoun
+his/her   ; MG:o ; mg       ; possessive   ; שלו שלה        ; כינוי קניין              ; His Her        ; Possessive adjective
+his       ; MG:o.m ; mg     ; possessive   ; שלו אנגלי      ; כינוי קניין זכר          ; His            ; Male possessive
+her       ; MG:o.f ; mg     ; possessive   ; שלה אנגלי      ; כינוי קניין נקבה         ; Her Poss       ; Female possessive
+him/her   ; MG:l ; mg       ; object       ; אותו אותה      ; כינוי מושא               ; Him Her        ; Object pronoun
+him       ; MG:l.m ; mg     ; object       ; אותו אנגלי     ; כינוי מושא זכר           ; Him            ; Male object pronoun
+they/them ; MG:t ; mg       ; plural       ; הם הן          ; כינוי רבים               ; They Them      ; Plural pronoun
+they      ; MG:t.m ; mg     ; plural       ; הם אנגלי       ; כינוי רבים               ; They           ; Plural subject
+them      ; MG:t.f ; mg     ; plural       ; הן אנגלי       ; כינוי רבים מושא          ; Them           ; Plural object
+their     ; MG:i ; mg       ; possessive   ; שלהם אנגלי     ; כינוי קניין רבים         ; Their          ; Plural possessive
+himself/herself ; MG:r ; mg ; reflexive    ; עצמו עצמה      ; כינוי חוזר               ; Himself Herself; Reflexive pronoun
+himself   ; MG:r.m ; mg     ; reflexive    ; עצמו אנגלי     ; כינוי חוזר זכר           ; Himself        ; Male reflexive
+herself   ; MG:r.f ; mg     ; reflexive    ; עצמה אנגלי     ; כינוי חוזר נקבה          ; Herself        ; Female reflexive
+
+# subgroup: people
+man/woman ; MG:p ; mg       ; person       ; איש אישה       ; אדם                      ; Man Woman      ; Person
+man       ; MG:p.m ; mg     ; person       ; איש אנגלי      ; אדם זכר                  ; Man            ; Male person
+woman     ; MG:p.f ; mg     ; person       ; אישה אנגלי     ; אדם נקבה                 ; Woman          ; Female person
+boy/girl  ; MG:c ; mg       ; child        ; ילד ילדה       ; ילד                      ; Boy Girl       ; Child
+boy       ; MG:c.m ; mg     ; child        ; ילד אנגלי      ; ילד זכר                  ; Boy            ; Male child
+girl      ; MG:c.f ; mg     ; child        ; ילדה אנגלי     ; ילד נקבה                 ; Girl           ; Female child
+son/daughter ; MG:s ; mg    ; offspring    ; בן בת          ; צאצא                     ; Son Daughter   ; Offspring
+son       ; MG:s.m ; mg     ; offspring    ; בן אנגלי       ; צאצא זכר                 ; Son            ; Male offspring
+daughter  ; MG:s.f ; mg     ; offspring    ; בת אנגלי       ; צאצא נקבה                ; Daughter       ; Female offspring
+father/mother ; MG:d ; mg   ; parent       ; אב אם          ; הורה                     ; Father Mother  ; Parent
+father    ; MG:d.m ; mg     ; parent       ; אב אנגלי       ; הורה זכר                 ; Father         ; Male parent
+mother    ; MG:d.f ; mg     ; parent       ; אם אנגלי       ; הורה נקבה                ; Mother         ; Female parent
+brother/sister ; MG:b ; mg  ; sibling      ; אח אחות        ; אח או אחות               ; Brother Sister ; Sibling
+brother   ; MG:b.m ; mg     ; sibling      ; אח אנגלי       ; אח                       ; Brother        ; Male sibling
+sister    ; MG:b.f ; mg     ; sibling      ; אחות אנגלי     ; אחות                     ; Sister         ; Female sibling
+husband/wife ; MG:w ; mg    ; spouse       ; בעל אישה       ; בן זוג                   ; Husband Wife   ; Spouse
+husband   ; MG:w.m ; mg     ; spouse       ; בעל אנגלי      ; בן זוג זכר               ; Husband        ; Male spouse
+wife      ; MG:w.f ; mg     ; spouse       ; אישה אנגלי     ; בת זוג נקבה              ; Wife           ; Female spouse
+uncle/aunt ; MG:a ; mg      ; relative     ; דוד דודה       ; דוד או דודה              ; Uncle Aunt     ; Parent sibling
+uncle     ; MG:a.m ; mg     ; relative     ; דוד אנגלי      ; אח של הורה               ; Uncle          ; Male parent sibling
+aunt      ; MG:a.f ; mg     ; relative     ; דודה אנגלי     ; אחות של הורה             ; Aunt           ; Female parent sibling
+Mr./Ms.   ; MG:n ; mg       ; title        ; מר גברת        ; תואר פנייה               ; Mr Ms          ; Honorific
+Mr.       ; MG:n.m ; mg     ; title        ; מר אנגלי       ; תואר זכר                 ; Mr             ; Male honorific
+Ms.       ; MG:n.f ; mg     ; title        ; גברת אנגלי     ; תואר נקבה                ; Ms             ; Female honorific
+king/queen ; MG:k ; mg      ; royalty      ; מלך מלכה       ; מלוכה                    ; King Queen     ; Royalty
+king      ; MG:k.m ; mg     ; royalty      ; מלך אנגלי      ; שליט זכר                 ; King           ; Male monarch
+queen     ; MG:k.f ; mg     ; royalty      ; מלכה אנגלי     ; שליטה נקבה               ; Queen          ; Female monarch

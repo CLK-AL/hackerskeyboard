@@ -1,0 +1,182 @@
+# he.txt - Hebrew Phoneme Database
+# Format: CHAR ; CODEPOINT ; CATEGORY ; SUBCATEGORY ; HE_LABEL ; HE_DESC ; EN_LABEL ; EN_DESC
+# Unified format for bilingual search
+# ═══════════════════════════════════════════════════════════════════════════════════════════
+
+# group: vowels
+# subgroup: nikud
+ַ     ; 05B7 ; vowel        ; open         ; פתח            ; תנועה פתוחה a            ; Patach         ; Open vowel a as in father
+ָ     ; 05B8 ; vowel        ; open         ; קמץ            ; תנועה a או o             ; Kamatz         ; Open vowel a/o as in law
+ֶ     ; 05B6 ; vowel        ; mid          ; סגול           ; תנועה בינונית e          ; Segol          ; Mid vowel e as in bed
+ֵ     ; 05B5 ; vowel        ; mid          ; צירה           ; תנועה בינונית e ארוכה    ; Tsere          ; Mid vowel e as in way
+ִ     ; 05B4 ; vowel        ; close        ; חיריק          ; תנועה סגורה i            ; Hiriq          ; Close vowel i as in see
+ֹ     ; 05B9 ; vowel        ; mid-back     ; חולם           ; תנועה אחורית o           ; Holam          ; Back vowel o as in go
+ֻ     ; 05BB ; vowel        ; close-back   ; קובוץ          ; תנועה סגורה u            ; Kubutz         ; Close back vowel u as in too
+וּ    ; 05D5+05BC ; vowel   ; close-back   ; שורוק          ; תנועה u עם וו            ; Shuruk         ; Close back vowel u with vav
+ֲ     ; 05B2 ; vowel        ; reduced      ; חטף פתח        ; שווא נע a                ; Hataf Patach   ; Reduced vowel a
+ֱ     ; 05B1 ; vowel        ; reduced      ; חטף סגול       ; שווא נע e                ; Hataf Segol    ; Reduced vowel e
+ֳ     ; 05B3 ; vowel        ; reduced      ; חטף קמץ        ; שווא נע o                ; Hataf Kamatz   ; Reduced vowel o
+ְ     ; 05B0 ; vowel        ; schwa        ; שווא           ; תנועה מצומצמת או אפס     ; Shva           ; Reduced vowel or silent
+
+# group: consonants
+# subgroup: stops
+בּ    ; 05D1+05BC ; consonant ; plosive-voiced   ; בית דגושה     ; עיצור סותם קולי b        ; Bet Dagesh     ; Voiced plosive b as in boy
+פּ    ; 05E4+05BC ; consonant ; plosive-voiceless; פא דגושה      ; עיצור סותם אטום p        ; Pe Dagesh      ; Voiceless plosive p as in pen
+כּ    ; 05DB+05BC ; consonant ; plosive-voiceless; כף דגושה      ; עיצור סותם אטום k        ; Kaf Dagesh     ; Voiceless plosive k as in king
+גּ    ; 05D2+05BC ; consonant ; plosive-voiced   ; גימל דגושה    ; עיצור סותם קולי g        ; Gimel Dagesh   ; Voiced plosive g as in go
+דּ    ; 05D3+05BC ; consonant ; plosive-voiced   ; דלת דגושה     ; עיצור סותם קולי d        ; Dalet Dagesh   ; Voiced plosive d as in day
+תּ    ; 05EA+05BC ; consonant ; plosive-voiceless; תו דגושה      ; עיצור סותם אטום t        ; Tav Dagesh     ; Voiceless plosive t as in top
+ט     ; 05D8 ; consonant    ; plosive-emphatic ; טית           ; עיצור סותם אמפטי t       ; Tet            ; Emphatic t sound
+ק     ; 05E7 ; consonant    ; plosive-uvular   ; קוף           ; עיצור סותם עורפי k       ; Kof            ; Uvular stop k
+
+# subgroup: fricatives
+ב     ; 05D1 ; consonant    ; fricative-voiced ; בית רפה       ; עיצור חוכך קולי v        ; Vet            ; Voiced fricative v as in van
+פ     ; 05E4 ; consonant    ; fricative-voiceless; פא רפה       ; עיצור חוכך אטום f        ; Fe             ; Voiceless fricative f as in fan
+כ     ; 05DB ; consonant    ; fricative-voiceless; כף רפה       ; עיצור חוכך אטום ch       ; Khaf           ; Voiceless fricative ch as in Bach
+ג     ; 05D2 ; consonant    ; fricative-voiced ; גימל רפה      ; עיצור חוכך קולי gh       ; Ghimel         ; Voiced fricative gh
+ד     ; 05D3 ; consonant    ; fricative-voiced ; דלת רפה       ; עיצור חוכך קולי dh       ; Dhalet         ; Voiced fricative dh as in this
+ת     ; 05EA ; consonant    ; fricative-voiceless; תו רפה       ; עיצור חוכך אטום th       ; Thav           ; Voiceless fricative th as in thin
+ס     ; 05E1 ; consonant    ; fricative-voiceless; סמך          ; עיצור חוכך אטום s        ; Samekh         ; Voiceless fricative s as in sun
+שׂ    ; 05E9+05C2 ; consonant ; fricative-voiceless; שין שמאלית  ; עיצור חוכך אטום s        ; Sin            ; Voiceless fricative s as in sun
+ז     ; 05D6 ; consonant    ; fricative-voiced ; זין           ; עיצור חוכך קולי z        ; Zayin          ; Voiced fricative z as in zoo
+שׁ    ; 05E9+05C1 ; consonant ; fricative-voiceless; שין ימנית   ; עיצור חוכך אטום sh       ; Shin           ; Voiceless fricative sh as in ship
+ה     ; 05D4 ; consonant    ; fricative-glottal; הא            ; עיצור גרוני h            ; He             ; Glottal fricative h as in hat
+ח     ; 05D7 ; consonant    ; fricative-pharyngeal; חית         ; עיצור לועי ch            ; Chet           ; Pharyngeal fricative ch
+ע     ; 05E2 ; consonant    ; fricative-pharyngeal; עין         ; עיצור לועי ע             ; Ayin           ; Pharyngeal voiced fricative
+צ     ; 05E6 ; consonant    ; affricate    ; צדי            ; עיצור מעורב ts           ; Tsadi          ; Affricate ts as in cats
+
+# subgroup: nasals
+מ     ; 05DE ; consonant    ; nasal        ; מם             ; עיצור אפי m              ; Mem            ; Nasal m as in mom
+נ     ; 05E0 ; consonant    ; nasal        ; נון            ; עיצור אפי n              ; Nun            ; Nasal n as in no
+
+# subgroup: liquids
+ל     ; 05DC ; consonant    ; lateral      ; למד            ; עיצור צידי l             ; Lamed          ; Lateral l as in love
+ר     ; 05E8 ; consonant    ; trill        ; ריש            ; עיצור מתגלגל r           ; Resh           ; Trill r as in run
+
+# subgroup: glides
+י     ; 05D9 ; consonant    ; glide        ; יוד            ; עיצור גלישה y            ; Yod            ; Glide y as in yes
+ו     ; 05D5 ; consonant    ; glide        ; וו             ; עיצור גלישה w/v          ; Vav            ; Glide w/v as in wave
+
+# subgroup: glottal
+א     ; 05D0 ; consonant    ; glottal-stop ; אלף            ; עיצור עצירה גרונית       ; Alef           ; Glottal stop
+
+# group: finals
+# subgroup: sofit
+ך     ; 05DA ; consonant    ; final        ; כף סופית       ; כף בסוף מילה             ; Final Khaf     ; Final form of khaf
+ם     ; 05DD ; consonant    ; final        ; מם סופית       ; מם בסוף מילה             ; Final Mem      ; Final form of mem
+ן     ; 05DF ; consonant    ; final        ; נון סופית      ; נון בסוף מילה            ; Final Nun      ; Final form of nun
+ף     ; 05E3 ; consonant    ; final        ; פא סופית       ; פא בסוף מילה             ; Final Fe       ; Final form of fe/pe
+ץ     ; 05E5 ; consonant    ; final        ; צדי סופית      ; צדי בסוף מילה            ; Final Tsadi    ; Final form of tsadi
+
+# group: modifiers
+# subgroup: dagesh
+ּ     ; 05BC ; modifier     ; dagesh       ; דגש            ; סימן חיזוק או הכפלה      ; Dagesh         ; Strengthening or gemination mark
+ׁ     ; 05C1 ; modifier     ; shin-dot     ; נקודת שין      ; סימן שין ימנית           ; Shin Dot       ; Right dot for shin
+ׂ     ; 05C2 ; modifier     ; sin-dot      ; נקודת שין      ; סימן שין שמאלית          ; Sin Dot        ; Left dot for sin
+
+# group: cantillation
+# subgroup: accents
+֑     ; 0591 ; cantillation ; accent       ; אתנחתא         ; טעם הפסק עיקרי           ; Etnachta       ; Major disjunctive accent
+֒     ; 0592 ; cantillation ; accent       ; סגול           ; טעם הפסק                 ; Segol Accent   ; Disjunctive accent
+֓     ; 0593 ; cantillation ; accent       ; שלשלת          ; טעם נדיר                 ; Shalshelet     ; Rare cantillation mark
+֔     ; 0594 ; cantillation ; accent       ; זקף קטן        ; טעם הפסק                 ; Zaqef Qatan    ; Minor disjunctive
+֕     ; 0595 ; cantillation ; accent       ; זקף גדול       ; טעם הפסק                 ; Zaqef Gadol    ; Major disjunctive
+֖     ; 0596 ; cantillation ; accent       ; טפחא          ; טעם חיבור                ; Tifcha         ; Conjunctive accent
+֗     ; 0597 ; cantillation ; accent       ; רביע           ; טעם הפסק                 ; Revia          ; Disjunctive accent
+֘     ; 0598 ; cantillation ; accent       ; צינורית        ; טעם נדיר                 ; Tsinnorit      ; Rare accent
+֙     ; 0599 ; cantillation ; accent       ; פשטא           ; טעם הפסק                 ; Pashta         ; Disjunctive accent
+֚     ; 059A ; cantillation ; accent       ; יתיב           ; טעם חיבור                ; Yetiv          ; Conjunctive accent
+֛     ; 059B ; cantillation ; accent       ; תביר           ; טעם הפסק                 ; Tevir          ; Disjunctive accent
+֜     ; 059C ; cantillation ; accent       ; גרש            ; טעם הפסק                 ; Geresh Accent  ; Disjunctive accent
+֝     ; 059D ; cantillation ; accent       ; גרשיים מוקדם   ; טעם הפסק                 ; Gershayim Acc  ; Double disjunctive
+֞     ; 059E ; cantillation ; accent       ; גרשיים         ; טעם הפסק כפול            ; Gershayim Cant ; Double geresh accent
+֟     ; 059F ; cantillation ; accent       ; קרני פרה       ; טעם נדיר                 ; Qarnei Para    ; Rare disjunctive
+֠     ; 05A0 ; cantillation ; accent       ; תלישא גדולה    ; טעם הפסק                 ; Telisha Gedola ; Major telisha
+֡     ; 05A1 ; cantillation ; accent       ; פזר            ; טעם הפסק                 ; Pazer          ; Disjunctive accent
+֢     ; 05A2 ; cantillation ; accent       ; אתנח הפוך      ; טעם נדיר                 ; Atnah Hafukh   ; Inverted etnachta
+֣     ; 05A3 ; cantillation ; accent       ; מונח           ; טעם חיבור                ; Munach         ; Conjunctive accent
+֤     ; 05A4 ; cantillation ; accent       ; מהפך           ; טעם חיבור                ; Mahapakh       ; Conjunctive accent
+֥     ; 05A5 ; cantillation ; accent       ; מרכא           ; טעם חיבור                ; Merkha         ; Conjunctive accent
+֦     ; 05A6 ; cantillation ; accent       ; מרכא כפולה     ; טעם חיבור כפול           ; Merkha Kefula  ; Double merkha
+֧     ; 05A7 ; cantillation ; accent       ; דרגא           ; טעם חיבור                ; Darga          ; Conjunctive accent
+֨     ; 05A8 ; cantillation ; accent       ; קדמא           ; טעם חיבור                ; Qadma          ; Conjunctive accent
+֩     ; 05A9 ; cantillation ; accent       ; תלישא קטנה     ; טעם הפסק                 ; Telisha Qetana ; Minor telisha
+֪     ; 05AA ; cantillation ; accent       ; ירח בן יומו    ; טעם נדיר                 ; Yerah Ben Yomo ; Rare accent
+֫     ; 05AB ; cantillation ; accent       ; עולה           ; טעם חיבור                ; Ole            ; Conjunctive accent
+֬     ; 05AC ; cantillation ; accent       ; עילוי          ; טעם חיבור                ; Iluy           ; Conjunctive accent
+֭     ; 05AD ; cantillation ; accent       ; דחי            ; טעם הפסק                 ; Dehi           ; Disjunctive accent
+֮     ; 05AE ; cantillation ; accent       ; זינורית        ; טעם הפסק                 ; Zinor          ; Disjunctive accent
+֯     ; 05AF ; cantillation ; accent       ; מסורה          ; סימן מסורה               ; Masora Circle  ; Masora text marker
+
+# group: punctuation
+# subgroup: marks
+׀     ; 05C0 ; punctuation  ; separator    ; פסיק           ; סימן הפרדה               ; Paseq          ; Separator mark
+׃     ; 05C3 ; punctuation  ; stop         ; סוף פסוק       ; סימן סיום פסוק           ; Sof Pasuq      ; End of verse mark
+־     ; 05BE ; punctuation  ; hyphen       ; מקף            ; מקף מילים                ; Maqaf          ; Hebrew hyphen
+׳     ; 05F3 ; punctuation  ; abbreviation ; גרש            ; סימן קיצור               ; Geresh         ; Abbreviation mark
+״     ; 05F4 ; punctuation  ; abbreviation ; גרשיים         ; סימן ראשי תיבות          ; Gershayim      ; Acronym mark
+
+# group: mg-gendered
+# subgroup: pronouns
+הוא/היא  ; MG:h ; mg          ; pronoun-subj ; כינוי נושא     ; כינוי גוף שלישי נושא     ; He She         ; Third person subject pronoun
+הוא      ; MG:h.m ; mg        ; pronoun-subj ; הוא זכר        ; כינוי נושא זכר           ; He             ; Male subject pronoun
+היא      ; MG:h.f ; mg        ; pronoun-subj ; היא נקבה       ; כינוי נושא נקבה          ; She            ; Female subject pronoun
+שלו/שלה  ; MG:o ; mg          ; pronoun-poss ; כינוי קניין    ; כינוי שייכות             ; His Her        ; Possessive pronoun
+שלו      ; MG:o.m ; mg        ; pronoun-poss ; שלו זכר        ; כינוי קניין זכר          ; His            ; Male possessive
+שלה      ; MG:o.f ; mg        ; pronoun-poss ; שלה נקבה       ; כינוי קניין נקבה         ; Her            ; Female possessive
+אותו/אותה ; MG:l ; mg         ; pronoun-obj  ; כינוי מושא     ; כינוי גוף מושא           ; Him Her        ; Object pronoun
+אותו     ; MG:l.m ; mg        ; pronoun-obj  ; אותו זכר       ; כינוי מושא זכר           ; Him            ; Male object pronoun
+אותה     ; MG:l.f ; mg        ; pronoun-obj  ; אותה נקבה      ; כינוי מושא נקבה          ; Her Object     ; Female object pronoun
+הם/הן    ; MG:t ; mg          ; pronoun-pl   ; כינוי רבים     ; כינוי גוף רבים           ; They           ; Plural pronoun
+הם       ; MG:t.m ; mg        ; pronoun-pl   ; הם זכר         ; כינוי רבים זכר           ; They Male      ; Male plural pronoun
+הן       ; MG:t.f ; mg        ; pronoun-pl   ; הן נקבה        ; כינוי רבים נקבה          ; They Female    ; Female plural pronoun
+שלהם/שלהן ; MG:i ; mg         ; pronoun-poss ; קניין רבים     ; כינוי קניין רבים         ; Their          ; Plural possessive
+שלהם     ; MG:i.m ; mg        ; pronoun-poss ; שלהם זכר       ; קניין רבים זכר           ; Their Male     ; Male plural possessive
+שלהן     ; MG:i.f ; mg        ; pronoun-poss ; שלהן נקבה      ; קניין רבים נקבה          ; Their Female   ; Female plural possessive
+אתה/את   ; MG:y ; mg          ; pronoun-2sg  ; אתה את         ; כינוי גוף שני יחיד       ; You Singular   ; Second person singular
+אתה      ; MG:y.m ; mg        ; pronoun-2sg  ; אתה זכר        ; כינוי שני יחיד זכר       ; You Male Sg    ; Male second person singular
+את       ; MG:y.f ; mg        ; pronoun-2sg  ; את נקבה        ; כינוי שני יחיד נקבה      ; You Female Sg  ; Female second person singular
+אתם/אתן  ; MG:u ; mg          ; pronoun-2pl  ; אתם אתן        ; כינוי גוף שני רבים       ; You Plural     ; Second person plural
+אתם      ; MG:u.m ; mg        ; pronoun-2pl  ; אתם זכר        ; כינוי שני רבים זכר       ; You Male Pl    ; Male second person plural
+אתן      ; MG:u.f ; mg        ; pronoun-2pl  ; אתן נקבה       ; כינוי שני רבים נקבה      ; You Female Pl  ; Female second person plural
+עצמו/עצמה ; MG:r ; mg         ; pronoun-refl ; כינוי חוזר     ; כינוי עצמי               ; Himself Herself; Reflexive pronoun
+עצמו     ; MG:r.m ; mg        ; pronoun-refl ; עצמו זכר       ; כינוי חוזר זכר           ; Himself        ; Male reflexive
+עצמה     ; MG:r.f ; mg        ; pronoun-refl ; עצמה נקבה      ; כינוי חוזר נקבה          ; Herself        ; Female reflexive
+
+# subgroup: people
+איש/אישה ; MG:p ; mg          ; person       ; אדם            ; איש או אישה              ; Man Woman      ; Person male or female
+איש      ; MG:p.m ; mg        ; person       ; איש זכר        ; אדם זכר                  ; Man            ; Male person
+אישה     ; MG:p.f ; mg        ; person       ; אישה נקבה      ; אדם נקבה                 ; Woman          ; Female person
+ילד/ילדה ; MG:c ; mg          ; child        ; ילד            ; ילד או ילדה              ; Boy Girl       ; Child male or female
+ילד      ; MG:c.m ; mg        ; child        ; ילד זכר        ; ילד בן                   ; Boy            ; Male child
+ילדה     ; MG:c.f ; mg        ; child        ; ילדה נקבה      ; ילדה בת                  ; Girl           ; Female child
+בן/בת    ; MG:s ; mg          ; offspring    ; צאצא           ; בן או בת                 ; Son Daughter   ; Offspring
+בן       ; MG:s.m ; mg        ; offspring    ; בן זכר         ; צאצא זכר                 ; Son            ; Male offspring
+בת       ; MG:s.f ; mg        ; offspring    ; בת נקבה        ; צאצא נקבה                ; Daughter       ; Female offspring
+אב/אם    ; MG:d ; mg          ; parent       ; הורה           ; אב או אם                 ; Father Mother  ; Parent
+אב       ; MG:d.m ; mg        ; parent       ; אב זכר         ; הורה זכר                 ; Father         ; Male parent
+אם       ; MG:d.f ; mg        ; parent       ; אם נקבה        ; הורה נקבה                ; Mother         ; Female parent
+אח/אחות  ; MG:b ; mg          ; sibling      ; אח אחות        ; אח או אחות               ; Brother Sister ; Sibling
+אח       ; MG:b.m ; mg        ; sibling      ; אח זכר         ; אח                       ; Brother        ; Male sibling
+אחות     ; MG:b.f ; mg        ; sibling      ; אחות נקבה      ; אחות                     ; Sister         ; Female sibling
+בעל/אישה ; MG:w ; mg          ; spouse       ; בן זוג         ; בעל או אישה              ; Husband Wife   ; Spouse
+בעל      ; MG:w.m ; mg        ; spouse       ; בעל זכר        ; בן זוג זכר               ; Husband        ; Male spouse
+דוד/דודה ; MG:a ; mg          ; relative     ; דוד דודה       ; דוד או דודה              ; Uncle Aunt     ; Uncle or aunt
+דוד      ; MG:a.m ; mg        ; relative     ; דוד זכר        ; אח של הורה               ; Uncle          ; Male parent sibling
+דודה     ; MG:a.f ; mg        ; relative     ; דודה נקבה      ; אחות של הורה             ; Aunt           ; Female parent sibling
+מר/גברת  ; MG:n ; mg          ; title        ; תואר           ; תואר פנייה               ; Mr Ms          ; Honorific title
+מר       ; MG:n.m ; mg        ; title        ; מר זכר         ; תואר זכר                 ; Mr             ; Male honorific
+גברת     ; MG:n.f ; mg        ; title        ; גברת נקבה      ; תואר נקבה                ; Ms             ; Female honorific
+מלך/מלכה ; MG:k ; mg          ; royalty      ; מלוכה          ; מלך או מלכה              ; King Queen     ; Royalty
+מלך      ; MG:k.m ; mg        ; royalty      ; מלך זכר        ; שליט זכר                 ; King           ; Male monarch
+מלכה     ; MG:k.f ; mg        ; royalty      ; מלכה נקבה      ; שליטה נקבה               ; Queen          ; Female monarch
+
+# subgroup: suffixes
+ים/ות    ; MG:g ; mg          ; suffix-pl    ; סיומת רבים     ; סיומת רבים ים או ות      ; Plural Suffix  ; Hebrew plural -im/-ot
+ים       ; MG:g.m ; mg        ; suffix-pl    ; סיומת ים       ; סיומת רבים זכר           ; Im Suffix      ; Male plural suffix -im
+ות       ; MG:g.f ; mg        ; suffix-pl    ; סיומת ות       ; סיומת רבים נקבה          ; Ot Suffix      ; Female plural suffix -ot
+ד/ת      ; MG:j ; mg          ; suffix-pres  ; סיומת הווה     ; סיומת בינוני עומד/ת      ; Present Suffix ; Hebrew present tense
+י/ת      ; MG:v ; mg          ; suffix-adj   ; סיומת לאום     ; סיומת שם תואר עברי/ת     ; Nationality    ; Nationality suffix -i/-it
+ה/ת      ; MG:x ; mg          ; suffix-qual  ; סיומת תכונה    ; סיומת תואר יפה/ת         ; Quality Suffix ; Quality adjective suffix
+ו/ה      ; MG:e ; mg          ; suffix-poss  ; סיומת קניין    ; סיומת שייכות שלו/ה       ; Possessive Suf ; Possessive suffix -o/-a
+בּ/ב     ; MG:q ; mg          ; dagesh       ; דגש קל         ; עם או בלי דגש            ; Dagesh Toggle  ; With or without dagesh

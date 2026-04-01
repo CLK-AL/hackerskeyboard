@@ -130,8 +130,8 @@ class LatinIME : InputMethodService(), ComposeSequencing,
         const val KEYCODE_PERIOD = '.'.code
 
         // ASCII codes for characters
-        private const val ASCII_ENTER = '\n'.code
-        private const val ASCII_SPACE = ' '.code
+        internal const val ASCII_ENTER = '\n'.code
+        internal const val ASCII_SPACE = ' '.code
         private const val ASCII_PERIOD = '.'.code
         private const val ASCII_COMMA = ','.code
 
@@ -145,7 +145,7 @@ class LatinIME : InputMethodService(), ComposeSequencing,
 
         // Static instance reference
         @JvmStatic
-        private var sInstance: LatinIME? = null
+        internal var sInstance: LatinIME? = null
 
         @JvmStatic
         fun getInstanceOrNull(): LatinIME? = sInstance
@@ -199,7 +199,7 @@ class LatinIME : InputMethodService(), ComposeSequencing,
     private var mVoiceRecognitionTrigger: VoiceRecognitionTrigger? = null
     private var mPluginManager: PluginManager? = null
     private var mNotificationReceiver: NotificationReceiver? = null
-    private var mToken: IBinder? = null
+    internal var mToken: IBinder? = null
     private var mConfigurationChanging = false
     private var mRefreshKeyboardRequired = false
     private var mLastKeyTime: Long = 0
@@ -329,7 +329,7 @@ class LatinIME : InputMethodService(), ComposeSequencing,
     private var mCpsIndex = 0
 
     // Handler for delayed operations
-    private val mHandler = object : Handler(Looper.getMainLooper()) {
+    internal val mHandler = object : Handler(Looper.getMainLooper()) {
         override fun handleMessage(msg: Message) {
             when (msg.what) {
                 MSG_UPDATE_SUGGESTIONS -> updateSuggestions()
@@ -491,11 +491,11 @@ class LatinIME : InputMethodService(), ComposeSequencing,
     }
 
     // ComposeSequencing implementation
-    override fun onDeadKey(deadKey: Char): Boolean {
+    fun onDeadKey(deadKey: Char): Boolean {
         return mDeadKeysActive && DeadAccentSequence.isDeadKey(deadKey)
     }
 
-    override fun onComposeSequence(seq: String?) {
+    fun onComposeSequence(seq: String?) {
         if (seq == null) return
         val ic = currentInputConnection ?: return
         ic.commitText(seq, 1)
@@ -686,7 +686,7 @@ class LatinIME : InputMethodService(), ComposeSequencing,
         )
     }
 
-    private fun toggleLanguage(reset: Boolean, next: Boolean) {
+    internal fun toggleLanguage(reset: Boolean, next: Boolean) {
         if (next) {
             mLanguageSwitcher!!.next()
         } else {
@@ -1081,7 +1081,7 @@ class LatinIME : InputMethodService(), ComposeSequencing,
     }
 
     // OnKeyboardActionListener implementation
-    override fun onKey(primaryCode: Int, keyCodes: IntArray?, x: Int, y: Int) {
+    override fun onKey(primaryCode: Int, keyCodes: IntArray, x: Int, y: Int) {
         val now = SystemClock.uptimeMillis()
         if (primaryCode != Keyboard.KEYCODE_DELETE || now > mLastKeyTime + QUICK_PRESS) {
             mDeleteCount = 0
@@ -1193,8 +1193,7 @@ class LatinIME : InputMethodService(), ComposeSequencing,
         }
     }
 
-    override fun onText(text: CharSequence?) {
-        if (text == null) return
+    override fun onText(text: CharSequence) {
         val ic = currentInputConnection ?: return
         ic.beginBatchEdit()
         commitTyped(ic, true)
@@ -1760,7 +1759,7 @@ class LatinIME : InputMethodService(), ComposeSequencing,
 
     private fun isAlphabet(code: Int): Boolean = Character.isLetter(code)
 
-    private fun isWordSeparator(code: Int): Boolean {
+    internal fun isWordSeparator(code: Int): Boolean {
         val separators = mWordSeparators
         return separators.contains(code.toChar().toString())
     }

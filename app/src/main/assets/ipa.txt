@@ -1,0 +1,216 @@
+# ipa.txt - IPA Universal Phoneme Database
+# Format: CHAR ; CODEPOINT ; CATEGORY ; SUBCATEGORY ; HE_LABEL ; HE_DESC ; EN_LABEL ; EN_DESC
+# Unified format for bilingual search
+# ═══════════════════════════════════════════════════════════════════════════════════════════
+
+# group: vowels-close
+# subgroup: front
+i     ; 0069 ; vowel        ; close-front  ; חיריק סגור     ; תנועה סגורה קדמית i      ; Close Front I  ; Close front unrounded vowel
+y     ; 0079 ; vowel        ; close-front  ; סגור מעוגל     ; תנועה סגורה קדמית y      ; Close Front Y  ; Close front rounded vowel
+ɪ     ; 026A ; vowel        ; near-close   ; חיריק קצר      ; תנועה כמעט סגורה         ; Near Close I   ; Near-close front unrounded
+ʏ     ; 028F ; vowel        ; near-close   ; קרוב מעוגל     ; תנועה כמעט סגורה מעוגלת  ; Near Close Y   ; Near-close front rounded
+
+# subgroup: central
+ɨ     ; 0268 ; vowel        ; close-central; סגור מרכזי     ; תנועה סגורה מרכזית       ; Close Central I; Close central unrounded
+ʉ     ; 0289 ; vowel        ; close-central; מרכזי מעוגל    ; תנועה סגורה מרכזית מעוגלת; Close Central U; Close central rounded
+
+# subgroup: back
+ɯ     ; 026F ; vowel        ; close-back   ; סגור אחורי     ; תנועה סגורה אחורית       ; Close Back U   ; Close back unrounded
+u     ; 0075 ; vowel        ; close-back   ; שורוק סגור     ; תנועה סגורה אחורית u     ; Close Back Uu  ; Close back rounded vowel
+ʊ     ; 028A ; vowel        ; near-close   ; קובוץ קצר      ; תנועה כמעט סגורה אחורית  ; Near Close U   ; Near-close back rounded
+
+# group: vowels-mid
+# subgroup: close-mid
+e     ; 0065 ; vowel        ; close-mid    ; צירה בינוני    ; תנועה בינונית סגורה e    ; Close Mid E    ; Close-mid front unrounded
+ø     ; 00F8 ; vowel        ; close-mid    ; בינוני מעוגל   ; תנועה בינונית סגורה מעוגל; Close Mid O    ; Close-mid front rounded
+ɘ     ; 0258 ; vowel        ; close-mid    ; בינוני מרכזי   ; תנועה בינונית מרכזית     ; Close Mid Schwa; Close-mid central
+ɵ     ; 0275 ; vowel        ; close-mid    ; מרכזי מעוגל    ; תנועה בינונית מרכזית מעוג; Close Mid Barred; Close-mid central rounded
+ɤ     ; 0264 ; vowel        ; close-mid    ; בינוני אחורי   ; תנועה בינונית אחורית     ; Close Mid Ram  ; Close-mid back unrounded
+o     ; 006F ; vowel        ; close-mid    ; חולם בינוני    ; תנועה בינונית סגורה o    ; Close Mid O    ; Close-mid back rounded
+
+# subgroup: mid
+ə     ; 0259 ; vowel        ; mid-central  ; שווא מרכזי     ; תנועה מרכזית ניטרלית     ; Schwa          ; Mid central vowel schwa
+
+# subgroup: open-mid
+ɛ     ; 025B ; vowel        ; open-mid     ; סגול פתוח      ; תנועה בינונית פתוחה e    ; Open Mid E     ; Open-mid front unrounded
+œ     ; 0153 ; vowel        ; open-mid     ; פתוח מעוגל     ; תנועה בינונית פתוחה מעוגל; Open Mid Oe    ; Open-mid front rounded
+ɜ     ; 025C ; vowel        ; open-mid     ; פתוח מרכזי     ; תנועה בינונית פתוחה מרכזי; Open Mid Rev   ; Open-mid central
+ɞ     ; 025E ; vowel        ; open-mid     ; מרכזי מעוגל פת ; תנועה בינונית מרכזית מעוג; Open Mid Closed; Open-mid central rounded
+ʌ     ; 028C ; vowel        ; open-mid     ; פתוח אחורי     ; תנועה בינונית פתוחה אחור ; Open Mid Wedge ; Open-mid back unrounded
+ɔ     ; 0254 ; vowel        ; open-mid     ; חולם פתוח      ; תנועה בינונית פתוחה o    ; Open Mid O     ; Open-mid back rounded
+
+# group: vowels-open
+# subgroup: near-open
+æ     ; 00E6 ; vowel        ; near-open    ; פתח קרוב       ; תנועה כמעט פתוחה         ; Near Open Ae   ; Near-open front unrounded
+ɐ     ; 0250 ; vowel        ; near-open    ; פתוח מרכזי     ; תנועה כמעט פתוחה מרכזית  ; Near Open A    ; Near-open central
+
+# subgroup: open
+a     ; 0061 ; vowel        ; open-front   ; פתח פתוח       ; תנועה פתוחה קדמית a      ; Open Front A   ; Open front unrounded
+ɶ     ; 0276 ; vowel        ; open-front   ; פתוח מעוגל קד  ; תנועה פתוחה קדמית מעוגלת ; Open Front Oe  ; Open front rounded
+ɑ     ; 0251 ; vowel        ; open-back    ; קמץ פתוח       ; תנועה פתוחה אחורית       ; Open Back A    ; Open back unrounded
+ɒ     ; 0252 ; vowel        ; open-back    ; פתוח מעוגל אח  ; תנועה פתוחה אחורית מעוגלת; Open Back O    ; Open back rounded
+
+# group: consonants-plosives
+# subgroup: bilabial
+p     ; 0070 ; consonant    ; plosive      ; פא סותם        ; עיצור סותם שפתי אטום     ; Plosive P      ; Voiceless bilabial plosive
+b     ; 0062 ; consonant    ; plosive      ; בית סותם       ; עיצור סותם שפתי קולי     ; Plosive B      ; Voiced bilabial plosive
+
+# subgroup: alveolar
+t     ; 0074 ; consonant    ; plosive      ; תו סותם        ; עיצור סותם שיני אטום     ; Plosive T      ; Voiceless alveolar plosive
+d     ; 0064 ; consonant    ; plosive      ; דלת סותם       ; עיצור סותם שיני קולי     ; Plosive D      ; Voiced alveolar plosive
+
+# subgroup: retroflex
+ʈ     ; 0288 ; consonant    ; plosive      ; רטרופלקס אטום  ; עיצור סותם רטרופלקסי     ; Plosive Retro T; Voiceless retroflex plosive
+ɖ     ; 0256 ; consonant    ; plosive      ; רטרופלקס קולי  ; עיצור סותם רטרופלקסי קולי; Plosive Retro D; Voiced retroflex plosive
+
+# subgroup: palatal
+c     ; 0063 ; consonant    ; plosive      ; חיכי אטום      ; עיצור סותם חיכי אטום     ; Plosive Palatal; Voiceless palatal plosive
+ɟ     ; 025F ; consonant    ; plosive      ; חיכי קולי      ; עיצור סותם חיכי קולי     ; Plosive Pal Vd ; Voiced palatal plosive
+
+# subgroup: velar
+k     ; 006B ; consonant    ; plosive      ; כף סותם        ; עיצור סותם וילוני אטום   ; Plosive K      ; Voiceless velar plosive
+g     ; 0067 ; consonant    ; plosive      ; גימל סותם      ; עיצור סותם וילוני קולי   ; Plosive G      ; Voiced velar plosive
+
+# subgroup: uvular
+q     ; 0071 ; consonant    ; plosive      ; קוף עורפי      ; עיצור סותם עורפי אטום    ; Plosive Q      ; Voiceless uvular plosive
+ɢ     ; 0262 ; consonant    ; plosive      ; עורפי קולי     ; עיצור סותם עורפי קולי    ; Plosive Uvular G; Voiced uvular plosive
+
+# subgroup: glottal
+ʔ     ; 0294 ; consonant    ; plosive      ; עצירה גרונית   ; עיצור גרוני עצירה        ; Glottal Stop   ; Glottal stop
+
+# group: consonants-nasals
+# subgroup: common
+m     ; 006D ; consonant    ; nasal        ; מם אפי         ; עיצור אפי שפתי           ; Nasal M        ; Bilabial nasal
+ɱ     ; 0271 ; consonant    ; nasal        ; אפי שיני שפתי  ; עיצור אפי שיני-שפתי      ; Nasal Labiodent; Labiodental nasal
+n     ; 006E ; consonant    ; nasal        ; נון אפי        ; עיצור אפי שיני           ; Nasal N        ; Alveolar nasal
+ɳ     ; 0273 ; consonant    ; nasal        ; אפי רטרופלקס   ; עיצור אפי רטרופלקסי      ; Nasal Retroflex; Retroflex nasal
+ɲ     ; 0272 ; consonant    ; nasal        ; אפי חיכי       ; עיצור אפי חיכי           ; Nasal Palatal  ; Palatal nasal
+ŋ     ; 014B ; consonant    ; nasal        ; אפי וילוני     ; עיצור אפי וילוני ng      ; Nasal Velar    ; Velar nasal ng
+ɴ     ; 0274 ; consonant    ; nasal        ; אפי עורפי      ; עיצור אפי עורפי          ; Nasal Uvular   ; Uvular nasal
+
+# group: consonants-trills
+# subgroup: common
+ʙ     ; 0299 ; consonant    ; trill        ; רעד שפתי       ; עיצור רעד שפתי           ; Trill Bilabial ; Bilabial trill
+r     ; 0072 ; consonant    ; trill        ; ריש רעד        ; עיצור רעד שיני           ; Trill R        ; Alveolar trill
+ʀ     ; 0280 ; consonant    ; trill        ; רעד עורפי      ; עיצור רעד עורפי          ; Trill Uvular   ; Uvular trill
+
+# group: consonants-taps
+# subgroup: common
+ⱱ     ; 2C71 ; consonant    ; tap          ; טפיחה שפתית    ; עיצור טפיחה שפתית        ; Tap Labiodental; Labiodental tap
+ɾ     ; 027E ; consonant    ; tap          ; טפיחה שינית    ; עיצור טפיחה שינית        ; Tap Alveolar   ; Alveolar tap
+ɽ     ; 027D ; consonant    ; tap          ; טפיחה רטרו     ; עיצור טפיחה רטרופלקסית   ; Tap Retroflex  ; Retroflex tap
+
+# group: consonants-fricatives
+# subgroup: bilabial
+ɸ     ; 0278 ; consonant    ; fricative    ; חוכך שפתי אטום ; עיצור חוכך שפתי אטום     ; Fricative Phi  ; Voiceless bilabial fricative
+β     ; 03B2 ; consonant    ; fricative    ; חוכך שפתי קולי ; עיצור חוכך שפתי קולי     ; Fricative Beta ; Voiced bilabial fricative
+
+# subgroup: labiodental
+f     ; 0066 ; consonant    ; fricative    ; פא חוכך        ; עיצור חוכך שיני-שפתי אטום; Fricative F    ; Voiceless labiodental fricative
+v     ; 0076 ; consonant    ; fricative    ; בית חוכך       ; עיצור חוכך שיני-שפתי קולי; Fricative V    ; Voiced labiodental fricative
+
+# subgroup: dental
+θ     ; 03B8 ; consonant    ; fricative    ; תטא חוכך       ; עיצור חוכך שיני אטום th  ; Fricative Theta; Voiceless dental fricative
+ð     ; 00F0 ; consonant    ; fricative    ; אד חוכך        ; עיצור חוכך שיני קולי dh  ; Fricative Eth  ; Voiced dental fricative
+
+# subgroup: alveolar
+s     ; 0073 ; consonant    ; fricative    ; סמך חוכך       ; עיצור חוכך שיני אטום s   ; Fricative S    ; Voiceless alveolar fricative
+z     ; 007A ; consonant    ; fricative    ; זין חוכך       ; עיצור חוכך שיני קולי z   ; Fricative Z    ; Voiced alveolar fricative
+
+# subgroup: postalveolar
+ʃ     ; 0283 ; consonant    ; fricative    ; שין חוכך       ; עיצור חוכך אחר-שיני sh   ; Fricative Esh  ; Voiceless postalveolar fricative
+ʒ     ; 0292 ; consonant    ; fricative    ; זין רחב        ; עיצור חוכך אחר-שיני zh   ; Fricative Ezh  ; Voiced postalveolar fricative
+
+# subgroup: retroflex
+ʂ     ; 0282 ; consonant    ; fricative    ; רטרו אטום      ; עיצור חוכך רטרופלקסי אטום; Fricative Retro S; Voiceless retroflex fricative
+ʐ     ; 0290 ; consonant    ; fricative    ; רטרו קולי      ; עיצור חוכך רטרופלקסי קולי; Fricative Retro Z; Voiced retroflex fricative
+
+# subgroup: palatal
+ç     ; 00E7 ; consonant    ; fricative    ; חיכי אטום      ; עיצור חוכך חיכי אטום     ; Fricative Cedilla; Voiceless palatal fricative
+ʝ     ; 029D ; consonant    ; fricative    ; חיכי קולי      ; עיצור חוכך חיכי קולי     ; Fricative Palatal; Voiced palatal fricative
+
+# subgroup: velar
+x     ; 0078 ; consonant    ; fricative    ; כף חוכך        ; עיצור חוכך וילוני אטום ch; Fricative X    ; Voiceless velar fricative
+ɣ     ; 0263 ; consonant    ; fricative    ; גימל חוכך      ; עיצור חוכך וילוני קולי   ; Fricative Gamma; Voiced velar fricative
+
+# subgroup: uvular
+χ     ; 03C7 ; consonant    ; fricative    ; עורפי אטום     ; עיצור חוכך עורפי אטום    ; Fricative Chi  ; Voiceless uvular fricative
+ʁ     ; 0281 ; consonant    ; fricative    ; עורפי קולי     ; עיצור חוכך עורפי קולי    ; Fricative Uvular; Voiced uvular fricative
+
+# subgroup: pharyngeal
+ħ     ; 0127 ; consonant    ; fricative    ; חית לועי       ; עיצור חוכך לועי אטום     ; Fricative Heng ; Voiceless pharyngeal fricative
+ʕ     ; 0295 ; consonant    ; fricative    ; עין לועי       ; עיצור חוכך לועי קולי     ; Fricative Ayin ; Voiced pharyngeal fricative
+
+# subgroup: glottal
+h     ; 0068 ; consonant    ; fricative    ; הא גרוני       ; עיצור חוכך גרוני אטום    ; Fricative H    ; Voiceless glottal fricative
+ɦ     ; 0266 ; consonant    ; fricative    ; גרוני קולי     ; עיצור חוכך גרוני קולי    ; Fricative Breathy; Voiced glottal fricative
+
+# group: consonants-affricates
+# subgroup: common
+t͡s   ; -    ; consonant    ; affricate    ; צדי אטום       ; עיצור מעורב ts           ; Affricate Ts   ; Voiceless alveolar affricate
+d͡z   ; -    ; consonant    ; affricate    ; דז קולי        ; עיצור מעורב dz           ; Affricate Dz   ; Voiced alveolar affricate
+t͡ʃ   ; -    ; consonant    ; affricate    ; צדי רחב        ; עיצור מעורב ch           ; Affricate Tsh  ; Voiceless postalveolar affricate
+d͡ʒ   ; -    ; consonant    ; affricate    ; ג׳ קולי        ; עיצור מעורב j            ; Affricate Dzh  ; Voiced postalveolar affricate
+
+# group: consonants-approximants
+# subgroup: common
+ʋ     ; 028B ; consonant    ; approximant  ; קירוב שפתי     ; עיצור קירוב שיני-שפתי    ; Approximant V  ; Labiodental approximant
+ɹ     ; 0279 ; consonant    ; approximant  ; ריש אנגלי      ; עיצור קירוב שיני         ; Approximant R  ; Alveolar approximant
+ɻ     ; 027B ; consonant    ; approximant  ; קירוב רטרו     ; עיצור קירוב רטרופלקסי    ; Approximant Retro; Retroflex approximant
+j     ; 006A ; consonant    ; approximant  ; יוד גלישה      ; עיצור קירוב חיכי y       ; Approximant J  ; Palatal approximant
+ɰ     ; 0270 ; consonant    ; approximant  ; קירוב וילוני   ; עיצור קירוב וילוני       ; Approximant Velar; Velar approximant
+
+# group: consonants-laterals
+# subgroup: approximant
+l     ; 006C ; consonant    ; lateral      ; למד צידי       ; עיצור צידי שיני          ; Lateral L      ; Alveolar lateral approximant
+ɭ     ; 026D ; consonant    ; lateral      ; צידי רטרו      ; עיצור צידי רטרופלקסי     ; Lateral Retroflex; Retroflex lateral
+ʎ     ; 028E ; consonant    ; lateral      ; צידי חיכי      ; עיצור צידי חיכי          ; Lateral Palatal; Palatal lateral
+ʟ     ; 029F ; consonant    ; lateral      ; צידי וילוני    ; עיצור צידי וילוני        ; Lateral Velar  ; Velar lateral
+
+# subgroup: fricative
+ɬ     ; 026C ; consonant    ; lateral-fric ; צידי חוכך אטום ; עיצור צידי חוכך אטום     ; Lateral Fric Vl; Voiceless lateral fricative
+ɮ     ; 026E ; consonant    ; lateral-fric ; צידי חוכך קולי ; עיצור צידי חוכך קולי     ; Lateral Fric Vd; Voiced lateral fricative
+
+# group: clicks
+# subgroup: common
+ʘ     ; 0298 ; consonant    ; click        ; נקישה שפתית    ; עיצור נקישה שפתי         ; Click Bilabial ; Bilabial click
+ǀ     ; 01C0 ; consonant    ; click        ; נקישה שינית    ; עיצור נקישה שיני         ; Click Dental   ; Dental click
+ǃ     ; 01C3 ; consonant    ; click        ; נקישה שיני רטרו; עיצור נקישה אחר-שיני     ; Click Alveolar ; Postalveolar click
+ǂ     ; 01C2 ; consonant    ; click        ; נקישה חיכית    ; עיצור נקישה חיכי-שיני    ; Click Palatal  ; Palatoalveolar click
+ǁ     ; 01C1 ; consonant    ; click        ; נקישה צידית    ; עיצור נקישה צידי         ; Click Lateral  ; Lateral click
+
+# group: suprasegmentals
+# subgroup: stress
+ˈ     ; 02C8 ; supraseg     ; stress       ; הטעמה ראשית    ; סימן הטעמה ראשית         ; Primary Stress ; Primary stress mark
+ˌ     ; 02CC ; supraseg     ; stress       ; הטעמה משנית    ; סימן הטעמה משנית         ; Secondary Stress; Secondary stress mark
+
+# subgroup: length
+ː     ; 02D0 ; supraseg     ; length       ; אורך           ; סימן אורך תנועה          ; Long           ; Length mark
+ˑ     ; 02D1 ; supraseg     ; length       ; חצי אורך       ; סימן חצי אורך            ; Half Long      ; Half-long mark
+
+# subgroup: tone
+˥     ; 02E5 ; supraseg     ; tone         ; טון גבוה       ; סימן טון גבוה 5          ; Tone High      ; Extra high tone
+˦     ; 02E6 ; supraseg     ; tone         ; טון גבוה בינוני; סימן טון גבוה 4          ; Tone High Mid  ; High tone
+˧     ; 02E7 ; supraseg     ; tone         ; טון בינוני     ; סימן טון בינוני 3        ; Tone Mid       ; Mid tone
+˨     ; 02E8 ; supraseg     ; tone         ; טון נמוך בינוני; סימן טון נמוך 2          ; Tone Low Mid   ; Low tone
+˩     ; 02E9 ; supraseg     ; tone         ; טון נמוך       ; סימן טון נמוך 1          ; Tone Low       ; Extra low tone
+
+# group: diacritics
+# subgroup: phonation
+̥     ; 0325 ; diacritic    ; voicing      ; אטום           ; סימן חוסר קוליות         ; Voiceless Below; Voiceless diacritic below
+̬     ; 032C ; diacritic    ; voicing      ; קולי           ; סימן קוליות              ; Voiced Below   ; Voiced diacritic below
+̤     ; 0324 ; diacritic    ; phonation    ; נשימתי         ; סימן קול נשימתי          ; Breathy        ; Breathy voice diacritic
+̰     ; 0330 ; diacritic    ; phonation    ; חריקה          ; סימן קול חורק            ; Creaky         ; Creaky voice diacritic
+
+# subgroup: articulation
+̪     ; 032A ; diacritic    ; place        ; שיני           ; סימן הגייה שינית         ; Dental         ; Dental diacritic
+̺     ; 033A ; diacritic    ; place        ; אפיקלי         ; סימן הגייה אפיקלית       ; Apical         ; Apical diacritic
+̻     ; 033B ; diacritic    ; place        ; למינלי         ; סימן הגייה למינלית       ; Laminal        ; Laminal diacritic
+
+# subgroup: modification
+ʷ     ; 02B7 ; diacritic    ; secondary    ; עיגול שפתיים   ; סימן עיגול שפתיים        ; Labialized     ; Labialization
+ʲ     ; 02B2 ; diacritic    ; secondary    ; רכוך חיכי      ; סימן רכוך חיכי           ; Palatalized    ; Palatalization
+ˠ     ; 02E0 ; diacritic    ; secondary    ; רכוך וילוני    ; סימן רכוך וילוני         ; Velarized      ; Velarization
+ˤ     ; 02E4 ; diacritic    ; secondary    ; רכוך לועי      ; סימן רכוך לועי           ; Pharyngealized ; Pharyngealization
+ⁿ     ; 207F ; diacritic    ; release      ; שחרור אפי      ; סימן שחרור אפי           ; Nasal Release  ; Nasal release
+ˡ     ; 02E1 ; diacritic    ; release      ; שחרור צידי     ; סימן שחרור צידי          ; Lateral Release; Lateral release

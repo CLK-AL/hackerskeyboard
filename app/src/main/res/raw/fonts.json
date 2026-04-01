@@ -1,0 +1,871 @@
+{
+  "עברית רב-מגדרית": {
+    "description": "Multi-Gender Hebrew - two systems: Ivrita JS (text processing) and MGHebrew fonts (PUA glyphs)",
+    "source": "https://alefalefalef.co.il/ivrita/",
+    "github": "https://github.com/AlefAlefAlef/ivrita",
+    "ivritaCDN": "https://cdn.jsdelivr.net/npm/ivrita@1/dist/ivrita.min.js",
+    "ivritaHosted": "https://ivrita.alefalefalef.co.il/ivrita.min.js",
+    "modes": ["Ivrita.MALE", "Ivrita.FEMALE", "Ivrita.NEUTRAL", "Ivrita.ORIGINAL"],
+    "fonts": {
+      "withoutNikud": [
+        {
+          "name": "Alef MultiGender",
+          "family": "AlefMultiGndr",
+          "fallback": "Alef",
+          "weight": 400,
+          "local": "./fonts/AlefMultiGndr-Regular.woff2",
+          "download": "https://raw.githubusercontent.com/AlefAlefAlef/ivrita/master/fonts/AlefMultiGndr-Regular.woff2"
+        },
+        {
+          "name": "Alef MultiGender Bold",
+          "family": "AlefMultiGndr",
+          "fallback": "Alef",
+          "weight": 700,
+          "local": "./fonts/AlefMultiGndr-Bold.woff2",
+          "download": "https://raw.githubusercontent.com/AlefAlefAlef/ivrita/master/fonts/AlefMultiGndr-Bold.woff2"
+        },
+        {
+          "name": "Heebo MultiGender",
+          "family": "HeeboMultiGndr",
+          "fallback": "Heebo",
+          "weight": 400,
+          "local": "./fonts/HeeboMultiGndr-Regular.woff2",
+          "download": "https://raw.githubusercontent.com/AlefAlefAlef/ivrita/master/fonts/HeeboMultiGndr-Regular.woff2"
+        },
+        {
+          "name": "Rubik MultiGender",
+          "family": "RubikMultiGndr",
+          "fallback": "Rubik",
+          "weight": 400,
+          "local": "./fonts/RubikMultiGndr-Regular.woff2",
+          "download": "https://raw.githubusercontent.com/AlefAlefAlef/ivrita/master/fonts/RubikMultiGndr-Regular.woff2"
+        },
+        {
+          "name": "Assistant MultiGender",
+          "family": "AssistantMultiGndr",
+          "fallback": "Assistant",
+          "weight": 400,
+          "local": "./fonts/AssistantMultiGndr-Regular.woff2",
+          "download": "https://raw.githubusercontent.com/AlefAlefAlef/ivrita/master/fonts/AssistantMultiGndr-Regular.woff2"
+        }
+      ],
+      "withNikud": [
+        {
+          "name": "Alef MultiGender Nikud",
+          "family": "AlefMultiGndrNikud",
+          "fallback": "Alef",
+          "weight": 400,
+          "local": "./fonts/AlefMultiGndr-Nikud.woff2",
+          "download": "https://raw.githubusercontent.com/AlefAlefAlef/ivrita/master/fonts/AlefMultiGndr-Nikud.woff2",
+          "note": "Supports רֵב (nikud reversal) glyph"
+        }
+      ]
+    },
+    "ivritaSyntax": {
+      "description": "Official Ivrita notation rules from alefalefalef.co.il/ivrita",
+      "rules": [
+        {
+          "id": 1,
+          "name": "סיומת ־ה",
+          "pattern": "ו/ה or ו.ה",
+          "examples": ["שלו/ה", "חרוץ.ה"],
+          "male": "שלו, חרוץ",
+          "female": "שלה, חרוצה"
+        },
+        {
+          "id": 2,
+          "name": "סיומת ־ות",
+          "pattern": "י/ות or י.ות",
+          "examples": ["עורכי/ות", "אנשי.ות"],
+          "male": "עורכי, אנשי",
+          "female": "עורכות, אנשות"
+        },
+        {
+          "id": 3,
+          "name": "סיומת ־י (ציווי/עתיד)",
+          "pattern": "/י or .י or (י)",
+          "examples": ["משוך.י", "ענה/י", "הפע(י)ל/י"],
+          "male": "משוך, ענה, הפעל",
+          "female": "משכי, עני, הפעילי"
+        },
+        {
+          "id": 4,
+          "name": "סיומת ־ית",
+          "pattern": "/ית or .ית",
+          "examples": ["סטודנט/ית", "מומחה.ית"],
+          "male": "סטודנט, מומחה",
+          "female": "סטודנטית, מומחית"
+        },
+        {
+          "id": 5,
+          "name": "סיומת ־ים/ות",
+          "pattern": "ים/ות or ות.ים or יםות",
+          "examples": ["דרושים/ות", "נערות.ים", "צעיריםות"],
+          "male": "דרושים, נערים, צעירים",
+          "female": "דרושות, נערות, צעירות"
+        },
+        {
+          "id": 6,
+          "name": "סיומת ־ים/יות",
+          "pattern": "ים/יות or ות/ים",
+          "examples": ["פרילנסרים/יות", "ישראליות/ים"],
+          "male": "פרילנסרים, ישראלים",
+          "female": "פרילנסריות, ישראליות"
+        },
+        {
+          "id": 7,
+          "name": "סיומת ־ם/ן (שייכות)",
+          "pattern": "ם/ן or ן/ם or םן or נם",
+          "examples": ["שלכם/ן", "ליבכן/ם", "בתיכםן", "ריחןם", "הערותיהם/ן"],
+          "male": "שלכם, ליבכם, בתיכם, ריחם, הערותיהם",
+          "female": "שלכן, ליבכן, בתיכן, ריחן, הערותיהן"
+        },
+        {
+          "id": 8,
+          "name": "סיומת ־נה (ציווי/עתיד רבים)",
+          "pattern": "ו/נה",
+          "examples": ["בקשו/נה", "תדרכו/נה", "י/תבדקו/נה", "רקדו/נה"],
+          "male": "בקשו, תדרכו, יבדקו, רקדו",
+          "female": "בקשנה, תדרכנה, תבדקנה, רקדנה"
+        },
+        {
+          "id": 9,
+          "name": "סיומת ־ת",
+          "pattern": "/ת or .ת",
+          "examples": ["מעצב/ת", "איש/ת"],
+          "male": "מעצב, איש",
+          "female": "מעצבת, אשת"
+        },
+        {
+          "id": 10,
+          "name": "סיומת ־תה (עבר גוף שלישי)",
+          "pattern": "ה/תה",
+          "examples": ["הלווה/תה", "בכה/תה"],
+          "male": "הלווה, בכה",
+          "female": "הלוותה, בכתה"
+        },
+        {
+          "id": 11,
+          "name": "סיומת ־תי",
+          "pattern": "י/תי or /תי",
+          "examples": ["יקירי/תי", "אהוב/תי", "אחי/ותי"],
+          "male": "יקירי, אהובי, אחי",
+          "female": "יקירתי, אהובתי, אחותי"
+        },
+        {
+          "id": 12,
+          "name": "י/ת־ בתחילת מילה",
+          "pattern": "י/ת or ת/י at start",
+          "examples": ["י/תכתוב", "ת/יבוא"],
+          "male": "יכתוב, יבוא",
+          "female": "תכתוב, תבוא"
+        },
+        {
+          "id": 13,
+          "name": "א.נשים",
+          "pattern": "א.נשים or א/נשים or א־נשים",
+          "examples": ["א.נשים", "א/נשי", "א/נשות"],
+          "male": "אנשים, אנשי, אנשי",
+          "female": "נשים, נשות, נשות"
+        },
+        {
+          "id": 14,
+          "name": "סוגריים (✱)",
+          "pattern": "(letter) - optional letter for female",
+          "examples": ["סב(ת)א", "חבר(ת)ו", "עלי(י)ך", "פנ(י)יך", "חושב(ת)"],
+          "male": "סבא, חברו, עליך, פניך, חושב",
+          "female": "סבתא, חברתו, עלייך, פנייך, חושבת"
+        },
+        {
+          "id": 15,
+          "name": "מילים שלמות",
+          "pattern": "word/word",
+          "examples": ["בן/בת", "היא/הוא", "איש/אשת", "אחת/אחד"],
+          "male": "בן, הוא, איש, אחד",
+          "female": "בת, היא, אשת, אחת"
+        },
+        {
+          "id": 16,
+          "name": "פיצול כפול (יחיד/יחידה/רבים)",
+          "pattern": "x.y.z or x/y/z",
+          "examples": ["שמור.י.ו", "שלח/י/ו"],
+          "male": "שמור, שלח",
+          "female": "שמרי, שלחי",
+          "plural": "שמרו, שלחו"
+        },
+        {
+          "id": 17,
+          "name": "[] סוגריים מרובעים",
+          "pattern": "[male|female|neutral]",
+          "examples": ["[גבר|אישה|אדם]", "[בן|בת]", "[מהממת|חתיך|יפה]", "סב[ים|תות]"],
+          "male": "גבר, בן, חתיך, סבים",
+          "female": "אישה, בת, מהממת, סבתות",
+          "neutral": "אדם, בן/בת, יפה"
+        },
+        {
+          "id": 18,
+          "name": "{} סוגריים מסולסלים",
+          "pattern": "{word} - skip processing",
+          "examples": ["{שלכם/ן}", "{גולשים/ות}"],
+          "result": "שלכם/ן, גולשים/ות (unchanged)"
+        },
+        {
+          "id": 19,
+          "name": "data-ivrita HTML attributes",
+          "pattern": "data-ivrita-male/female/neutral",
+          "example": "<strong data-ivrita-male=\"חתיך\" data-ivrita-female=\"מהממת\" data-ivrita-neutral=\"\">יפה</strong>",
+          "note": "Advanced HTML-based gender alternatives"
+        }
+      ]
+    },
+    "mghebrewGlyphs": {
+      "description": "PUA glyphs in MGHebrew fonts - hybrid characters combining male/female endings",
+      "note": "These are font glyphs, separate from Ivrita JS text processing",
+      "glyphs": [
+        {
+          "id": 1,
+          "name": "יו״ב",
+          "nameEn": "yuv",
+          "pua": "U+E000",
+          "char": "\uE000",
+          "male": "וא",
+          "female": "יא",
+          "pattern": "הוא/היא",
+          "example": "הוא/יא"
+        },
+        {
+          "id": 2,
+          "name": "תי״ם",
+          "nameEn": "tem",
+          "pua": "U+E001",
+          "char": "\uE001",
+          "male": "ים",
+          "female": "ות",
+          "pattern": "plural nouns",
+          "example": "מורים/ות"
+        },
+        {
+          "id": 3,
+          "name": "נ״ם",
+          "nameEn": "nem",
+          "pua": "U+E002",
+          "char": "\uE002",
+          "male": "ם",
+          "female": "ן",
+          "pattern": "2nd person plural suffix",
+          "example": "אתם/ן"
+        },
+        {
+          "id": 4,
+          "name": "ת״ד",
+          "nameEn": "tad",
+          "pua": "U+E003",
+          "char": "\uE003",
+          "male": "ד",
+          "female": "ת",
+          "pattern": "present tense verbs",
+          "example": "עומד/ת"
+        },
+        {
+          "id": 5,
+          "name": "נ״ת",
+          "nameEn": "nat",
+          "pua": "U+E004",
+          "char": "\uE004",
+          "male": "נ",
+          "female": "ת",
+          "pattern": "adjectives ending נ",
+          "example": "ישנ/ת"
+        },
+        {
+          "id": 6,
+          "name": "י״ת",
+          "nameEn": "yat",
+          "pua": "U+E005",
+          "char": "\uE005",
+          "male": "י",
+          "female": "ת",
+          "pattern": "nationality adjectives",
+          "example": "עברי/ת"
+        },
+        {
+          "id": 7,
+          "name": "ה״ת",
+          "nameEn": "hat",
+          "pua": "U+E006",
+          "char": "\uE006",
+          "male": "ה",
+          "female": "ת",
+          "pattern": "adjectives ending ה",
+          "example": "יפה/ת"
+        },
+        {
+          "id": 8,
+          "name": "ו״ה",
+          "nameEn": "vah",
+          "pua": "U+E007",
+          "char": "\uE007",
+          "male": "ו",
+          "female": "ה",
+          "pattern": "possessive pronouns",
+          "example": "שלו/ה"
+        },
+        {
+          "id": 9,
+          "name": "א״ן",
+          "nameEn": "an",
+          "pua": "U+E008",
+          "char": "\uE008",
+          "male": "א",
+          "female": "",
+          "pattern": "optional alef",
+          "example": "הוא."
+        },
+        {
+          "id": 10,
+          "name": "ת״ה",
+          "nameEn": "tah",
+          "pua": "U+E009",
+          "char": "\uE009",
+          "male": "",
+          "female": "ת",
+          "pattern": "optional tav",
+          "example": "רופא/ת"
+        },
+        {
+          "id": 11,
+          "name": "ני״ת",
+          "nameEn": "nit",
+          "pua": "U+E00A",
+          "char": "\uE00A",
+          "male": "ן",
+          "female": "נית",
+          "pattern": "professional nouns",
+          "example": "זמרן/ית"
+        },
+        {
+          "id": 12,
+          "name": "רֵב",
+          "nameEn": "rev",
+          "pua": "U+E00B",
+          "char": "\uE00B",
+          "male": "-",
+          "female": "-",
+          "pattern": "nikud reversal",
+          "example": "מוֹר[ֶה|ָה]",
+          "note": "Swaps vowels in nikud text"
+        }
+      ]
+    },
+    "nikudPatterns": [
+      {
+        "id": 1,
+        "pattern": "את/ה",
+        "male": "אַתָּה",
+        "female": "אַתְּ",
+        "ivrita": "אַת[ָּה|ְּ]",
+        "glyphUsed": "רֵב",
+        "description": "2nd person singular pronoun (you)"
+      },
+      {
+        "id": 2,
+        "pattern": "לך/ך",
+        "male": "לְךָ",
+        "female": "לָךְ",
+        "ivrita": "ל[ְךָ|ָךְ]",
+        "glyphUsed": "רֵב",
+        "description": "To you (prepositional suffix)"
+      },
+      {
+        "id": 3,
+        "pattern": "בך/ך",
+        "male": "בְּךָ",
+        "female": "בָּךְ",
+        "ivrita": "ב[ְּךָ|ָּךְ]",
+        "glyphUsed": "רֵב",
+        "description": "In you (prepositional suffix)"
+      },
+      {
+        "id": 4,
+        "pattern": "אותך/ך",
+        "male": "אוֹתְךָ",
+        "female": "אוֹתָךְ",
+        "ivrita": "אוֹת[ְךָ|ָךְ]",
+        "glyphUsed": "רֵב",
+        "description": "You (direct object)"
+      },
+      {
+        "id": 5,
+        "pattern": "שלך/ך",
+        "male": "שֶׁלְּךָ",
+        "female": "שֶׁלָּךְ",
+        "ivrita": "שֶׁל[ְּךָ|ָּךְ]",
+        "glyphUsed": "רֵב",
+        "description": "Yours (possessive)"
+      },
+      {
+        "id": 6,
+        "pattern": "עליך/ך",
+        "male": "עָלֶיךָ",
+        "female": "עָלַיִךְ",
+        "ivrita": "עָל[ֶיךָ|ַיִךְ]",
+        "glyphUsed": "רֵב",
+        "description": "On you (prepositional suffix)"
+      },
+      {
+        "id": 7,
+        "pattern": "אליך/ך",
+        "male": "אֵלֶיךָ",
+        "female": "אֵלַיִךְ",
+        "ivrita": "אֵל[ֶיךָ|ַיִךְ]",
+        "glyphUsed": "רֵב",
+        "description": "To you (directional)"
+      },
+      {
+        "id": 8,
+        "pattern": "ממך/ך",
+        "male": "מִמְּךָ",
+        "female": "מִמֵּךְ",
+        "ivrita": "מִמ[ְּךָ|ֵּךְ]",
+        "glyphUsed": "רֵב",
+        "description": "From you"
+      },
+      {
+        "id": 9,
+        "pattern": "איתך/ך",
+        "male": "אִתְּךָ",
+        "female": "אִתָּךְ",
+        "ivrita": "אִת[ְּךָ|ָּךְ]",
+        "glyphUsed": "רֵב",
+        "description": "With you"
+      },
+      {
+        "id": 10,
+        "pattern": "מורה/ה",
+        "male": "מוֹרֶה",
+        "female": "מוֹרָה",
+        "ivrita": "מוֹר[ֶה|ָה]",
+        "glyphUsed": "רֵב",
+        "description": "Teacher (same consonants, different vowels)"
+      },
+      {
+        "id": 11,
+        "pattern": "יפה/ה",
+        "male": "יָפֶה",
+        "female": "יָפָה",
+        "ivrita": "יָפ[ֶה|ָה]",
+        "glyphUsed": "רֵב",
+        "description": "Beautiful (same consonants, different vowels)"
+      },
+      {
+        "id": 12,
+        "pattern": "קשה/ה",
+        "male": "קָשֶׁה",
+        "female": "קָשָׁה",
+        "ivrita": "קָש[ֶׁה|ָׁה]",
+        "glyphUsed": "רֵב",
+        "description": "Hard/difficult (same consonants, different vowels)"
+      }
+    ]
+  },
+  "Hebrew Variable": [
+    {
+      "name": "Heebo",
+      "source": "https://fonts.google.com/specimen/Heebo",
+      "cdn": "https://fonts.googleapis.com/css2?family=Heebo:wght@100..900&display=swap",
+      "local": "./fonts/heebo-variable.woff2",
+      "weights": "100-900",
+      "variable": true
+    },
+    {
+      "name": "Rubik",
+      "source": "https://fonts.google.com/specimen/Rubik",
+      "cdn": "https://fonts.googleapis.com/css2?family=Rubik:wght@300..900&display=swap",
+      "local": "./fonts/rubik-variable.woff2",
+      "weights": "300-900",
+      "variable": true
+    },
+    {
+      "name": "Assistant",
+      "source": "https://fonts.google.com/specimen/Assistant",
+      "cdn": "https://fonts.googleapis.com/css2?family=Assistant:wght@200..800&display=swap",
+      "local": "./fonts/assistant-variable.woff2",
+      "weights": "200-800",
+      "variable": true
+    }
+  ],
+  "Hebrew Serif": [
+    {
+      "name": "David Libre",
+      "source": "https://fonts.google.com/specimen/David+Libre",
+      "cdn": "https://fonts.googleapis.com/css2?family=David+Libre:wght@400;500;700&display=swap",
+      "local": "./fonts/david_libre-400;500;700.woff2",
+      "weights": [400, 500, 700]
+    },
+    {
+      "name": "Frank Ruhl Libre",
+      "source": "https://fonts.google.com/specimen/Frank+Ruhl+Libre",
+      "cdn": "https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@300..900&display=swap",
+      "local": "./fonts/frank_ruhl_libre-variable.woff2",
+      "weights": "300-900",
+      "variable": true
+    },
+    {
+      "name": "Bellefair",
+      "source": "https://fonts.google.com/specimen/Bellefair",
+      "cdn": "https://fonts.googleapis.com/css2?family=Bellefair&display=swap",
+      "local": "./fonts/bellefair-400.woff2",
+      "weights": [400]
+    },
+    {
+      "name": "Suez One",
+      "source": "https://fonts.google.com/specimen/Suez+One",
+      "cdn": "https://fonts.googleapis.com/css2?family=Suez+One&display=swap",
+      "local": "./fonts/suez_one-400.woff2",
+      "weights": [400]
+    }
+  ],
+  "Hebrew Sans": [
+    {
+      "name": "Alef",
+      "source": "https://fonts.google.com/specimen/Alef",
+      "cdn": "https://fonts.googleapis.com/css2?family=Alef:wght@400;700&display=swap",
+      "local": "./fonts/alef-400;700.woff2",
+      "weights": [400, 700]
+    },
+    {
+      "name": "Miriam Libre",
+      "source": "https://fonts.google.com/specimen/Miriam+Libre",
+      "cdn": "https://fonts.googleapis.com/css2?family=Miriam+Libre:wght@400;700&display=swap",
+      "local": "./fonts/miriam_libre-400;700.woff2",
+      "weights": [400, 700]
+    },
+    {
+      "name": "Secular One",
+      "source": "https://fonts.google.com/specimen/Secular+One",
+      "cdn": "https://fonts.googleapis.com/css2?family=Secular+One&display=swap",
+      "local": "./fonts/secular_one-400.woff2",
+      "weights": [400]
+    },
+    {
+      "name": "Varela Round",
+      "source": "https://fonts.google.com/specimen/Varela+Round",
+      "cdn": "https://fonts.googleapis.com/css2?family=Varela+Round&display=swap",
+      "local": "./fonts/varela_round-400.woff2",
+      "weights": [400]
+    },
+    {
+      "name": "Karantina",
+      "source": "https://fonts.google.com/specimen/Karantina",
+      "cdn": "https://fonts.googleapis.com/css2?family=Karantina:wght@300;400;700&display=swap",
+      "local": "./fonts/karantina-300;400;700.woff2",
+      "weights": [300, 400, 700]
+    }
+  ],
+  "Hebrew Display": [
+    {
+      "name": "Amatic SC",
+      "source": "https://fonts.google.com/specimen/Amatic+SC",
+      "cdn": "https://fonts.googleapis.com/css2?family=Amatic+SC:wght@400;700&display=swap",
+      "local": "./fonts/amatic_sc-400;700.woff2",
+      "weights": [400, 700]
+    },
+    {
+      "name": "Bona Nova",
+      "source": "https://fonts.google.com/specimen/Bona+Nova",
+      "cdn": "https://fonts.googleapis.com/css2?family=Bona+Nova:wght@400;700&display=swap",
+      "local": "./fonts/bona_nova-400;700.woff2",
+      "weights": [400, 700]
+    },
+    {
+      "name": "Tinos",
+      "source": "https://fonts.google.com/specimen/Tinos",
+      "cdn": "https://fonts.googleapis.com/css2?family=Tinos:wght@400;700&display=swap",
+      "local": "./fonts/tinos-400;700.woff2",
+      "weights": [400, 700]
+    }
+  ],
+  "Rubik Variants": [
+    {
+      "name": "Rubik Mono One",
+      "source": "https://fonts.google.com/specimen/Rubik+Mono+One",
+      "cdn": "https://fonts.googleapis.com/css2?family=Rubik+Mono+One&display=swap",
+      "local": "./fonts/rubik_mono_one-400.woff2",
+      "weights": [400]
+    },
+    {
+      "name": "Rubik Doodle Shadow",
+      "source": "https://fonts.google.com/specimen/Rubik+Doodle+Shadow",
+      "cdn": "https://fonts.googleapis.com/css2?family=Rubik+Doodle+Shadow&display=swap",
+      "local": "./fonts/rubik_doodle_shadow-400.woff2",
+      "weights": [400]
+    },
+    {
+      "name": "Rubik Doodle Triangles",
+      "source": "https://fonts.google.com/specimen/Rubik+Doodle+Triangles",
+      "cdn": "https://fonts.googleapis.com/css2?family=Rubik+Doodle+Triangles&display=swap",
+      "local": "./fonts/rubik_doodle_triangles-400.woff2",
+      "weights": [400]
+    },
+    {
+      "name": "Rubik Bubbles",
+      "source": "https://fonts.google.com/specimen/Rubik+Bubbles",
+      "cdn": "https://fonts.googleapis.com/css2?family=Rubik+Bubbles&display=swap",
+      "local": "./fonts/rubik_bubbles-400.woff2",
+      "weights": [400]
+    },
+    {
+      "name": "Rubik Burned",
+      "source": "https://fonts.google.com/specimen/Rubik+Burned",
+      "cdn": "https://fonts.googleapis.com/css2?family=Rubik+Burned&display=swap",
+      "local": "./fonts/rubik_burned-400.woff2",
+      "weights": [400]
+    },
+    {
+      "name": "Rubik Dirt",
+      "source": "https://fonts.google.com/specimen/Rubik+Dirt",
+      "cdn": "https://fonts.googleapis.com/css2?family=Rubik+Dirt&display=swap",
+      "local": "./fonts/rubik_dirt-400.woff2",
+      "weights": [400]
+    },
+    {
+      "name": "Rubik Distressed",
+      "source": "https://fonts.google.com/specimen/Rubik+Distressed",
+      "cdn": "https://fonts.googleapis.com/css2?family=Rubik+Distressed&display=swap",
+      "local": "./fonts/rubik_distressed-400.woff2",
+      "weights": [400]
+    },
+    {
+      "name": "Rubik Glitch",
+      "source": "https://fonts.google.com/specimen/Rubik+Glitch",
+      "cdn": "https://fonts.googleapis.com/css2?family=Rubik+Glitch&display=swap",
+      "local": "./fonts/rubik_glitch-400.woff2",
+      "weights": [400]
+    },
+    {
+      "name": "Rubik Glitch Pop",
+      "source": "https://fonts.google.com/specimen/Rubik+Glitch+Pop",
+      "cdn": "https://fonts.googleapis.com/css2?family=Rubik+Glitch+Pop&display=swap",
+      "local": "./fonts/rubik_glitch_pop-400.woff2",
+      "weights": [400]
+    },
+    {
+      "name": "Rubik Iso",
+      "source": "https://fonts.google.com/specimen/Rubik+Iso",
+      "cdn": "https://fonts.googleapis.com/css2?family=Rubik+Iso&display=swap",
+      "local": "./fonts/rubik_iso-400.woff2",
+      "weights": [400]
+    },
+    {
+      "name": "Rubik Lines",
+      "source": "https://fonts.google.com/specimen/Rubik+Lines",
+      "cdn": "https://fonts.googleapis.com/css2?family=Rubik+Lines&display=swap",
+      "local": "./fonts/rubik_lines-400.woff2",
+      "weights": [400]
+    },
+    {
+      "name": "Rubik Maps",
+      "source": "https://fonts.google.com/specimen/Rubik+Maps",
+      "cdn": "https://fonts.googleapis.com/css2?family=Rubik+Maps&display=swap",
+      "local": "./fonts/rubik_maps-400.woff2",
+      "weights": [400]
+    },
+    {
+      "name": "Rubik Marker Hatch",
+      "source": "https://fonts.google.com/specimen/Rubik+Marker+Hatch",
+      "cdn": "https://fonts.googleapis.com/css2?family=Rubik+Marker+Hatch&display=swap",
+      "local": "./fonts/rubik_marker_hatch-400.woff2",
+      "weights": [400]
+    },
+    {
+      "name": "Rubik Maze",
+      "source": "https://fonts.google.com/specimen/Rubik+Maze",
+      "cdn": "https://fonts.googleapis.com/css2?family=Rubik+Maze&display=swap",
+      "local": "./fonts/rubik_maze-400.woff2",
+      "weights": [400]
+    },
+    {
+      "name": "Rubik Microbe",
+      "source": "https://fonts.google.com/specimen/Rubik+Microbe",
+      "cdn": "https://fonts.googleapis.com/css2?family=Rubik+Microbe&display=swap",
+      "local": "./fonts/rubik_microbe-400.woff2",
+      "weights": [400]
+    },
+    {
+      "name": "Rubik Moonrocks",
+      "source": "https://fonts.google.com/specimen/Rubik+Moonrocks",
+      "cdn": "https://fonts.googleapis.com/css2?family=Rubik+Moonrocks&display=swap",
+      "local": "./fonts/rubik_moonrocks-400.woff2",
+      "weights": [400]
+    },
+    {
+      "name": "Rubik Pixels",
+      "source": "https://fonts.google.com/specimen/Rubik+Pixels",
+      "cdn": "https://fonts.googleapis.com/css2?family=Rubik+Pixels&display=swap",
+      "local": "./fonts/rubik_pixels-400.woff2",
+      "weights": [400]
+    },
+    {
+      "name": "Rubik Puddles",
+      "source": "https://fonts.google.com/specimen/Rubik+Puddles",
+      "cdn": "https://fonts.googleapis.com/css2?family=Rubik+Puddles&display=swap",
+      "local": "./fonts/rubik_puddles-400.woff2",
+      "weights": [400]
+    },
+    {
+      "name": "Rubik Scribble",
+      "source": "https://fonts.google.com/specimen/Rubik+Scribble",
+      "cdn": "https://fonts.googleapis.com/css2?family=Rubik+Scribble&display=swap",
+      "local": "./fonts/rubik_scribble-400.woff2",
+      "weights": [400]
+    },
+    {
+      "name": "Rubik Spray Paint",
+      "source": "https://fonts.google.com/specimen/Rubik+Spray+Paint",
+      "cdn": "https://fonts.googleapis.com/css2?family=Rubik+Spray+Paint&display=swap",
+      "local": "./fonts/rubik_spray_paint-400.woff2",
+      "weights": [400]
+    },
+    {
+      "name": "Rubik Storm",
+      "source": "https://fonts.google.com/specimen/Rubik+Storm",
+      "cdn": "https://fonts.googleapis.com/css2?family=Rubik+Storm&display=swap",
+      "local": "./fonts/rubik_storm-400.woff2",
+      "weights": [400]
+    },
+    {
+      "name": "Rubik Vinyl",
+      "source": "https://fonts.google.com/specimen/Rubik+Vinyl",
+      "cdn": "https://fonts.googleapis.com/css2?family=Rubik+Vinyl&display=swap",
+      "local": "./fonts/rubik_vinyl-400.woff2",
+      "weights": [400]
+    },
+    {
+      "name": "Rubik Wet Paint",
+      "source": "https://fonts.google.com/specimen/Rubik+Wet+Paint",
+      "cdn": "https://fonts.googleapis.com/css2?family=Rubik+Wet+Paint&display=swap",
+      "local": "./fonts/rubik_wet_paint-400.woff2",
+      "weights": [400]
+    },
+    {
+      "name": "Rubik 80s Fade",
+      "source": "https://fonts.google.com/specimen/Rubik+80s+Fade",
+      "cdn": "https://fonts.googleapis.com/css2?family=Rubik+80s+Fade&display=swap",
+      "local": "./fonts/rubik_80s_fade-400.woff2",
+      "weights": [400]
+    },
+    {
+      "name": "Rubik Broken Fax",
+      "source": "https://fonts.google.com/specimen/Rubik+Broken+Fax",
+      "cdn": "https://fonts.googleapis.com/css2?family=Rubik+Broken+Fax&display=swap",
+      "local": "./fonts/rubik_broken_fax-400.woff2",
+      "weights": [400]
+    },
+    {
+      "name": "Rubik Gemstones",
+      "source": "https://fonts.google.com/specimen/Rubik+Gemstones",
+      "cdn": "https://fonts.googleapis.com/css2?family=Rubik+Gemstones&display=swap",
+      "local": "./fonts/rubik_gemstones-400.woff2",
+      "weights": [400]
+    }
+  ],
+  "Emoji Color": [
+    {
+      "name": "Twemoji",
+      "source": "https://github.com/twitter/twemoji",
+      "cdn": "https://fonts.cdnfonts.com/css/twemoji-mozilla",
+      "local": "./fonts/twemoji.woff2",
+      "weights": [400],
+      "type": "emoji"
+    },
+    {
+      "name": "Noto Color Emoji",
+      "source": "https://fonts.google.com/noto/specimen/Noto+Color+Emoji",
+      "cdn": "https://fonts.cdnfonts.com/css/noto-color-emoji",
+      "local": "./fonts/noto_color_emoji.woff2",
+      "weights": [400],
+      "type": "emoji"
+    },
+    {
+      "name": "Fluent Emoji",
+      "source": "https://github.com/AuroraLS3/fluent-emoji-font",
+      "cdn": null,
+      "local": "./fonts/fluent_emoji.woff2",
+      "weights": [400],
+      "type": "emoji"
+    },
+    {
+      "name": "OpenMoji",
+      "source": "https://openmoji.org/",
+      "cdn": null,
+      "local": "./fonts/openmoji.woff2",
+      "weights": [400],
+      "type": "emoji"
+    },
+    {
+      "name": "JoyPixels",
+      "source": "https://www.joypixels.com/",
+      "cdn": null,
+      "local": "./fonts/joypixels.woff2",
+      "weights": [400],
+      "type": "emoji"
+    },
+    {
+      "name": "Blobmoji",
+      "source": "https://github.com/AuroraLS3/blobmoji-font",
+      "cdn": null,
+      "local": "./fonts/blobmoji.woff2",
+      "weights": [400],
+      "type": "emoji"
+    }
+  ],
+  "Emoji Monochrome": [
+    {
+      "name": "Noto Emoji",
+      "source": "https://fonts.google.com/noto/specimen/Noto+Emoji",
+      "cdn": "https://fonts.cdnfonts.com/css/noto-emoji",
+      "local": "./fonts/noto_emoji.woff2",
+      "weights": [400],
+      "type": "emoji"
+    },
+    {
+      "name": "Symbola",
+      "source": "https://dn-works.com/ufas/",
+      "cdn": null,
+      "local": "./fonts/symbola.woff2",
+      "weights": [400],
+      "type": "emoji"
+    }
+  ],
+  "Emoji System": [
+    {
+      "name": "Segoe UI Emoji",
+      "source": "https://docs.microsoft.com/en-us/typography/font-list/segoe-ui-emoji",
+      "cdn": null,
+      "local": null,
+      "weights": [400],
+      "type": "emoji",
+      "system": true
+    },
+    {
+      "name": "Apple Color Emoji",
+      "source": "https://support.apple.com/en-us/HT207962",
+      "cdn": null,
+      "local": null,
+      "weights": [400],
+      "type": "emoji",
+      "system": true
+    },
+    {
+      "name": "Segoe UI Symbol",
+      "source": "https://docs.microsoft.com/en-us/typography/font-list/segoe-ui-symbol",
+      "cdn": null,
+      "local": null,
+      "weights": [400],
+      "type": "emoji",
+      "system": true
+    }
+  ]
+}
+
+

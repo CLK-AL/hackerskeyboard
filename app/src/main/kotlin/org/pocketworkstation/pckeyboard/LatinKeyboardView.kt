@@ -135,12 +135,13 @@ class LatinKeyboardView @JvmOverloads constructor(
         }
     }
 
-    override fun setKeyboard(newKeyboard: Keyboard) {
+    override fun setKeyboard(newKeyboard: Keyboard?) {
         val oldKeyboard = keyboard
         if (oldKeyboard is LatinKeyboard) {
             oldKeyboard.keyReleased()
         }
         super.setKeyboard(newKeyboard)
+        if (newKeyboard == null) return
         mJumpThresholdSquare = newKeyboard.minWidth / 7
         mJumpThresholdSquare *= mJumpThresholdSquare
         val numRows = newKeyboard.mRowCount
@@ -385,7 +386,7 @@ class LatinKeyboardView @JvmOverloads constructor(
 
     private class ExtensionKeyboardListener(private val mTarget: OnKeyboardActionListener) :
         OnKeyboardActionListener {
-        override fun onKey(primaryCode: Int, keyCodes: IntArray?, x: Int, y: Int) {
+        override fun onKey(primaryCode: Int, keyCodes: IntArray, x: Int, y: Int) {
             mTarget.onKey(primaryCode, keyCodes, x, y)
         }
 
@@ -397,7 +398,7 @@ class LatinKeyboardView @JvmOverloads constructor(
             mTarget.onRelease(primaryCode)
         }
 
-        override fun onText(text: CharSequence?) {
+        override fun onText(text: CharSequence) {
             mTarget.onText(text)
         }
 

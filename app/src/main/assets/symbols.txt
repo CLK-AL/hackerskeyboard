@@ -1,0 +1,552 @@
+# symbols.txt - Unicode Symbols Database
+# Format: CHAR ; CODEPOINT ; CATEGORY ; SUBCATEGORY ; HE_LABEL ; HE_DESC ; EN_LABEL ; EN_DESC
+# Each symbol has unique searchable labels in Hebrew and English
+# ═══════════════════════════════════════════════════════════════════════════════════════════
+
+# group: hebrew-punctuation
+# subgroup: marks
+₪     ; 20AA  ; currency     ; shekel       ; שקל חדש            ; סימן המטבע הישראלי           ; New Shekel         ; Israeli currency symbol
+״     ; 05F4  ; punctuation  ; quotation    ; גרשיים             ; מירכאות עבריות כפולות        ; Gershayim          ; Hebrew double quotation mark
+׳     ; 05F3  ; punctuation  ; quotation    ; גרש                ; סימן קיצור עברי              ; Geresh             ; Hebrew punctuation geresh
+־     ; 05BE  ; punctuation  ; dash         ; מקף עברי           ; מקף מילים בעברית             ; Maqaf              ; Hebrew word connector
+–     ; 2013  ; punctuation  ; dash         ; קו מחבר            ; מקף אמצעי לטווחים            ; En Dash            ; Range and connection dash
+—     ; 2014  ; punctuation  ; dash         ; קו מפריד           ; מקף ארוך להפרדה              ; Em Dash            ; Long separating dash
+…     ; 2026  ; punctuation  ; ellipsis     ; שלוש נקודות        ; סימן השמטת טקסט              ; Ellipsis           ; Text omission mark
+«     ; 00AB  ; punctuation  ; quotation    ; גרש פותח           ; מרכאות זווית פותחות          ; Left Guillemet     ; Opening angle quote
+»     ; 00BB  ; punctuation  ; quotation    ; גרש סוגר           ; מרכאות זווית סוגרות          ; Right Guillemet    ; Closing angle quote
+
+# group: math-operators
+# subgroup: basic
++     ; 002B  ; math         ; operator     ; פלוס               ; סימן חיבור                   ; Plus               ; Addition sign
+−     ; 2212  ; math         ; operator     ; מינוס              ; סימן חיסור                   ; Minus              ; Subtraction sign
+×     ; 00D7  ; math         ; operator     ; כפל                ; סימן הכפלה                   ; Multiply           ; Multiplication sign
+÷     ; 00F7  ; math         ; operator     ; חילוק              ; סימן חלוקה                   ; Divide             ; Division sign
+=     ; 003D  ; math         ; relation     ; שווה               ; סימן שוויון                  ; Equals             ; Equality sign
+±     ; 00B1  ; math         ; operator     ; פלוס מינוס         ; חיובי או שלילי               ; Plus-Minus         ; Positive or negative
+∓     ; 2213  ; math         ; operator     ; מינוס פלוס         ; שלילי או חיובי               ; Minus-Plus         ; Negative or positive
+
+# subgroup: relations
+≠     ; 2260  ; math         ; relation     ; לא שווה            ; סימן אי שוויון               ; Not Equal          ; Inequality sign
+≈     ; 2248  ; math         ; relation     ; בערך שווה          ; שוויון משוער                 ; Approximately      ; Approximate equality
+≡     ; 2261  ; math         ; relation     ; זהה ל              ; זהות מתמטית                  ; Identical          ; Identity sign
+≢     ; 2262  ; math         ; relation     ; לא זהה             ; אי זהות                      ; Not Identical      ; Non-identity
+<     ; 003C  ; math         ; relation     ; קטן מ              ; סימן קטן מ                   ; Less Than          ; Less than sign
+>     ; 003E  ; math         ; relation     ; גדול מ             ; סימן גדול מ                  ; Greater Than       ; Greater than sign
+≤     ; 2264  ; math         ; relation     ; קטן שווה           ; קטן או שווה                  ; Less Equal         ; Less than or equal
+≥     ; 2265  ; math         ; relation     ; גדול שווה          ; גדול או שווה                 ; Greater Equal      ; Greater than or equal
+≪     ; 226A  ; math         ; relation     ; קטן בהרבה          ; קטן משמעותית                 ; Much Less          ; Much less than
+≫     ; 226B  ; math         ; relation     ; גדול בהרבה         ; גדול משמעותית                ; Much Greater       ; Much greater than
+∝     ; 221D  ; math         ; relation     ; פרופורציוני        ; יחס ישר                      ; Proportional       ; Proportional to
+
+# subgroup: constants
+∞     ; 221E  ; math         ; constant     ; אינסוף             ; ערך אינסופי                  ; Infinity           ; Infinity symbol
+π     ; 03C0  ; math         ; constant     ; פאי                ; יחס היקף לקוטר               ; Pi                 ; Circle ratio constant
+φ     ; 03C6  ; math         ; constant     ; פי זהב             ; יחס הזהב                     ; Phi Golden         ; Golden ratio
+ℯ     ; 212F  ; math         ; constant     ; אקספוננט           ; בסיס אקספוננציאלי            ; Script e           ; Exponential base
+ℎ     ; 210E  ; math         ; constant     ; פלאנק              ; קבוע פלאנק                   ; Planck             ; Planck constant
+
+# subgroup: operators
+√     ; 221A  ; math         ; operator     ; שורש               ; שורש ריבועי                  ; Square Root        ; Square root
+∛     ; 221B  ; math         ; operator     ; שורש שלישי         ; שורש מעוקב                   ; Cube Root          ; Cubic root
+∜     ; 221C  ; math         ; operator     ; שורש רביעי         ; שורש מדרגה רביעית            ; Fourth Root        ; Fourth root
+∑     ; 2211  ; math         ; operator     ; סיגמא סכום         ; סכום סדרה                    ; Summation          ; Series sum
+∏     ; 220F  ; math         ; operator     ; פאי מכפלה          ; מכפלת סדרה                   ; Product            ; Series product
+∫     ; 222B  ; math         ; operator     ; אינטגרל            ; אינטגרל מסוים                ; Integral           ; Definite integral
+∬     ; 222C  ; math         ; operator     ; אינטגרל כפול       ; אינטגרל דו מימדי             ; Double Integral    ; Surface integral
+∭     ; 222D  ; math         ; operator     ; אינטגרל משולש      ; אינטגרל תלת מימדי            ; Triple Integral    ; Volume integral
+∮     ; 222E  ; math         ; operator     ; אינטגרל סגור       ; אינטגרל קווי סגור            ; Contour Integral   ; Closed path integral
+∂     ; 2202  ; math         ; operator     ; נגזרת חלקית        ; גזירה חלקית                  ; Partial Deriv      ; Partial derivative
+∇     ; 2207  ; math         ; operator     ; נבלה גרדיאנט       ; אופרטור גרדיאנט              ; Nabla Del          ; Gradient operator
+∆     ; 2206  ; math         ; operator     ; דלתא הפרש          ; הפרש או שינוי                ; Delta Diff         ; Difference operator
+
+# subgroup: logic
+∧     ; 2227  ; math         ; logic        ; וגם לוגי           ; קונינקציה AND                ; Logical And        ; Conjunction
+∨     ; 2228  ; math         ; logic        ; או לוגי            ; דיסיונקציה OR                ; Logical Or         ; Disjunction
+¬     ; 00AC  ; math         ; logic        ; לא לוגי            ; שלילה NOT                    ; Logical Not        ; Negation
+⊻     ; 22BB  ; math         ; logic        ; או בלעדי           ; XOR בלעדי                    ; Logical Xor        ; Exclusive or
+⊼     ; 22BC  ; math         ; logic        ; לא וגם             ; NAND                         ; Logical Nand       ; Not and
+⊽     ; 22BD  ; math         ; logic        ; לא או              ; NOR                          ; Logical Nor        ; Not or
+⇒     ; 21D2  ; math         ; logic        ; גורר               ; אימפליקציה                   ; Implies            ; Logical implication
+⇔     ; 21D4  ; math         ; logic        ; אם ורק אם          ; שקילות לוגית                 ; Iff Biconditional  ; If and only if
+∀     ; 2200  ; math         ; logic        ; לכל                ; כמת אוניברסלי                ; For All            ; Universal quantifier
+∃     ; 2203  ; math         ; logic        ; קיים               ; כמת קיום                     ; Exists             ; Existential quantifier
+∄     ; 2204  ; math         ; logic        ; לא קיים            ; אי קיום                      ; Not Exists         ; Non-existence
+
+# subgroup: sets
+∈     ; 2208  ; math         ; set          ; שייך ל             ; איבר בקבוצה                  ; Element Of         ; Set membership
+∉     ; 2209  ; math         ; set          ; לא שייך            ; לא איבר בקבוצה               ; Not Element        ; Not a member
+∋     ; 220B  ; math         ; set          ; מכיל               ; קבוצה מכילה                  ; Contains           ; Set contains
+∌     ; 220C  ; math         ; set          ; לא מכיל            ; קבוצה לא מכילה               ; Not Contains       ; Set not contains
+⊂     ; 2282  ; math         ; set          ; תת קבוצה           ; הכלה ממש                     ; Subset             ; Proper subset
+⊃     ; 2283  ; math         ; set          ; על קבוצה           ; מכיל ממש                     ; Superset           ; Proper superset
+⊆     ; 2286  ; math         ; set          ; תת קבוצה שווה      ; הכלה או שוויון               ; Subset Equal       ; Subset or equal
+⊇     ; 2287  ; math         ; set          ; על קבוצה שווה      ; מכיל או שווה                 ; Superset Equal     ; Superset or equal
+∪     ; 222A  ; math         ; set          ; איחוד              ; איחוד קבוצות                 ; Union              ; Set union
+∩     ; 2229  ; math         ; set          ; חיתוך              ; חיתוך קבוצות                 ; Intersection       ; Set intersection
+∅     ; 2205  ; math         ; set          ; קבוצה ריקה         ; הקבוצה הריקה                 ; Empty Set          ; Null set
+ℕ     ; 2115  ; math         ; set          ; טבעיים             ; המספרים הטבעיים              ; Naturals           ; Natural numbers
+ℤ     ; 2124  ; math         ; set          ; שלמים              ; המספרים השלמים               ; Integers           ; Integer numbers
+ℚ     ; 211A  ; math         ; set          ; רציונליים          ; המספרים הרציונליים           ; Rationals          ; Rational numbers
+ℝ     ; 211D  ; math         ; set          ; ממשיים             ; המספרים הממשיים              ; Reals              ; Real numbers
+ℂ     ; 2102  ; math         ; set          ; מרוכבים            ; המספרים המרוכבים             ; Complex            ; Complex numbers
+
+# group: greek-letters
+# subgroup: uppercase
+Α     ; 0391  ; greek        ; uppercase    ; אלפא גדולה         ; אות יוונית A                 ; Alpha Upper        ; Greek capital alpha
+Β     ; 0392  ; greek        ; uppercase    ; בטא גדולה          ; אות יוונית B                 ; Beta Upper         ; Greek capital beta
+Γ     ; 0393  ; greek        ; uppercase    ; גמא גדולה          ; אות יוונית G                 ; Gamma Upper        ; Greek capital gamma
+Δ     ; 0394  ; greek        ; uppercase    ; דלתא גדולה         ; אות יוונית D משולש           ; Delta Upper        ; Greek capital delta
+Ε     ; 0395  ; greek        ; uppercase    ; אפסילון גדולה      ; אות יוונית E                 ; Epsilon Upper      ; Greek capital epsilon
+Ζ     ; 0396  ; greek        ; uppercase    ; זטא גדולה          ; אות יוונית Z                 ; Zeta Upper         ; Greek capital zeta
+Η     ; 0397  ; greek        ; uppercase    ; אטא גדולה          ; אות יוונית H ארוכה           ; Eta Upper          ; Greek capital eta
+Θ     ; 0398  ; greek        ; uppercase    ; תטא גדולה          ; אות יוונית TH                ; Theta Upper        ; Greek capital theta
+Ι     ; 0399  ; greek        ; uppercase    ; יוטא גדולה         ; אות יוונית I                 ; Iota Upper         ; Greek capital iota
+Κ     ; 039A  ; greek        ; uppercase    ; קפא גדולה          ; אות יוונית K                 ; Kappa Upper        ; Greek capital kappa
+Λ     ; 039B  ; greek        ; uppercase    ; למדא גדולה         ; אות יוונית L                 ; Lambda Upper       ; Greek capital lambda
+Μ     ; 039C  ; greek        ; uppercase    ; מיו גדולה          ; אות יוונית M                 ; Mu Upper           ; Greek capital mu
+Ν     ; 039D  ; greek        ; uppercase    ; ניו גדולה          ; אות יוונית N                 ; Nu Upper           ; Greek capital nu
+Ξ     ; 039E  ; greek        ; uppercase    ; קסי גדולה          ; אות יוונית X                 ; Xi Upper           ; Greek capital xi
+Ο     ; 039F  ; greek        ; uppercase    ; אומיקרון גדולה     ; אות יוונית O קצרה            ; Omicron Upper      ; Greek capital omicron
+Π     ; 03A0  ; greek        ; uppercase    ; פאי גדולה          ; אות יוונית P                 ; Pi Upper           ; Greek capital pi
+Ρ     ; 03A1  ; greek        ; uppercase    ; רו גדולה           ; אות יוונית R                 ; Rho Upper          ; Greek capital rho
+Σ     ; 03A3  ; greek        ; uppercase    ; סיגמא גדולה        ; אות יוונית S סכום            ; Sigma Upper        ; Greek capital sigma
+Τ     ; 03A4  ; greek        ; uppercase    ; טאו גדולה          ; אות יוונית T                 ; Tau Upper          ; Greek capital tau
+Υ     ; 03A5  ; greek        ; uppercase    ; אופסילון גדולה     ; אות יוונית U                 ; Upsilon Upper      ; Greek capital upsilon
+Φ     ; 03A6  ; greek        ; uppercase    ; פי גדולה           ; אות יוונית PH                ; Phi Upper          ; Greek capital phi
+Χ     ; 03A7  ; greek        ; uppercase    ; חי גדולה           ; אות יוונית CH                ; Chi Upper          ; Greek capital chi
+Ψ     ; 03A8  ; greek        ; uppercase    ; פסי גדולה          ; אות יוונית PS                ; Psi Upper          ; Greek capital psi
+Ω     ; 03A9  ; greek        ; uppercase    ; אומגה גדולה        ; אות יוונית O ארוכה           ; Omega Upper        ; Greek capital omega
+
+# subgroup: lowercase
+α     ; 03B1  ; greek        ; lowercase    ; אלפא               ; אות יוונית a                 ; Alpha              ; Greek small alpha
+β     ; 03B2  ; greek        ; lowercase    ; בטא                ; אות יוונית b                 ; Beta               ; Greek small beta
+γ     ; 03B3  ; greek        ; lowercase    ; גמא                ; אות יוונית g                 ; Gamma              ; Greek small gamma
+δ     ; 03B4  ; greek        ; lowercase    ; דלתא               ; אות יוונית d                 ; Delta              ; Greek small delta
+ε     ; 03B5  ; greek        ; lowercase    ; אפסילון            ; אות יוונית e                 ; Epsilon            ; Greek small epsilon
+ζ     ; 03B6  ; greek        ; lowercase    ; זטא                ; אות יוונית z                 ; Zeta               ; Greek small zeta
+η     ; 03B7  ; greek        ; lowercase    ; אטא                ; אות יוונית ארוכה             ; Eta                ; Greek small eta
+θ     ; 03B8  ; greek        ; lowercase    ; תטא                ; אות יוונית th זווית          ; Theta              ; Greek small theta
+ι     ; 03B9  ; greek        ; lowercase    ; יוטא               ; אות יוונית i                 ; Iota               ; Greek small iota
+κ     ; 03BA  ; greek        ; lowercase    ; קפא                ; אות יוונית k                 ; Kappa              ; Greek small kappa
+λ     ; 03BB  ; greek        ; lowercase    ; למדא               ; אות יוונית l גלי             ; Lambda             ; Greek small lambda
+μ     ; 03BC  ; greek        ; lowercase    ; מיו                ; אות יוונית m מיקרו           ; Mu                 ; Greek small mu micro
+ν     ; 03BD  ; greek        ; lowercase    ; ניו                ; אות יוונית n                 ; Nu                 ; Greek small nu
+ξ     ; 03BE  ; greek        ; lowercase    ; קסי                ; אות יוונית x                 ; Xi                 ; Greek small xi
+ο     ; 03BF  ; greek        ; lowercase    ; אומיקרון           ; אות יוונית o קצרה            ; Omicron            ; Greek small omicron
+ρ     ; 03C1  ; greek        ; lowercase    ; רו                 ; אות יוונית r                 ; Rho                ; Greek small rho
+ς     ; 03C2  ; greek        ; lowercase    ; סיגמא סופית        ; סיגמא סוף מילה               ; Final Sigma        ; Greek small final sigma
+σ     ; 03C3  ; greek        ; lowercase    ; סיגמא              ; אות יוונית s                 ; Sigma              ; Greek small sigma
+τ     ; 03C4  ; greek        ; lowercase    ; טאו                ; אות יוונית t                 ; Tau                ; Greek small tau
+υ     ; 03C5  ; greek        ; lowercase    ; אופסילון           ; אות יוונית u                 ; Upsilon            ; Greek small upsilon
+
+φ     ; 03C6  ; greek        ; lowercase    ; פי אות             ; אות יוונית phi ph            ; Phi Letter         ; Greek letter phi
+χ     ; 03C7  ; greek        ; lowercase    ; חי                 ; אות יוונית ch                ; Chi                ; Greek small chi
+ψ     ; 03C8  ; greek        ; lowercase    ; פסי                ; אות יוונית ps                ; Psi                ; Greek small psi
+ω     ; 03C9  ; greek        ; lowercase    ; אומגה              ; אות יוונית o ארוכה           ; Omega              ; Greek small omega
+
+# group: arrows
+# subgroup: basic
+←     ; 2190  ; arrow        ; direction    ; חץ שמאלה           ; כיוון שמאל                   ; Left Arrow         ; Leftward arrow
+↑     ; 2191  ; arrow        ; direction    ; חץ למעלה           ; כיוון מעלה                   ; Up Arrow           ; Upward arrow
+→     ; 2192  ; arrow        ; direction    ; חץ ימינה           ; כיוון ימין                   ; Right Arrow        ; Rightward arrow
+↓     ; 2193  ; arrow        ; direction    ; חץ למטה            ; כיוון מטה                    ; Down Arrow         ; Downward arrow
+↔     ; 2194  ; arrow        ; direction    ; חץ אופקי           ; שני כיוונים אופקי            ; Left Right         ; Horizontal bidirectional
+↕     ; 2195  ; arrow        ; direction    ; חץ אנכי            ; שני כיוונים אנכי             ; Up Down            ; Vertical bidirectional
+↖     ; 2196  ; arrow        ; direction    ; חץ שמאל למעלה      ; אלכסון שמאל עליון            ; Up Left            ; Northwest arrow
+↗     ; 2197  ; arrow        ; direction    ; חץ ימין למעלה      ; אלכסון ימין עליון            ; Up Right           ; Northeast arrow
+↘     ; 2198  ; arrow        ; direction    ; חץ ימין למטה       ; אלכסון ימין תחתון            ; Down Right         ; Southeast arrow
+↙     ; 2199  ; arrow        ; direction    ; חץ שמאל למטה       ; אלכסון שמאל תחתון            ; Down Left          ; Southwest arrow
+↩     ; 21A9  ; arrow        ; turn         ; חץ חזרה שמאל       ; פנייה לשמאל                  ; Left Hook          ; Leftward with hook
+↪     ; 21AA  ; arrow        ; turn         ; חץ חזרה ימין       ; פנייה לימין                  ; Right Hook         ; Rightward with hook
+↺     ; 21BA  ; arrow        ; circular     ; חץ נגד השעון       ; סיבוב נגד כיוון השעון        ; Counter Clock      ; Counterclockwise
+↻     ; 21BB  ; arrow        ; circular     ; חץ עם השעון        ; סיבוב עם כיוון השעון         ; Clockwise          ; Clockwise rotation
+
+# subgroup: double
+⇐     ; 21D0  ; arrow        ; double       ; חץ כפול שמאלה      ; חץ כפול שמאל                 ; Double Left        ; Leftward double arrow
+⇑     ; 21D1  ; arrow        ; double       ; חץ כפול למעלה      ; חץ כפול מעלה                 ; Double Up          ; Upward double arrow
+⇒     ; 21D2  ; arrow        ; double       ; חץ גורר            ; חץ כפול אימפליקציה           ; Arrow Implies      ; Double arrow implies
+⇓     ; 21D3  ; arrow        ; double       ; חץ כפול למטה       ; חץ כפול מטה                  ; Double Down        ; Downward double arrow
+⇔     ; 21D4  ; arrow        ; double       ; חץ שקול            ; חץ כפול שקילות               ; Arrow Iff          ; Double arrow biconditional
+
+# subgroup: special
+⤴     ; 2934  ; arrow        ; curved       ; חץ מעוקל ימינה     ; עלייה ימינה                  ; Curve Up Right     ; Rising rightward curve
+⤵     ; 2935  ; arrow        ; curved       ; חץ מעוקל שמאלה     ; ירידה שמאלה                  ; Curve Down Right   ; Falling rightward curve
+➔     ; 2794  ; arrow        ; heavy        ; חץ עבה ימינה       ; חץ מודגש                     ; Heavy Right        ; Heavy rightward arrow
+➜     ; 279C  ; arrow        ; heavy        ; חץ מלא ימינה       ; חץ גוף מלא                   ; Filled Right       ; Filled rightward arrow
+➡     ; 27A1  ; arrow        ; heavy        ; חץ שחור ימינה      ; חץ שחור                      ; Black Right        ; Black rightward arrow
+
+# group: shapes
+# subgroup: circles
+●     ; 25CF  ; shape        ; circle       ; עיגול מלא          ; עיגול שחור                   ; Black Circle       ; Filled circle
+○     ; 25CB  ; shape        ; circle       ; עיגול ריק          ; עיגול לבן                    ; White Circle       ; Empty circle
+◐     ; 25D0  ; shape        ; circle       ; עיגול חצי שמאל     ; חצי עיגול שמאלי              ; Left Half          ; Circle left half black
+◑     ; 25D1  ; shape        ; circle       ; עיגול חצי ימין     ; חצי עיגול ימני               ; Right Half         ; Circle right half black
+◒     ; 25D2  ; shape        ; circle       ; עיגול חצי תחתון    ; חצי עיגול תחתון              ; Bottom Half        ; Circle lower half black
+◓     ; 25D3  ; shape        ; circle       ; עיגול חצי עליון    ; חצי עיגול עליון              ; Top Half           ; Circle upper half black
+◉     ; 25C9  ; shape        ; circle       ; עיגול בתוך עיגול   ; עיגול עם נקודה               ; Fisheye            ; Circle with dot inside
+◌     ; 25CC  ; shape        ; circle       ; עיגול מקווקו       ; עיגול נקודות                 ; Dotted Circle      ; Dashed circle outline
+
+# subgroup: squares
+■     ; 25A0  ; shape        ; square       ; ריבוע מלא          ; ריבוע שחור                   ; Black Square       ; Filled square
+□     ; 25A1  ; shape        ; square       ; ריבוע ריק          ; ריבוע לבן                    ; White Square       ; Empty square
+▢     ; 25A2  ; shape        ; square       ; ריבוע מעוגל        ; ריבוע פינות מעוגלות          ; Rounded Square     ; Square with rounded corners
+▣     ; 25A3  ; shape        ; square       ; ריבוע בריבוע       ; ריבוע בתוך ריבוע             ; Square in Square   ; White square containing black
+▪     ; 25AA  ; shape        ; square       ; ריבוע קטן שחור     ; ריבוע שחור קטן               ; Small Black Sq     ; Small black square
+▫     ; 25AB  ; shape        ; square       ; ריבוע קטן לבן      ; ריבוע לבן קטן                ; Small White Sq     ; Small white square
+
+# subgroup: triangles
+▲     ; 25B2  ; shape        ; triangle     ; משולש למעלה        ; משולש שחור מעלה              ; Up Triangle        ; Black up-pointing triangle
+△     ; 25B3  ; shape        ; triangle     ; משולש ריק מעלה     ; משולש לבן מעלה               ; White Up Tri       ; White up-pointing triangle
+▶     ; 25B6  ; shape        ; triangle     ; משולש ימינה        ; משולש שחור ימין הפעל         ; Right Triangle     ; Black right-pointing triangle
+▷     ; 25B7  ; shape        ; triangle     ; משולש ריק ימין     ; משולש לבן ימין               ; White Right Tri    ; White right-pointing triangle
+▼     ; 25BC  ; shape        ; triangle     ; משולש למטה         ; משולש שחור מטה               ; Down Triangle      ; Black down-pointing triangle
+▽     ; 25BD  ; shape        ; triangle     ; משולש ריק מטה      ; משולש לבן מטה                ; White Down Tri     ; White down-pointing triangle
+◀     ; 25C0  ; shape        ; triangle     ; משולש שמאלה        ; משולש שחור שמאל              ; Left Triangle      ; Black left-pointing triangle
+◁     ; 25C1  ; shape        ; triangle     ; משולש ריק שמאל     ; משולש לבן שמאל               ; White Left Tri     ; White left-pointing triangle
+
+# subgroup: diamonds
+◆     ; 25C6  ; shape        ; diamond      ; מעוין מלא          ; מעוין שחור                   ; Black Diamond      ; Filled diamond
+◇     ; 25C7  ; shape        ; diamond      ; מעוין ריק          ; מעוין לבן                    ; White Diamond      ; Empty diamond
+◈     ; 25C8  ; shape        ; diamond      ; מעוין בתוך מעוין   ; מעוין עם מעוין               ; Diamond in Diam    ; White diamond containing black
+
+# subgroup: stars
+★     ; 2605  ; shape        ; star         ; כוכב מלא           ; כוכב שחור חמש קודקודים       ; Black Star         ; Filled five-pointed star
+☆     ; 2606  ; shape        ; star         ; כוכב ריק           ; כוכב לבן חמש קודקודים        ; White Star         ; Empty five-pointed star
+✦     ; 2726  ; shape        ; star         ; כוכב ארבע שחור     ; כוכב ארבע קודקודים           ; Four Point Star    ; Black four-pointed star
+✧     ; 2727  ; shape        ; star         ; כוכב ארבע לבן      ; כוכב ארבע לבן                ; White Four Star    ; White four-pointed star
+✩     ; 2729  ; shape        ; star         ; כוכב מודגש         ; כוכב עם גבול                 ; Stress Star        ; Stress outlined star
+✪     ; 272A  ; shape        ; star         ; כוכב בעיגול        ; כוכב מוקף עיגול              ; Circled Star       ; Circled white star
+✴     ; 2734  ; shape        ; star         ; כוכב שמונה         ; כוכב שמונה קודקודים          ; Eight Point        ; Eight-pointed star
+✶     ; 2736  ; shape        ; star         ; כוכב שש            ; כוכב שש קודקודים             ; Six Point Star     ; Six-pointed black star
+✡     ; 2721  ; shape        ; star         ; מגן דוד            ; כוכב שש קודקודים יהודי       ; Star of David      ; Star of David hexagram
+
+# group: symbols
+# subgroup: check-marks
+✓     ; 2713  ; symbol       ; check        ; וי אישור           ; סימון חיובי                  ; Check Mark         ; Checkmark approval
+✔     ; 2714  ; symbol       ; check        ; וי מודגש           ; סימון חיובי עבה              ; Heavy Check        ; Bold checkmark
+✗     ; 2717  ; symbol       ; check        ; איקס דחייה         ; סימון שלילי                  ; Ballot X           ; Rejection cross
+✘     ; 2718  ; symbol       ; check        ; איקס מודגש         ; סימון שלילי עבה              ; Heavy X            ; Bold rejection cross
+☐     ; 2610  ; symbol       ; check        ; תיבת סימון         ; תיבה ריקה לסימון             ; Ballot Box         ; Empty checkbox
+☑     ; 2611  ; symbol       ; check        ; תיבה עם וי         ; תיבה מסומנת וי               ; Box with Check     ; Checkbox with checkmark
+☒     ; 2612  ; symbol       ; check        ; תיבה עם איקס       ; תיבה מסומנת X                ; Box with X         ; Checkbox with X
+
+# subgroup: card-suits
+♠     ; 2660  ; symbol       ; card         ; עלה שחור           ; סדרת עלים בקלפים             ; Black Spade        ; Spade card suit
+♡     ; 2661  ; symbol       ; card         ; לב לבן             ; סדרת לבבות לבן               ; White Heart        ; White heart card suit
+♢     ; 2662  ; symbol       ; card         ; יהלום לבן          ; סדרת יהלומים לבן             ; White Diamond      ; White diamond card suit
+♣     ; 2663  ; symbol       ; card         ; תלתן שחור          ; סדרת תלתנים בקלפים           ; Black Club         ; Club card suit
+♤     ; 2664  ; symbol       ; card         ; עלה לבן            ; סדרת עלים לבן                ; White Spade        ; White spade card suit
+♥     ; 2665  ; symbol       ; card         ; לב אדום            ; סדרת לבבות אדום              ; Red Heart          ; Red heart card suit
+♦     ; 2666  ; symbol       ; card         ; יהלום אדום         ; סדרת יהלומים אדום            ; Red Diamond        ; Red diamond card suit
+♧     ; 2667  ; symbol       ; card         ; תלתן לבן           ; סדרת תלתנים לבן              ; White Club         ; White club card suit
+
+# subgroup: music
+♩     ; 2669  ; symbol       ; music        ; תו רבע             ; תו רבע מוזיקלי               ; Quarter Note       ; Musical quarter note
+♪     ; 266A  ; symbol       ; music        ; תו שמינית          ; תו שמינית מוזיקלי            ; Eighth Note        ; Musical eighth note
+♫     ; 266B  ; symbol       ; music        ; תווים מחוברים      ; שני תווים מחוברים            ; Beamed Notes       ; Beamed eighth notes
+♬     ; 266C  ; symbol       ; music        ; תווים כפולים       ; תווים שישית עשרה             ; Beamed Sixteenth   ; Beamed sixteenth notes
+♭     ; 266D  ; symbol       ; music        ; במול               ; הורדת חצי טון                ; Flat               ; Musical flat sign
+♮     ; 266E  ; symbol       ; music        ; בקר                ; ביטול דיאז או במול           ; Natural            ; Musical natural sign
+♯     ; 266F  ; symbol       ; music        ; דיאז               ; העלאת חצי טון                ; Sharp              ; Musical sharp sign
+𝄞     ; 1D11E ; symbol       ; music        ; מפתח סול           ; מפתח סול טרבל                ; Treble Clef        ; G clef treble
+𝄢     ; 1D122 ; symbol       ; music        ; מפתח פה            ; מפתח פה באס                  ; Bass Clef          ; F clef bass
+
+# subgroup: weather
+☀     ; 2600  ; symbol       ; weather      ; שמש                ; שמש בהירה מזג אוויר          ; Sun                ; Clear sunny weather
+☁     ; 2601  ; symbol       ; weather      ; ענן                ; יום מעונן                    ; Cloud              ; Cloudy weather
+☂     ; 2602  ; symbol       ; weather      ; מטריה              ; גשם צפוי                     ; Umbrella           ; Rain expected
+☃     ; 2603  ; symbol       ; weather      ; איש שלג            ; מזג אוויר שלג                ; Snowman            ; Snowy weather
+☄     ; 2604  ; symbol       ; weather      ; שביט               ; כוכב שביט מטאור              ; Comet              ; Comet meteor
+☼     ; 263C  ; symbol       ; weather      ; שמש לבנה           ; שמש עם קרניים                ; White Sun          ; Sun with rays
+⚡     ; 26A1  ; symbol       ; weather      ; ברק                ; סופת ברקים                   ; Lightning          ; Lightning thunderstorm
+❄     ; 2744  ; symbol       ; weather      ; פתית שלג           ; שלג יורד                     ; Snowflake          ; Falling snow
+❅     ; 2745  ; symbol       ; weather      ; פתית עבה           ; שלג כבד                      ; Tight Snowflake    ; Heavy snowflake
+
+# subgroup: legal
+©     ; 00A9  ; symbol       ; legal        ; זכויות יוצרים      ; סימן קופירייט                ; Copyright          ; Copyright symbol
+®     ; 00AE  ; symbol       ; legal        ; סימן רשום          ; סימן מסחרי רשום              ; Registered         ; Registered trademark
+™     ; 2122  ; symbol       ; legal        ; סימן מסחרי         ; סימן טריידמארק               ; Trademark          ; Trademark symbol
+℗     ; 2117  ; symbol       ; legal        ; זכויות הקלטה       ; סימן פונוגרם                 ; Sound Recording    ; Sound recording copyright
+℠     ; 2120  ; symbol       ; legal        ; סימן שירות         ; סרוויס מארק                  ; Service Mark       ; Service mark symbol
+
+# subgroup: reference
+§     ; 00A7  ; symbol       ; reference    ; סעיף               ; סימן סעיף בחוק               ; Section            ; Section sign
+¶     ; 00B6  ; symbol       ; reference    ; פסקה               ; סימן פסקה חדשה               ; Pilcrow            ; Paragraph sign
+†     ; 2020  ; symbol       ; reference    ; צלב הערה           ; סימן הערת שוליים             ; Dagger             ; Footnote marker
+‡     ; 2021  ; symbol       ; reference    ; צלב כפול           ; סימן הערה שנייה              ; Double Dagger      ; Second footnote marker
+※     ; 203B  ; symbol       ; reference    ; כוכב הפניה         ; סימן הפניה יפני              ; Reference Mark     ; Japanese reference mark
+•     ; 2022  ; symbol       ; reference    ; נקודה תבליט        ; סימון רשימה                  ; Bullet             ; Bullet point
+◦     ; 25E6  ; symbol       ; reference    ; עיגול תבליט        ; תבליט עיגול ריק              ; White Bullet       ; White bullet point
+‣     ; 2023  ; symbol       ; reference    ; משולש תבליט        ; תבליט משולש                  ; Triangle Bullet    ; Triangular bullet
+
+# subgroup: keyboard
+⌘     ; 2318  ; symbol       ; keyboard     ; פקודה מק           ; מקש Command במק              ; Command Key        ; Mac command key
+⌥     ; 2325  ; symbol       ; keyboard     ; אופציה מק          ; מקש Option במק               ; Option Key         ; Mac option key
+⇧     ; 21E7  ; symbol       ; keyboard     ; שיפט               ; מקש Shift                    ; Shift Key          ; Shift key symbol
+⌃     ; 2303  ; symbol       ; keyboard     ; קונטרול            ; מקש Control                  ; Control Key        ; Control key symbol
+⎋     ; 238B  ; symbol       ; keyboard     ; אסקייפ             ; מקש Escape                   ; Escape Key         ; Escape key symbol
+⏎     ; 23CE  ; symbol       ; keyboard     ; אנטר               ; מקש Enter חזרה               ; Return Key         ; Return enter key
+⌫     ; 232B  ; symbol       ; keyboard     ; מחיקה אחורה        ; מקש Backspace                ; Backspace          ; Delete backward key
+⌦     ; 2326  ; symbol       ; keyboard     ; מחיקה קדימה        ; מקש Delete                   ; Delete Forward     ; Delete forward key
+⇥     ; 21E5  ; symbol       ; keyboard     ; טאב ימינה          ; מקש Tab                      ; Tab Right          ; Tab key right
+⇤     ; 21E4  ; symbol       ; keyboard     ; טאב שמאלה          ; מקש Backtab                  ; Tab Left           ; Tab key left
+␣     ; 2423  ; symbol       ; keyboard     ; רווח               ; מקש רווח                     ; Space Key          ; Space bar symbol
+
+# group: currency
+# subgroup: common
+$     ; 0024  ; currency     ; dollar       ; דולר               ; דולר אמריקאי USD             ; Dollar             ; US Dollar sign
+¢     ; 00A2  ; currency     ; cent         ; סנט                ; סנט אמריקאי                  ; Cent               ; Cent sign
+£     ; 00A3  ; currency     ; pound        ; לירה               ; לירה שטרלינג GBP             ; Pound              ; British Pound Sterling
+¥     ; 00A5  ; currency     ; yen          ; יין                ; יין יפני JPY                 ; Yen                ; Japanese Yen sign
+€     ; 20AC  ; currency     ; euro         ; אירו               ; אירו אירופאי EUR             ; Euro               ; Euro sign
+₪     ; 20AA  ; currency     ; shekel       ; שקל ישראלי         ; מטבע שקל חדש ILS             ; ILS Shekel         ; Israeli New Shekel currency
+₹     ; 20B9  ; currency     ; rupee        ; רופי               ; רופי הודי INR                ; Rupee              ; Indian Rupee sign
+₽     ; 20BD  ; currency     ; ruble        ; רובל               ; רובל רוסי RUB                ; Ruble              ; Russian Ruble sign
+₿     ; 20BF  ; currency     ; bitcoin      ; ביטקוין            ; מטבע דיגיטלי BTC             ; Bitcoin            ; Bitcoin cryptocurrency
+₴     ; 20B4  ; currency     ; hryvnia      ; הריבניה            ; הריבניה אוקראינית UAH        ; Hryvnia            ; Ukrainian Hryvnia
+₩     ; 20A9  ; currency     ; won          ; וון                ; וון קוריאני KRW              ; Won                ; South Korean Won
+฿     ; 0E3F  ; currency     ; baht         ; באהט               ; באהט תאילנדי THB             ; Baht               ; Thai Baht sign
+₱     ; 20B1  ; currency     ; peso         ; פסו                ; פסו פיליפיני PHP             ; Peso               ; Philippine Peso sign
+₺     ; 20BA  ; currency     ; lira         ; לירה טורקית        ; לירה טורקית TRY              ; Turkish Lira       ; Turkish Lira sign
+
+# group: zodiac
+# subgroup: signs
+♈     ; 2648  ; zodiac       ; sign         ; טלה                ; מזל טלה מרץ-אפריל            ; Aries              ; Zodiac Aries ram
+♉     ; 2649  ; zodiac       ; sign         ; שור                ; מזל שור אפריל-מאי            ; Taurus             ; Zodiac Taurus bull
+♊     ; 264A  ; zodiac       ; sign         ; תאומים             ; מזל תאומים מאי-יוני          ; Gemini             ; Zodiac Gemini twins
+♋     ; 264B  ; zodiac       ; sign         ; סרטן               ; מזל סרטן יוני-יולי           ; Cancer             ; Zodiac Cancer crab
+♌     ; 264C  ; zodiac       ; sign         ; אריה               ; מזל אריה יולי-אוגוסט         ; Leo                ; Zodiac Leo lion
+♍     ; 264D  ; zodiac       ; sign         ; בתולה              ; מזל בתולה אוגוסט-ספט         ; Virgo              ; Zodiac Virgo maiden
+♎     ; 264E  ; zodiac       ; sign         ; מאזניים            ; מזל מאזניים ספט-אוקט         ; Libra              ; Zodiac Libra scales
+♏     ; 264F  ; zodiac       ; sign         ; עקרב               ; מזל עקרב אוקט-נוב            ; Scorpio            ; Zodiac Scorpio scorpion
+♐     ; 2650  ; zodiac       ; sign         ; קשת                ; מזל קשת נוב-דצמ              ; Sagittarius        ; Zodiac Sagittarius archer
+♑     ; 2651  ; zodiac       ; sign         ; גדי                ; מזל גדי דצמ-ינואר            ; Capricorn          ; Zodiac Capricorn goat
+♒     ; 2652  ; zodiac       ; sign         ; דלי                ; מזל דלי ינואר-פבר            ; Aquarius           ; Zodiac Aquarius water
+♓     ; 2653  ; zodiac       ; sign         ; דגים               ; מזל דגים פבר-מרץ             ; Pisces             ; Zodiac Pisces fish
+
+# group: planets
+# subgroup: celestial
+☉     ; 2609  ; planet       ; star         ; שמש כוכב           ; השמש כוכב מרכזי              ; Sun Astro          ; Astronomical sun symbol
+☽     ; 263D  ; planet       ; moon         ; ירח חרמש           ; ירח ראשון חרמש               ; First Quarter      ; First quarter moon
+☾     ; 263E  ; planet       ; moon         ; ירח אחרון          ; ירח אחרון חרמש               ; Last Quarter       ; Last quarter moon
+☿     ; 263F  ; planet       ; inner        ; כוכב חמה           ; מרקורי כוכב פנימי            ; Mercury            ; Planet Mercury symbol
+♀     ; 2640  ; planet       ; inner        ; נוגה ונוס          ; ונוס נקבה אהבה               ; Venus Female       ; Venus female symbol
+♁     ; 2641  ; planet       ; home         ; כדור הארץ          ; כדור הארץ הבית               ; Earth              ; Earth planet symbol
+♂     ; 2642  ; planet       ; inner        ; מאדים מארס         ; מארס זכר מלחמה               ; Mars Male          ; Mars male symbol
+♃     ; 2643  ; planet       ; outer        ; צדק יופיטר         ; יופיטר כוכב גדול             ; Jupiter            ; Planet Jupiter symbol
+♄     ; 2644  ; planet       ; outer        ; שבתאי סטורן        ; סטורן כוכב הטבעות            ; Saturn             ; Planet Saturn symbol
+♅     ; 2645  ; planet       ; outer        ; אורנוס             ; אורנוס כוכב קרח              ; Uranus             ; Planet Uranus symbol
+♆     ; 2646  ; planet       ; outer        ; נפטון              ; נפטון כוכב כחול              ; Neptune            ; Planet Neptune symbol
+♇     ; 2647  ; planet       ; dwarf        ; פלוטו              ; פלוטו כוכב ננס               ; Pluto              ; Dwarf planet Pluto
+
+# group: chess
+# subgroup: white-pieces
+♔     ; 2654  ; chess        ; white        ; מלך לבן            ; מלך שחמט לבן                 ; White K kinging    ; Chess white king
+♕     ; 2655  ; chess        ; white        ; מלכה לבנה          ; מלכה שחמט לבנה               ; White Q queenueen  ; Chess white queen
+♖     ; 2656  ; chess        ; white        ; צריח לבן           ; צריח שחמט לבן                ; White Rook         ; Chess white rook castle
+♗     ; 2657  ; chess        ; white        ; רץ לבן             ; רץ שחמט לבן                  ; White Bishop       ; Chess white bishop
+♘     ; 2658  ; chess        ; white        ; פרש לבן            ; פרש שחמט לבן סוס             ; White K kingnight  ; Chess white knight horse
+♙     ; 2659  ; chess        ; white        ; רגלי לבן           ; רגלי שחמט לבן                ; White Pawn         ; Chess white pawn
+
+# subgroup: black-pieces
+♚     ; 265A  ; chess        ; black        ; מלך שחור           ; מלך שחמט שחור                ; Black K kinging    ; Chess black king
+♛     ; 265B  ; chess        ; black        ; מלכה שחורה         ; מלכה שחמט שחורה              ; Black Q queenueen  ; Chess black queen
+♜     ; 265C  ; chess        ; black        ; צריח שחור          ; צריח שחמט שחור               ; Black Rook         ; Chess black rook castle
+♝     ; 265D  ; chess        ; black        ; רץ שחור            ; רץ שחמט שחור                 ; Black Bishop       ; Chess black bishop
+♞     ; 265E  ; chess        ; black        ; פרש שחור           ; פרש שחמט שחור סוס            ; Black K kingnight  ; Chess black knight horse
+♟     ; 265F  ; chess        ; black        ; רגלי שחור          ; רגלי שחמט שחור               ; Black Pawn         ; Chess black pawn
+
+# group: dice
+# subgroup: faces
+⚀     ; 2680  ; dice         ; face         ; קוביה 1 אחת        ; פאת קוביה מספר 1 אחת         ; Die Face 1 one     ; Dice showing number 1 one
+⚁     ; 2681  ; dice         ; face         ; קוביה 2 שתיים      ; פאת קוביה מספר 2 שתיים       ; Die Face 2 two     ; Dice showing number 2 two
+⚂     ; 2682  ; dice         ; face         ; קוביה 3 שלוש       ; פאת קוביה מספר 3 שלוש        ; Die Face 3 three   ; Dice showing number 3 three
+⚃     ; 2683  ; dice         ; face         ; קוביה 4 ארבע       ; פאת קוביה מספר 4 ארבע        ; Die Face 4 four    ; Dice showing number 4 four
+⚄     ; 2684  ; dice         ; face         ; קוביה 5 חמש        ; פאת קוביה מספר 5 חמש         ; Die Face 5 five    ; Dice showing number 5 five
+⚅     ; 2685  ; dice         ; face         ; קוביה 6 שש         ; פאת קוביה מספר 6 שש          ; Die Face 6 six     ; Dice showing number 6 six
+
+# group: domino
+# subgroup: horizontal
+🁣     ; 1F063 ; domino       ; horizontal   ; דומינו 0 אפס-0 אפס ; אבן דומינו ריק ריק           ; Domino 0 zero-0 zero ; Domino tile blank blank
+🁤     ; 1F064 ; domino       ; horizontal   ; דומינו 0 אפס-1 אחת ; אבן דומינו ריק 1 אחת         ; Domino 0 zero-1 one ; Domino tile blank one
+🁥     ; 1F065 ; domino       ; horizontal   ; דומינו 0 אפס-2 שתיים ; אבן דומינו ריק 2 שתיים       ; Domino 0 zero-2 two ; Domino tile blank two
+🁦     ; 1F066 ; domino       ; horizontal   ; דומינו 0 אפס-3 שלוש ; אבן דומינו ריק 3 שלוש        ; Domino 0 zero-3 three ; Domino tile blank three
+🁧     ; 1F067 ; domino       ; horizontal   ; דומינו 0 אפס-4 ארבע ; אבן דומינו ריק 4 ארבע        ; Domino 0 zero-4 four ; Domino tile blank four
+🁨     ; 1F068 ; domino       ; horizontal   ; דומינו 0 אפס-5 חמש ; אבן דומינו ריק 5 חמש         ; Domino 0 zero-5 five ; Domino tile blank five
+🁩     ; 1F069 ; domino       ; horizontal   ; דומינו 0 אפס-6 שש  ; אבן דומינו ריק 6 שש          ; Domino 0 zero-6 six ; Domino tile blank six
+🁪     ; 1F06A ; domino       ; horizontal   ; דומינו 1 אחת-1 אחת ; אבן דומינו 1 אחת 1 אחת       ; Domino 1 one-1 one ; Domino tile one one
+🁫     ; 1F06B ; domino       ; horizontal   ; דומינו 1 אחת-2 שתיים ; אבן דומינו 1 אחת 2 שתיים     ; Domino 1 one-2 two ; Domino tile one two
+🁬     ; 1F06C ; domino       ; horizontal   ; דומינו 1 אחת-3 שלוש ; אבן דומינו 1 אחת 3 שלוש      ; Domino 1 one-3 three ; Domino tile one three
+🁭     ; 1F06D ; domino       ; horizontal   ; דומינו 1 אחת-4 ארבע ; אבן דומינו 1 אחת 4 ארבע      ; Domino 1 one-4 four ; Domino tile one four
+🁮     ; 1F06E ; domino       ; horizontal   ; דומינו 1 אחת-5 חמש ; אבן דומינו 1 אחת 5 חמש       ; Domino 1 one-5 five ; Domino tile one five
+🁯     ; 1F06F ; domino       ; horizontal   ; דומינו 1 אחת-6 שש  ; אבן דומינו 1 אחת 6 שש        ; Domino 1 one-6 six ; Domino tile one six
+🁰     ; 1F070 ; domino       ; horizontal   ; דומינו 2 שתיים-2 שתיים ; אבן דומינו 2 שתיים 2 שתיים   ; Domino 2 two-2 two ; Domino tile two two
+🁱     ; 1F071 ; domino       ; horizontal   ; דומינו 2 שתיים-3 שלוש ; אבן דומינו 2 שתיים 3 שלוש    ; Domino 2 two-3 three ; Domino tile two three
+🁲     ; 1F072 ; domino       ; horizontal   ; דומינו 2 שתיים-4 ארבע ; אבן דומינו 2 שתיים 4 ארבע    ; Domino 2 two-4 four ; Domino tile two four
+🁳     ; 1F073 ; domino       ; horizontal   ; דומינו 2 שתיים-5 חמש ; אבן דומינו 2 שתיים 5 חמש     ; Domino 2 two-5 five ; Domino tile two five
+🁴     ; 1F074 ; domino       ; horizontal   ; דומינו 2 שתיים-6 שש ; אבן דומינו 2 שתיים 6 שש      ; Domino 2 two-6 six ; Domino tile two six
+🁵     ; 1F075 ; domino       ; horizontal   ; דומינו 3 שלוש-3 שלוש ; אבן דומינו 3 שלוש 3 שלוש     ; Domino 3 three-3 three ; Domino tile three three
+🁶     ; 1F076 ; domino       ; horizontal   ; דומינו 3 שלוש-4 ארבע ; אבן דומינו 3 שלוש 4 ארבע     ; Domino 3 three-4 four ; Domino tile three four
+🁷     ; 1F077 ; domino       ; horizontal   ; דומינו 3 שלוש-5 חמש ; אבן דומינו 3 שלוש 5 חמש      ; Domino 3 three-5 five ; Domino tile three five
+🁸     ; 1F078 ; domino       ; horizontal   ; דומינו 3 שלוש-6 שש ; אבן דומינו 3 שלוש 6 שש       ; Domino 3 three-6 six ; Domino tile three six
+🁹     ; 1F079 ; domino       ; horizontal   ; דומינו 4 ארבע-4 ארבע ; אבן דומינו 4 ארבע 4 ארבע     ; Domino 4 four-4 four ; Domino tile four four
+🁺     ; 1F07A ; domino       ; horizontal   ; דומינו 4 ארבע-5 חמש ; אבן דומינו 4 ארבע 5 חמש      ; Domino 4 four-5 five ; Domino tile four five
+🁻     ; 1F07B ; domino       ; horizontal   ; דומינו 4 ארבע-6 שש ; אבן דומינו 4 ארבע 6 שש       ; Domino 4 four-6 six ; Domino tile four six
+🁼     ; 1F07C ; domino       ; horizontal   ; דומינו 5 חמש-5 חמש ; אבן דומינו 5 חמש 5 חמש       ; Domino 5 five-5 five ; Domino tile five five
+🁽     ; 1F07D ; domino       ; horizontal   ; דומינו 5 חמש-6 שש  ; אבן דומינו 5 חמש 6 שש        ; Domino 5 five-6 six ; Domino tile five six
+🁾     ; 1F07E ; domino       ; horizontal   ; דומינו 6 שש-6 שש   ; אבן דומינו 6 שש 6 שש         ; Domino 6 six-6 six ; Domino tile six six
+
+# group: playing-cards
+# subgroup: spades
+🂡     ; 1F0A1 ; card         ; spades       ; קלף עלה A אס       ; אס עלים 1 אחת                ; Card Spade A ace   ; Ace of Spades value 1 one
+🂢     ; 1F0A2 ; card         ; spades       ; קלף עלה 2 שתיים    ; שתיים עלים                   ; Card Spade 2 two   ; Two of Spades
+🂣     ; 1F0A3 ; card         ; spades       ; קלף עלה 3 שלוש     ; שלוש עלים                    ; Card Spade 3 three ; Three of Spades
+🂤     ; 1F0A4 ; card         ; spades       ; קלף עלה 4 ארבע     ; ארבע עלים                    ; Card Spade 4 four  ; Four of Spades
+🂥     ; 1F0A5 ; card         ; spades       ; קלף עלה 5 חמש      ; חמש עלים                     ; Card Spade 5 five  ; Five of Spades
+🂦     ; 1F0A6 ; card         ; spades       ; קלף עלה 6 שש       ; שש עלים                      ; Card Spade 6 six   ; Six of Spades
+🂧     ; 1F0A7 ; card         ; spades       ; קלף עלה 7 שבע      ; שבע עלים                     ; Card Spade 7 seven ; Seven of Spades
+🂨     ; 1F0A8 ; card         ; spades       ; קלף עלה 8 שמונה    ; שמונה עלים                   ; Card Spade 8 eight ; Eight of Spades
+🂩     ; 1F0A9 ; card         ; spades       ; קלף עלה 9 תשע      ; תשע עלים                     ; Card Spade 9 nine  ; Nine of Spades
+🂪    ; 1F0AA ; card         ; spades       ; קלף עלה 10 עשר     ; עשר עלים                     ; Card Spade 10 ten  ; Ten of Spades
+🂫    ; 1F0AB ; card         ; spades       ; קלף עלה J נסיך     ; נסיך עלים 11 אחת-עשרה        ; Card Spade J jack  ; Jack of Spades value 11 eleven
+🂭    ; 1F0AD ; card         ; spades       ; קלף עלה Q מלכה     ; מלכה עלים 12 שתים-עשרה       ; Card Spade Q queen ; Queen of Spades value 12 twelve
+🂮    ; 1F0AE ; card         ; spades       ; קלף עלה K מלך      ; מלך עלים 13 שלוש-עשרה        ; Card Spade K king  ; King of Spades value 13 thirteen
+
+# subgroup: hearts
+🂱     ; 1F0B1 ; card         ; hearts       ; קלף לב A אס        ; אס לבבות 1 אחת               ; Card Heart A ace   ; Ace of Hearts value 1 one
+🂲     ; 1F0B2 ; card         ; hearts       ; קלף לב 2 שתיים     ; שתיים לבבות                  ; Card Heart 2 two   ; Two of Hearts
+🂳     ; 1F0B3 ; card         ; hearts       ; קלף לב 3 שלוש      ; שלוש לבבות                   ; Card Heart 3 three ; Three of Hearts
+🂴     ; 1F0B4 ; card         ; hearts       ; קלף לב 4 ארבע      ; ארבע לבבות                   ; Card Heart 4 four  ; Four of Hearts
+🂵     ; 1F0B5 ; card         ; hearts       ; קלף לב 5 חמש       ; חמש לבבות                    ; Card Heart 5 five  ; Five of Hearts
+🂶     ; 1F0B6 ; card         ; hearts       ; קלף לב 6 שש        ; שש לבבות                     ; Card Heart 6 six   ; Six of Hearts
+🂷     ; 1F0B7 ; card         ; hearts       ; קלף לב 7 שבע       ; שבע לבבות                    ; Card Heart 7 seven ; Seven of Hearts
+🂸     ; 1F0B8 ; card         ; hearts       ; קלף לב 8 שמונה     ; שמונה לבבות                  ; Card Heart 8 eight ; Eight of Hearts
+🂹     ; 1F0B9 ; card         ; hearts       ; קלף לב 9 תשע       ; תשע לבבות                    ; Card Heart 9 nine  ; Nine of Hearts
+🂺    ; 1F0BA ; card         ; hearts       ; קלף לב 10 עשר      ; עשר לבבות                    ; Card Heart 10 ten  ; Ten of Hearts
+🂻    ; 1F0BB ; card         ; hearts       ; קלף לב J נסיך      ; נסיך לבבות 11 אחת-עשרה       ; Card Heart J jack  ; Jack of Hearts value 11 eleven
+🂽    ; 1F0BD ; card         ; hearts       ; קלף לב Q מלכה      ; מלכה לבבות 12 שתים-עשרה      ; Card Heart Q queen ; Queen of Hearts value 12 twelve
+🂾    ; 1F0BE ; card         ; hearts       ; קלף לב K מלך       ; מלך לבבות 13 שלוש-עשרה       ; Card Heart K king  ; King of Hearts value 13 thirteen
+
+# subgroup: diamonds
+🃁     ; 1F0C1 ; card         ; diamonds     ; קלף יהלום A אס     ; אס יהלומים 1 אחת             ; Card Diamond A ace ; Ace of Diamonds value 1 one
+🃂     ; 1F0C2 ; card         ; diamonds     ; קלף יהלום 2 שתיים  ; שתיים יהלומים                ; Card Diamond 2 two ; Two of Diamonds
+🃃     ; 1F0C3 ; card         ; diamonds     ; קלף יהלום 3 שלוש   ; שלוש יהלומים                 ; Card Diamond 3 three ; Three of Diamonds
+🃄     ; 1F0C4 ; card         ; diamonds     ; קלף יהלום 4 ארבע   ; ארבע יהלומים                 ; Card Diamond 4 four ; Four of Diamonds
+🃅     ; 1F0C5 ; card         ; diamonds     ; קלף יהלום 5 חמש    ; חמש יהלומים                  ; Card Diamond 5 five ; Five of Diamonds
+🃆     ; 1F0C6 ; card         ; diamonds     ; קלף יהלום 6 שש     ; שש יהלומים                   ; Card Diamond 6 six ; Six of Diamonds
+🃇     ; 1F0C7 ; card         ; diamonds     ; קלף יהלום 7 שבע    ; שבע יהלומים                  ; Card Diamond 7 seven ; Seven of Diamonds
+🃈     ; 1F0C8 ; card         ; diamonds     ; קלף יהלום 8 שמונה  ; שמונה יהלומים                ; Card Diamond 8 eight ; Eight of Diamonds
+🃉     ; 1F0C9 ; card         ; diamonds     ; קלף יהלום 9 תשע    ; תשע יהלומים                  ; Card Diamond 9 nine ; Nine of Diamonds
+🃊    ; 1F0CA ; card         ; diamonds     ; קלף יהלום 10 עשר   ; עשר יהלומים                  ; Card Diamond 10 ten ; Ten of Diamonds
+🃋    ; 1F0CB ; card         ; diamonds     ; קלף יהלום J נסיך   ; נסיך יהלומים 11 אחת-עשרה     ; Card Diamond J jack ; Jack of Diamonds value 11 eleven
+🃍    ; 1F0CD ; card         ; diamonds     ; קלף יהלום Q מלכה   ; מלכה יהלומים 12 שתים-עשרה    ; Card Diamond Q queen ; Queen of Diamonds value 12 twelve
+🃎    ; 1F0CE ; card         ; diamonds     ; קלף יהלום K מלך    ; מלך יהלומים 13 שלוש-עשרה     ; Card Diamond K king ; King of Diamonds value 13 thirteen
+
+# subgroup: clubs
+🃑     ; 1F0D1 ; card         ; clubs        ; קלף תלתן A אס      ; אס תלתנים 1 אחת              ; Card Club A ace    ; Ace of Clubs value 1 one
+🃒     ; 1F0D2 ; card         ; clubs        ; קלף תלתן 2 שתיים   ; שתיים תלתנים                 ; Card Club 2 two    ; Two of Clubs
+🃓     ; 1F0D3 ; card         ; clubs        ; קלף תלתן 3 שלוש    ; שלוש תלתנים                  ; Card Club 3 three  ; Three of Clubs
+🃔     ; 1F0D4 ; card         ; clubs        ; קלף תלתן 4 ארבע    ; ארבע תלתנים                  ; Card Club 4 four   ; Four of Clubs
+🃕     ; 1F0D5 ; card         ; clubs        ; קלף תלתן 5 חמש     ; חמש תלתנים                   ; Card Club 5 five   ; Five of Clubs
+🃖     ; 1F0D6 ; card         ; clubs        ; קלף תלתן 6 שש      ; שש תלתנים                    ; Card Club 6 six    ; Six of Clubs
+🃗     ; 1F0D7 ; card         ; clubs        ; קלף תלתן 7 שבע     ; שבע תלתנים                   ; Card Club 7 seven  ; Seven of Clubs
+🃘     ; 1F0D8 ; card         ; clubs        ; קלף תלתן 8 שמונה   ; שמונה תלתנים                 ; Card Club 8 eight  ; Eight of Clubs
+🃙     ; 1F0D9 ; card         ; clubs        ; קלף תלתן 9 תשע     ; תשע תלתנים                   ; Card Club 9 nine   ; Nine of Clubs
+🃚    ; 1F0DA ; card         ; clubs        ; קלף תלתן 10 עשר    ; עשר תלתנים                   ; Card Club 10 ten   ; Ten of Clubs
+🃛    ; 1F0DB ; card         ; clubs        ; קלף תלתן J נסיך    ; נסיך תלתנים 11 אחת-עשרה      ; Card Club J jack   ; Jack of Clubs value 11 eleven
+🃝    ; 1F0DD ; card         ; clubs        ; קלף תלתן Q מלכה    ; מלכה תלתנים 12 שתים-עשרה     ; Card Club Q queen  ; Queen of Clubs value 12 twelve
+🃞    ; 1F0DE ; card         ; clubs        ; קלף תלתן K מלך     ; מלך תלתנים 13 שלוש-עשרה      ; Card Club K king   ; King of Clubs value 13 thirteen
+
+# subgroup: special-cards
+🂠     ; 1F0A0 ; card         ; special      ; קלף הפוך           ; גב קלף                       ; Card Back          ; Playing card back
+🃏     ; 1F0CF ; card         ; special      ; ג׳וקר              ; קלף ג׳וקר ליצן               ; Joker              ; Joker wild card
+
+# group: numbers
+# subgroup: circled
+①     ; 2460  ; number       ; circled      ; עיגול 1 אחת        ; מספר 1 אחת בעיגול            ; Circled 1 one      ; Number 1 one in circle
+②     ; 2461  ; number       ; circled      ; עיגול 2 שתיים      ; מספר 2 שתיים בעיגול          ; Circled 2 two      ; Number 2 two in circle
+③     ; 2462  ; number       ; circled      ; עיגול 3 שלוש       ; מספר 3 שלוש בעיגול           ; Circled 3 three    ; Number 3 three in circle
+④     ; 2463  ; number       ; circled      ; עיגול 4 ארבע       ; מספר 4 ארבע בעיגול           ; Circled 4 four     ; Number 4 four in circle
+⑤     ; 2464  ; number       ; circled      ; עיגול 5 חמש        ; מספר 5 חמש בעיגול            ; Circled 5 five     ; Number 5 five in circle
+⑥     ; 2465  ; number       ; circled      ; עיגול 6 שש         ; מספר 6 שש בעיגול             ; Circled 6 six      ; Number 6 six in circle
+⑦     ; 2466  ; number       ; circled      ; עיגול 7 שבע        ; מספר 7 שבע בעיגול            ; Circled 7 seven    ; Number 7 seven in circle
+⑧     ; 2467  ; number       ; circled      ; עיגול 8 שמונה      ; מספר 8 שמונה בעיגול          ; Circled 8 eight    ; Number 8 eight in circle
+⑨     ; 2468  ; number       ; circled      ; עיגול 9 תשע        ; מספר 9 תשע בעיגול            ; Circled 9 nine     ; Number 9 nine in circle
+⑩     ; 2469  ; number       ; circled      ; עיגול 10 עשר       ; מספר 10 עשר בעיגול           ; Circled 10 ten     ; Number 10 ten in circle
+
+# subgroup: negative-circled
+❶     ; 2776  ; number       ; neg-circled  ; שחור 1 אחת         ; מספר 1 אחת עיגול שחור        ; Neg Circle 1 one   ; Number 1 one black circle
+❷     ; 2777  ; number       ; neg-circled  ; שחור 2 שתיים       ; מספר 2 שתיים עיגול שחור      ; Neg Circle 2 two   ; Number 2 two black circle
+❸     ; 2778  ; number       ; neg-circled  ; שחור 3 שלוש        ; מספר 3 שלוש עיגול שחור       ; Neg Circle 3 three ; Number 3 three black circle
+❹     ; 2779  ; number       ; neg-circled  ; שחור 4 ארבע        ; מספר 4 ארבע עיגול שחור       ; Neg Circle 4 four  ; Number 4 four black circle
+❺     ; 277A  ; number       ; neg-circled  ; שחור 5 חמש         ; מספר 5 חמש עיגול שחור        ; Neg Circle 5 five  ; Number 5 five black circle
+❻     ; 277B  ; number       ; neg-circled  ; שחור 6 שש          ; מספר 6 שש עיגול שחור         ; Neg Circle 6 six   ; Number 6 six black circle
+❼     ; 277C  ; number       ; neg-circled  ; שחור 7 שבע         ; מספר 7 שבע עיגול שחור        ; Neg Circle 7 seven ; Number 7 seven black circle
+❽     ; 277D  ; number       ; neg-circled  ; שחור 8 שמונה       ; מספר 8 שמונה עיגול שחור      ; Neg Circle 8 eight ; Number 8 eight black circle
+❾     ; 277E  ; number       ; neg-circled  ; שחור 9 תשע         ; מספר 9 תשע עיגול שחור        ; Neg Circle 9 nine  ; Number 9 nine black circle
+❿     ; 277F  ; number       ; neg-circled  ; שחור 10 עשר        ; מספר 10 עשר עיגול שחור       ; Neg Circle 10 ten  ; Number 10 ten black circle
+
+# subgroup: superscript
+⁰     ; 2070  ; number       ; superscript  ; חזקה 0 אפס         ; מספר 0 אפס עילי              ; Super 0 zero       ; Superscript number 0 zero
+¹     ; 00B9  ; number       ; superscript  ; חזקה 1 אחת         ; מספר 1 אחת עילי              ; Super 1 one        ; Superscript number 1 one
+²     ; 00B2  ; number       ; superscript  ; חזקה 2 שתיים       ; מספר 2 שתיים עילי ריבוע      ; Super 2 two        ; Superscript number 2 two squared
+³     ; 00B3  ; number       ; superscript  ; חזקה 3 שלוש        ; מספר 3 שלוש עילי מעוקב       ; Super 3 three      ; Superscript number 3 three cubed
+⁴     ; 2074  ; number       ; superscript  ; חזקה 4 ארבע        ; מספר 4 ארבע עילי             ; Super 4 four       ; Superscript number 4 four
+⁵     ; 2075  ; number       ; superscript  ; חזקה 5 חמש         ; מספר 5 חמש עילי              ; Super 5 five       ; Superscript number 5 five
+⁶     ; 2076  ; number       ; superscript  ; חזקה 6 שש          ; מספר 6 שש עילי               ; Super 6 six        ; Superscript number 6 six
+⁷     ; 2077  ; number       ; superscript  ; חזקה 7 שבע         ; מספר 7 שבע עילי              ; Super 7 seven      ; Superscript number 7 seven
+⁸     ; 2078  ; number       ; superscript  ; חזקה 8 שמונה       ; מספר 8 שמונה עילי            ; Super 8 eight      ; Superscript number 8 eight
+⁹     ; 2079  ; number       ; superscript  ; חזקה 9 תשע         ; מספר 9 תשע עילי              ; Super 9 nine       ; Superscript number 9 nine
+
+# subgroup: subscript
+₀     ; 2080  ; number       ; subscript    ; תחתי 0 אפס         ; מספר 0 אפס תחתי              ; Sub 0 zero         ; Subscript number 0 zero
+₁     ; 2081  ; number       ; subscript    ; תחתי 1 אחת         ; מספר 1 אחת תחתי              ; Sub 1 one          ; Subscript number 1 one
+₂     ; 2082  ; number       ; subscript    ; תחתי 2 שתיים       ; מספר 2 שתיים תחתי            ; Sub 2 two          ; Subscript number 2 two
+₃     ; 2083  ; number       ; subscript    ; תחתי 3 שלוש        ; מספר 3 שלוש תחתי             ; Sub 3 three        ; Subscript number 3 three
+₄     ; 2084  ; number       ; subscript    ; תחתי 4 ארבע        ; מספר 4 ארבע תחתי             ; Sub 4 four         ; Subscript number 4 four
+₅     ; 2085  ; number       ; subscript    ; תחתי 5 חמש         ; מספר 5 חמש תחתי              ; Sub 5 five         ; Subscript number 5 five
+₆     ; 2086  ; number       ; subscript    ; תחתי 6 שש          ; מספר 6 שש תחתי               ; Sub 6 six          ; Subscript number 6 six
+₇     ; 2087  ; number       ; subscript    ; תחתי 7 שבע         ; מספר 7 שבע תחתי              ; Sub 7 seven        ; Subscript number 7 seven
+₈     ; 2088  ; number       ; subscript    ; תחתי 8 שמונה       ; מספר 8 שמונה תחתי            ; Sub 8 eight        ; Subscript number 8 eight
+₉     ; 2089  ; number       ; subscript    ; תחתי 9 תשע         ; מספר 9 תשע תחתי              ; Sub 9 nine         ; Subscript number 9 nine
+
+# subgroup: roman
+Ⅰ     ; 2160  ; number       ; roman        ; רומי 1 אחת         ; מספר רומי I שווה 1 אחת       ; Roman 1 one        ; Roman numeral I equals 1 one
+Ⅱ     ; 2161  ; number       ; roman        ; רומי 2 שתיים       ; מספר רומי II שווה 2 שתיים    ; Roman 2 two        ; Roman numeral II equals 2 two
+Ⅲ     ; 2162  ; number       ; roman        ; רומי 3 שלוש        ; מספר רומי III שווה 3 שלוש    ; Roman 3 three      ; Roman numeral III equals 3 three
+Ⅳ     ; 2163  ; number       ; roman        ; רומי 4 ארבע        ; מספר רומי IV שווה 4 ארבע     ; Roman 4 four       ; Roman numeral IV equals 4 four
+Ⅴ     ; 2164  ; number       ; roman        ; רומי 5 חמש         ; מספר רומי V שווה 5 חמש       ; Roman 5 five       ; Roman numeral V equals 5 five
+Ⅵ     ; 2165  ; number       ; roman        ; רומי 6 שש          ; מספר רומי VI שווה 6 שש       ; Roman 6 six        ; Roman numeral VI equals 6 six
+Ⅶ     ; 2166  ; number       ; roman        ; רומי 7 שבע         ; מספר רומי VII שווה 7 שבע     ; Roman 7 seven      ; Roman numeral VII equals 7 seven
+Ⅷ     ; 2167  ; number       ; roman        ; רומי 8 שמונה       ; מספר רומי VIII שווה 8 שמונה  ; Roman 8 eight      ; Roman numeral VIII equals 8 eight
+Ⅸ     ; 2168  ; number       ; roman        ; רומי 9 תשע         ; מספר רומי IX שווה 9 תשע      ; Roman 9 nine       ; Roman numeral IX equals 9 nine
+Ⅹ     ; 2169  ; number       ; roman        ; רומי 10 עשר        ; מספר רומי X שווה 10 עשר      ; Roman 10 ten       ; Roman numeral X equals 10 ten
+Ⅺ     ; 216A  ; number       ; roman        ; רומי 11 אחת-עשרה   ; מספר רומי XI שווה 11 אחת-עשרה ; Roman 11 eleven    ; Roman numeral XI equals 11 eleven
+Ⅻ     ; 216B  ; number       ; roman        ; רומי 12 שתים-עשרה  ; מספר רומי XII שווה 12 שתים-עשרה ; Roman 12 twelve    ; Roman numeral XII equals 12 twelve
+Ⅼ     ; 216C  ; number       ; roman        ; רומי 50 חמישים     ; מספר רומי L שווה 50 חמישים   ; Roman 50 fifty     ; Roman numeral L equals 50 fifty
+Ⅽ     ; 216D  ; number       ; roman        ; רומי 100 מאה       ; מספר רומי C שווה 100 מאה     ; Roman 100 hundred  ; Roman numeral C equals 100 hundred
+Ⅾ     ; 216E  ; number       ; roman        ; רומי 500 חמש-מאות  ; מספר רומי D שווה 500 חמש-מאות ; Roman 500 five-hundred ; Roman numeral D equals 500 five-hundred
+Ⅿ     ; 216F  ; number       ; roman        ; רומי 1000 אלף      ; מספר רומי M שווה 1000 אלף    ; Roman 1000 thousand ; Roman numeral M equals 1000 thousand
+
+# subgroup: fractions
+½     ; 00BD  ; number       ; fraction     ; שבר 1/2 חצי        ; חצי שווה 0.5                 ; Fraction 1/2 half  ; One half equals 0.5
+⅓     ; 2153  ; number       ; fraction     ; שבר 1/3 שליש       ; שליש שווה 0.33               ; Fraction 1/3 third ; One third equals 0.33
+⅔     ; 2154  ; number       ; fraction     ; שבר 2/3 שני-שליש   ; שני שליש שווה 0.67           ; Fraction 2/3 two-thirds ; Two thirds equals 0.67
+¼     ; 00BC  ; number       ; fraction     ; שבר 1/4 רבע        ; רבע שווה 0.25                ; Fraction 1/4 quarter ; One quarter equals 0.25
+¾     ; 00BE  ; number       ; fraction     ; שבר 3/4 שלושה-רבע  ; שלושה רבע שווה 0.75          ; Fraction 3/4 three-quarters ; Three quarters equals 0.75
+⅕     ; 2155  ; number       ; fraction     ; שבר 1/5 חמישית     ; חמישית שווה 0.2              ; Fraction 1/5 fifth ; One fifth equals 0.2
+⅙     ; 2159  ; number       ; fraction     ; שבר 1/6 שישית      ; שישית שווה 0.167             ; Fraction 1/6 sixth ; One sixth equals 0.167
+⅛     ; 215B  ; number       ; fraction     ; שבר 1/8 שמינית     ; שמינית שווה 0.125            ; Fraction 1/8 eighth ; One eighth equals 0.125
+⅞     ; 215E  ; number       ; fraction     ; שבר 7/8 שבע-שמיניות ; שבע שמיניות שווה 0.875       ; Fraction 7/8 seven-eighths ; Seven eighths equals 0.875
+
+# group: units
+# subgroup: temperature
+°     ; 00B0  ; unit         ; temperature  ; מעלות              ; סימן מעלות טמפרטורה          ; Degree             ; Degree sign
+℃     ; 2103  ; unit         ; temperature  ; צלזיוס             ; מעלות צלזיוס                 ; Celsius            ; Degree Celsius
+℉     ; 2109  ; unit         ; temperature  ; פרנהייט            ; מעלות פרנהייט                ; Fahrenheit         ; Degree Fahrenheit
+
+# subgroup: abbreviations
+№     ; 2116  ; unit         ; abbrev       ; מספר סידורי        ; סימן מספר סידורי             ; Numero             ; Numero sign
+℅     ; 2105  ; unit         ; abbrev       ; לכל                ; care of c/o                  ; Care Of            ; Care of sign
+℡     ; 2121  ; unit         ; abbrev       ; טלפון              ; telephone TEL                ; Telephone          ; Telephone sign
+℻     ; 213B  ; unit         ; abbrev       ; פקס                ; facsimile FAX                ; Facsimile          ; Fax sign

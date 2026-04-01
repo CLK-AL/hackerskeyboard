@@ -159,14 +159,12 @@ class CandidateView(context: Context, attrs: AttributeSet?) : View(context, attr
 
     override fun computeHorizontalScrollRange(): Int = mTotalWidth
 
-    override fun onDraw(canvas: Canvas?) {
-        if (canvas != null) {
-            super.onDraw(canvas)
-        }
+    override fun onDraw(canvas: Canvas) {
+        super.onDraw(canvas)
         _onDraw(canvas)
     }
 
-    private fun _onDraw(canvas: Canvas?) {
+    private fun _onDraw(canvas: Canvas) {
         mTotalWidth = 0
 
         val height = getHeight()

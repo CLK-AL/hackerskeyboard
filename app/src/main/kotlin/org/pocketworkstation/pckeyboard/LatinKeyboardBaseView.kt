@@ -543,7 +543,7 @@ open class LatinKeyboardBaseView @JvmOverloads constructor(
      * @see getKeyboard
      * @param keyboard the keyboard to display in this view
      */
-    fun setKeyboard(keyboard: Keyboard?) {
+    open fun setKeyboard(keyboard: Keyboard?) {
         if (mKeyboard != null) {
             dismissKeyPreview()
         }
