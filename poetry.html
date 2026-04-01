@@ -54,7 +54,32 @@ a,a:hover,a:visited,a:active{color:inherit;text-decoration:none}
 </head>
 <body>
 <div class="wrap" id="app"></div>
+<!-- UniKey KMP Library -->
+<script src="kotlin-kotlin-stdlib.js"></script>
+<script src="hackerskeyboard-unikey-kmp.js"></script>
 <script>
+/* ═══ UniKey KMP API ═══ */
+var UK = globalThis['hackerskeyboard:unikey-kmp'].org.pocketworkstation.unikey;
+
+/* IPA functions from KMP - now shared between Android and JS */
+function heIpa(w) { return UK.heIpa(w); }
+function enIpa(w) { return UK.enIpa(w); }
+function lineEndIpa(line, lang) { return UK.lineEndIpa(line, lang === "he"); }
+function ipaHue(ipa) { return UK.ipaHue(ipa); }
+function hl(h, s, l) { return UK.hsl(h, s, l); }
+
+/* UniKey syllable-based functions */
+function parseHebrewSyllables(word) { return UK.parseHebrewSyllables(word); }
+function parseEnglishSyllables(word) { return UK.parseEnglishSyllables(word); }
+function wordHue(word, isHebrew) { return UK.wordHue(word, isHebrew); }
+function wordEndColor(word, isHebrew) { return UK.wordEndColor(word, isHebrew); }
+function rhymeKey(word, isHebrew) { return UK.rhymeKey(word, isHebrew); }
+function rhymes(w1, h1, w2, h2) { return UK.rhymes(w1, h1, w2, h2); }
+function rhymeDistance(w1, h1, w2, h2) { return UK.rhymeDistance(w1, h1, w2, h2); }
+
+/* Rhyme scheme using KMP */
+function rhymeScheme(ipas) { return UK.rhymeScheme(ipas); }
+
 var POEM=[
   {id:1,label:"\u05D0\u05F3",he:["\u05D1\u05B7\u05BC\u05D6\u05B6\u05BC\u05DC\u05B6\u05EA \u05D4\u05B7\u05E9\u05B0\u05BC\u05C1\u05D7\u05B7\u05E8\u05B0\u05D7\u05D5\u05B9\u05E8\u05B6\u05EA,","\u05EA\u05BC\u05D5\u05B9\u05D4\u05B8\u05D4, \u05DC\u05B9\u05D0 \u05DE\u05B0\u05D3\u05B7\u05D1\u05B6\u05BC\u05E8\u05B6\u05EA,","\u05DB\u05B8\u05BC\u05DA\u05B0 \u05D1\u05B0\u05BC\u05EA\u05D5\u05B9\u05DB\u05B8\u05D4\u05BC \u05E1\u05D5\u05B9\u05E2\u05B6\u05E8\u05B6\u05EA,","\u05DC\u05B0\u05D0\u05B7\u05D8 \u05DB\u05B7\u05BC\u05E2\u05B7\u05E1 \u05E6\u05D5\u05B9\u05D1\u05B6\u05E8\u05B6\u05EA."],en:["Darkened basalt spring,","musing not uttering,","within its core raging,","slow wrath staging."]},
   {id:2,label:"\u05D1\u05F3",he:["\u05D1\u05B7\u05BC\u05D6\u05B6\u05BC\u05DC\u05B6\u05EA \u05DE\u05B4\u05EA\u05B0\u05D1\u05BC\u05D5\u05B9\u05E0\u05B6\u05E0\u05B6\u05EA,","\u05D0\u05B7\u05DA\u05B0 \u05DC\u05B9\u05D0 \u05DE\u05B4\u05EA\u05B0\u05DC\u05D5\u05B9\u05E0\u05B6\u05E0\u05B6\u05EA,","\u05DC\u05B9\u05D0 \u05E0\u05B8\u05E2\u05B4\u05D9\u05DD \u05DC\u05B8\u05D4\u05BC \u05DC\u05B0\u05D1\u05B7\u05E7\u05B5\u05BC\u05E9\u05C1,","\u05D4\u05B7\u05E8 \u05D2\u05BC\u05D5\u05B9\u05E2\u05B5\u05E9\u05C1 \u05E8\u05B8\u05D3\u05D5\u05BC\u05DD \u05DE\u05B0\u05D9\u05B8\u05D0\u05B5\u05E9\u05C1."],en:["Basalt stands contemplating,","keeps silent not protesting,","uneasy to beseech knees bent,","depressed mountain dormant."]},
@@ -379,53 +404,21 @@ function pickPath(vid,idx){
   render();
 }
 
-/* ═══ IPA ═══ */
-var NIQ={0x05B0:"@",0x05B1:"e",0x05B2:"a",0x05B3:"o",0x05B4:"i",0x05B5:"e",0x05B6:"E",0x05B7:"a",0x05B8:"a",0x05B9:"o",0x05BA:"o",0x05BB:"u"};
-var CON={"\u05D0":"","\u05D1":"v","\u05D2":"g","\u05D3":"d","\u05D4":"h","\u05D5":"v","\u05D6":"z","\u05D7":"x","\u05D8":"t","\u05D9":"j","\u05DA":"x","\u05DB":"x","\u05DC":"l","\u05DD":"m","\u05DE":"m","\u05DF":"n","\u05E0":"n","\u05E1":"s","\u05E2":"","\u05E3":"f","\u05E4":"f","\u05E5":"ts","\u05E6":"ts","\u05E7":"k","\u05E8":"r","\u05E9":"sh","\u05EA":"t"};
-var DAG={"\u05D1":"b","\u05DB":"k","\u05E4":"p"};
+/* ═══ IPA (now using KMP library - see UK.* above) ═══ */
 
-function heIpa(w){w=w.replace(/[,.\-;:!?\s]+$/,"");var o="",lc="",lcPos=-1;for(var i=0;i<w.length;i++){var c=w.codePointAt(i);if(c>=0x05D0&&c<=0x05EA){lc=w[i];lcPos=o.length;o+=(CON[w[i]]||"");}else if(c===0x05BC){if(DAG[lc]&&lcPos>=0){var before=o.slice(0,lcPos);var after=o.slice(lcPos+(CON[lc]||"").length);o=before+DAG[lc]+after;}}else if(c===0x05C1){/* shin dot */}else if(c===0x05C2){/* sin dot */if(lcPos>=0){var before2=o.slice(0,lcPos);var after2=o.slice(lcPos+(CON[lc]||"").length);o=before2+"s"+after2;}}else if(NIQ[c]!==undefined){o+=NIQ[c];}}return o;}
-
-var EN_END=[[/ing$/,"IN"],[/tion$/,"shEn"],[/ting$/,"tIN"],[/ring$/,"rIN"],[/ling$/,"lIN"],[/ning$/,"nIN"],[/ent$/,"Ent"],[/ant$/,"ant"],[/ine$/,"ajn"],[/ate$/,"ejt"],[/ight$/,"ajt"],[/ite$/,"ajt"],[/ake$/,"ejk"],[/ade$/,"ejd"],[/age$/,"Ij"],[/ound$/,"awnd"],[/own$/,"awn"],[/out$/,"awt"],[/ash$/,"ash"],[/ush$/,"ush"],[/ay$/,"ej"],[/ey$/,"ej"],[/oy$/,"oj"],[/er$/,"Er"],[/or$/,"Er"],[/ar$/,"ar"],[/le$/,"El"],[/al$/,"El"],[/ed$/,"d"],[/es$/,"z"],[/ly$/,"li"],[/ck$/,"k"],[/ss$/,"s"],[/ll$/,"l"]];
-function enIpa(w){w=w.toLowerCase().replace(/[^a-z]/g,"");if(!w)return"";for(var i=0;i<EN_END.length;i++){if(EN_END[i][0].test(w))return EN_END[i][1];}return w.slice(-3);}
-
-function lineEndIpa(line,lang){var ws=line.replace(/[,.\-;:!?\s]+$/,"").trim().split(/\s+/);var last=ws[ws.length-1]||"";return lang==="he"?(heIpa(last).slice(-4)||heIpa(last)):enIpa(last);}
-
-var V_HUE={a:0,e:50,E:65,i:120,o:180,u:240,"@":300,j:130};
-var C_OFF={t:0,d:5,s:10,z:15,n:20,l:25,r:30,m:35,k:40,g:45,b:50,p:55,f:60,v:65,sh:70,x:75,ts:80,h:85,"":90};
-function ipaHue(ipa){
-  if(!ipa)return 0;
-  var n=ipa.length;
-  /* last 3 chars = rhyme core (consonant+vowel+consonant), prefix = minor tint */
-  var core=ipa.slice(Math.max(0,n-3));
-  var hc=5381;
-  for(var i=0;i<core.length;i++)hc=((hc*33)^core.charCodeAt(i))>>>0;
-  var pre=ipa.slice(0,Math.max(0,n-3));
-  var hp=5381;
-  for(var j=0;j<pre.length;j++)hp=((hp*33)^pre.charCodeAt(j))>>>0;
-  return ((hc%360)*0.85+(hp%360)*0.15)%360;
+/* syllables - using UniKey syllable parsing */
+function sH(l) {
+  /* Hebrew syllable count from UniKey */
+  var syls = parseHebrewSyllables(l.replace(/[,.\-;:!?\s]+$/,""));
+  return syls.length;
 }
-function hl(h,s,l){return"hsl("+Math.round(h)+","+s+"%,"+l+"%)";}
-
-/* syllables */
-function sH(l){var c=0;for(var i=0;i<l.length;i++){var p=l.codePointAt(i);if(p>=0x05B1&&p<=0x05BB)c+=1;else if(p===0x05B0)c+=0.5;}return Math.round(c);}
-function sE(w){var s=w.toLowerCase().replace(/[^a-z]/g,"");if(s.length<=3)return 1;s=s.replace(/(?:[^lsz])es$/,"").replace(/(?:[^aeiouy])ed$/,"").replace(/(?:[^aeiouy])e$/,"").replace(/^y/,"");var m=s.match(/[aeiouy]{1,2}/g);return Math.max(1,m?m.length:1);}
-function sL(l){return l.replace(/[^a-zA-Z\s'-]/g,"").split(/\s+/).filter(Boolean).reduce(function(a,w){return a+sE(w);},0);}
-
-function rhymeScheme(ipas){
-  var groups=[]; // [{key, letter}]
-  var abc="ABCDEFGHIJKLM";
-  return ipas.map(function(ipa){
-    if(!ipa)return {ch:"x",ipa:"?",hue:0};
-    var key=ipa.slice(-3);
-    var hue=ipaHue(ipa);
-    for(var g=0;g<groups.length;g++){
-      if(groups[g].key===key)return {ch:groups[g].letter,ipa:key,hue:hue};
-    }
-    var letter=abc[groups.length]||"?";
-    groups.push({key:key,letter:letter});
-    return {ch:letter,ipa:key,hue:hue};
-  });
+function sE(w) {
+  /* English syllable count from UniKey */
+  var syls = parseEnglishSyllables(w);
+  return Math.max(1, syls.length);
+}
+function sL(l) {
+  return l.replace(/[^a-zA-Z\s'-]/g,"").split(/\s+/).filter(Boolean).reduce(function(a,w){return a+sE(w);},0);
 }
 
 /* colored scheme: A:ret · B:har · ... */
@@ -468,25 +461,29 @@ function h(tag,props,kids){
   return el;
 }
 
-function colorWord(word,ipa,isEnd,href){
-  var hue=ipaHue(ipa);
-  var el;
-  el=document.createElement("span");
+function colorWord(word, lang, isEnd, href){
+  /* Use UniKeySyllable for hue - phonetically similar syllables cluster */
+  var isHebrew = lang === "he";
+  var hue = wordHue(word, isHebrew);
+  var el = document.createElement("span");
   if(href){el.setAttribute("data-ref",href);el.style.cursor="pointer";}
-  el.textContent=word;
-  el.style.color=hl(hue,isEnd?80:45,isEnd?72:55);
-  if(isEnd){el.style.fontWeight="700";el.style.textShadow="0 0 8px "+hl(hue,60,25);el.style.borderBottom="2px solid "+hl(hue,50,30);}
+  el.textContent = word;
+  el.style.color = hl(hue, isEnd ? 80 : 45, isEnd ? 72 : 55);
+  if(isEnd){
+    el.style.fontWeight = "700";
+    el.style.textShadow = "0 0 8px " + hl(hue, 60, 25);
+    el.style.borderBottom = "2px solid " + hl(hue, 50, 30);
+  }
   return el;
 }
 
-function colorLine(text,lang,vi,li){
-  var frag=document.createDocumentFragment();
-  var ws=text.split(/\s+/);
-  ws.forEach(function(w,i){
-    var ipa=lang==="he"?heIpa(w):enIpa(w);
-    var href=(vi!=null&&li!=null)?"#"+lang+"."+(vi+1)+"."+(li+1)+"."+(i+1)+".0":null;
-    frag.appendChild(colorWord(w,ipa,i===ws.length-1,href));
-    if(i<ws.length-1)frag.appendChild(document.createTextNode(" "));
+function colorLine(text, lang, vi, li){
+  var frag = document.createDocumentFragment();
+  var ws = text.split(/\s+/);
+  ws.forEach(function(w, i){
+    var href = (vi != null && li != null) ? "#" + lang + "." + (vi+1) + "." + (li+1) + "." + (i+1) + ".0" : null;
+    frag.appendChild(colorWord(w, lang, i === ws.length - 1, href));
+    if(i < ws.length - 1) frag.appendChild(document.createTextNode(" "));
   });
   return frag;
 }
@@ -660,56 +657,58 @@ function triggerLoad(){
   inp.click();
 }
 
-function colorLineWithCursor(text,lang,pos,vi,li){
-  var frag=document.createDocumentFragment();
-  var full=text+"";
-  var segs=full.split(/(\s+)/);
-  var offset=0,wordIdx=0;
+function colorLineWithCursor(text, lang, pos, vi, li){
+  var frag = document.createDocumentFragment();
+  var full = text + "";
+  var segs = full.split(/(\s+)/);
+  var offset = 0, wordIdx = 0;
+  var isHebrew = lang === "he";
+
   segs.forEach(function(seg){
     if(/^\s+$/.test(seg)){
       frag.appendChild(document.createTextNode(seg));
-      offset+=seg.length;
+      offset += seg.length;
       return;
     }
-    var segStart=offset;
-    var segEnd=offset+seg.length;
-    var wi=wordIdx;wordIdx++;
-    var ipa=lang==="he"?heIpa(seg):enIpa(seg);
-    var hue=ipaHue(ipa);
-    var hasCursor=pos>=segStart&&pos<segEnd;
+    var segStart = offset;
+    var segEnd = offset + seg.length;
+    var wi = wordIdx; wordIdx++;
+    /* Use UniKeySyllable wordHue for phonetic coloring */
+    var hue = wordHue(seg, isHebrew);
+    var hasCursor = pos >= segStart && pos < segEnd;
 
     if(hasCursor){
-      var ci=pos-segStart;
-      var before=seg.slice(0,ci);
-      var after=seg.slice(ci);
+      var ci = pos - segStart;
+      var before = seg.slice(0, ci);
+      var after = seg.slice(ci);
       if(before){
-        var sp=document.createElement("span");
-        sp.textContent=before;
-        sp.style.color=hl(hue,50,60);
+        var sp = document.createElement("span");
+        sp.textContent = before;
+        sp.style.color = hl(hue, 50, 60);
         frag.appendChild(sp);
       }
-      var cur=document.createElement("span");
-      cur.className="cursor";
+      var cur = document.createElement("span");
+      cur.className = "cursor";
       frag.appendChild(cur);
       if(after){
-        var sp2=document.createElement("span");
-        sp2.textContent=after;
-        sp2.style.color=hl(hue,50,60);
+        var sp2 = document.createElement("span");
+        sp2.textContent = after;
+        sp2.style.color = hl(hue, 50, 60);
         frag.appendChild(sp2);
       }
     }else{
-      var wp=document.createElement("span");
-      wp.setAttribute("data-ref","#"+lang+"."+(vi!=null?vi+1:"?")+"."+((li!=null?li:0)+1)+"."+(wi+1)+".0");
-      wp.textContent=seg;
-      wp.style.color=hl(hue,50,60);
-      wp.style.cursor="pointer";
+      var wp = document.createElement("span");
+      wp.setAttribute("data-ref", "#" + lang + "." + (vi != null ? vi + 1 : "?") + "." + ((li != null ? li : 0) + 1) + "." + (wi + 1) + ".0");
+      wp.textContent = seg;
+      wp.style.color = hl(hue, 50, 60);
+      wp.style.cursor = "pointer";
       frag.appendChild(wp);
     }
-    offset+=seg.length;
+    offset += seg.length;
   });
-  if(pos>=full.length){
-    var cur2=document.createElement("span");
-    cur2.className="cursor";
+  if(pos >= full.length){
+    var cur2 = document.createElement("span");
+    cur2.className = "cursor";
     frag.appendChild(cur2);
   }
   return frag;

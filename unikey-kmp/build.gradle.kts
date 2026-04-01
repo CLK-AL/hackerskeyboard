@@ -12,8 +12,13 @@ kotlin {
         }
     }
 
-    // JavaScript target - library only, tests handled separately
+    // JavaScript target for browser
     js(IR) {
+        browser {
+            webpackTask {
+                mainOutputFileName = "unikey.js"
+            }
+        }
         binaries.library()
     }
 
