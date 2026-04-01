@@ -278,8 +278,9 @@ data class UniKeySyllable(
         }
 
         private fun getHebrewConsonantIpa(letter: Char, word: String, pos: Int): String {
-            // Check for dagesh after letter
-            val hasDagesh = pos + 1 < word.length && word[pos + 1].code == 0x05BC
+            // Check for dagesh after letter (can be at pos+1 or pos+2 if vowel comes first)
+            val hasDagesh = (pos + 1 < word.length && word[pos + 1].code == 0x05BC) ||
+                            (pos + 2 < word.length && word[pos + 2].code == 0x05BC)
 
             return when (letter) {
                 '\u05D0' -> ""     // alef - silent
@@ -369,6 +370,7 @@ data class UniKeySyllable(
         }
 
         private fun mapEnglishVowel(vowels: String): String {
+            if (vowels.isEmpty()) return ""
             return when (vowels) {
                 "a" -> "a"
                 "e" -> "e"
@@ -381,7 +383,7 @@ data class UniKeySyllable(
                 "oo" -> "u"
                 "ou" -> "a"
                 "oi", "oy" -> "o"
-                else -> vowels.firstOrNull()?.toString() ?: "a"
+                else -> vowels.firstOrNull()?.toString() ?: ""
             }
         }
 
@@ -1029,8 +1031,8 @@ data class UniKeySyllable(
             // Perfect rhyme = same consonant + same vowel
             if (last1.consonant == last2.consonant && last1.vowel == last2.vowel) return 0
 
-            // Same vowel, different consonant = near rhyme
-            if (last1.vowel == last2.vowel) return 10 + consonantDistance(last1.consonant, last2.consonant)
+            // Same vowel, different consonant = near rhyme (but not for empty vowels)
+            if (last1.vowel == last2.vowel && last1.vowel.isNotEmpty()) return 10 + consonantDistance(last1.consonant, last2.consonant)
 
             // Different vowel = assonance at best
             return 50 + vowelDistance(last1.vowel, last2.vowel)
