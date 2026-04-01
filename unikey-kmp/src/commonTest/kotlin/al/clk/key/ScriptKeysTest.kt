@@ -69,75 +69,75 @@ class CurrencyTest {
     }
 }
 
-class HebrewKeyTest {
+class HebrewLetterKeyTest {
 
     @Test
-    fun testHebrewKeyFromQwerty() {
-        val alef = HebrewKey.fromQwerty("t")
+    fun testHebrewLetterFromQwerty() {
+        val alef = HebrewLetter.fromQwerty("t")
         assertNotNull(alef)
-        assertEquals(HebrewKey.ALEF, alef)
+        assertEquals(HebrewLetter.ALEF, alef)
         assertEquals("א", alef.char)
         assertEquals("ʔ", alef.ipa)
     }
 
     @Test
-    fun testHebrewKeyFromChar() {
-        val bet = HebrewKey.fromChar("ב")
+    fun testHebrewLetterFromChar() {
+        val bet = HebrewLetter.fromChar('ב')
         assertNotNull(bet)
-        assertEquals(HebrewKey.BET, bet)
+        assertEquals(HebrewLetter.BET, bet)
         assertEquals("v", bet.ipa)
-        assertTrue(bet.hasDagesh)
-        assertEquals("b", bet.dageshIpa)
+        assertTrue(bet.isBgdkpt)
+        assertEquals("b", bet.ipaDagesh)
     }
 
     @Test
     fun testHebrewFinalLetters() {
-        assertTrue(HebrewKey.KAF_SOFIT.isFinal)
-        assertTrue(HebrewKey.MEM_SOFIT.isFinal)
-        assertTrue(HebrewKey.NUN_SOFIT.isFinal)
-        assertTrue(HebrewKey.PE_SOFIT.isFinal)
-        assertTrue(HebrewKey.TSADI_SOFIT.isFinal)
+        assertTrue(HebrewLetter.KAF_SOFIT.isFinalForm)
+        assertTrue(HebrewLetter.MEM_SOFIT.isFinalForm)
+        assertTrue(HebrewLetter.NUN_SOFIT.isFinalForm)
+        assertTrue(HebrewLetter.PE_SOFIT.isFinalForm)
+        assertTrue(HebrewLetter.TSADI_SOFIT.isFinalForm)
     }
 
     @Test
     fun testHebrewBgdkptLetters() {
-        assertTrue(HebrewKey.BET.hasDagesh)
-        assertTrue(HebrewKey.KAF.hasDagesh)
-        assertTrue(HebrewKey.PE.hasDagesh)
+        assertTrue(HebrewLetter.BET.isBgdkpt)
+        assertTrue(HebrewLetter.KAF.isBgdkpt)
+        assertTrue(HebrewLetter.PE.isBgdkpt)
     }
 
     @Test
-    fun testAllHebrewKeysImplementILayoutKey() {
-        HebrewKey.entries.forEach { key ->
+    fun testAllHebrewLettersImplementILayoutKey() {
+        HebrewLetter.entries.forEach { key ->
             assertTrue(key.char.isNotEmpty(), "${key.name} should have char")
             assertTrue(key.displayName.isNotEmpty(), "${key.name} should have displayName")
         }
     }
 }
 
-class HebrewVowelTest {
+class NikudVowelTest {
 
     @Test
-    fun testHebrewVowelFromCodePoint() {
-        val patach = HebrewVowel.fromCodePoint(0x05B7)
+    fun testNikudVowelFromCodePoint() {
+        val patach = NikudVowel.fromCodePoint(0x05B7)
         assertNotNull(patach)
-        assertEquals(HebrewVowel.PATACH, patach)
+        assertEquals(NikudVowel.PATACH, patach)
         assertEquals("a", patach.ipa)
     }
 
     @Test
-    fun testHebrewVowelIpa() {
-        assertEquals("ə", HebrewVowel.SHVA.ipa)
-        assertEquals("i", HebrewVowel.CHIRIK.ipa)
-        assertEquals("e", HebrewVowel.TZERE.ipa)
-        assertEquals("a", HebrewVowel.PATACH.ipa)
-        assertEquals("o", HebrewVowel.CHOLAM.ipa)
-        assertEquals("u", HebrewVowel.KUBUTZ.ipa)
+    fun testNikudVowelIpa() {
+        assertEquals("ə", NikudVowel.SHVA.ipa)
+        assertEquals("i", NikudVowel.CHIRIK.ipa)
+        assertEquals("e", NikudVowel.TZERE.ipa)
+        assertEquals("a", NikudVowel.PATACH.ipa)
+        assertEquals("o", NikudVowel.CHOLAM.ipa)
+        assertEquals("u", NikudVowel.KUBUTZ.ipa)
     }
 
     @Test
-    fun testAllHebrewVowelsImplementILayoutKey() {
-        HebrewVowel.entries.forEach { vowel ->
+    fun testAllNikudVowelsImplementILayoutKey() {
+        NikudVowel.entries.forEach { vowel ->
             assertTrue(vowel.char.isNotEmpty(), "${vowel.name} should have char")
             assertTrue(vowel.ipa.isNotEmpty(), "${vowel.name} should have ipa")
             assertTrue(vowel.displayName.isNotEmpty(), "${vowel.name} should have displayName")
@@ -145,34 +145,34 @@ class HebrewVowelTest {
     }
 }
 
-class ArabicKeyTest {
+class ArabicLetterKeyTest {
 
     @Test
-    fun testArabicKeyFromQwerty() {
-        val ba = ArabicKey.fromQwerty("f")
+    fun testArabicLetterFromQwerty() {
+        val ba = ArabicLetter.fromQwerty('f')
         assertNotNull(ba)
-        assertEquals(ArabicKey.BA, ba)
+        assertEquals(ArabicLetter.BA, ba)
         assertEquals("ب", ba.char)
         assertEquals("b", ba.ipa)
     }
 
     @Test
     fun testArabicEmphaticConsonants() {
-        assertEquals("sˤ", ArabicKey.SAD.ipa)
-        assertEquals("dˤ", ArabicKey.DAD.ipa)
-        assertEquals("tˤ", ArabicKey.TAA.ipa)
-        assertEquals("ðˤ", ArabicKey.ZAA.ipa)
+        assertEquals("sˤ", ArabicLetter.SAD.ipa)
+        assertEquals("dˤ", ArabicLetter.DAD.ipa)
+        assertEquals("tˤ", ArabicLetter.TAA.ipa)
+        assertEquals("ðˤ", ArabicLetter.ZAA.ipa)
     }
 
     @Test
     fun testArabicPharyngealConsonants() {
-        assertEquals("ħ", ArabicKey.HA.ipa)
-        assertEquals("ʕ", ArabicKey.AIN.ipa)
+        assertEquals("ħ", ArabicLetter.HA.ipa)
+        assertEquals("ʕ", ArabicLetter.AIN.ipa)
     }
 
     @Test
-    fun testAllArabicKeysImplementILayoutKey() {
-        ArabicKey.entries.forEach { key ->
+    fun testAllArabicLettersImplementILayoutKey() {
+        ArabicLetter.entries.forEach { key ->
             assertTrue(key.char.isNotEmpty(), "${key.name} should have char")
             assertTrue(key.displayName.isNotEmpty(), "${key.name} should have displayName")
         }

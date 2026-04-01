@@ -38,11 +38,11 @@ enum class HebrewPrefix(
  */
 enum class NikudVowel(
     val mark: String,
-    val ipa: String,
+    override val ipa: String,
     val unicode: Int,
     val hue: Int,          // HSL hue for visualization
     val isShort: Boolean   // Short vs long vowel
-) {
+) : ILayoutKey {
     // A-class vowels (warm hues)
     KAMATZ("ָ", "a", 0x05B8, 0, false),
     PATACH("ַ", "a", 0x05B7, 15, true),
@@ -70,6 +70,9 @@ enum class NikudVowel(
     // Reduced vowel (gray)
     SHVA("ְ", "ə", 0x05B0, 0, true),
     SHVA_NA("ְ", "e", 0x05B0, 60, true);          // Mobile shva - same char, context
+
+    override val char: String get() = mark
+    override val displayName: String get() = name.lowercase().replace('_', '-')
 
     /** Is this a hataf (reduced) vowel */
     val isHataf: Boolean get() = this in setOf(HATAF_PATACH, HATAF_SEGOL, HATAF_KAMATZ)
@@ -249,9 +252,9 @@ enum class ArabicLetter(
     val initial: String,
     val medial: String,
     val finalForm: String,
-    val ipa: String,
+    override val ipa: String,
     val qwerty: Char
-) {
+) : ILayoutKey {
     ALIF("ا", "ا", "ـا", "ـا", "", 'h'),
     BA("ب", "بـ", "ـبـ", "ـب", "b", 'f'),
     TA("ت", "تـ", "ـتـ", "ـت", "t", 'j'),
@@ -282,6 +285,9 @@ enum class ArabicLetter(
     YA("ي", "يـ", "ـيـ", "ـي", "j", 'd'),
     HAMZA("ء", "ء", "ء", "ء", "ʔ", 'x'),
     TA_MARBUTA("ة", "ة", "ـة", "ـة", "a", ']');
+
+    override val char: String get() = isolated
+    override val displayName: String get() = name.lowercase()
 
     /** Get form for position */
     fun forPosition(pos: SyllablePosition): String = when (pos) {
@@ -594,7 +600,7 @@ fun HebrewLetter.toMorphoKey(): MorphoKey {
     // Modifiers (dagesh for bgdkpt)
     val modifiers = if (ipaDagesh != null && ipaDagesh != ipa) {
         mapOf(Modifier.SHIFT to MorphoKey(
-            base = MorphoVariant("$letter\u05BC", ipaDagesh!!, "$displayName-dagesh")
+            base = MorphoVariant("$letter\u05BC", ipaDagesh, "$displayName-dagesh")
         ))
     } else emptyMap()
 
@@ -617,7 +623,7 @@ fun HebrewPrefix.toMorphoKey(): MorphoKey {
     // Add dagesh modifier for bgdkpt
     val modifiers = if (letter.ipaDagesh != null && letter.ipaDagesh != letter.ipa) {
         mapOf(Modifier.SHIFT to MorphoKey(
-            base = MorphoVariant("${letter.letter}\u05BC", letter.ipaDagesh!!, "${letter.displayName}-dagesh")
+            base = MorphoVariant("${letter.letter}\u05BC", letter.ipaDagesh, "${letter.displayName}-dagesh")
         ))
     } else emptyMap()
 
