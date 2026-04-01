@@ -16,3 +16,4 @@
 .gitignore
 README.html
 keystore.jks
+build.log
