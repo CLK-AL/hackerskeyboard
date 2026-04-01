@@ -575,3 +575,219 @@ fun ipaToHue(ipa: String): Int {
         }
     }
 }
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// MORPHO KEY GENERATORS - Convert enums to MorphoKey instances
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/**
+ * Generate MorphoKey from HebrewLetter with position/modifier variants
+ */
+fun HebrewLetter.toMorphoKey(): MorphoKey {
+    val base = MorphoVariant(letter.toString(), ipa, displayName)
+
+    // Position map (final form for suffix)
+    val position = if (finalForm != null) {
+        mapOf(SyllablePosition.SUFFIX to MorphoVariant(finalForm.toString(), ipa, "$displayName sofit"))
+    } else emptyMap()
+
+    // Modifiers (dagesh for bgdkpt)
+    val modifiers = if (ipaDagesh != null && ipaDagesh != ipa) {
+        mapOf(Modifier.SHIFT to MorphoKey(
+            base = MorphoVariant("$letter\u05BC", ipaDagesh!!, "$displayName-dagesh")
+        ))
+    } else emptyMap()
+
+    return MorphoKey(base, position, emptyMap(), emptyMap(), modifiers)
+}
+
+/**
+ * Generate prefix MorphoKey from HebrewPrefix
+ */
+fun HebrewPrefix.toMorphoKey(): MorphoKey {
+    val base = MorphoVariant(letter.letter.toString(), letter.ipa, letter.displayName)
+    val position = mapOf(
+        SyllablePosition.PREFIX to MorphoVariant(form, ipa, "${letter.displayName}-prefix-$meaning"),
+        SyllablePosition.MIDDLE to base,
+        SyllablePosition.SUFFIX to if (letter.finalForm != null)
+            MorphoVariant(letter.finalForm.toString(), letter.ipa, "${letter.displayName}-sofit")
+        else base
+    )
+
+    // Add dagesh modifier for bgdkpt
+    val modifiers = if (letter.ipaDagesh != null && letter.ipaDagesh != letter.ipa) {
+        mapOf(Modifier.SHIFT to MorphoKey(
+            base = MorphoVariant("${letter.letter}\u05BC", letter.ipaDagesh!!, "${letter.displayName}-dagesh")
+        ))
+    } else emptyMap()
+
+    return MorphoKey(base, position, emptyMap(), emptyMap(), modifiers)
+}
+
+/**
+ * Generate suffix MorphoKey from HebrewSuffix
+ */
+fun HebrewSuffix.toMorphoKey(): MorphoKey {
+    val base = MorphoVariant(chars, ipa, name.lowercase().replace('_', '-'))
+    val numberMap = mapOf(number to base)
+    val genderMap = mapOf(gender to base)
+    return MorphoKey(base, emptyMap(), genderMap, numberMap, emptyMap())
+}
+
+/**
+ * Generate MorphoKey from ArabicLetter
+ */
+fun ArabicLetter.toMorphoKey(): MorphoKey {
+    val base = MorphoVariant(isolated, ipa, name.lowercase())
+    val position = mapOf(
+        SyllablePosition.PREFIX to MorphoVariant(initial, ipa, "${name.lowercase()}-initial"),
+        SyllablePosition.MIDDLE to MorphoVariant(medial, ipa, "${name.lowercase()}-medial"),
+        SyllablePosition.SUFFIX to MorphoVariant(finalForm, ipa, "${name.lowercase()}-final")
+    )
+    return MorphoKey(base, position, emptyMap(), emptyMap(), emptyMap())
+}
+
+/**
+ * Generate suffix MorphoKey from ArabicSuffix
+ */
+fun ArabicSuffix.toMorphoKey(): MorphoKey {
+    val base = MorphoVariant(chars, ipa, name.lowercase().replace('_', '-'))
+    val numberMap = mapOf(number to base)
+    val genderMap = mapOf(gender to base)
+    return MorphoKey(base, emptyMap(), genderMap, numberMap, emptyMap())
+}
+
+/**
+ * Hebrew keyboard layout using enums
+ */
+object HebrewMorphoEnum {
+    // All consonants from HebrewLetter
+    val consonants = HebrewLetter.entries
+        .filter { !it.isFinalForm }
+        .associateBy { it.letter }
+        .mapValues { it.value.toMorphoKey() }
+
+    // Prefix forms
+    val prefixes = HebrewPrefix.entries.map { it.toMorphoKey() }
+
+    // Plural suffixes by gender
+    val pluralSuffixes = mapOf(
+        Gender.MASCULINE to HebrewSuffix.MASC_PLURAL.toMorphoKey(),
+        Gender.FEMININE to HebrewSuffix.FEM_PLURAL.toMorphoKey()
+    )
+
+    // QWERTY mapping
+    val qwertyMap = mapOf(
+        "t" to HebrewLetter.ALEF,
+        "c" to HebrewLetter.BET,
+        "d" to HebrewLetter.GIMEL,
+        "s" to HebrewLetter.DALET,
+        "v" to HebrewLetter.HE,
+        "u" to HebrewLetter.VAV,
+        "z" to HebrewLetter.ZAYIN,
+        "j" to HebrewLetter.CHET,
+        "y" to HebrewLetter.TET,
+        "h" to HebrewLetter.YOD,
+        "f" to HebrewLetter.KAF,
+        "k" to HebrewLetter.LAMED,
+        "n" to HebrewLetter.MEM,
+        "b" to HebrewLetter.NUN,
+        "x" to HebrewLetter.SAMECH,
+        "g" to HebrewLetter.AYIN,
+        "p" to HebrewLetter.PE,
+        "m" to HebrewLetter.TSADI,
+        "e" to HebrewLetter.QOF,
+        "r" to HebrewLetter.RESH,
+        "a" to HebrewLetter.SHIN,
+        "," to HebrewLetter.TAV
+    )
+
+    val keys: Map<String, MorphoKey> = qwertyMap.mapValues { it.value.toMorphoKey() }
+}
+
+/**
+ * Arabic keyboard layout using enums
+ */
+object ArabicMorphoEnum {
+    val consonants = ArabicLetter.entries
+        .associateBy { it.isolated }
+        .mapValues { it.value.toMorphoKey() }
+
+    // AL prefix
+    val alPrefix = MorphoKey(
+        base = MorphoVariant("ال", "al", "al-definite"),
+        position = mapOf(SyllablePosition.PREFIX to MorphoVariant("الـ", "al", "al-prefix"))
+    )
+
+    val prefixes = listOf(alPrefix)
+
+    val pluralSuffixes = mapOf(
+        Gender.MASCULINE to ArabicSuffix.MASC_PLURAL_NOM.toMorphoKey(),
+        Gender.FEMININE to ArabicSuffix.FEM_PLURAL.toMorphoKey()
+    )
+
+    val qwertyMap = mapOf(
+        "h" to ArabicLetter.ALIF,
+        "f" to ArabicLetter.BA,
+        "j" to ArabicLetter.TA,
+        "e" to ArabicLetter.THA,
+        "p" to ArabicLetter.HA,
+        "o" to ArabicLetter.KHA,
+        "v" to ArabicLetter.RA,
+        "." to ArabicLetter.ZAY,
+        "s" to ArabicLetter.SEEN,
+        "a" to ArabicLetter.SHEEN,
+        "w" to ArabicLetter.SAD,
+        "q" to ArabicLetter.DAD,
+        "u" to ArabicLetter.AIN,
+        "y" to ArabicLetter.GHAIN,
+        "t" to ArabicLetter.FA,
+        "r" to ArabicLetter.QAF,
+        "k" to ArabicLetter.KAF,
+        "g" to ArabicLetter.LAM,
+        "l" to ArabicLetter.MEEM,
+        "," to ArabicLetter.WAW,
+        "d" to ArabicLetter.YA,
+        "x" to ArabicLetter.HAMZA
+    )
+
+    val keys: Map<String, MorphoKey> = qwertyMap.mapValues { it.value.toMorphoKey() }
+}
+
+/**
+ * Romance language suffixes using enums
+ */
+object RomanceMorphoEnum {
+    fun spanishEnding(gender: Gender, number: Number): MorphoKey =
+        SpanishSuffix.ending(gender, number).let {
+            MorphoKey(base = MorphoVariant(it.chars, it.ipa, it.name.lowercase()))
+        }
+
+    fun frenchEnding(gender: Gender, number: Number): MorphoKey =
+        FrenchSuffix.ending(gender, number).let {
+            MorphoKey(base = MorphoVariant(it.chars, it.ipa, it.name.lowercase()))
+        }
+
+    fun italianEnding(gender: Gender, number: Number): MorphoKey =
+        ItalianSuffix.ending(gender, number).let {
+            MorphoKey(base = MorphoVariant(it.chars, it.ipa, it.name.lowercase()))
+        }
+
+    fun portugueseEnding(gender: Gender, number: Number): MorphoKey =
+        PortugueseSuffix.ending(gender, number).let {
+            MorphoKey(base = MorphoVariant(it.chars, it.ipa, it.name.lowercase()))
+        }
+}
+
+/**
+ * German articles and plurals using enums
+ */
+object GermanMorphoEnum {
+    fun article(gender: Gender, number: Number, case: String = "nom"): MorphoKey =
+        GermanArticle.definite(gender, number, case).let {
+            MorphoKey(base = MorphoVariant(it.chars, it.ipa, it.name.lowercase()))
+        }
+
+    fun pluralSuffix(type: GermanPlural): MorphoKey =
+        MorphoKey(base = MorphoVariant(type.chars, type.ipa, type.name.lowercase()))
+}

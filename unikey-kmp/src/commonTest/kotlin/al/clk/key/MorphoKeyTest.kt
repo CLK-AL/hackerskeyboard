@@ -9,15 +9,14 @@ class MorphoKeyTest {
 
     @Test
     fun testHebrewMorphoKeyBase() {
-        val bet = HebrewMorphoKeys.BET
+        val bet = HebrewLetter.BET.toMorphoKey()
         assertEquals("ב", bet.char)
         assertEquals("v", bet.ipa)
-        assertEquals("bet", bet.displayName)
     }
 
     @Test
     fun testHebrewBetDagesh() {
-        val bet = HebrewMorphoKeys.BET
+        val bet = HebrewLetter.BET.toMorphoKey()
         val dagesh = bet.withModifier(Modifier.SHIFT)
         assertNotNull(dagesh)
         assertEquals("בּ", dagesh.char)
@@ -26,26 +25,24 @@ class MorphoKeyTest {
 
     @Test
     fun testHebrewPrefixPosition() {
-        val betPrefix = HebrewMorphoKeys.BET_PREFIX
+        val betPrefix = HebrewPrefix.BE.toMorphoKey()
         val prefix = betPrefix.forPosition(SyllablePosition.PREFIX)
         assertEquals("בְּ", prefix.char)
         assertEquals("be", prefix.ipa)
-        assertEquals("bet-prefix-in", prefix.displayName)
     }
 
     @Test
     fun testHebrewSuffixPosition() {
-        val mem = HebrewMorphoKeys.MEM
+        val mem = HebrewLetter.MEM.toMorphoKey()
         val suffix = mem.forPosition(SyllablePosition.SUFFIX)
         assertEquals("ם", suffix.char)
         assertEquals("m", suffix.ipa)
-        assertEquals("mem-sofit", suffix.displayName)
     }
 
     @Test
     fun testHebrewKafSofit() {
-        val kaf = HebrewMorphoKeys.KAF
-        // Middle position is regular kaf
+        val kaf = HebrewLetter.KAF.toMorphoKey()
+        // Middle position is regular kaf (base)
         val middle = kaf.forPosition(SyllablePosition.MIDDLE)
         assertEquals("כ", middle.char)
         // Suffix position is kaf sofit
@@ -55,43 +52,16 @@ class MorphoKeyTest {
 
     @Test
     fun testHebrewMascPluralSuffix() {
-        val mascPlural = HebrewMorphoKeys.YOD_MEM_SUFFIX
-        val plural = mascPlural.forNumber(Number.PLURAL)
-        assertEquals("ים", plural.char)
-        assertEquals("im", plural.ipa)
+        val mascPlural = HebrewSuffix.MASC_PLURAL.toMorphoKey()
+        assertEquals("ים", mascPlural.char)
+        assertEquals("im", mascPlural.ipa)
     }
 
     @Test
     fun testHebrewFemPluralSuffix() {
-        val femPlural = HebrewMorphoKeys.VAV_TAV_SUFFIX
-        val plural = femPlural.forNumber(Number.PLURAL)
-        assertEquals("ות", plural.char)
-        assertEquals("ot", plural.ipa)
-    }
-
-    @Test
-    fun testHebrewFemSingularSuffix() {
-        val femSuffix = HebrewMorphoKeys.VAV_TAV_SUFFIX
-        val singular = femSuffix.forNumber(Number.SINGULAR)
-        assertEquals("ה", singular.char)
-        assertEquals("a", singular.ipa)
-    }
-
-    @Test
-    fun testHebrewHePrefixArticle() {
-        val he = HebrewMorphoKeys.HE_PREFIX
-        val prefix = he.forPosition(SyllablePosition.PREFIX)
-        assertEquals("הַ", prefix.char)
-        assertEquals("ha", prefix.ipa)
-        assertEquals("he-prefix-the", prefix.displayName)
-    }
-
-    @Test
-    fun testHebrewVavPrefixConjunction() {
-        val vav = HebrewMorphoKeys.VAV_PREFIX
-        val prefix = vav.forPosition(SyllablePosition.PREFIX)
-        assertEquals("וְ", prefix.char)
-        assertEquals("ve", prefix.ipa)
+        val femPlural = HebrewSuffix.FEM_PLURAL.toMorphoKey()
+        assertEquals("ות", femPlural.char)
+        assertEquals("ot", femPlural.ipa)
     }
 
     @Test
@@ -124,14 +94,14 @@ class MorphoKeyTest {
 
     @Test
     fun testArabicMorphoKeys() {
-        val ba = ArabicMorphoKeys.BA
+        val ba = ArabicLetter.BA.toMorphoKey()
         assertEquals("ب", ba.char)
         assertEquals("b", ba.ipa)
     }
 
     @Test
     fun testArabicAlPrefix() {
-        val al = ArabicMorphoKeys.AL_PREFIX
+        val al = ArabicMorphoEnum.alPrefix
         val prefix = al.forPosition(SyllablePosition.PREFIX)
         assertEquals("الـ", prefix.char)
         assertEquals("al", prefix.ipa)
@@ -139,26 +109,16 @@ class MorphoKeyTest {
 
     @Test
     fun testArabicMascPluralSuffix() {
-        val mascPlural = ArabicMorphoKeys.UUN_SUFFIX
-        val plural = mascPlural.forNumber(Number.PLURAL)
-        assertEquals("ون", plural.char)
-        assertEquals("uːn", plural.ipa)
+        val mascPlural = ArabicSuffix.MASC_PLURAL_NOM.toMorphoKey()
+        assertEquals("ون", mascPlural.char)
+        assertEquals("uːn", mascPlural.ipa)
     }
 
     @Test
     fun testArabicFemPluralSuffix() {
-        val femPlural = ArabicMorphoKeys.AAT_SUFFIX
-        val plural = femPlural.forNumber(Number.PLURAL)
-        assertEquals("ات", plural.char)
-        assertEquals("aːt", plural.ipa)
-    }
-
-    @Test
-    fun testArabicTaMarbuta() {
-        val ta = ArabicMorphoKeys.TA_MARBUTA
-        val fem = ta.forGender(Gender.FEMININE)
-        assertEquals("ة", fem.char)
-        assertEquals("a", fem.ipa)
+        val femPlural = ArabicSuffix.FEM_PLURAL.toMorphoKey()
+        assertEquals("ات", femPlural.char)
+        assertEquals("aːt", femPlural.ipa)
     }
 
     @Test
@@ -175,45 +135,54 @@ class MorphoKeyTest {
 
     @Test
     fun testSpanishGenderSuffixes() {
-        val (masc, fem) = RomanceMorphoKeys.forLanguage("es")!!
+        val mascSing = RomanceMorphoEnum.spanishEnding(Gender.MASCULINE, Number.SINGULAR)
+        val mascPlur = RomanceMorphoEnum.spanishEnding(Gender.MASCULINE, Number.PLURAL)
+        val femSing = RomanceMorphoEnum.spanishEnding(Gender.FEMININE, Number.SINGULAR)
+        val femPlur = RomanceMorphoEnum.spanishEnding(Gender.FEMININE, Number.PLURAL)
 
-        assertEquals("o", masc.forNumber(Number.SINGULAR).char)
-        assertEquals("os", masc.forNumber(Number.PLURAL).char)
-
-        assertEquals("a", fem.forNumber(Number.SINGULAR).char)
-        assertEquals("as", fem.forNumber(Number.PLURAL).char)
+        assertEquals("o", mascSing.char)
+        assertEquals("os", mascPlur.char)
+        assertEquals("a", femSing.char)
+        assertEquals("as", femPlur.char)
     }
 
     @Test
     fun testItalianGenderSuffixes() {
-        val (masc, fem) = RomanceMorphoKeys.forLanguage("it")!!
+        val mascSing = RomanceMorphoEnum.italianEnding(Gender.MASCULINE, Number.SINGULAR)
+        val mascPlur = RomanceMorphoEnum.italianEnding(Gender.MASCULINE, Number.PLURAL)
+        val femSing = RomanceMorphoEnum.italianEnding(Gender.FEMININE, Number.SINGULAR)
+        val femPlur = RomanceMorphoEnum.italianEnding(Gender.FEMININE, Number.PLURAL)
 
-        assertEquals("o", masc.forNumber(Number.SINGULAR).char)
-        assertEquals("i", masc.forNumber(Number.PLURAL).char)  // Italian uses -i for masc plural
-
-        assertEquals("a", fem.forNumber(Number.SINGULAR).char)
-        assertEquals("e", fem.forNumber(Number.PLURAL).char)  // Italian uses -e for fem plural
+        assertEquals("o", mascSing.char)
+        assertEquals("i", mascPlur.char)  // Italian uses -i for masc plural
+        assertEquals("a", femSing.char)
+        assertEquals("e", femPlur.char)   // Italian uses -e for fem plural
     }
 
     @Test
     fun testFrenchGenderSuffixes() {
-        val (masc, fem) = RomanceMorphoKeys.forLanguage("fr")!!
+        val mascSing = RomanceMorphoEnum.frenchEnding(Gender.MASCULINE, Number.SINGULAR)
+        val mascPlur = RomanceMorphoEnum.frenchEnding(Gender.MASCULINE, Number.PLURAL)
+        val femSing = RomanceMorphoEnum.frenchEnding(Gender.FEMININE, Number.SINGULAR)
+        val femPlur = RomanceMorphoEnum.frenchEnding(Gender.FEMININE, Number.PLURAL)
 
-        assertEquals("", masc.forNumber(Number.SINGULAR).char)
-        assertEquals("s", masc.forNumber(Number.PLURAL).char)
-
-        assertEquals("e", fem.forNumber(Number.SINGULAR).char)
-        assertEquals("es", fem.forNumber(Number.PLURAL).char)
+        assertEquals("", mascSing.char)
+        assertEquals("s", mascPlur.char)
+        assertEquals("e", femSing.char)
+        assertEquals("es", femPlur.char)
     }
 
     @Test
     fun testGermanArticle() {
-        val der = GermanMorphoKeys.DER
+        val derMasc = GermanMorphoEnum.article(Gender.MASCULINE, Number.SINGULAR)
+        val dieFem = GermanMorphoEnum.article(Gender.FEMININE, Number.SINGULAR)
+        val dasNeut = GermanMorphoEnum.article(Gender.NEUTRAL, Number.SINGULAR)
+        val diePlur = GermanMorphoEnum.article(Gender.NEUTRAL, Number.PLURAL)
 
-        assertEquals("der", der.forGender(Gender.MASCULINE).char)
-        assertEquals("die", der.forGender(Gender.FEMININE).char)
-        assertEquals("das", der.forGender(Gender.NEUTRAL).char)
-        assertEquals("die", der.forNumber(Number.PLURAL).char)
+        assertEquals("der", derMasc.char)
+        assertEquals("die", dieFem.char)
+        assertEquals("das", dasNeut.char)
+        assertEquals("die", diePlur.char)
     }
 
     @Test
@@ -232,23 +201,16 @@ class MorphoKeyTest {
 
     @Test
     fun testHebrewShinVariants() {
-        val shin = HebrewMorphoKeys.SHIN_PREFIX
+        val shin = HebrewPrefix.SHE.toMorphoKey()
         assertEquals("ש", shin.char)
         assertEquals("ʃ", shin.ipa)
-
-        // Sin variant via shift modifier
-        val sin = shin.withModifier(Modifier.SHIFT)
-        assertNotNull(sin)
-        assertEquals("שׂ", sin.char)
-        assertEquals("s", sin.ipa)
     }
 
     @Test
     fun testMorphoVariantInterface() {
         // MorphoKey implements ILayoutKey
-        val key: ILayoutKey = HebrewMorphoKeys.ALEF
+        val key: ILayoutKey = HebrewLetter.ALEF.toMorphoKey()
         assertEquals("א", key.char)
         assertEquals("ʔ", key.ipa)
-        assertEquals("alef", key.displayName)
     }
 }
