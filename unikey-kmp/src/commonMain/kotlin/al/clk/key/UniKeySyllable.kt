@@ -779,5 +779,86 @@ data class UniKeySyllable(
                 360 - kotlin.math.abs(h1 - h2)
             ) / 10
         }
+
+        // ═══ Latin-script languages (with language-specific patterns) ═══
+
+        /**
+         * Parse Latin-script word into syllables using language-specific patterns.
+         * Falls back to generic English parsing if language has no specific patterns.
+         */
+        fun parseLatin(word: String, lang: Lang): List<UniKeySyllable> {
+            val w = word.lowercase()
+
+            // Try to match language-specific ending patterns for better IPA
+            val endingIpa = when (lang) {
+                Lang.DE -> GermanPattern.matchEnding(w)?.ipa
+                Lang.FR -> FrenchPattern.matchEnding(w)?.ipa
+                Lang.ES -> SpanishPattern.matchEnding(w)?.ipa
+                Lang.IT -> ItalianPattern.matchEnding(w)?.ipa
+                Lang.PT -> PortuguesePattern.matchEnding(w)?.ipa
+                Lang.NL -> DutchPattern.matchEnding(w)?.ipa
+                Lang.PL -> PolishPattern.matchEnding(w)?.ipa
+                Lang.TR -> TurkishPattern.matchEnding(w)?.ipa
+                else -> null
+            }
+
+            // Use generic English parsing but with language-specific ending IPA
+            val syllables = parseEnglish(word).toMutableList()
+
+            // Replace last syllable's vowel/IPA if we have a language-specific match
+            if (endingIpa != null && syllables.isNotEmpty()) {
+                val last = syllables.last()
+                syllables[syllables.lastIndex] = UniKeySyllable(
+                    consonant = last.consonant,
+                    vowel = endingIpa,
+                    original = last.original
+                )
+            }
+
+            return syllables
+        }
+
+        /**
+         * Convert word to IPA for a specific language.
+         * This allows explicit language selection rather than auto-detection.
+         */
+        fun toIpaForLang(word: String, lang: Lang): List<UniKeySyllable> {
+            return when (lang.script) {
+                Script.HEBREW -> parseHebrew(word)
+                Script.ARABIC -> parseArabic(word)
+                Script.GREEK -> parseGreek(word)
+                Script.DEVANAGARI -> parseDevanagari(word)
+                Script.CYRILLIC -> parseCyrillic(word)
+                Script.HANGUL -> parseHangul(word)
+                Script.HIRAGANA -> parseJapanese(word)
+                Script.CJK -> parseCjk(word)
+                Script.LATIN -> parseLatin(word, lang)
+                Script.UNKNOWN -> parseEnglish(word)
+            }
+        }
+
+        /**
+         * Get rhyme key for a word in a specific language.
+         */
+        fun rhymeKeyForLang(word: String, lang: Lang, syllableCount: Int = 1): String {
+            val syllables = toIpaForLang(word, lang)
+            return syllables.takeLast(syllableCount)
+                .joinToString("-") { "${it.consonant}${it.vowel}" }
+        }
+
+        /**
+         * Get word hue for a specific language.
+         */
+        fun wordHueForLang(word: String, lang: Lang): Int {
+            val syllables = toIpaForLang(word, lang)
+            return syllables.lastOrNull()?.hue ?: 0
+        }
+
+        /**
+         * Get word end color for a specific language.
+         */
+        fun wordEndColorForLang(word: String, lang: Lang): String {
+            return hsl(wordHueForLang(word, lang), 80, 72)
+        }
     }
 }

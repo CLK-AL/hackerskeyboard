@@ -478,3 +478,102 @@ fun getAllVowels(): Array<dynamic> {
         obj
     }.toTypedArray()
 }
+
+// ═══ TargetLanguage System (Multi-language Support) ═══
+
+@JsName("getSupportedTargetLanguages")
+fun getSupportedTargetLanguages(): Array<dynamic> {
+    return TargetLanguage.ALL.map { lang ->
+        val obj = js("{}")
+        obj["code"] = lang.code
+        obj["nativeName"] = lang.nativeName
+        obj["direction"] = lang.direction.name
+        obj["script"] = lang.script.name
+        obj
+    }.toTypedArray()
+}
+
+@JsName("getTargetLanguage")
+fun getTargetLanguage(code: String): dynamic? {
+    val lang = TargetLanguage.fromCode(code) ?: return null
+    val obj = js("{}")
+    obj["code"] = lang.code
+    obj["nativeName"] = lang.nativeName
+    obj["direction"] = lang.direction.name
+    obj["script"] = lang.script.name
+    return obj
+}
+
+@JsName("toIpaForLang")
+fun toIpaForLang(word: String, langCode: String): Array<dynamic> {
+    val lang = Lang.fromCode(langCode) ?: return emptyArray()
+    return UniKeySyllable.toIpaForLang(word, lang).map { syl ->
+        val obj = js("{}")
+        obj["consonant"] = syl.consonant
+        obj["vowel"] = syl.vowel
+        obj["original"] = syl.original
+        obj["hue"] = syl.hue
+        obj
+    }.toTypedArray()
+}
+
+@JsName("wordHueForLang")
+fun wordHueForLang(word: String, langCode: String): Int {
+    val lang = Lang.fromCode(langCode) ?: return 0
+    return UniKeySyllable.wordHueForLang(word, lang)
+}
+
+@JsName("wordEndColorForLang")
+fun wordEndColorForLang(word: String, langCode: String): String {
+    val lang = Lang.fromCode(langCode) ?: return "hsl(0, 0%, 50%)"
+    return UniKeySyllable.wordEndColorForLang(word, lang)
+}
+
+@JsName("rhymeKeyForLang")
+fun rhymeKeyForLang(word: String, langCode: String, syllableCount: Int = 1): String {
+    val lang = Lang.fromCode(langCode) ?: return ""
+    return UniKeySyllable.rhymeKeyForLang(word, lang, syllableCount)
+}
+
+@JsName("parseSyllablesForLang")
+fun parseSyllablesForLang(word: String, langCode: String): Array<dynamic> {
+    val targetLang = TargetLanguage.fromCode(langCode) ?: return emptyArray()
+    return targetLang.parseSyllables(word).map { syl ->
+        val obj = js("{}")
+        obj["consonant"] = syl.consonant
+        obj["vowel"] = syl.vowel
+        obj["original"] = syl.original
+        obj["hue"] = syl.hue
+        obj
+    }.toTypedArray()
+}
+
+@JsName("getLanguagePromptHints")
+fun getLanguagePromptHints(langCode: String): dynamic? {
+    val targetLang = TargetLanguage.fromCode(langCode) ?: return null
+    val hints = targetLang.aiPromptHints
+    val obj = js("{}")
+    obj["linguistRole"] = hints.linguistRole
+    obj["culturalNotes"] = hints.culturalNotes
+    obj["rhymeNotes"] = hints.rhymeNotes
+    obj["grammarNotes"] = hints.grammarNotes
+    obj["genderNotes"] = hints.genderNotes
+    obj["scriptNotes"] = hints.scriptNotes
+    return obj
+}
+
+@JsName("generateAnalysisPrompt")
+fun generateAnalysisPrompt(srcLangCode: String, tgtLangCode: String, context: String = ""): String {
+    val srcLang = Lang.fromCode(srcLangCode) ?: return ""
+    val tgtLang = TargetLanguage.fromCode(tgtLangCode) ?: return ""
+    val pair = TranslationPair(srcLang, tgtLang)
+    return pair.generateAnalysisPrompt(context)
+}
+
+@JsName("generatePathPrompt")
+fun generatePathPrompt(srcLangCode: String, tgtLangCode: String, context: String = ""): String {
+    val srcLang = Lang.fromCode(srcLangCode) ?: return ""
+    val tgtLang = TargetLanguage.fromCode(tgtLangCode) ?: return ""
+    val pair = TranslationPair(srcLang, tgtLang)
+    return pair.generatePathPrompt(context)
+}
