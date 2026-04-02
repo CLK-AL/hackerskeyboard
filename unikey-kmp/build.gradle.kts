@@ -22,6 +22,17 @@ kotlin {
         binaries.library()
     }
 
+    // WebAssembly target for browser (Kotlin/Wasm)
+    @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
+    wasmJs {
+        browser {
+            webpackTask {
+                mainOutputFileName = "unikey-wasm.js"
+            }
+        }
+        binaries.library()
+    }
+
     // Source sets
     sourceSets {
         val commonMain by getting {
@@ -45,6 +56,18 @@ kotlin {
         val jsMain by getting {
             dependencies {
                 implementation(kotlin("stdlib-js"))
+            }
+        }
+
+        val wasmJsMain by getting {
+            dependencies {
+                implementation(kotlin("stdlib"))
+            }
+        }
+
+        val wasmJsTest by getting {
+            dependencies {
+                implementation(kotlin("test"))
             }
         }
     }
