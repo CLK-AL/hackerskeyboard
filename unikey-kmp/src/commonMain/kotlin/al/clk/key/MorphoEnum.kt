@@ -663,6 +663,78 @@ fun ArabicSuffix.toMorphoKey(): MorphoKey {
     return MorphoKey(base, emptyMap(), genderMap, numberMap, emptyMap())
 }
 
+// ═══════════════════════════════════════════════════════════════════════════════
+// LAYOUT KEY GENERATORS - Convert enums to LayoutKey instances
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/**
+ * Generate LayoutKey from HebrewLetter
+ */
+fun HebrewLetter.toLayoutKey(): LayoutKey {
+    val modifiers = if (ipaDagesh != null && ipaDagesh != ipa) {
+        mapOf(Modifier.SHIFT to LayoutKey("$letter\u05BC", ipaDagesh, "$displayName-dagesh"))
+    } else emptyMap()
+    return LayoutKey(letter.toString(), ipa, displayName, modifiers)
+}
+
+/**
+ * Generate LayoutKey from ArabicLetter with optional shift modifier
+ */
+fun ArabicLetter.toLayoutKey(shiftChar: String? = null, shiftIpa: String? = null, shiftName: String? = null): LayoutKey {
+    val modifiers = if (shiftChar != null) {
+        mapOf(Modifier.SHIFT to LayoutKey(shiftChar, shiftIpa ?: "", shiftName ?: shiftChar))
+    } else emptyMap()
+    return LayoutKey(isolated, ipa, displayName, modifiers)
+}
+
+/**
+ * Arabic keyboard shift modifiers (harakat and punctuation) by qwerty key
+ */
+val arabicShiftMap: Map<Char, Triple<String, String, String>> = mapOf(
+    'q' to Triple("َ", "a", "fatha"),
+    'w' to Triple("ً", "an", "tanwin-fath"),
+    'e' to Triple("ُ", "u", "damma"),
+    'r' to Triple("ٌ", "un", "tanwin-damm"),
+    't' to Triple("ِ", "i", "kasra"),
+    'y' to Triple("ٍ", "in", "tanwin-kasr"),
+    'u' to Triple("ّ", "", "shadda"),
+    'i' to Triple("ْ", "", "sukun"),
+    'o' to Triple("ـ", "", "tatweel"),
+    'p' to Triple("؛", "", "semicolon"),
+    'a' to Triple("\\", "", "backslash"),
+    'd' to Triple("]", "", "bracket-right"),
+    'f' to Triple("[", "", "bracket-left"),
+    'g' to Triple("لأ", "laʔ", "lam-hamza"),
+    'h' to Triple("أ", "ʔ", "alif-hamza"),
+    'j' to Triple("ـ", "", "tatweel"),
+    'k' to Triple("،", "", "comma"),
+    'l' to Triple("/", "", "slash"),
+    'z' to Triple("~", "", "tilde"),
+    'x' to Triple("ْ", "", "sukun"),
+    'c' to Triple("}", "", "brace-right"),
+    'v' to Triple("{", "", "brace-left"),
+    ',' to Triple(",", "", "comma"),
+    '.' to Triple(".", "", "period")
+)
+
+/**
+ * Arabic keyboard keys generated from enum with shift modifiers
+ */
+val arabicKeys: Map<String, LayoutKey> = ArabicLetter.entries
+    .filter { it.qwerty != '/' }  // Skip letters with placeholder qwerty
+    .associate { letter ->
+        val shift = arabicShiftMap[letter.qwerty]
+        letter.qwerty.toString() to letter.toLayoutKey(shift?.first, shift?.second, shift?.third)
+    } + mapOf(
+    // Additional keys not in ArabicLetter enum
+    "b" to LayoutKey("لا", "la", "lam-alif", mapOf(Modifier.SHIFT to LayoutKey("لآ", "laː", "lam-alif-madda"))),
+    "n" to LayoutKey("ى", "aː", "alif-maqsura", mapOf(Modifier.SHIFT to LayoutKey("آ", "ʔaː", "alif-madda"))),
+    "m" to LayoutKey("ة", "a", "ta-marbuta", mapOf(Modifier.SHIFT to LayoutKey("'", "", "quote"))),
+    "z" to LayoutKey("ئ", "ʔ", "hamza-ya", mapOf(Modifier.SHIFT to LayoutKey("~", "", "tilde"))),
+    "c" to LayoutKey("ؤ", "ʔ", "hamza-waw", mapOf(Modifier.SHIFT to LayoutKey("}", "", "brace-right"))),
+    "/" to LayoutKey("ظ", "ðˤ", "za", mapOf(Modifier.SHIFT to LayoutKey("؟", "", "question")))
+)
+
 /**
  * Hebrew keyboard layout using enums
  */
@@ -682,31 +754,10 @@ object HebrewMorphoEnum {
         Gender.FEMININE to HebrewSuffix.FEM_PLURAL.toMorphoKey()
     )
 
-    // QWERTY mapping
-    val qwertyMap = mapOf(
-        "t" to HebrewLetter.ALEF,
-        "c" to HebrewLetter.BET,
-        "d" to HebrewLetter.GIMEL,
-        "s" to HebrewLetter.DALET,
-        "v" to HebrewLetter.HE,
-        "u" to HebrewLetter.VAV,
-        "z" to HebrewLetter.ZAYIN,
-        "j" to HebrewLetter.CHET,
-        "y" to HebrewLetter.TET,
-        "h" to HebrewLetter.YOD,
-        "f" to HebrewLetter.KAF,
-        "k" to HebrewLetter.LAMED,
-        "n" to HebrewLetter.MEM,
-        "b" to HebrewLetter.NUN,
-        "x" to HebrewLetter.SAMECH,
-        "g" to HebrewLetter.AYIN,
-        "p" to HebrewLetter.PE,
-        "m" to HebrewLetter.TSADI,
-        "e" to HebrewLetter.QOF,
-        "r" to HebrewLetter.RESH,
-        "a" to HebrewLetter.SHIN,
-        "," to HebrewLetter.TAV
-    )
+    // QWERTY mapping - generated from HebrewLetter enum
+    val qwertyMap: Map<String, HebrewLetter> = HebrewLetter.entries
+        .filter { it.qwerty.isNotEmpty() && !it.isFinalForm }
+        .associateBy { it.qwerty }
 
     val keys: Map<String, MorphoKey> = qwertyMap.mapValues { it.value.toMorphoKey() }
 }
@@ -732,30 +783,10 @@ object ArabicMorphoEnum {
         Gender.FEMININE to ArabicSuffix.FEM_PLURAL.toMorphoKey()
     )
 
-    val qwertyMap = mapOf(
-        "h" to ArabicLetter.ALIF,
-        "f" to ArabicLetter.BA,
-        "j" to ArabicLetter.TA,
-        "e" to ArabicLetter.THA,
-        "p" to ArabicLetter.HA,
-        "o" to ArabicLetter.KHA,
-        "v" to ArabicLetter.RA,
-        "." to ArabicLetter.ZAY,
-        "s" to ArabicLetter.SEEN,
-        "a" to ArabicLetter.SHEEN,
-        "w" to ArabicLetter.SAD,
-        "q" to ArabicLetter.DAD,
-        "u" to ArabicLetter.AIN,
-        "y" to ArabicLetter.GHAIN,
-        "t" to ArabicLetter.FA,
-        "r" to ArabicLetter.QAF,
-        "k" to ArabicLetter.KAF,
-        "g" to ArabicLetter.LAM,
-        "l" to ArabicLetter.MEEM,
-        "," to ArabicLetter.WAW,
-        "d" to ArabicLetter.YA,
-        "x" to ArabicLetter.HAMZA
-    )
+    // QWERTY mapping - generated from ArabicLetter enum
+    val qwertyMap: Map<String, ArabicLetter> = ArabicLetter.entries
+        .filter { it.qwerty != '/' }  // Skip letters with placeholder qwerty
+        .associateBy { it.qwerty.toString() }
 
     val keys: Map<String, MorphoKey> = qwertyMap.mapValues { it.value.toMorphoKey() }
 }

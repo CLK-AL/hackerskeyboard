@@ -121,37 +121,7 @@ object KeyboardLayouts {
         name = "Arabic",
         nativeName = "العربية",
         script = UniKeySyllable.Companion.Script.ARABIC,
-        keys = mapOf(
-            "q" to key("ض", "dˤ", "dad", "َ", "a", "fatha"),
-            "w" to key("ص", "sˤ", "sad", "ً", "an", "tanwin-fath"),
-            "e" to key("ث", "θ", "tha", "ُ", "u", "damma"),
-            "r" to key("ق", "q", "qaf", "ٌ", "un", "tanwin-damm"),
-            "t" to key("ف", "f", "fa", "ِ", "i", "kasra"),
-            "y" to key("غ", "ɣ", "ghain", "ٍ", "in", "tanwin-kasr"),
-            "u" to key("ع", "ʕ", "ain", "ّ", "", "shadda"),
-            "i" to key("ه", "h", "ha", "ْ", "", "sukun"),
-            "o" to key("خ", "x", "kha", "ـ", "", "tatweel"),
-            "p" to key("ح", "ħ", "ha", "؛", "", "semicolon"),
-            "a" to key("ش", "ʃ", "shin", "\\", "", "backslash"),
-            "s" to key("س", "s", "sin"),
-            "d" to key("ي", "j", "ya", "]", "", "bracket-right"),
-            "f" to key("ب", "b", "ba", "[", "", "bracket-left"),
-            "g" to key("ل", "l", "lam", "لأ", "laʔ", "lam-hamza"),
-            "h" to key("ا", "", "alif", "أ", "ʔ", "alif-hamza"),
-            "j" to key("ت", "t", "ta", "ـ", "", "tatweel"),
-            "k" to key("ن", "n", "nun", "،", "", "comma"),
-            "l" to key("م", "m", "mim", "/", "", "slash"),
-            "z" to key("ئ", "ʔ", "hamza-ya", "~", "", "tilde"),
-            "x" to key("ء", "ʔ", "hamza", "ْ", "", "sukun"),
-            "c" to key("ؤ", "ʔ", "hamza-waw", "}", "", "brace-right"),
-            "v" to key("ر", "r", "ra", "{", "", "brace-left"),
-            "b" to key("لا", "la", "lam-alif", "لآ", "laː", "lam-alif-madda"),
-            "n" to key("ى", "aː", "alif-maqsura", "آ", "ʔaː", "alif-madda"),
-            "m" to key("ة", "a", "ta-marbuta", "'", "", "quote"),
-            "," to key("و", "w", "waw", ",", "", "comma"),
-            "." to key("ز", "z", "zay", ".", "", "period"),
-            "/" to key("ظ", "ðˤ", "za", "؟", "", "question")
-        )
+        keys = arabicKeys
     )
 
     // ═══ Danish (da) ═══
@@ -277,41 +247,18 @@ object KeyboardLayouts {
     )
 
     // ═══ Hebrew (he) ═══
+    // Keys generated from HebrewLetter enum
+    private val hebrewKeys: Map<String, LayoutKey> = HebrewLetter.entries
+        .filter { it.qwerty.isNotEmpty() }
+        .associate { it.qwerty to it.toLayoutKey() } +
+        mapOf("4" to key("₪", "", "shekel", "$", "", "dollar"))
+
     val HE = KeyboardLayout(
         code = "he",
         name = "Hebrew",
         nativeName = "עברית",
         script = UniKeySyllable.Companion.Script.HEBREW,
-        keys = mapOf(
-            "t" to key("א", "ʔ", "alef"),
-            "c" to key("ב", "v", "bet"),
-            "d" to key("ג", "g", "gimel"),
-            "s" to key("ד", "d", "dalet"),
-            "v" to key("ה", "h", "he"),
-            "u" to key("ו", "v", "vav"),
-            "z" to key("ז", "z", "zayin"),
-            "j" to key("ח", "x", "chet"),
-            "y" to key("ט", "t", "tet"),
-            "h" to key("י", "j", "yod"),
-            "l" to key("ך", "x", "kaf-sofit"),
-            "f" to key("כ", "x", "kaf"),
-            "k" to key("ל", "l", "lamed"),
-            "o" to key("ם", "m", "mem-sofit"),
-            "n" to key("מ", "m", "mem"),
-            "i" to key("ן", "n", "nun-sofit"),
-            "b" to key("נ", "n", "nun"),
-            "x" to key("ס", "s", "samech"),
-            "g" to key("ע", "ʕ", "ayin"),
-            ";" to key("ף", "f", "pe-sofit"),
-            "p" to key("פ", "f", "pe"),
-            "." to key("ץ", "ts", "tsadi-sofit"),
-            "m" to key("צ", "ts", "tsadi"),
-            "e" to key("ק", "k", "qof"),
-            "r" to key("ר", "ʁ", "resh"),
-            "a" to key("ש", "ʃ", "shin"),
-            "," to key("ת", "t", "tav"),
-            "4" to key("₪", "", "shekel", "$", "", "dollar")
-        )
+        keys = hebrewKeys
     )
 
     // ═══ Hindi (hi) ═══
