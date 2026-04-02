@@ -93,7 +93,9 @@ enum class CyrillicKey(
 
     companion object {
         private val byQwerty = entries.associateBy { it.qwerty }
+        private val byChar = entries.associateBy { it.char.firstOrNull() }
         fun fromQwerty(key: String): CyrillicKey? = byQwerty[key]
+        fun fromChar(c: Char): CyrillicKey? = byChar[c]
     }
 }
 
@@ -225,7 +227,10 @@ enum class HiraganaKey(
 
     companion object {
         private val byRomaji = entries.associateBy { it.romaji }
+        private val byChar = entries.associateBy { it.char.firstOrNull() }
+        private val byKatakana = entries.associateBy { it.katakana.firstOrNull() }
         fun fromRomaji(r: String): HiraganaKey? = byRomaji[r]
+        fun fromChar(c: Char): HiraganaKey? = byChar[c] ?: byKatakana[c]
     }
 }
 
@@ -288,6 +293,8 @@ enum class DevanagariKey(
     companion object {
         val consonants = entries.filter { !it.isVowel }
         val vowels = entries.filter { it.isVowel }
+        private val byChar = entries.associateBy { it.char.firstOrNull() }
+        fun fromChar(c: Char): DevanagariKey? = byChar[c]
     }
 }
 

@@ -306,9 +306,11 @@ enum class ArabicLetter(
 
     companion object {
         private val byIsolated = entries.associateBy { it.isolated }
+        private val byIsolatedChar = entries.associateBy { it.isolated.firstOrNull() }
         private val byQwerty = entries.associateBy { it.qwerty }
 
         fun fromChar(s: String): ArabicLetter? = byIsolated[s]
+        fun fromChar(c: Char): ArabicLetter? = byIsolatedChar[c]
         fun fromQwerty(c: Char): ArabicLetter? = byQwerty[c]
     }
 }

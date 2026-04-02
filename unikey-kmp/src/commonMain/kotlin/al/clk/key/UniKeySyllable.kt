@@ -381,38 +381,8 @@ data class UniKeySyllable(
             return syllables
         }
 
-        private fun arabicConsonantIpa(c: Char): String = when (c) {
-            '\u0627' -> ""      // alif - vowel carrier
-            '\u0628' -> "b"     // ba
-            '\u062A' -> "t"     // ta
-            '\u062B' -> "θ"     // tha
-            '\u062C' -> "dʒ"    // jeem
-            '\u062D' -> "ħ"     // ḥa
-            '\u062E' -> "x"     // kha
-            '\u062F' -> "d"     // dal
-            '\u0630' -> "ð"     // dhal
-            '\u0631' -> "r"     // ra
-            '\u0632' -> "z"     // zay
-            '\u0633' -> "s"     // sin
-            '\u0634' -> "ʃ"     // shin
-            '\u0635' -> "sˤ"    // ṣad (emphatic)
-            '\u0636' -> "dˤ"    // ḍad (emphatic)
-            '\u0637' -> "tˤ"    // ṭa (emphatic)
-            '\u0638' -> "ðˤ"    // ẓa (emphatic)
-            '\u0639' -> "ʕ"     // ain
-            '\u063A' -> "ɣ"     // ghain
-            '\u0641' -> "f"     // fa
-            '\u0642' -> "q"     // qaf
-            '\u0643' -> "k"     // kaf
-            '\u0644' -> "l"     // lam
-            '\u0645' -> "m"     // mim
-            '\u0646' -> "n"     // nun
-            '\u0647' -> "h"     // ha
-            '\u0648' -> "w"     // waw
-            '\u064A' -> "j"     // ya
-            '\u0621' -> "ʔ"     // hamza
-            else -> ""
-        }
+        private fun arabicConsonantIpa(c: Char): String =
+            ArabicLetter.fromChar(c)?.ipa ?: ""
 
         private fun collectArabicVowel(word: String, start: Int): Pair<String, Int> {
             if (start >= word.length) return "a" to 0
@@ -580,41 +550,16 @@ data class UniKeySyllable(
             return syllables
         }
 
-        private fun cyrillicCharIpa(c: Char): Pair<String, String> = when (c) {
-            'а' -> "" to "a"
-            'б' -> "b" to ""
-            'в' -> "v" to ""
-            'г' -> "ɡ" to ""
-            'д' -> "d" to ""
-            'е' -> "j" to "e"
-            'ё' -> "j" to "o"
-            'ж' -> "ʒ" to ""
-            'з' -> "z" to ""
-            'и' -> "" to "i"
-            'й' -> "j" to ""
-            'к' -> "k" to ""
-            'л' -> "l" to ""
-            'м' -> "m" to ""
-            'н' -> "n" to ""
-            'о' -> "" to "o"
-            'п' -> "p" to ""
-            'р' -> "r" to ""
-            'с' -> "s" to ""
-            'т' -> "t" to ""
-            'у' -> "" to "u"
-            'ф' -> "f" to ""
-            'х' -> "x" to ""
-            'ц' -> "ts" to ""
-            'ч' -> "tʃ" to ""
-            'ш' -> "ʃ" to ""
-            'щ' -> "ʃtʃ" to ""
-            'ъ' -> "" to ""  // hard sign
-            'ы' -> "" to "ɨ"
-            'ь' -> "" to ""  // soft sign
-            'э' -> "" to "e"
-            'ю' -> "j" to "u"
-            'я' -> "j" to "a"
-            else -> "" to ""
+        private fun cyrillicCharIpa(c: Char): Pair<String, String> {
+            val key = CyrillicKey.fromChar(c) ?: return "" to ""
+            val ipa = key.ipa
+            // Split IPA into consonant onset and vowel nucleus
+            return when {
+                ipa.isEmpty() -> "" to ""  // hard/soft signs
+                ipa in listOf("a", "e", "i", "o", "u", "ɨ") -> "" to ipa  // pure vowels
+                ipa.startsWith("j") && ipa.length > 1 -> "j" to ipa.drop(1)  // я, ю, е, ё
+                else -> ipa to ""  // consonants
+            }
         }
 
         // ═══ Hangul/Korean (ko) ═══
@@ -748,73 +693,26 @@ data class UniKeySyllable(
             return syllables
         }
 
-        private fun hiraganaIpa(c: Char): Pair<String, String> = when (c) {
-            'あ' -> "" to "a"
-            'い' -> "" to "i"
-            'う' -> "" to "ɯ"
-            'え' -> "" to "e"
-            'お' -> "" to "o"
-            'か' -> "k" to "a"
-            'き' -> "k" to "i"
-            'く' -> "k" to "ɯ"
-            'け' -> "k" to "e"
-            'こ' -> "k" to "o"
-            'さ' -> "s" to "a"
-            'し' -> "ɕ" to "i"
-            'す' -> "s" to "ɯ"
-            'せ' -> "s" to "e"
-            'そ' -> "s" to "o"
-            'た' -> "t" to "a"
-            'ち' -> "tɕ" to "i"
-            'つ' -> "ts" to "ɯ"
-            'て' -> "t" to "e"
-            'と' -> "t" to "o"
-            'な' -> "n" to "a"
-            'に' -> "ɲ" to "i"
-            'ぬ' -> "n" to "ɯ"
-            'ね' -> "n" to "e"
-            'の' -> "n" to "o"
-            'は' -> "h" to "a"
-            'ひ' -> "ç" to "i"
-            'ふ' -> "ɸ" to "ɯ"
-            'へ' -> "h" to "e"
-            'ほ' -> "h" to "o"
-            'ま' -> "m" to "a"
-            'み' -> "m" to "i"
-            'む' -> "m" to "ɯ"
-            'め' -> "m" to "e"
-            'も' -> "m" to "o"
-            'や' -> "j" to "a"
-            'ゆ' -> "j" to "ɯ"
-            'よ' -> "j" to "o"
-            'ら' -> "ɾ" to "a"
-            'り' -> "ɾ" to "i"
-            'る' -> "ɾ" to "ɯ"
-            'れ' -> "ɾ" to "e"
-            'ろ' -> "ɾ" to "o"
-            'わ' -> "w" to "a"
-            'を' -> "" to "o"
-            'ん' -> "n" to ""
-            else -> "" to ""
+        private fun hiraganaIpa(c: Char): Pair<String, String> {
+            val key = HiraganaKey.fromChar(c) ?: return "" to ""
+            val ipa = key.ipa
+            // Split IPA into consonant onset and vowel nucleus
+            val vowels = listOf("a", "i", "ɯ", "e", "o")
+            return when {
+                ipa.isEmpty() -> "" to ""
+                ipa in vowels -> "" to ipa  // pure vowels
+                ipa == "n" -> "n" to ""     // syllabic n
+                else -> {
+                    // Find vowel at end and split
+                    val vowel = vowels.find { ipa.endsWith(it) } ?: ""
+                    val consonant = if (vowel.isNotEmpty()) ipa.dropLast(vowel.length) else ipa
+                    consonant to vowel
+                }
+            }
         }
 
-        private fun katakanaIpa(c: Char): Pair<String, String> {
-            // Katakana maps directly to hiragana sounds
-            val hiragana = when (c) {
-                'ア' -> 'あ'; 'イ' -> 'い'; 'ウ' -> 'う'; 'エ' -> 'え'; 'オ' -> 'お'
-                'カ' -> 'か'; 'キ' -> 'き'; 'ク' -> 'く'; 'ケ' -> 'け'; 'コ' -> 'こ'
-                'サ' -> 'さ'; 'シ' -> 'し'; 'ス' -> 'す'; 'セ' -> 'せ'; 'ソ' -> 'そ'
-                'タ' -> 'た'; 'チ' -> 'ち'; 'ツ' -> 'つ'; 'テ' -> 'て'; 'ト' -> 'と'
-                'ナ' -> 'な'; 'ニ' -> 'に'; 'ヌ' -> 'ぬ'; 'ネ' -> 'ね'; 'ノ' -> 'の'
-                'ハ' -> 'は'; 'ヒ' -> 'ひ'; 'フ' -> 'ふ'; 'ヘ' -> 'へ'; 'ホ' -> 'ほ'
-                'マ' -> 'ま'; 'ミ' -> 'み'; 'ム' -> 'む'; 'メ' -> 'め'; 'モ' -> 'も'
-                'ヤ' -> 'や'; 'ユ' -> 'ゆ'; 'ヨ' -> 'よ'
-                'ラ' -> 'ら'; 'リ' -> 'り'; 'ル' -> 'る'; 'レ' -> 'れ'; 'ロ' -> 'ろ'
-                'ワ' -> 'わ'; 'ヲ' -> 'を'; 'ン' -> 'ん'
-                else -> c
-            }
-            return hiraganaIpa(hiragana)
-        }
+        private fun katakanaIpa(c: Char): Pair<String, String> =
+            hiraganaIpa(c)  // HiraganaKey.fromChar handles both hiragana and katakana
 
         // ═══ CJK/Chinese (zh) ═══
         fun parseCjk(word: String): List<UniKeySyllable> {
