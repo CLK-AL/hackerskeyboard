@@ -1852,6 +1852,1094 @@ class FormulaEvaluator(private val table: TableData) {
     }
 }
 
+// ═══════════════════════════════════════════════════════════════════════════════
+// JSON PATH - Query language for JSON (RFC 9535)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/**
+ * JSONPath query result.
+ */
+data class JsonPathResult(
+    val path: String,
+    val value: Any?,
+    val index: Int = -1
+)
+
+/**
+ * JSONPath implementation (subset of RFC 9535).
+ * Supports: $, ., [], *, .., [n], [n:m], [?()], @
+ */
+object JsonPath {
+    /**
+     * Query JSON-like structure using JSONPath.
+     * @param root The root object (Map or List)
+     * @param path JSONPath expression (e.g., "$.store.book[0].title")
+     */
+    fun query(root: Any?, path: String): List<JsonPathResult> {
+        if (root == null) return emptyList()
+        val results = mutableListOf<JsonPathResult>()
+        val segments = parse(path)
+        traverse(root, segments, "$", results)
+        return results
+    }
+
+    /** Parse JSONPath into segments */
+    private fun parse(path: String): List<PathSegment> {
+        val segments = mutableListOf<PathSegment>()
+        var i = 0
+        val p = path.trim()
+
+        if (p.startsWith("$")) i = 1
+        if (i < p.length && p[i] == '.') i++
+
+        while (i < p.length) {
+            when {
+                p[i] == '.' && i + 1 < p.length && p[i + 1] == '.' -> {
+                    segments.add(PathSegment.Recursive)
+                    i += 2
+                }
+                p[i] == '.' -> {
+                    i++
+                }
+                p[i] == '[' -> {
+                    val end = p.indexOf(']', i)
+                    if (end == -1) break
+                    val inner = p.substring(i + 1, end).trim()
+                    segments.add(parseBracket(inner))
+                    i = end + 1
+                }
+                p[i] == '*' -> {
+                    segments.add(PathSegment.Wildcard)
+                    i++
+                }
+                else -> {
+                    val start = i
+                    while (i < p.length && p[i] !in ".[") i++
+                    val name = p.substring(start, i)
+                    if (name.isNotEmpty()) segments.add(PathSegment.Property(name))
+                }
+            }
+        }
+        return segments
+    }
+
+    private fun parseBracket(inner: String): PathSegment = when {
+        inner == "*" -> PathSegment.Wildcard
+        inner.startsWith("?") -> PathSegment.Filter(inner.drop(1).trim('(', ')'))
+        inner.contains(":") -> {
+            val parts = inner.split(":")
+            val start = parts.getOrNull(0)?.toIntOrNull() ?: 0
+            val end = parts.getOrNull(1)?.toIntOrNull()
+            PathSegment.Slice(start, end)
+        }
+        inner.startsWith("'") || inner.startsWith("\"") ->
+            PathSegment.Property(inner.trim('\'', '"'))
+        else -> inner.toIntOrNull()?.let { PathSegment.Index(it) }
+            ?: PathSegment.Property(inner)
+    }
+
+    private fun traverse(
+        node: Any?,
+        segments: List<PathSegment>,
+        currentPath: String,
+        results: MutableList<JsonPathResult>
+    ) {
+        if (segments.isEmpty()) {
+            results.add(JsonPathResult(currentPath, node))
+            return
+        }
+
+        val seg = segments.first()
+        val rest = segments.drop(1)
+
+        when (seg) {
+            is PathSegment.Property -> {
+                when (node) {
+                    is Map<*, *> -> node[seg.name]?.let {
+                        traverse(it, rest, "$currentPath.${seg.name}", results)
+                    }
+                }
+            }
+            is PathSegment.Index -> {
+                when (node) {
+                    is List<*> -> node.getOrNull(seg.index)?.let {
+                        traverse(it, rest, "$currentPath[${seg.index}]", results)
+                    }
+                }
+            }
+            is PathSegment.Wildcard -> {
+                when (node) {
+                    is Map<*, *> -> node.forEach { (k, v) ->
+                        traverse(v, rest, "$currentPath.$k", results)
+                    }
+                    is List<*> -> node.forEachIndexed { i, v ->
+                        traverse(v, rest, "$currentPath[$i]", results)
+                    }
+                }
+            }
+            is PathSegment.Recursive -> {
+                // Match at current level
+                traverse(node, rest, currentPath, results)
+                // Recurse into children
+                when (node) {
+                    is Map<*, *> -> node.forEach { (k, v) ->
+                        traverse(v, segments, "$currentPath.$k", results)
+                    }
+                    is List<*> -> node.forEachIndexed { i, v ->
+                        traverse(v, segments, "$currentPath[$i]", results)
+                    }
+                }
+            }
+            is PathSegment.Slice -> {
+                if (node is List<*>) {
+                    val end = seg.end ?: node.size
+                    val sublist = node.subList(seg.start.coerceAtLeast(0), end.coerceAtMost(node.size))
+                    sublist.forEachIndexed { i, v ->
+                        traverse(v, rest, "$currentPath[${seg.start + i}]", results)
+                    }
+                }
+            }
+            is PathSegment.Filter -> {
+                // Simplified filter: @.property op value
+                if (node is List<*>) {
+                    node.forEachIndexed { i, item ->
+                        if (matchFilter(item, seg.expr)) {
+                            traverse(item, rest, "$currentPath[$i]", results)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun matchFilter(item: Any?, expr: String): Boolean {
+        if (item !is Map<*, *>) return false
+        val pattern = Regex("""@\.(\w+)\s*(==|!=|>|<|>=|<=)\s*(.+)""")
+        val match = pattern.matchEntire(expr.trim()) ?: return true
+        val (prop, op, valueStr) = match.destructured
+        val actual = item[prop] ?: return false
+        val expectedStr = valueStr.trim('\'', '"')
+
+        // Convert to comparable numbers using hashCode for non-numeric comparison
+        fun toNum(v: Any?): Double? = when (v) {
+            is Int -> v.toDouble()
+            is Long -> v.toDouble()
+            is Float -> v.toDouble()
+            is Double -> v
+            is String -> v.toDoubleOrNull()
+            else -> null
+        }
+
+        val actualNum = toNum(actual)
+        val expectedNum = toNum(expectedStr)
+
+        return when (op) {
+            "==" -> actual.toString() == expectedStr || actual.hashCode() == expectedStr.hashCode()
+            "!=" -> actual.toString() != expectedStr && actual.hashCode() != expectedStr.hashCode()
+            ">" -> if (actualNum != null && expectedNum != null) actualNum > expectedNum else false
+            "<" -> if (actualNum != null && expectedNum != null) actualNum < expectedNum else false
+            ">=" -> if (actualNum != null && expectedNum != null) actualNum >= expectedNum else false
+            "<=" -> if (actualNum != null && expectedNum != null) actualNum <= expectedNum else false
+            else -> false
+        }
+    }
+
+    sealed class PathSegment {
+        data class Property(val name: String) : PathSegment()
+        data class Index(val index: Int) : PathSegment()
+        data object Wildcard : PathSegment()
+        data object Recursive : PathSegment()
+        data class Slice(val start: Int, val end: Int?) : PathSegment()
+        data class Filter(val expr: String) : PathSegment()
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// XML PATH - XPath subset for XML querying
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/**
+ * XPath query result.
+ */
+data class XPathResult(
+    val path: String,
+    val nodeName: String,
+    val value: String?,
+    val attributes: Map<String, String> = emptyMap()
+)
+
+/**
+ * Simplified XPath for document queries.
+ * Supports: /, //, *, @attr, [n], [predicate]
+ */
+object XPath {
+    /**
+     * Query parsed elements using XPath-like syntax.
+     */
+    fun query(elements: List<ParsedElement>, xpath: String): List<XPathResult> {
+        val results = mutableListOf<XPathResult>()
+        val segments = parseXPath(xpath)
+
+        elements.forEach { elem ->
+            if (matchesPath(elem, segments)) {
+                results.add(XPathResult(
+                    path = elem.index.formatted,
+                    nodeName = elem.tag.name,
+                    value = elem.content,
+                    attributes = elem.attributes
+                ))
+            }
+        }
+        return results
+    }
+
+    private fun parseXPath(xpath: String): List<XPathSegment> {
+        val segments = mutableListOf<XPathSegment>()
+        val parts = xpath.split("/").filter { it.isNotEmpty() }
+
+        var i = 0
+        while (i < parts.size) {
+            val part = parts[i]
+            when {
+                part.isEmpty() && i == 0 -> {
+                    // // at start means descendant
+                    if (parts.getOrNull(i + 1)?.isEmpty() == true) {
+                        segments.add(XPathSegment.Descendant)
+                        i++
+                    }
+                }
+                part == "*" -> segments.add(XPathSegment.Wildcard)
+                part.startsWith("@") -> segments.add(XPathSegment.Attribute(part.drop(1)))
+                part.contains("[") -> {
+                    val name = part.substringBefore("[")
+                    val pred = part.substringAfter("[").substringBefore("]")
+                    segments.add(XPathSegment.Element(name, pred))
+                }
+                else -> segments.add(XPathSegment.Element(part, null))
+            }
+            i++
+        }
+        return segments
+    }
+
+    private fun matchesPath(elem: ParsedElement, segments: List<XPathSegment>): Boolean {
+        if (segments.isEmpty()) return true
+
+        val pathParts = elem.index.formatted.split("/")
+        var segIdx = 0
+        var pathIdx = 0
+
+        while (segIdx < segments.size && pathIdx < pathParts.size) {
+            val seg = segments[segIdx]
+            val pathPart = pathParts[pathIdx]
+
+            when (seg) {
+                is XPathSegment.Element -> {
+                    val tagName = pathPart.replace(Regex("\\d+.*"), "")
+                    if (seg.name == "*" || seg.name.equals(tagName, ignoreCase = true)) {
+                        if (seg.predicate != null && !matchPredicate(elem, seg.predicate)) {
+                            return false
+                        }
+                        segIdx++
+                    }
+                    pathIdx++
+                }
+                is XPathSegment.Wildcard -> {
+                    segIdx++
+                    pathIdx++
+                }
+                is XPathSegment.Descendant -> {
+                    // Skip to next segment match
+                    segIdx++
+                    if (segIdx >= segments.size) return true
+                }
+                is XPathSegment.Attribute -> {
+                    return elem.attributes.containsKey(seg.name)
+                }
+            }
+        }
+        return segIdx >= segments.size
+    }
+
+    private fun matchPredicate(elem: ParsedElement, predicate: String): Boolean {
+        return when {
+            predicate.toIntOrNull() != null -> true // Index predicate, simplified
+            predicate.startsWith("@") -> {
+                val attrMatch = Regex("""@(\w+)='([^']*)'""").matchEntire(predicate)
+                if (attrMatch != null) {
+                    val (name, value) = attrMatch.destructured
+                    elem.attributes[name] == value
+                } else {
+                    elem.attributes.containsKey(predicate.drop(1))
+                }
+            }
+            else -> true
+        }
+    }
+
+    sealed class XPathSegment {
+        data class Element(val name: String, val predicate: String?) : XPathSegment()
+        data object Wildcard : XPathSegment()
+        data object Descendant : XPathSegment()
+        data class Attribute(val name: String) : XPathSegment()
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// CSS SELECTORS - Query elements using CSS selector syntax
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/**
+ * CSS Selector query engine for parsed elements.
+ */
+object CssSelector {
+    /**
+     * Query elements using CSS selector syntax.
+     * Supports: tag, .class, #id, [attr], [attr=value], >, +, ~, :first-child, :last-child
+     */
+    fun query(elements: List<ParsedElement>, selector: String): List<ParsedElement> {
+        val parsed = parseSelector(selector)
+        return elements.filter { matchesSelector(it, parsed, elements) }
+    }
+
+    private fun parseSelector(selector: String): List<SelectorPart> {
+        val parts = mutableListOf<SelectorPart>()
+        var current = selector.trim()
+
+        while (current.isNotEmpty()) {
+            when {
+                current.startsWith(">") -> {
+                    parts.add(SelectorPart.Combinator.Child)
+                    current = current.drop(1).trim()
+                }
+                current.startsWith("+") -> {
+                    parts.add(SelectorPart.Combinator.Adjacent)
+                    current = current.drop(1).trim()
+                }
+                current.startsWith("~") -> {
+                    parts.add(SelectorPart.Combinator.Sibling)
+                    current = current.drop(1).trim()
+                }
+                current.startsWith("#") -> {
+                    val id = current.drop(1).takeWhile { it.isLetterOrDigit() || it == '-' || it == '_' }
+                    parts.add(SelectorPart.Id(id))
+                    current = current.drop(1 + id.length).trim()
+                }
+                current.startsWith(".") -> {
+                    val cls = current.drop(1).takeWhile { it.isLetterOrDigit() || it == '-' || it == '_' }
+                    parts.add(SelectorPart.Class(cls))
+                    current = current.drop(1 + cls.length).trim()
+                }
+                current.startsWith("[") -> {
+                    val end = current.indexOf(']')
+                    if (end > 0) {
+                        val attrExpr = current.substring(1, end)
+                        parts.add(parseAttrSelector(attrExpr))
+                        current = current.drop(end + 1).trim()
+                    } else break
+                }
+                current.startsWith(":") -> {
+                    val pseudo = current.drop(1).takeWhile { it.isLetterOrDigit() || it == '-' }
+                    parts.add(SelectorPart.Pseudo(pseudo))
+                    current = current.drop(1 + pseudo.length).trim()
+                }
+                current.startsWith("*") -> {
+                    parts.add(SelectorPart.Universal)
+                    current = current.drop(1).trim()
+                }
+                current.first().isLetter() -> {
+                    val tag = current.takeWhile { it.isLetterOrDigit() || it == '-' }
+                    parts.add(SelectorPart.Tag(tag))
+                    current = current.drop(tag.length).trim()
+                }
+                else -> {
+                    current = current.drop(1).trim()
+                }
+            }
+        }
+        return parts
+    }
+
+    private fun parseAttrSelector(expr: String): SelectorPart.Attribute {
+        val ops = listOf("~=", "|=", "^=", "$=", "*=", "=")
+        for (op in ops) {
+            if (expr.contains(op)) {
+                val parts = expr.split(op, limit = 2)
+                return SelectorPart.Attribute(parts[0].trim(), op, parts[1].trim().trim('\'', '"'))
+            }
+        }
+        return SelectorPart.Attribute(expr.trim(), null, null)
+    }
+
+    private fun matchesSelector(
+        elem: ParsedElement,
+        parts: List<SelectorPart>,
+        allElements: List<ParsedElement>
+    ): Boolean {
+        for (part in parts) {
+            val matches = when (part) {
+                is SelectorPart.Tag -> elem.tag.name.equals(part.name, ignoreCase = true)
+                is SelectorPart.Class -> elem.index.leaf?.cssClasses?.any {
+                    it.equals(part.name, ignoreCase = true)
+                } ?: false
+                is SelectorPart.Id -> elem.attributes["id"] == part.id
+                is SelectorPart.Attribute -> matchAttribute(elem, part)
+                is SelectorPart.Universal -> true
+                is SelectorPart.Pseudo -> matchPseudo(elem, part.name, allElements)
+                is SelectorPart.Combinator -> true // Handled separately
+            }
+            if (!matches) return false
+        }
+        return true
+    }
+
+    private fun matchAttribute(elem: ParsedElement, attr: SelectorPart.Attribute): Boolean {
+        val value = elem.attributes[attr.name] ?: return attr.op == null
+        if (attr.op == null) return true
+        val expected = attr.value ?: return false
+
+        return when (attr.op) {
+            "=" -> value == expected
+            "~=" -> value.split(" ").contains(expected)
+            "|=" -> value == expected || value.startsWith("$expected-")
+            "^=" -> value.startsWith(expected)
+            "$=" -> value.endsWith(expected)
+            "*=" -> value.contains(expected)
+            else -> false
+        }
+    }
+
+    private fun matchPseudo(elem: ParsedElement, pseudo: String, allElements: List<ParsedElement>): Boolean {
+        val elemParent = elem.index.parent()?.formatted
+        val siblings = allElements.filter {
+            it.index.parent()?.formatted == elemParent
+        }
+        return when (pseudo) {
+            "first-child" -> siblings.firstOrNull() == elem
+            "last-child" -> siblings.lastOrNull() == elem
+            "only-child" -> siblings.size == 1
+            "empty" -> elem.content.isBlank()
+            else -> true
+        }
+    }
+
+    sealed class SelectorPart {
+        data class Tag(val name: String) : SelectorPart()
+        data class Class(val name: String) : SelectorPart()
+        data class Id(val id: String) : SelectorPart()
+        data class Attribute(val name: String, val op: String?, val value: String?) : SelectorPart()
+        data object Universal : SelectorPart()
+        data class Pseudo(val name: String) : SelectorPart()
+        sealed class Combinator : SelectorPart() {
+            data object Child : Combinator()
+            data object Adjacent : Combinator()
+            data object Sibling : Combinator()
+        }
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// JSON PATCH - RFC 6902 implementation
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/**
+ * JSON Patch operation (RFC 6902).
+ */
+sealed class JsonPatchOp {
+    abstract val path: String
+
+    data class Add(override val path: String, val value: Any?) : JsonPatchOp()
+    data class Remove(override val path: String) : JsonPatchOp()
+    data class Replace(override val path: String, val value: Any?) : JsonPatchOp()
+    data class Move(override val path: String, val from: String) : JsonPatchOp()
+    data class Copy(override val path: String, val from: String) : JsonPatchOp()
+    data class Test(override val path: String, val value: Any?) : JsonPatchOp()
+
+    /** Convert to JSON-like map */
+    fun toMap(): Map<String, Any?> = when (this) {
+        is Add -> mapOf("op" to "add", "path" to path, "value" to value)
+        is Remove -> mapOf("op" to "remove", "path" to path)
+        is Replace -> mapOf("op" to "replace", "path" to path, "value" to value)
+        is Move -> mapOf("op" to "move", "from" to from, "path" to path)
+        is Copy -> mapOf("op" to "copy", "from" to from, "path" to path)
+        is Test -> mapOf("op" to "test", "path" to path, "value" to value)
+    }
+
+    companion object {
+        /** Parse from map */
+        fun fromMap(map: Map<String, Any?>): JsonPatchOp? {
+            val op = map["op"] as? String ?: return null
+            val path = map["path"] as? String ?: return null
+            return when (op) {
+                "add" -> Add(path, map["value"])
+                "remove" -> Remove(path)
+                "replace" -> Replace(path, map["value"])
+                "move" -> Move(path, map["from"] as? String ?: return null)
+                "copy" -> Copy(path, map["from"] as? String ?: return null)
+                "test" -> Test(path, map["value"])
+                else -> null
+            }
+        }
+    }
+}
+
+/**
+ * JSON Patch implementation (RFC 6902).
+ */
+object JsonPatch {
+    /**
+     * Apply patch operations to a document.
+     * @return Modified document or null if test fails
+     */
+    fun apply(document: MutableMap<String, Any?>, ops: List<JsonPatchOp>): MutableMap<String, Any?>? {
+        for (op in ops) {
+            val success = when (op) {
+                is JsonPatchOp.Add -> applyAdd(document, op.path, op.value)
+                is JsonPatchOp.Remove -> applyRemove(document, op.path)
+                is JsonPatchOp.Replace -> applyReplace(document, op.path, op.value)
+                is JsonPatchOp.Move -> applyMove(document, op.from, op.path)
+                is JsonPatchOp.Copy -> applyCopy(document, op.from, op.path)
+                is JsonPatchOp.Test -> applyTest(document, op.path, op.value)
+            }
+            if (!success) return null
+        }
+        return document
+    }
+
+    /**
+     * Generate patch from two documents (diff).
+     */
+    fun diff(source: Map<String, Any?>, target: Map<String, Any?>, path: String = ""): List<JsonPatchOp> {
+        val ops = mutableListOf<JsonPatchOp>()
+
+        // Check for removals and changes
+        for ((key, sourceVal) in source) {
+            val currentPath = "$path/$key"
+            if (key !in target) {
+                ops.add(JsonPatchOp.Remove(currentPath))
+            } else {
+                val targetVal = target[key]
+                if (sourceVal != targetVal) {
+                    when {
+                        sourceVal is Map<*, *> && targetVal is Map<*, *> -> {
+                            @Suppress("UNCHECKED_CAST")
+                            ops.addAll(diff(sourceVal as Map<String, Any?>, targetVal as Map<String, Any?>, currentPath))
+                        }
+                        else -> ops.add(JsonPatchOp.Replace(currentPath, targetVal))
+                    }
+                }
+            }
+        }
+
+        // Check for additions
+        for ((key, targetVal) in target) {
+            if (key !in source) {
+                ops.add(JsonPatchOp.Add("$path/$key", targetVal))
+            }
+        }
+
+        return ops
+    }
+
+    private fun applyAdd(doc: MutableMap<String, Any?>, path: String, value: Any?): Boolean {
+        val (parent, key) = resolvePath(doc, path) ?: return false
+        when (parent) {
+            is MutableMap<*, *> -> {
+                @Suppress("UNCHECKED_CAST")
+                (parent as MutableMap<String, Any?>)[key] = value
+            }
+            is MutableList<*> -> {
+                val idx = key.toIntOrNull() ?: return false
+                @Suppress("UNCHECKED_CAST")
+                (parent as MutableList<Any?>).add(idx, value)
+            }
+            else -> return false
+        }
+        return true
+    }
+
+    private fun applyRemove(doc: MutableMap<String, Any?>, path: String): Boolean {
+        val (parent, key) = resolvePath(doc, path) ?: return false
+        when (parent) {
+            is MutableMap<*, *> -> {
+                @Suppress("UNCHECKED_CAST")
+                (parent as MutableMap<String, Any?>).remove(key)
+            }
+            is MutableList<*> -> {
+                val idx = key.toIntOrNull() ?: return false
+                @Suppress("UNCHECKED_CAST")
+                (parent as MutableList<Any?>).removeAt(idx)
+            }
+            else -> return false
+        }
+        return true
+    }
+
+    private fun applyReplace(doc: MutableMap<String, Any?>, path: String, value: Any?): Boolean {
+        val (parent, key) = resolvePath(doc, path) ?: return false
+        when (parent) {
+            is MutableMap<*, *> -> {
+                @Suppress("UNCHECKED_CAST")
+                (parent as MutableMap<String, Any?>)[key] = value
+            }
+            is MutableList<*> -> {
+                val idx = key.toIntOrNull() ?: return false
+                @Suppress("UNCHECKED_CAST")
+                (parent as MutableList<Any?>)[idx] = value
+            }
+            else -> return false
+        }
+        return true
+    }
+
+    private fun applyMove(doc: MutableMap<String, Any?>, from: String, path: String): Boolean {
+        val value = getValue(doc, from) ?: return false
+        if (!applyRemove(doc, from)) return false
+        return applyAdd(doc, path, value)
+    }
+
+    private fun applyCopy(doc: MutableMap<String, Any?>, from: String, path: String): Boolean {
+        val value = getValue(doc, from) ?: return false
+        return applyAdd(doc, path, value)
+    }
+
+    private fun applyTest(doc: MutableMap<String, Any?>, path: String, value: Any?): Boolean {
+        val actual = getValue(doc, path)
+        return actual == value
+    }
+
+    private fun resolvePath(doc: MutableMap<String, Any?>, path: String): Pair<Any, String>? {
+        val parts = path.trimStart('/').split("/")
+        if (parts.isEmpty()) return null
+
+        var current: Any = doc
+        for (i in 0 until parts.size - 1) {
+            current = when (current) {
+                is Map<*, *> -> current[parts[i]] ?: return null
+                is List<*> -> current.getOrNull(parts[i].toIntOrNull() ?: return null) ?: return null
+                else -> return null
+            }
+        }
+        return current to parts.last()
+    }
+
+    private fun getValue(doc: Map<String, Any?>, path: String): Any? {
+        val parts = path.trimStart('/').split("/")
+        var current: Any? = doc
+        for (part in parts) {
+            current = when (current) {
+                is Map<*, *> -> current[part]
+                is List<*> -> current.getOrNull(part.toIntOrNull() ?: return null)
+                else -> return null
+            }
+        }
+        return current
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// JSON SCHEMA - Validation (JSON Schema Draft 2020-12 subset)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/**
+ * JSON Schema validation result.
+ */
+data class ValidationResult(
+    val valid: Boolean,
+    val errors: List<ValidationError> = emptyList()
+) {
+    data class ValidationError(
+        val path: String,
+        val message: String,
+        val keyword: String
+    )
+}
+
+/**
+ * JSON Schema validator (subset of Draft 2020-12).
+ */
+object JsonSchema {
+    /**
+     * Validate data against schema.
+     */
+    fun validate(data: Any?, schema: Map<String, Any?>, path: String = "$"): ValidationResult {
+        val errors = mutableListOf<ValidationResult.ValidationError>()
+        validateNode(data, schema, path, errors)
+        return ValidationResult(errors.isEmpty(), errors)
+    }
+
+    private fun validateNode(
+        data: Any?,
+        schema: Map<String, Any?>,
+        path: String,
+        errors: MutableList<ValidationResult.ValidationError>
+    ) {
+        // Type validation
+        schema["type"]?.let { type ->
+            if (!validateType(data, type.toString())) {
+                errors.add(ValidationResult.ValidationError(path, "Expected type $type", "type"))
+            }
+        }
+
+        // Enum validation
+        @Suppress("UNCHECKED_CAST")
+        (schema["enum"] as? List<Any?>)?.let { enum ->
+            if (data !in enum) {
+                errors.add(ValidationResult.ValidationError(path, "Value not in enum $enum", "enum"))
+            }
+        }
+
+        // Const validation
+        schema["const"]?.let { const ->
+            if (data != const) {
+                errors.add(ValidationResult.ValidationError(path, "Value must be $const", "const"))
+            }
+        }
+
+        // String validations
+        if (data is String) {
+            val minLen: Int? = toNumber(schema["minLength"])?.toInt()
+            val maxLen: Int? = toNumber(schema["maxLength"])?.toInt()
+
+            if (minLen != null && data.length < minLen) {
+                errors.add(ValidationResult.ValidationError(path, "String too short (min $minLen)", "minLength"))
+            }
+            if (maxLen != null && data.length > maxLen) {
+                errors.add(ValidationResult.ValidationError(path, "String too long (max $maxLen)", "maxLength"))
+            }
+            (schema["pattern"] as? String)?.let { pattern ->
+                if (!Regex(pattern).containsMatchIn(data)) {
+                    errors.add(ValidationResult.ValidationError(path, "Does not match pattern", "pattern"))
+                }
+            }
+        }
+
+        // Number validations
+        val dataNum = toNumber(data)
+        if (dataNum != null) {
+            val minVal: Double? = toNumber(schema["minimum"])
+            val maxVal: Double? = toNumber(schema["maximum"])
+            val multVal: Double? = toNumber(schema["multipleOf"])
+
+            if (minVal != null && dataNum < minVal) {
+                errors.add(ValidationResult.ValidationError(path, "Value below minimum $minVal", "minimum"))
+            }
+            if (maxVal != null && dataNum > maxVal) {
+                errors.add(ValidationResult.ValidationError(path, "Value above maximum $maxVal", "maximum"))
+            }
+            if (multVal != null && multVal != 0.0 && dataNum % multVal != 0.0) {
+                errors.add(ValidationResult.ValidationError(path, "Not multiple of $multVal", "multipleOf"))
+            }
+        }
+
+        // Array validations
+        if (data is List<*>) {
+            val minItems: Int? = toNumber(schema["minItems"])?.toInt()
+            val maxItems: Int? = toNumber(schema["maxItems"])?.toInt()
+
+            if (minItems != null && data.size < minItems) {
+                errors.add(ValidationResult.ValidationError(path, "Too few items (min $minItems)", "minItems"))
+            }
+            if (maxItems != null && data.size > maxItems) {
+                errors.add(ValidationResult.ValidationError(path, "Too many items (max $maxItems)", "maxItems"))
+            }
+            // uniqueItems validation (array is set / enum is set)
+            if (schema["uniqueItems"] == true) {
+                if (data.size != data.toSet().size) {
+                    errors.add(ValidationResult.ValidationError(path, "Array items must be unique", "uniqueItems"))
+                }
+            }
+            @Suppress("UNCHECKED_CAST")
+            (schema["items"] as? Map<String, Any?>)?.let { itemSchema ->
+                data.forEachIndexed { i, item ->
+                    validateNode(item, itemSchema, "$path[$i]", errors)
+                }
+            }
+        }
+
+        // Object validations
+        if (data is Map<*, *>) {
+            @Suppress("UNCHECKED_CAST")
+            val props = schema["properties"] as? Map<String, Map<String, Any?>>
+            @Suppress("UNCHECKED_CAST")
+            val required = schema["required"] as? List<String> ?: emptyList()
+
+            // Check required properties
+            for (req in required) {
+                if (req !in data) {
+                    errors.add(ValidationResult.ValidationError("$path.$req", "Required property missing", "required"))
+                }
+            }
+
+            // Validate properties
+            props?.forEach { (propName, propSchema) ->
+                if (propName in data) {
+                    validateNode(data[propName], propSchema, "$path.$propName", errors)
+                }
+            }
+        }
+    }
+
+    private fun validateType(data: Any?, type: String): Boolean = when (type) {
+        "string" -> data is String
+        "number" -> data is Number
+        "integer" -> data is Int || data is Long
+        "boolean" -> data is Boolean
+        "array" -> data is List<*>
+        "object" -> data is Map<*, *>
+        "null" -> data == null
+        else -> true
+    }
+
+    /** Convert Any? to Double for numeric comparisons */
+    private fun toNumber(value: Any?): Double? {
+        return when (value) {
+            is Int -> value.toDouble()
+            is Long -> value.toDouble()
+            is Float -> value.toDouble()
+            is Double -> value
+            is String -> value.toDoubleOrNull()
+            else -> null
+        }
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// VERSION / CRDT - Document versioning and Yjs-compatible operations
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/**
+ * Document version with vector clock.
+ */
+data class DocVersion(
+    val clientId: String,
+    val clock: Long,
+    val timestamp: Long = currentTimeMillis()
+) {
+    /** Version string: clientId:clock */
+    val formatted: String get() = "$clientId:$clock"
+
+    companion object {
+        fun parse(s: String): DocVersion? {
+            val parts = s.split(":")
+            if (parts.size != 2) return null
+            return DocVersion(parts[0], parts[1].toLongOrNull() ?: return null)
+        }
+
+        // Simple monotonic counter for common (real impl would use expect/actual)
+        private var timeCounter = 0L
+        private fun currentTimeMillis(): Long = ++timeCounter
+    }
+}
+
+/**
+ * Vector clock for distributed versioning.
+ */
+data class VectorClock(
+    val clocks: MutableMap<String, Long> = mutableMapOf()
+) {
+    /** Increment clock for client */
+    fun tick(clientId: String): Long {
+        val next = (clocks[clientId] ?: 0) + 1
+        clocks[clientId] = next
+        return next
+    }
+
+    /** Merge with another vector clock (take max) */
+    fun merge(other: VectorClock) {
+        for ((id, clock) in other.clocks) {
+            clocks[id] = maxOf(clocks[id] ?: 0, clock)
+        }
+    }
+
+    /** Check if this clock is concurrent with another */
+    fun isConcurrent(other: VectorClock): Boolean {
+        val thisGt = clocks.any { (id, c) -> c > (other.clocks[id] ?: 0) }
+        val otherGt = other.clocks.any { (id, c) -> c > (clocks[id] ?: 0) }
+        return thisGt && otherGt
+    }
+
+    /** Check if this clock happens before another */
+    fun happensBefore(other: VectorClock): Boolean {
+        return clocks.all { (id, c) -> c <= (other.clocks[id] ?: 0) } &&
+               clocks.any { (id, c) -> c < (other.clocks[id] ?: 0) }
+    }
+}
+
+/**
+ * Yjs-compatible CRDT operation types.
+ */
+sealed class YOp {
+    abstract val id: DocVersion
+    abstract val origin: DocVersion?
+
+    /** Insert text/content */
+    data class Insert(
+        override val id: DocVersion,
+        override val origin: DocVersion?,
+        val content: String,
+        val attrs: Map<String, Any?> = emptyMap()
+    ) : YOp()
+
+    /** Delete content */
+    data class Delete(
+        override val id: DocVersion,
+        override val origin: DocVersion?,
+        val length: Int
+    ) : YOp()
+
+    /** Format/attribute change */
+    data class Format(
+        override val id: DocVersion,
+        override val origin: DocVersion?,
+        val length: Int,
+        val attrs: Map<String, Any?>
+    ) : YOp()
+}
+
+/**
+ * Yjs-compatible YText for collaborative text editing.
+ */
+class YText(private val clientId: String) {
+    private val ops = mutableListOf<YOp>()
+    private val clock = VectorClock()
+    private var content = StringBuilder()
+
+    /** Current text content */
+    val text: String get() = content.toString()
+
+    /** All operations */
+    val operations: List<YOp> get() = ops.toList()
+
+    /** Insert text at position */
+    fun insert(index: Int, str: String, attrs: Map<String, Any?> = emptyMap()): YOp.Insert {
+        val version = DocVersion(clientId, clock.tick(clientId))
+        val origin = if (index > 0 && ops.isNotEmpty()) ops.last().id else null
+
+        val op = YOp.Insert(version, origin, str, attrs)
+        applyLocal(op)
+        return op
+    }
+
+    /** Delete text at position */
+    fun delete(index: Int, length: Int): YOp.Delete {
+        val version = DocVersion(clientId, clock.tick(clientId))
+        val origin = if (ops.isNotEmpty()) ops.last().id else null
+
+        val op = YOp.Delete(version, origin, length)
+        applyLocal(op)
+        return op
+    }
+
+    /** Apply remote operation */
+    fun applyRemote(op: YOp) {
+        clock.merge(VectorClock(mutableMapOf(op.id.clientId to op.id.clock)))
+        // Simplified: just append (real impl needs CRDT merge)
+        when (op) {
+            is YOp.Insert -> content.append(op.content)
+            is YOp.Delete -> {
+                val end = minOf(content.length, op.length)
+                if (end > 0) content.deleteRange(0, end)
+            }
+            is YOp.Format -> { /* Apply formatting */ }
+        }
+        ops.add(op)
+    }
+
+    private fun applyLocal(op: YOp) {
+        when (op) {
+            is YOp.Insert -> {
+                val idx = minOf(content.length, findInsertIndex(op.origin))
+                content.insert(idx, op.content)
+            }
+            is YOp.Delete -> {
+                val idx = findInsertIndex(op.origin)
+                val end = minOf(content.length, idx + op.length)
+                if (idx < end) content.deleteRange(idx, end)
+            }
+            is YOp.Format -> { /* Apply formatting */ }
+        }
+        ops.add(op)
+    }
+
+    private fun findInsertIndex(origin: DocVersion?): Int {
+        if (origin == null) return 0
+        var idx = 0
+        for (op in ops) {
+            if (op.id == origin) break
+            if (op is YOp.Insert) idx += op.content.length
+        }
+        return idx
+    }
+
+    /** Export state for sync */
+    fun exportState(): Map<String, Any> = mapOf(
+        "clientId" to clientId,
+        "clock" to clock.clocks.toMap(),
+        "ops" to ops.map { op ->
+            when (op) {
+                is YOp.Insert -> mapOf(
+                    "type" to "insert",
+                    "id" to op.id.formatted,
+                    "origin" to op.origin?.formatted,
+                    "content" to op.content,
+                    "attrs" to op.attrs
+                )
+                is YOp.Delete -> mapOf(
+                    "type" to "delete",
+                    "id" to op.id.formatted,
+                    "origin" to op.origin?.formatted,
+                    "length" to op.length
+                )
+                is YOp.Format -> mapOf(
+                    "type" to "format",
+                    "id" to op.id.formatted,
+                    "origin" to op.origin?.formatted,
+                    "length" to op.length,
+                    "attrs" to op.attrs
+                )
+            }
+        }
+    )
+}
+
+/**
+ * YDoc - Yjs-compatible document container.
+ */
+class YDoc(val clientId: String = generateClientId()) {
+    private val texts = mutableMapOf<String, YText>()
+    private val arrays = mutableMapOf<String, MutableList<Any?>>()
+    private val maps = mutableMapOf<String, MutableMap<String, Any?>>()
+
+    /** Get or create YText */
+    fun getText(name: String = "default"): YText {
+        return texts.getOrPut(name) { YText(clientId) }
+    }
+
+    /** Get or create array */
+    fun getArray(name: String): MutableList<Any?> {
+        return arrays.getOrPut(name) { mutableListOf() }
+    }
+
+    /** Get or create map */
+    fun getMap(name: String): MutableMap<String, Any?> {
+        return maps.getOrPut(name) { mutableMapOf() }
+    }
+
+    /** Export full document state */
+    fun exportState(): Map<String, Any> = mapOf(
+        "clientId" to clientId,
+        "texts" to texts.mapValues { it.value.exportState() },
+        "arrays" to arrays.toMap(),
+        "maps" to maps.mapValues { it.value.toMap() }
+    )
+
+    companion object {
+        private var counter = 0
+        private fun generateClientId(): String = "client_${++counter}_${kotlin.random.Random.nextInt(1000000)}"
+    }
+}
+
 /**
  * Sheet in a workbook.
  */
