@@ -713,6 +713,69 @@ fun ArabicLetter.toLayoutKey(shiftChar: String? = null, shiftIpa: String? = null
 }
 
 /**
+ * Generate LayoutKey from GreekKey with uppercase shift
+ */
+fun GreekKey.toLayoutKey(): LayoutKey {
+    val modifiers = mapOf(Modifier.SHIFT to LayoutKey(upper, ipa, displayName.replaceFirstChar { it.uppercase() }))
+    return LayoutKey(char, ipa, displayName, modifiers)
+}
+
+/**
+ * Generate LayoutKey from CyrillicKey with uppercase shift
+ */
+fun CyrillicKey.toLayoutKey(): LayoutKey {
+    val modifiers = mapOf(Modifier.SHIFT to LayoutKey(upper, ipa, displayName.replaceFirstChar { it.uppercase() }))
+    return LayoutKey(char, ipa, displayName, modifiers)
+}
+
+/**
+ * Generate LayoutKey from HiraganaKey with katakana shift
+ */
+fun HiraganaKey.toLayoutKey(): LayoutKey {
+    val modifiers = mapOf(Modifier.SHIFT to LayoutKey(katakana, ipa, "$displayName-katakana"))
+    return LayoutKey(char, ipa, displayName, modifiers)
+}
+
+/**
+ * Greek keyboard keys - generated from GreekKey enum
+ */
+val greekKeys: Map<String, LayoutKey> = GreekKey.entries
+    .associate { it.qwerty to it.toLayoutKey() } +
+    mapOf("q" to LayoutKey(";", "", "semicolon", mapOf(Modifier.SHIFT to LayoutKey(":", "", "colon"))))
+
+/**
+ * Cyrillic (Russian) keyboard keys - generated from CyrillicKey enum
+ */
+val cyrillicKeys: Map<String, LayoutKey> = CyrillicKey.entries
+    .associate { it.qwerty to it.toLayoutKey() }
+
+/**
+ * Hiragana (Japanese) keyboard keys - generated from HiraganaKey enum
+ */
+val hiraganaKeys: Map<String, LayoutKey> = HiraganaKey.entries
+    .filter { it.romaji.length == 1 || it.romaji in listOf("ka", "sa", "ta", "na", "ha", "ma", "ya", "ra", "wa") }
+    .associate {
+        val key = when (it.romaji) {
+            "a" -> "a"
+            "i" -> "i"
+            "u" -> "u"
+            "e" -> "e"
+            "o" -> "o"
+            "ka" -> "k"
+            "sa" -> "s"
+            "ta" -> "t"
+            "na" -> "n"
+            "ha" -> "h"
+            "ma" -> "m"
+            "ya" -> "y"
+            "ra" -> "r"
+            "wa" -> "w"
+            else -> it.romaji
+        }
+        key to it.toLayoutKey()
+    }
+
+/**
  * Arabic keyboard shift modifiers (harakat and punctuation) by qwerty key
  */
 val arabicShiftMap: Map<Char, Triple<String, String, String>> = mapOf(
