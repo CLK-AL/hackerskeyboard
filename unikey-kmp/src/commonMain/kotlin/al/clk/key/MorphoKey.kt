@@ -100,7 +100,7 @@ data class MorphoLayout(
     val code: String,
     val name: String,
     val nativeName: String,
-    val script: UniKeySyllable.Companion.Script,
+    val script: Script,
     val keys: Map<String, MorphoKey>,
     val prefixes: List<MorphoKey> = emptyList(),
     val suffixes: Map<Gender, MorphoKey> = emptyMap(),
@@ -126,7 +126,7 @@ object MorphoLayouts {
         code = "he",
         name = "Hebrew",
         nativeName = "עברית",
-        script = UniKeySyllable.Companion.Script.HEBREW,
+        script = Script.HEBREW,
         keys = HebrewMorphoEnum.keys,
         prefixes = HebrewMorphoEnum.prefixes,
         pluralSuffixes = HebrewMorphoEnum.pluralSuffixes
@@ -136,7 +136,7 @@ object MorphoLayouts {
         code = "ar",
         name = "Arabic",
         nativeName = "العربية",
-        script = UniKeySyllable.Companion.Script.ARABIC,
+        script = Script.ARABIC,
         keys = ArabicMorphoEnum.keys,
         prefixes = ArabicMorphoEnum.prefixes,
         pluralSuffixes = ArabicMorphoEnum.pluralSuffixes

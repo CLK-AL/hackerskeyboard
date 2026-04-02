@@ -596,22 +596,11 @@ data class UniKeySyllable(
         private val CJK_VOWELS = listOf("a", "o", "e", "i", "u", "ü", "ai", "ei", "ao", "ou", "an", "en", "ang", "eng", "ong")
 
         /**
-         * Script type for input text conversion to IPA.
-         * Covers all 23 Chatterbox multilingual TTS languages:
-         * ar, da, de, el, en, es, fi, fr, he, hi, it, ja, ko, ms, nl, no, pl, pt, ru, sv, sw, tr, zh
+         * @deprecated Use top-level Script enum from Currency.kt instead.
+         * This typealias is kept for backward compatibility.
          */
-        enum class Script {
-            HEBREW,     // he
-            LATIN,      // da, de, en, es, fi, fr, it, ms, nl, no, pl, pt, sv, sw, tr
-            ARABIC,     // ar
-            GREEK,      // el
-            DEVANAGARI, // hi
-            CYRILLIC,   // ru
-            HANGUL,     // ko
-            HIRAGANA,   // ja (also covers katakana)
-            CJK,        // zh, ja (kanji)
-            UNKNOWN
-        }
+        @Deprecated("Use top-level Script enum", ReplaceWith("al.clk.key.Script"))
+        typealias Script = al.clk.key.Script
 
         /**
          * Detect script type from Unicode code points.

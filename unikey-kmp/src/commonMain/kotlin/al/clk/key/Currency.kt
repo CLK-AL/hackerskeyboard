@@ -1,6 +1,49 @@
 package al.clk.key
 
 /**
+ * Language codes with script association.
+ * This is the single source of truth for language identification in forms maps.
+ */
+enum class Lang(val code: String, val script: Script) {
+    HE("he", Script.HEBREW),
+    EN("en", Script.LATIN),
+    AR("ar", Script.ARABIC),
+    EL("el", Script.GREEK),
+    RU("ru", Script.CYRILLIC),
+    HI("hi", Script.DEVANAGARI),
+    JA("ja", Script.HIRAGANA),
+    KO("ko", Script.HANGUL),
+    ZH("zh", Script.CJK),
+    // Latin-script languages
+    DA("da", Script.LATIN),
+    DE("de", Script.LATIN),
+    ES("es", Script.LATIN),
+    FI("fi", Script.LATIN),
+    FR("fr", Script.LATIN),
+    IT("it", Script.LATIN),
+    MS("ms", Script.LATIN),
+    NL("nl", Script.LATIN),
+    NO("no", Script.LATIN),
+    PL("pl", Script.LATIN),
+    PT("pt", Script.LATIN),
+    SV("sv", Script.LATIN),
+    SW("sw", Script.LATIN),
+    TR("tr", Script.LATIN);
+
+    companion object {
+        private val byCode = entries.associateBy { it.code }
+        fun fromCode(code: String): Lang? = byCode[code.lowercase()]
+    }
+}
+
+/**
+ * Script types for keyboard layouts
+ */
+enum class Script {
+    HEBREW, LATIN, ARABIC, GREEK, DEVANAGARI, CYRILLIC, HANGUL, HIRAGANA, CJK, UNKNOWN
+}
+
+/**
  * Common interface for keyboard keys with phonetic properties.
  * Enums implement this to be the single source of truth for key data.
  */

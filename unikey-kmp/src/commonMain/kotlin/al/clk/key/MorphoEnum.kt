@@ -746,7 +746,7 @@ fun HebrewLetter.toUniKey(): UniKey {
     return UniKey(
         id = qwerty,
         ipa = ipa,
-        forms = mapOf("he" to heKey, "en" to enKey),
+        forms = mapOf(Lang.HE to heKey, Lang.EN to enKey),
         properties = props
     )
 }

@@ -15,7 +15,7 @@ object UniKeys {
     private fun key(id: String, ipa: String, he: String, en: String, heShift: String? = null, enShift: String? = null): UniKey {
         val heKey: ILayoutKey = if (heShift != null) SimpleKey(he, ipa, id, SimpleKey(heShift, "", "$id-shift")) else SimpleKey(he, ipa, id)
         val enKey: ILayoutKey = SimpleKey(en, ipa, id, enShift?.let { SimpleKey(it, "", "$id-shift") })
-        return UniKey(id = id, ipa = ipa, forms = mapOf("he" to heKey, "en" to enKey))
+        return UniKey(id = id, ipa = ipa, forms = mapOf(Lang.HE to heKey, Lang.EN to enKey))
     }
 
     // Punctuation keys with shift variants

@@ -8,7 +8,7 @@ package al.clk.key
 data class UniKey(
     val id: String,
     override val ipa: String,
-    val forms: Map<String, ILayoutKey> = emptyMap(),  // langCode -> key form
+    val forms: Map<Lang, ILayoutKey> = emptyMap(),  // Lang enum -> key form
     val syl: List<Syllable>? = null,
     val enSyl: List<EnglishSyllable>? = null,
     val mg: MultiGender? = null,
@@ -20,20 +20,26 @@ data class UniKey(
     override val displayName: String get() = id
     override val shiftKey: ILayoutKey? get() = forms.values.firstOrNull()?.shiftKey
 
-    /** Get form for language code */
-    fun forLang(langCode: String): ILayoutKey? = forms[langCode]
+    /** Get form for Lang enum */
+    fun forLang(lang: Lang): ILayoutKey? = forms[lang]
 
-    /** Get char for language */
-    fun charFor(langCode: String): String = forms[langCode]?.char ?: ipa
+    /** Get form for language code string (convenience) */
+    fun forLang(langCode: String): ILayoutKey? = Lang.fromCode(langCode)?.let { forms[it] }
+
+    /** Get char for Lang */
+    fun charFor(lang: Lang): String = forms[lang]?.char ?: ipa
+
+    /** Get char for language code string (convenience) */
+    fun charFor(langCode: String): String = Lang.fromCode(langCode)?.let { forms[it]?.char } ?: ipa
 
     /** Check property */
     fun has(prop: KeyProperty): Boolean = prop in properties
 
     // Legacy accessors for backward compatibility
-    val he: String get() = forms["he"]?.char ?: ""
-    val en: String get() = forms["en"]?.char ?: id
-    val EN: String get() = forms["en"]?.shiftKey?.char ?: en.uppercase()
-    val dagesh: String? get() = (forms["he"]?.shiftKey as? SimpleKey)?.ipa?.takeIf { it.isNotEmpty() }
+    val he: String get() = forms[Lang.HE]?.char ?: ""
+    val en: String get() = forms[Lang.EN]?.char ?: id
+    val EN: String get() = forms[Lang.EN]?.shiftKey?.char ?: en.uppercase()
+    val dagesh: String? get() = (forms[Lang.HE]?.shiftKey as? SimpleKey)?.ipa?.takeIf { it.isNotEmpty() }
     val guttural: Boolean get() = has(KeyProperty.GUTTURAL)
     val isFinal: Boolean get() = has(KeyProperty.FINAL_FORM)
 
@@ -54,8 +60,8 @@ data class UniKey(
         }
 
         val langKey = when (mode) {
-            KeyMode.he -> forms["he"]
-            KeyMode.en, KeyMode.EN -> forms["en"]
+            KeyMode.he -> forms[Lang.HE]
+            KeyMode.en, KeyMode.EN -> forms[Lang.EN]
         }
 
         // Shift without Alt
@@ -94,11 +100,11 @@ data class UniKey(
     }
 
     companion object {
-        /** Create UniKey from IPA with language forms */
+        /** Create UniKey from IPA with language forms (Lang enum keys) */
         fun fromIpa(
             id: String,
             ipa: String,
-            vararg langForms: Pair<String, ILayoutKey>,
+            vararg langForms: Pair<Lang, ILayoutKey>,
             properties: Set<KeyProperty> = emptySet()
         ) = UniKey(id, ipa, langForms.toMap(), properties = properties)
     }

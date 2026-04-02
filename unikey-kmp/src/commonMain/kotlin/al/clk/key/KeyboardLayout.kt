@@ -9,7 +9,7 @@ data class KeyboardLayout(
     val code: String,           // ISO 639-1 language code
     val name: String,           // Display name
     val nativeName: String,     // Name in native script
-    val script: UniKeySyllable.Companion.Script,
+    val script: Script,
     val keys: Map<String, ILayoutKey>
 )
 
@@ -120,7 +120,7 @@ object KeyboardLayouts {
         code = "ar",
         name = "Arabic",
         nativeName = "العربية",
-        script = UniKeySyllable.Companion.Script.ARABIC,
+        script = Script.ARABIC,
         keys = arabicKeys
     )
 
@@ -129,7 +129,7 @@ object KeyboardLayouts {
         code = "da",
         name = "Danish",
         nativeName = "Dansk",
-        script = UniKeySyllable.Companion.Script.LATIN,
+        script = Script.LATIN,
         keys = buildLatinLayout("kr", "krone", mapOf(
             ";" to key("æ", "ɛ", "ae", "Æ", "ɛ", "AE"),
             "'" to key("ø", "ø", "oe", "Ø", "ø", "OE"),
@@ -142,7 +142,7 @@ object KeyboardLayouts {
         code = "de",
         name = "German",
         nativeName = "Deutsch",
-        script = UniKeySyllable.Companion.Script.LATIN,
+        script = Script.LATIN,
         keys = buildLatinLayout("€", "euro", mapOf(
             ";" to key("ö", "ø", "o-umlaut", "Ö", "ø", "O-umlaut"),
             "'" to key("ä", "ɛ", "a-umlaut", "Ä", "ɛ", "A-umlaut"),
@@ -156,7 +156,7 @@ object KeyboardLayouts {
         code = "el",
         name = "Greek",
         nativeName = "Ελληνικά",
-        script = UniKeySyllable.Companion.Script.GREEK,
+        script = Script.GREEK,
         keys = greekKeys
     )
 
@@ -165,7 +165,7 @@ object KeyboardLayouts {
         code = "en",
         name = "English (US)",
         nativeName = "English",
-        script = UniKeySyllable.Companion.Script.LATIN,
+        script = Script.LATIN,
         keys = buildLatinLayout("$", "dollar", emptyMap())
     )
 
@@ -174,7 +174,7 @@ object KeyboardLayouts {
         code = "en-gb",
         name = "English (UK)",
         nativeName = "English",
-        script = UniKeySyllable.Companion.Script.LATIN,
+        script = Script.LATIN,
         keys = buildLatinLayout("£", "pound", mapOf(
             "3" to key("3", "", "three", "£", "", "pound")
         ))
@@ -185,7 +185,7 @@ object KeyboardLayouts {
         code = "es",
         name = "Spanish",
         nativeName = "Español",
-        script = UniKeySyllable.Companion.Script.LATIN,
+        script = Script.LATIN,
         keys = buildLatinLayout("€", "euro", mapOf(
             ";" to key("ñ", "ɲ", "ene", "Ñ", "ɲ", "Ene"),
             "'" to key("´", "", "acute", "¨", "", "diaeresis"),
@@ -198,7 +198,7 @@ object KeyboardLayouts {
         code = "fi",
         name = "Finnish",
         nativeName = "Suomi",
-        script = UniKeySyllable.Companion.Script.LATIN,
+        script = Script.LATIN,
         keys = buildLatinLayout("€", "euro", mapOf(
             ";" to key("ö", "ø", "o-umlaut", "Ö", "ø", "O-umlaut"),
             "'" to key("ä", "æ", "a-umlaut", "Ä", "æ", "A-umlaut")
@@ -210,7 +210,7 @@ object KeyboardLayouts {
         code = "fr",
         name = "French",
         nativeName = "Français",
-        script = UniKeySyllable.Companion.Script.LATIN,
+        script = Script.LATIN,
         keys = buildLatinLayout("€", "euro", mapOf(
             ";" to key("é", "e", "e-acute", "É", "e", "E-acute"),
             "'" to key("è", "ɛ", "e-grave", "È", "ɛ", "E-grave"),
@@ -230,7 +230,7 @@ object KeyboardLayouts {
         code = "he",
         name = "Hebrew",
         nativeName = "עברית",
-        script = UniKeySyllable.Companion.Script.HEBREW,
+        script = Script.HEBREW,
         keys = hebrewKeys
     )
 
@@ -239,7 +239,7 @@ object KeyboardLayouts {
         code = "hi",
         name = "Hindi",
         nativeName = "हिन्दी",
-        script = UniKeySyllable.Companion.Script.DEVANAGARI,
+        script = Script.DEVANAGARI,
         keys = mapOf(
             // Vowels (with matra shifts)
             "q" to key("औ", "ɔː", "au", "ौ", "ɔː", "au-matra"),
@@ -283,7 +283,7 @@ object KeyboardLayouts {
         code = "it",
         name = "Italian",
         nativeName = "Italiano",
-        script = UniKeySyllable.Companion.Script.LATIN,
+        script = Script.LATIN,
         keys = buildLatinLayout("€", "euro", mapOf(
             ";" to key("ò", "ɔ", "o-grave", "Ò", "ɔ", "O-grave"),
             "'" to key("à", "a", "a-grave", "À", "a", "A-grave"),
@@ -298,7 +298,7 @@ object KeyboardLayouts {
         code = "ja",
         name = "Japanese",
         nativeName = "日本語",
-        script = UniKeySyllable.Companion.Script.HIRAGANA,
+        script = Script.HIRAGANA,
         keys = hiraganaKeys + mapOf(
             "l" to key("ー", "ː", "long-vowel"),
             "q" to key("。", "", "period"),
@@ -312,7 +312,7 @@ object KeyboardLayouts {
         code = "ko",
         name = "Korean",
         nativeName = "한국어",
-        script = UniKeySyllable.Companion.Script.HANGUL,
+        script = Script.HANGUL,
         keys = mapOf(
             // Consonants (초성) with tensed shift
             "q" to key("ㅂ", "p", "bieup", "ㅃ", "p͈", "ssang-bieup"),
@@ -351,7 +351,7 @@ object KeyboardLayouts {
         code = "ms",
         name = "Malay",
         nativeName = "Bahasa Melayu",
-        script = UniKeySyllable.Companion.Script.LATIN,
+        script = Script.LATIN,
         keys = buildLatinLayout("RM", "ringgit", emptyMap())
     )
 
@@ -360,7 +360,7 @@ object KeyboardLayouts {
         code = "nl",
         name = "Dutch",
         nativeName = "Nederlands",
-        script = UniKeySyllable.Companion.Script.LATIN,
+        script = Script.LATIN,
         keys = buildLatinLayout("€", "euro", mapOf(
             "'" to key("´", "", "acute", "¨", "", "diaeresis"),
             "[" to key("ij", "ɛi", "ij", "IJ", "ɛi", "IJ")
@@ -372,7 +372,7 @@ object KeyboardLayouts {
         code = "no",
         name = "Norwegian",
         nativeName = "Norsk",
-        script = UniKeySyllable.Companion.Script.LATIN,
+        script = Script.LATIN,
         keys = buildLatinLayout("kr", "krone", mapOf(
             ";" to key("ø", "ø", "oe", "Ø", "ø", "OE"),
             "'" to key("æ", "æ", "ae", "Æ", "æ", "AE"),
@@ -385,7 +385,7 @@ object KeyboardLayouts {
         code = "pl",
         name = "Polish",
         nativeName = "Polski",
-        script = UniKeySyllable.Companion.Script.LATIN,
+        script = Script.LATIN,
         keys = buildLatinLayout("zł", "zloty", mapOf(
             "a" to key("a", "a", "a", "ą", "ɔ̃", "a-ogonek"),
             "c" to key("c", "ts", "c", "ć", "tɕ", "c-acute"),
@@ -404,7 +404,7 @@ object KeyboardLayouts {
         code = "pt",
         name = "Portuguese",
         nativeName = "Português",
-        script = UniKeySyllable.Companion.Script.LATIN,
+        script = Script.LATIN,
         keys = buildLatinLayout("€", "euro", mapOf(
             ";" to key("ç", "s", "c-cedilla", "Ç", "s", "C-cedilla"),
             "'" to key("~", "", "tilde", "^", "", "circumflex"),
@@ -418,7 +418,7 @@ object KeyboardLayouts {
         code = "pt-br",
         name = "Portuguese (Brazil)",
         nativeName = "Português (Brasil)",
-        script = UniKeySyllable.Companion.Script.LATIN,
+        script = Script.LATIN,
         keys = buildLatinLayout("R$", "real", mapOf(
             ";" to key("ç", "s", "c-cedilla", "Ç", "s", "C-cedilla"),
             "'" to key("~", "", "tilde", "^", "", "circumflex"),
@@ -432,7 +432,7 @@ object KeyboardLayouts {
         code = "ru",
         name = "Russian",
         nativeName = "Русский",
-        script = UniKeySyllable.Companion.Script.CYRILLIC,
+        script = Script.CYRILLIC,
         keys = cyrillicKeys + mapOf("4" to key("₽", "", "ruble", "$", "", "dollar"))
     )
 
@@ -441,7 +441,7 @@ object KeyboardLayouts {
         code = "sv",
         name = "Swedish",
         nativeName = "Svenska",
-        script = UniKeySyllable.Companion.Script.LATIN,
+        script = Script.LATIN,
         keys = buildLatinLayout("kr", "krona", mapOf(
             ";" to key("ö", "ø", "o-umlaut", "Ö", "ø", "O-umlaut"),
             "'" to key("ä", "ɛ", "a-umlaut", "Ä", "ɛ", "A-umlaut"),
@@ -454,7 +454,7 @@ object KeyboardLayouts {
         code = "sw",
         name = "Swahili",
         nativeName = "Kiswahili",
-        script = UniKeySyllable.Companion.Script.LATIN,
+        script = Script.LATIN,
         keys = buildLatinLayout("TSh", "shilling", emptyMap())
     )
 
@@ -463,7 +463,7 @@ object KeyboardLayouts {
         code = "tr",
         name = "Turkish",
         nativeName = "Türkçe",
-        script = UniKeySyllable.Companion.Script.LATIN,
+        script = Script.LATIN,
         keys = buildLatinLayout("₺", "lira", mapOf(
             "i" to key("ı", "ɯ", "dotless-i", "I", "ɯ", "Dotless-I"),
             ";" to key("ş", "ʃ", "s-cedilla", "Ş", "ʃ", "S-cedilla"),
@@ -480,7 +480,7 @@ object KeyboardLayouts {
         code = "zh",
         name = "Chinese",
         nativeName = "中文",
-        script = UniKeySyllable.Companion.Script.CJK,
+        script = Script.CJK,
         keys = mapOf(
             // Pinyin initials
             "b" to key("b", "p", "bo"),
@@ -519,7 +519,7 @@ object KeyboardLayouts {
         code = "en-au",
         name = "English (Australia)",
         nativeName = "English",
-        script = UniKeySyllable.Companion.Script.LATIN,
+        script = Script.LATIN,
         keys = buildLatinLayout("$", "dollar", emptyMap())
     )
 
@@ -528,7 +528,7 @@ object KeyboardLayouts {
         code = "en-ca",
         name = "English (Canada)",
         nativeName = "English",
-        script = UniKeySyllable.Companion.Script.LATIN,
+        script = Script.LATIN,
         keys = buildLatinLayout("$", "dollar", emptyMap())
     )
 
@@ -537,7 +537,7 @@ object KeyboardLayouts {
         code = "en-in",
         name = "English (India)",
         nativeName = "English",
-        script = UniKeySyllable.Companion.Script.LATIN,
+        script = Script.LATIN,
         keys = buildLatinLayout("₹", "rupee", emptyMap())
     )
 
@@ -546,7 +546,7 @@ object KeyboardLayouts {
         code = "es-419",
         name = "Spanish (Latin America)",
         nativeName = "Español (Latinoamérica)",
-        script = UniKeySyllable.Companion.Script.LATIN,
+        script = Script.LATIN,
         keys = buildLatinLayout("$", "dollar", mapOf(
             ";" to key("ñ", "ɲ", "ene", "Ñ", "ɲ", "Ene"),
             "'" to key("´", "", "acute", "¨", "", "diaeresis"),
