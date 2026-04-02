@@ -171,25 +171,31 @@ data class SimpleKey(
 enum class Currency(
     val symbol: String,
     val displayName: String,
-    val regions: List<String>
+    val langs: List<Lang>
 ) {
-    DOLLAR("$", "dollar", listOf("en", "en-us", "en-au", "en-ca", "es-419")),
-    POUND("£", "pound", listOf("en-gb")),
-    EURO("€", "euro", listOf("de", "el", "es", "fi", "fr", "it", "nl", "pt")),
-    RUPEE("₹", "rupee", listOf("hi", "en-in")),
-    SHEKEL("₪", "shekel", listOf("he")),
-    YEN("¥", "yen", listOf("ja", "zh")),
-    WON("₩", "won", listOf("ko")),
-    RUBLE("₽", "ruble", listOf("ru")),
-    LIRA("₺", "lira", listOf("tr")),
-    ZLOTY("zł", "zloty", listOf("pl")),
-    KRONE("kr", "krone", listOf("da", "no", "sv")),
-    REAL("R$", "real", listOf("pt-br")),
-    RINGGIT("RM", "ringgit", listOf("ms")),
-    SHILLING("TSh", "shilling", listOf("sw"));
+    DOLLAR("$", "dollar", listOf(Lang.EN, Lang.EN_AU, Lang.EN_CA, Lang.ES_419)),
+    POUND("£", "pound", listOf(Lang.EN_GB)),
+    EURO("€", "euro", listOf(Lang.DE, Lang.EL, Lang.ES, Lang.FI, Lang.FR, Lang.IT, Lang.NL, Lang.PT)),
+    RUPEE("₹", "rupee", listOf(Lang.HI, Lang.EN_IN)),
+    SHEKEL("₪", "shekel", listOf(Lang.HE)),
+    YEN("¥", "yen", listOf(Lang.JA, Lang.ZH)),
+    WON("₩", "won", listOf(Lang.KO)),
+    RUBLE("₽", "ruble", listOf(Lang.RU)),
+    LIRA("₺", "lira", listOf(Lang.TR)),
+    ZLOTY("zł", "zloty", listOf(Lang.PL)),
+    KRONE("kr", "krone", listOf(Lang.DA, Lang.NO, Lang.SV)),
+    REAL("R$", "real", listOf(Lang.PT_BR)),
+    RINGGIT("RM", "ringgit", listOf(Lang.MS)),
+    SHILLING("TSh", "shilling", listOf(Lang.SW));
 
     companion object {
-        private val byRegion = entries.flatMap { c -> c.regions.map { it to c } }.toMap()
-        fun forRegion(code: String): Currency = byRegion[code] ?: DOLLAR
+        private val byLang = entries.flatMap { c -> c.langs.map { it to c } }.toMap()
+
+        /** Get currency for a Lang (preferred) */
+        fun forLang(lang: Lang): Currency = byLang[lang] ?: DOLLAR
+
+        /** Get currency by language code string */
+        @Deprecated("Use forLang(Lang) instead", ReplaceWith("forLang(Lang.fromCode(code)!!)"))
+        fun forRegion(code: String): Currency = Lang.fromCode(code)?.let { byLang[it] } ?: DOLLAR
     }
 }
