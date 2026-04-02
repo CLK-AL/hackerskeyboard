@@ -46,11 +46,11 @@ class McpMushiProtocolTest {
             }
         )
 
-        val json = McpWire.json.encodeToString(McpToolDef.serializer(), tool)
+        val json = ProtoWire.json.encodeToString(McpToolDef.serializer(), tool)
         assertTrue(json.contains("read_file"))
         assertTrue(json.contains("inputSchema"))
 
-        val decoded = McpWire.json.decodeFromString(McpToolDef.serializer(), json)
+        val decoded = ProtoWire.json.decodeFromString(McpToolDef.serializer(), json)
         assertEquals("read_file", decoded.name)
     }
 
@@ -70,10 +70,10 @@ class McpMushiProtocolTest {
         val success = McpToolResult.Success(listOf(McpContent.Text("result")))
         val error = McpToolResult.Error("Not found", -32601)
 
-        val successJson = McpWire.json.encodeToString(McpToolResult.serializer(), success)
+        val successJson = ProtoWire.json.encodeToString(McpToolResult.serializer(), success)
         assertTrue(successJson.contains("success"))
 
-        val errorJson = McpWire.json.encodeToString(McpToolResult.serializer(), error)
+        val errorJson = ProtoWire.json.encodeToString(McpToolResult.serializer(), error)
         assertTrue(errorJson.contains("error"))
     }
 
@@ -140,7 +140,7 @@ class McpMushiProtocolTest {
     @Test
     fun testWebDavMethodSerialization() {
         val method = WebDavMethod.PROPFIND
-        val json = McpWire.json.encodeToString(WebDavMethod.serializer(), method)
+        val json = ProtoWire.json.encodeToString(WebDavMethod.serializer(), method)
         assertTrue(json.contains("PROPFIND"))
     }
 
@@ -152,8 +152,8 @@ class McpMushiProtocolTest {
             value = "test.txt"
         )
 
-        val json = McpWire.json.encodeToString(DavProperty.serializer(), prop)
-        val decoded = McpWire.json.decodeFromString(DavProperty.serializer(), json)
+        val json = ProtoWire.json.encodeToString(DavProperty.serializer(), prop)
+        val decoded = ProtoWire.json.decodeFromString(DavProperty.serializer(), json)
         assertEquals("displayname", decoded.name)
     }
 
@@ -167,7 +167,7 @@ class McpMushiProtocolTest {
             isCollection = false
         )
 
-        val json = McpWire.json.encodeToString(DavResource.serializer(), resource)
+        val json = ProtoWire.json.encodeToString(DavResource.serializer(), resource)
         assertTrue(json.contains("test.txt"))
         assertFalse(json.contains("isCollection\":true"))
     }
@@ -183,15 +183,15 @@ class McpMushiProtocolTest {
             timeout = 3600
         )
 
-        val json = McpWire.json.encodeToString(DavLock.serializer(), lock)
+        val json = ProtoWire.json.encodeToString(DavLock.serializer(), lock)
         assertTrue(json.contains("abc123"))
     }
 
     @Test
     fun testDavDepthSerialization() {
-        assertEquals("\"0\"", McpWire.json.encodeToString(DavDepth.serializer(), DavDepth.ZERO))
-        assertEquals("\"1\"", McpWire.json.encodeToString(DavDepth.serializer(), DavDepth.ONE))
-        assertEquals("\"infinity\"", McpWire.json.encodeToString(DavDepth.serializer(), DavDepth.INFINITY))
+        assertEquals("\"0\"", ProtoWire.json.encodeToString(DavDepth.serializer(), DavDepth.ZERO))
+        assertEquals("\"1\"", ProtoWire.json.encodeToString(DavDepth.serializer(), DavDepth.ONE))
+        assertEquals("\"infinity\"", ProtoWire.json.encodeToString(DavDepth.serializer(), DavDepth.INFINITY))
     }
 
     @Test
@@ -387,17 +387,24 @@ class McpMushiProtocolTest {
     }
 
     @Test
-    fun testLineRangeParse() {
-        val single = LineRange.parse("5")
-        assertNotNull(single)
-        assertEquals(5, single.start)
-        assertEquals(5, single.end)
-
-        val range = LineRange.parse("10-20")
+    fun testRangeParse() {
+        // HTTP Range header format
+        val range = Range.parseRange("bytes=0-499")
         assertNotNull(range)
-        assertEquals(10, range.start)
-        assertEquals(20, range.end)
-        assertEquals(11, range.length)
+        assertEquals(0L, range.start)
+        assertEquals(499L, range.end)
+        assertEquals(500L, range.length)
+
+        // Content-Range header format
+        val contentRange = Range.parseContentRange("bytes 0-499/1000")
+        assertNotNull(contentRange)
+        assertEquals(0L, contentRange.start)
+        assertEquals(499L, contentRange.end)
+        assertEquals(1000L, contentRange.total)
+
+        // toContentRange output
+        val r = Range.bytes(100, 199, 1000)
+        assertEquals("bytes 100-199/1000", r.toContentRange())
     }
 
     @Test
@@ -455,7 +462,7 @@ class McpMushiProtocolTest {
             timeout = 5000
         )
 
-        val json = McpWire.json.encodeToString(KtorRequest.serializer(), req)
+        val json = ProtoWire.json.encodeToString(KtorRequest.serializer(), req)
         assertTrue(json.contains("POST"))
         assertTrue(json.contains("api.example.com"))
     }
@@ -468,8 +475,8 @@ class McpMushiProtocolTest {
             body = """{"result": "ok"}"""
         )
 
-        val json = McpWire.json.encodeToString(KtorResponse.serializer(), resp)
-        assertEquals(200, McpWire.json.decodeFromString(KtorResponse.serializer(), json).status)
+        val json = ProtoWire.json.encodeToString(KtorResponse.serializer(), resp)
+        assertEquals(200, ProtoWire.json.decodeFromString(KtorResponse.serializer(), json).status)
     }
 
     @Test
@@ -481,8 +488,8 @@ class McpMushiProtocolTest {
             retry = 3000
         )
 
-        val json = McpWire.json.encodeToString(SseEvent.serializer(), event)
-        val decoded = McpWire.json.decodeFromString(SseEvent.serializer(), json)
+        val json = ProtoWire.json.encodeToString(SseEvent.serializer(), event)
+        val decoded = ProtoWire.json.decodeFromString(SseEvent.serializer(), json)
         assertEquals("message", decoded.event)
         assertEquals("evt-123", decoded.id)
     }
@@ -490,8 +497,8 @@ class McpMushiProtocolTest {
     @Test
     fun testWireFormatJson() {
         val data = McpCapabilities(tools = true, resources = false)
-        val encoded = McpWire.encode(data, WireFormat.JSON)
-        val decoded = McpWire.decode<McpCapabilities>(encoded, WireFormat.JSON)
+        val encoded = ProtoWire.encode(data, WireFormat.JSON)
+        val decoded = ProtoWire.decode<McpCapabilities>(encoded, WireFormat.JSON)
 
         assertTrue(decoded.tools)
         assertFalse(decoded.resources)
@@ -500,13 +507,13 @@ class McpMushiProtocolTest {
     @Test
     fun testWireFormatMessagePack() {
         val data = McpCapabilities(tools = true, resources = true)
-        val encoded = McpWire.encode(data, WireFormat.MESSAGE_PACK)
+        val encoded = ProtoWire.encode(data, WireFormat.MESSAGE_PACK)
 
         // MessagePack has header byte
         assertTrue(encoded.isNotEmpty())
         assertTrue(encoded[0] == 0x92.toByte())
 
-        val decoded = McpWire.decode<McpCapabilities>(encoded, WireFormat.MESSAGE_PACK)
+        val decoded = ProtoWire.decode<McpCapabilities>(encoded, WireFormat.MESSAGE_PACK)
         assertTrue(decoded.tools)
     }
 

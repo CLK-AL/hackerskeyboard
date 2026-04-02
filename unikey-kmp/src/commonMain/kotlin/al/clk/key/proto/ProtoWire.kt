@@ -62,9 +62,6 @@ data class Range(
     }
 }
 
-/** Backwards compatibility aliases */
-typealias Segment = Range
-typealias LineRange = Range
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // VALUE CLASSES - Zero allocation wrappers for IDs
@@ -179,8 +176,6 @@ object RangeCodec {
     fun contentRangeHeader(segment: Segment, unit: String = "bytes") = segment.toContentRange(unit)
 }
 
-/** Backwards compatibility alias */
-typealias TextLineCodec = RangeCodec
 
 /**
  * YDoc codec for Yjs CRDT text format.

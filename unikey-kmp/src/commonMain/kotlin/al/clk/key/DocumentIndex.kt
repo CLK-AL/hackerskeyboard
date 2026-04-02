@@ -4641,9 +4641,6 @@ data class Range(
     }
 }
 
-/** Backwards compatibility aliases */
-typealias Segment = Range
-typealias LineRange = Range
 
 /**
  * Segment codec for HTTP partial content.
@@ -4688,8 +4685,6 @@ object RangeCodec {
     fun contentRangeHeader(segment: Segment, unit: String = "bytes") = segment.toContentRange(unit)
 }
 
-/** Backwards compatibility */
-typealias TextLineCodec = RangeCodec
 
 /**
  * XML codec for XML wire format.
@@ -4843,9 +4838,6 @@ object ProtoWire {
         TextLineCodec.decode(data.decodeToString())
 }
 
-/** Alias for backwards compatibility */
-typealias McpWire = ProtoWire
-typealias MushiWire = ProtoWire
 
 /**
  * MessagePack codec (simplified - full impl needs library).
@@ -5445,9 +5437,6 @@ sealed class MushiPatchOp {
     }
 }
 
-/** Type alias for backwards compatibility */
-typealias MushiDocVersion = ProtoVersion
-typealias MushiVectorClock = ProtoVectorClock
 
 /**
  * Mushi event types for SSE/WSS transport.
