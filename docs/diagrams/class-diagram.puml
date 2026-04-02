@@ -1,0 +1,192 @@
+@startuml class-diagram
+!theme plain
+skinparam classAttributeIconSize 0
+title UniKey Core Data Structures
+
+package "Language & Script" {
+    enum Lang {
+        HE("he", HEBREW)
+        EN("en", LATIN)
+        AR("ar", ARABIC)
+        EL("el", GREEK)
+        RU("ru", CYRILLIC)
+        HI("hi", DEVANAGARI)
+        JA("ja", HIRAGANA)
+        KO("ko", HANGUL)
+        ZH("zh", CJK)
+        DE, ES, FR, IT...
+        --
+        code: String
+        script: Script
+        baseLang: Lang?
+        isVariant: Boolean
+        --
+        +matchEndingIpa(word): String?
+        +fromCode(code): Lang?
+        +baseLanguages: List<Lang>
+    }
+
+    enum Script {
+        HEBREW
+        LATIN
+        ARABIC
+        GREEK
+        DEVANAGARI
+        CYRILLIC
+        HANGUL
+        HIRAGANA
+        CJK
+        UNKNOWN
+    }
+}
+
+package "Keyboard Interfaces" {
+    interface ILayoutKey {
+        +char: String
+        +ipa: String
+        +displayName: String
+        +shiftKey: ILayoutKey?
+        +ctrlKey: ILayoutKey?
+        +altKey: ILayoutKey?
+        --
+        +withModifier(mod): ILayoutKey?
+    }
+
+    interface ISpellingPattern {
+        +pattern: String
+        +examples: List<String>
+        +position: PatternPosition
+    }
+
+    interface IHebrewPattern {
+        +male: String
+        +haser: String
+        +unpointed: String
+    }
+
+    interface IArabicPattern {
+        +withHarakat: String
+        +withoutHarakat: String
+    }
+
+    enum PatternPosition {
+        PREFIX
+        INFIX
+        SUFFIX
+        ANY
+    }
+
+    enum PatternCategory {
+        VOWEL
+        CONSONANT
+        PREFIX
+        SUFFIX
+        ROOT
+        WORD
+    }
+}
+
+package "Hebrew Specifics" {
+    enum HebrewLetter {
+        ALEF('א', "", "alef")
+        BET('ב', "v", "bet")
+        GIMEL('ג', "g", "gimel")
+        ...
+        --
+        letter: Char
+        ipa: String
+        displayName: String
+        type: HebrewLetterType
+        isBgdkpt: Boolean
+        isGuttural: Boolean
+        colorIpa: String
+        colorIpaDagesh: String?
+    }
+
+    enum NikudVowel {
+        PATACH(0x05B7, "a", "patach")
+        KAMATZ(0x05B8, "a", "kamatz")
+        SEGOL(0x05B6, "e", "segol")
+        TSERE(0x05B5, "e", "tsere")
+        HIRIQ(0x05B4, "i", "hiriq")
+        HOLAM(0x05B9, "o", "holam")
+        SHURUK(0x05BC, "u", "shuruk")
+        ...
+        --
+        unicode: Int
+        ipa: String
+        name: String
+        colorIpa: String
+    }
+}
+
+package "Syllable & Rhyme" {
+    class UniKeySyllable {
+        consonant: String
+        vowel: String
+        original: String
+        hue: Int
+        --
+        +parseHebrew(word): List<UniKeySyllable>
+        +parseEnglish(word): List<UniKeySyllable>
+        +parseArabic(word): List<UniKeySyllable>
+        +parseCyrillic(word): List<UniKeySyllable>
+        +detectScript(text): Script
+        +toIpa(word): List<UniKeySyllable>
+        +wordHue(word): Int
+        +rhymeKey(word): String
+    }
+
+    class RhymeSchemeItem {
+        letter: Char
+        ipa: String
+        hue: Int
+    }
+}
+
+package "Verse Indexing" {
+    class VerseIndexState {
+        vType: Int
+        lineIdx: Int
+        order: Float
+        formatted: String
+    }
+
+    class HierarchicalIndex {
+        vType: Int
+        lineIdx: Int?
+        wordIdx: Int?
+        sylIdx: Int?
+        lineOrder: Float
+        wordOrder: Float
+        sylOrder: Float
+        depth: Int
+        formatted: String
+        --
+        +parse(formatted): HierarchicalIndex?
+        +insertOrder(before, after): Float
+    }
+
+    class WordState {
+        text: String
+        order: Float
+        sylBounds: List<Int>
+        hue: Int
+        --
+        +syllables(): List<SyllableState>
+    }
+}
+
+' Relationships
+Lang *-- Script
+ILayoutKey <|-- ISpellingPattern
+ISpellingPattern <|-- IHebrewPattern
+ISpellingPattern <|-- IArabicPattern
+ILayoutKey <|.. HebrewLetter
+HebrewLetter --> NikudVowel : uses
+UniKeySyllable --> Script : detectScript
+UniKeySyllable ..> RhymeSchemeItem : produces
+HierarchicalIndex ..> VerseIndexState : extends
+WordState --> UniKeySyllable : uses
+
+@enduml

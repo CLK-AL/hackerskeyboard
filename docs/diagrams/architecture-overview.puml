@@ -1,0 +1,85 @@
+@startuml architecture-overview
+!theme plain
+skinparam packageStyle rectangle
+skinparam componentStyle rectangle
+title Bilingual Poetry Editor - System Architecture
+
+package "Frontend (poetry.html)" as frontend {
+    component "Verse Editor" as editor
+    component "Rhyme Matrix" as matrix
+    component "Path Picker" as picker
+    component "Language Selector" as langsel
+
+    component "UniKey JS API" as jsapi {
+        portin heIpa
+        portin enIpa
+        portin rhymeScheme
+        portin wordHue
+        portin toIpa
+    }
+}
+
+package "UniKey-KMP (Kotlin Multiplatform)" as kmp {
+    component "IpaColor" as ipacolor {
+        portin heIpa()
+        portin enIpa()
+        portin ipaHue()
+    }
+
+    component "UniKeySyllable" as unisyl {
+        portin parseHebrew
+        portin parseEnglish
+        portin detectScript
+    }
+
+    component "IpaMatrix" as ipamatrix {
+        portin consonants
+        portin vowels
+        portin phonemeHue
+    }
+
+    component "KeyboardLayouts" as layouts
+    component "TranslationPair" as transpair
+}
+
+package "Language Modules" as langmod {
+    component "Non-Latin Scripts" as nonlatin {
+        component "HebrewLetter" as hebrew
+        component "ArabicLetter" as arabic
+        component "CyrillicLetter" as cyrillic
+        component "GreekLetter" as greek
+        component "DevanagariKey" as devanagari
+        component "HangulKey" as hangul
+        component "HiraganaKey" as hiragana
+        component "CJK" as cjk
+    }
+
+    component "Latin Patterns" as latinpat {
+        component "EnglishPattern" as enpat
+        component "GermanPattern" as depat
+        component "FrenchPattern" as frpat
+        component "SpanishPattern" as espat
+        component "12 more languages..." as morepat
+    }
+}
+
+package "Claude API (Translation Engine)" as claude {
+    component "Stage 1: analyzeAll()" as stage1 {
+        note right: Input: Source stanzas\nOutput: words[], pairs[], targets[]
+    }
+
+    component "Stage 2: buildPaths()" as stage2 {
+        note right: 6 translation paths:\nIPA Echo, Literal, Cultural,\nEmotional, Idiom, Compress
+    }
+}
+
+database "Poem Data (POEM[])" as poemdb
+
+' Relationships
+frontend --> kmp : JS bindings
+kmp --> langmod : IPA lookups
+kmp ..> claude : Translation requests
+editor --> poemdb : Read/Write verses
+stage1 --> stage2 : Analysis data
+
+@enduml

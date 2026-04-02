@@ -1,0 +1,97 @@
+@startuml sequence-ipa-conversion
+!theme plain
+title IPA Conversion Flow - Hebrew and English Words
+
+actor "Frontend\n(poetry.html)" as frontend
+participant "UniKeyJs" as js
+participant "IpaColor" as ipacolor
+participant "UniKeySyllable" as syl
+participant "HebrewLetter\n(enum)" as heletter
+participant "NikudVowel\n(enum)" as nikud
+participant "EnglishPattern\n(enum)" as enpat
+
+== Hebrew Word to IPA ==
+
+frontend -> js: heIpa("בַּזֶּלֶת")
+js -> ipacolor: heIpa(word)
+activate ipacolor
+
+ipacolor -> ipacolor: Clean word (remove punctuation)
+loop for each character
+    alt Hebrew letter (0x05D0-0x05EA)
+        ipacolor -> heletter: CONSONANT_IPA[char]
+        heletter --> ipacolor: "b", "z", "l", "t"
+    else Dagesh (0x05BC)
+        ipacolor -> heletter: DAGESH_IPA[lastConsonant]
+        heletter --> ipacolor: dagesh IPA variant
+    else Shin dot (0x05C1)
+        ipacolor -> ipacolor: keep as "sh"
+    else Sin dot (0x05C2)
+        ipacolor -> ipacolor: change "sh" to "s"
+    else Nikud (vowel mark)
+        ipacolor -> nikud: NIKUD_IPA[codepoint]
+        nikud --> ipacolor: "a", "e", "o"
+    end
+end
+ipacolor --> js: "bazelet"
+js --> frontend: "bazelet"
+
+== English Word to IPA ==
+
+frontend -> js: enIpa("basalt")
+js -> ipacolor: enIpa(word)
+activate ipacolor
+
+ipacolor -> ipacolor: lowercase, remove non-alpha
+ipacolor -> enpat: matchEnding(word)
+activate enpat
+enpat -> enpat: Check patterns by priority\n(e.g., "-alt" -> "ɔːlt")
+enpat --> ipacolor: EnglishPattern entry or null
+deactivate enpat
+
+alt Pattern matched
+    ipacolor -> ipacolor: simplifyIpa(pattern.ipa)\nɪ->I, ŋ->N, ʃ->sh...
+    ipacolor --> js: simplified IPA ending
+else No pattern match
+    ipacolor -> ipacolor: takeLast(3) as fallback
+    ipacolor --> js: last 3 chars
+end
+
+js --> frontend: "lt" (rhyme ending)
+
+== IPA to Hue (Color) ==
+
+frontend -> js: ipaHue("bazelet")
+js -> ipacolor: ipaHue(ipa)
+activate ipacolor
+
+ipacolor -> ipacolor: core = takeLast(3) "let"
+ipacolor -> ipacolor: Hash core (djb2 algorithm)
+ipacolor -> ipacolor: prefix = dropLast(3) "baze"
+ipacolor -> ipacolor: Hash prefix (minor tint)
+ipacolor -> ipacolor: hue = (core*0.85 + prefix*0.15) % 360
+
+ipacolor --> js: 245 (blue-ish hue)
+js --> frontend: 245
+
+== Rhyme Scheme Detection ==
+
+frontend -> js: rhymeScheme(["bazelet", "soeret", "lt", "nt"])
+js -> ipacolor: rhymeScheme(ipas)
+activate ipacolor
+
+loop for each IPA
+    ipacolor -> ipacolor: key = takeLast(3)
+    ipacolor -> ipacolor: Check if key seen before
+    alt Key exists
+        ipacolor -> ipacolor: Use existing letter
+    else New key
+        ipacolor -> ipacolor: Assign next letter (A, B, C...)
+    end
+    ipacolor -> ipacolor: Calculate hue for this IPA
+end
+
+ipacolor --> js: [{ch:'A', ipa:'let'}, {ch:'A', ipa:'ret'}, {ch:'B', ipa:'lt'}, {ch:'C', ipa:'nt'}]
+js --> frontend: Rhyme scheme array
+
+@enduml

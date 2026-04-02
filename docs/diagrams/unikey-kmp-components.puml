@@ -1,0 +1,157 @@
+@startuml unikey-kmp-components
+!theme plain
+skinparam packageStyle rectangle
+title UniKey-KMP Module Components
+
+package "commonMain" as common {
+    package "Core Types" as core {
+        class "Lang" as lang {
+            code: String
+            script: Script
+            baseLang: Lang?
+            --
+            matchEndingIpa()
+        }
+
+        enum "Script" as script {
+            HEBREW
+            LATIN
+            ARABIC
+            GREEK
+            DEVANAGARI
+            CYRILLIC
+            HANGUL
+            HIRAGANA
+            CJK
+            UNKNOWN
+        }
+
+        interface "ILayoutKey" as ilayoutkey {
+            char: String
+            ipa: String
+            displayName: String
+            shiftKey: ILayoutKey?
+        }
+
+        interface "ISpellingPattern" as ispelling {
+            pattern: String
+            examples: List<String>
+            position: PatternPosition
+        }
+    }
+
+    package "IPA System" as ipasys {
+        class "IpaColor" as ipacolor {
+            +heIpa(word): String
+            +enIpa(word): String
+            +ipaHue(ipa): Int
+            +lineEndIpa(line, isHebrew): String
+            +rhymeScheme(ipas): List<RhymeSchemeItem>
+        }
+
+        class "IpaMatrix" as ipamatrix {
+            +consonants: List<IpaConsonantEntry>
+            +vowels: List<IpaVowelEntry>
+            +getPhonemeHue(ipa): Int
+            +getConsonantsForLanguage(lang): List
+            +getVowelsForLanguage(lang): List
+        }
+
+        class "UniKeySyllable" as unisyl {
+            +parseHebrew(word): List<UniKeySyllable>
+            +parseEnglish(word): List<UniKeySyllable>
+            +parseArabic(word): List<UniKeySyllable>
+            +detectScript(text): Script
+            +toIpa(word): List<UniKeySyllable>
+            +wordHue(word): Int
+            +rhymeKey(word): String
+        }
+    }
+
+    package "Keyboard Layouts" as kblayouts {
+        class "KeyboardLayouts" as layouts {
+            +supportedLanguages: List<String>
+            +get(langCode): KeyboardLayout?
+        }
+
+        class "KeyLanguage" as keylang {
+            code: String
+            nativeName: String
+            englishName: String
+            direction: Direction
+            script: Script
+            --
+            +parseSyllables(word): List
+            +aiPromptHints: PromptHints
+        }
+
+        class "TranslationPair" as transpair {
+            source: KeyLanguage
+            target: KeyLanguage
+            pairId: String
+            --
+            +generateAnalysisPrompt(): String
+            +generatePathPrompt(): String
+        }
+    }
+
+    package "Verse Index" as verseidx {
+        class "VerseIndexState" as versestate {
+            vType: Int
+            lineIdx: Int
+            order: Float
+            formatted: String
+        }
+
+        class "HierarchicalIndex" as hieridx {
+            vType: Int
+            lineIdx: Int?
+            wordIdx: Int?
+            sylIdx: Int?
+            depth: Int
+            formatted: String
+        }
+
+        class "RhymeSchemeState" as rhymestate {
+            pattern: String
+            lines: List<RhymeLineState>
+        }
+    }
+}
+
+package "jsMain" as js {
+    class "UniKeyJs" as unikeyjs {
+        @JsExport
+        --
+        +heIpa(), enIpa()
+        +rhymeScheme(), wordHue()
+        +parseHebrewSyllables()
+        +parseEnglishSyllables()
+        +getAllConsonants()
+        +getAllVowels()
+        +getLayout()
+        ...
+    }
+}
+
+package "wasmJsMain" as wasm {
+    class "UniKeyWasm" as unikeywasm {
+        WASM bindings
+    }
+}
+
+' Relationships
+lang --> script
+ilayoutkey <|.. ispelling
+ipacolor --> lang
+ipamatrix --> lang
+unisyl --> ipacolor
+unisyl --> script
+layouts --> keylang
+transpair --> keylang
+unikeyjs --> ipacolor
+unikeyjs --> unisyl
+unikeyjs --> layouts
+unikeyjs --> ipamatrix
+
+@enduml

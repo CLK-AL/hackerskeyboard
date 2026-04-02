@@ -1,0 +1,102 @@
+@startuml module-dependencies
+!theme plain
+skinparam packageStyle rectangle
+skinparam componentStyle rectangle
+title Module Dependencies
+
+package "Root Project" as root {
+    component "poetry.html" as poetry
+    component "hackerskeyboard-unikey-kmp.js" as jsout
+    component "kotlin-kotlin-stdlib.js" as stdlib
+}
+
+package "app (Android Keyboard)" as app {
+    package "pckeyboard" as pckeyboard {
+        component "LatinIME" as latinime
+        component "Keyboard" as keyboard
+        component "LatinKeyboard" as latinkb
+        component "KeyboardSwitcher" as kbswitch
+        component "LanguageSwitcher" as langswitch
+        component "Suggest" as suggest
+        component "Dictionary" as dict
+        component "PointerTracker" as pointer
+        component "CandidateView" as candidate
+    }
+
+    package "unikey (Android)" as androidunikey {
+        component "HebrewLetter" as hebrewAnd
+        component "Nikud" as nikudAnd
+        component "UniKey" as unikeyAnd
+        component "Bgdkpt" as bgdkptAnd
+        component "Ipa" as ipaAnd
+    }
+}
+
+package "unikey-kmp (Kotlin Multiplatform)" as kmp {
+    package "commonMain" as common {
+        component "Currency.kt" as currency {
+            note right: Lang, Script, ILayoutKey\nISpellingPattern
+        }
+        component "IpaColor.kt" as ipacolor
+        component "IpaMatrix.kt" as ipamatrix
+        component "UniKeySyllable.kt" as unisyl
+        component "HebrewLetter.kt" as hebrew
+        component "SpellingPatterns.kt" as patterns
+        component "SpellingPatternsEast.kt" as patternseast
+        component "ScriptKeys.kt" as scriptkeys
+        component "KeyboardLayout.kt" as kblayout
+        component "TargetLanguage.kt" as targetlang
+        component "VerseIndex.kt" as verseindex
+        component "MorphoKey.kt" as morpho
+    }
+
+    package "jsMain" as jsmain {
+        component "UniKeyJs.kt" as unikeyjs
+    }
+
+    package "wasmJsMain" as wasmmain {
+        component "UniKeyWasm.kt" as unikeywasm
+    }
+}
+
+' Build outputs
+kmp ..> jsout : builds to
+kmp ..> stdlib : depends on
+
+' Poetry.html dependencies
+poetry --> jsout : loads
+poetry --> stdlib : loads
+
+' Internal KMP dependencies
+ipacolor --> hebrew
+ipacolor --> patterns
+unisyl --> ipacolor
+unisyl --> scriptkeys
+unisyl --> patternseast
+kblayout --> currency
+targetlang --> currency
+unikeyjs --> ipacolor
+unikeyjs --> unisyl
+unikeyjs --> ipamatrix
+unikeyjs --> kblayout
+unikeyjs --> targetlang
+unikeyjs --> verseindex
+
+' Android dependencies
+latinime --> keyboard
+latinime --> langswitch
+latinime --> suggest
+keyboard --> latinkb
+latinkb --> kbswitch
+suggest --> dict
+latinkb --> pointer
+latinime --> candidate
+
+' Android UniKey
+latinime ..> unikeyAnd : optional
+unikeyAnd --> hebrewAnd
+unikeyAnd --> nikudAnd
+unikeyAnd --> bgdkptAnd
+unikeyAnd --> ipaAnd
+
+@enduml

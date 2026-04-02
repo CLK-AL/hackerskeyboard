@@ -1,0 +1,97 @@
+@startuml translation-flow
+!theme plain
+title Poetry Translation Flow (Claude API Integration)
+
+actor "User" as user
+participant "Verse Editor\n(poetry.html)" as editor
+participant "UniKey JS API" as uk
+participant "Claude API" as claude
+database "POEM[]" as poem
+
+== Load & Display ==
+
+user -> editor: Open poetry.html
+editor -> poem: Load Hebrew verses
+poem --> editor: Stanzas with he[] and en[]
+
+loop for each line
+    editor -> uk: heIpa(hebrewWord)
+    uk --> editor: IPA string
+    editor -> uk: ipaHue(ipa)
+    uk --> editor: hue (0-360)
+    editor -> editor: Apply HSL color to word
+end
+
+editor --> user: Display colored verse
+
+== Stage 1: Analysis ==
+
+user -> editor: Click "Analyze"
+editor -> claude: analyzeAll()\nS1SYS prompt + Hebrew stanzas
+activate claude
+
+claude -> claude: Parse Hebrew morphology
+claude -> claude: Find rhyme pairs
+claude -> claude: Generate synonyms with IPA
+claude -> claude: Note cultural context
+
+claude --> editor: Analysis JSON
+deactivate claude
+
+note right of editor
+  {
+    "sid": 1,
+    "words": [{
+      "he": "בַּזֶּלֶת",
+      "ipa": "bazelet",
+      "syns": [
+        {"en": "basalt", "end": "lt", "s": true},
+        {"en": "rock", "end": "ok", "s": false}
+      ]
+    }],
+    "pairs": [
+      {"a": "raging", "b": "staging", "ipa": "IN"}
+    ],
+    "targets": ["bazelet", "soeret"]
+  }
+end note
+
+editor -> uk: rhymeScheme(targets)
+uk --> editor: [{ch:'A', ipa:'let', hue:245}, ...]
+
+== Stage 2: Path Generation ==
+
+user -> editor: Select stanza, click "Paths"
+editor -> claude: buildPaths(vid)\nS2SYS prompt + analysis data
+activate claude
+
+claude -> claude: Generate 6 translation strategies
+
+note left of claude
+  1. IPA ECHO - Max sound fidelity
+  2. LITERAL ANCHOR - Denotative accuracy
+  3. CULTURAL CHARGE - Hebrew register
+  4. EMOTIONAL - Match poem's arc
+  5. ENGLISH IDIOM - Natural English
+  6. COMPRESSION - Shortest/hardest
+end note
+
+claude --> editor: 6 couplet alternatives
+deactivate claude
+
+loop for each path option
+    editor -> uk: enIpa(englishWord)
+    uk --> editor: IPA ending
+    editor -> uk: ipaHue(ipa)
+    uk --> editor: hue for visual matching
+end
+
+editor --> user: Display 6 colored path options
+
+== User Selection ==
+
+user -> editor: Select preferred path
+editor -> poem: Update en[] for stanza
+editor -> editor: Re-render with new colors
+
+@enduml
