@@ -53,6 +53,18 @@ enum class HebrewLetter(
     val isGuttural: Boolean get() = type == LetterType.GUTTURAL
     val isBgdkpt: Boolean get() = type == LetterType.BGDKPT
 
+    /** ASCII-friendly IPA for color hashing (gutturals silent, sh for shin, etc.) */
+    val colorIpa: String get() = when (ipa) {
+        "\u0294", "\u0295" -> ""      // ʔ (alef), ʕ (ayin) -> silent
+        "\u0283" -> "sh"               // ʃ (shin) -> sh
+        "\u0127" -> "x"                // ħ (chet) -> x
+        "\u0281" -> "r"                // ʁ (resh) -> r
+        else -> ipa
+    }
+
+    /** ASCII-friendly dagesh IPA for color hashing */
+    val colorIpaDagesh: String? get() = ipaDagesh
+
     fun getIpa(hasDagesh: Boolean = false): String = if (hasDagesh && ipaDagesh != null) ipaDagesh else ipa
     fun getEn(hasDagesh: Boolean = false): String = if (hasDagesh && enDagesh != null) enDagesh else en
 

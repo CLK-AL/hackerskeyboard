@@ -74,6 +74,14 @@ enum class NikudVowel(
     override val char: String get() = mark
     override val displayName: String get() = name.lowercase().replace('_', '-')
 
+    /** ASCII-friendly IPA for color hashing */
+    val colorIpa: String get() = when {
+        ipa == "ə" -> "@"
+        ipa == "ɛ" && this == SEGOL -> "E"
+        ipa == "ɛ" -> "e"
+        else -> ipa.take(1)  // Use first char for long vowels
+    }
+
     /** Is this a hataf (reduced) vowel */
     val isHataf: Boolean get() = this in setOf(HATAF_PATACH, HATAF_SEGOL, HATAF_KAMATZ)
 

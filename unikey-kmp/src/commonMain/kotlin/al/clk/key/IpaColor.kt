@@ -61,64 +61,23 @@ object IpaColor {
     }
 
     /**
-     * Simplified consonant IPA for color hashing (ASCII-friendly).
+     * Consonant IPA for color hashing - generated from HebrewLetter enum.
      */
-    private val CONSONANT_IPA = mapOf(
-        '\u05D0' to "",    // alef - silent
-        '\u05D1' to "v",   // bet
-        '\u05D2' to "g",   // gimel
-        '\u05D3' to "d",   // dalet
-        '\u05D4' to "h",   // he
-        '\u05D5' to "v",   // vav
-        '\u05D6' to "z",   // zayin
-        '\u05D7' to "x",   // chet
-        '\u05D8' to "t",   // tet
-        '\u05D9' to "j",   // yod
-        '\u05DA' to "x",   // kaf sofit
-        '\u05DB' to "x",   // kaf
-        '\u05DC' to "l",   // lamed
-        '\u05DD' to "m",   // mem sofit
-        '\u05DE' to "m",   // mem
-        '\u05DF' to "n",   // nun sofit
-        '\u05E0' to "n",   // nun
-        '\u05E1' to "s",   // samech
-        '\u05E2' to "",    // ayin - silent
-        '\u05E3' to "f",   // pe sofit
-        '\u05E4' to "f",   // pe
-        '\u05E5' to "ts",  // tsadi sofit
-        '\u05E6' to "ts",  // tsadi
-        '\u05E7' to "k",   // qof
-        '\u05E8' to "r",   // resh
-        '\u05E9' to "sh",  // shin
-        '\u05EA' to "t"    // tav
-    )
+    private val CONSONANT_IPA: Map<Char, String> = HebrewLetter.entries
+        .associateBy({ it.letter }, { it.colorIpa })
 
     /**
-     * Dagesh changes for BGDKPT letters.
+     * Dagesh changes for BGDKPT letters - generated from HebrewLetter enum.
      */
-    private val DAGESH_IPA = mapOf(
-        '\u05D1' to "b",   // bet -> b
-        '\u05DB' to "k",   // kaf -> k
-        '\u05E4' to "p"    // pe -> p
-    )
+    private val DAGESH_IPA: Map<Char, String> = HebrewLetter.entries
+        .filter { it.colorIpaDagesh != null }
+        .associateBy({ it.letter }, { it.colorIpaDagesh!! })
 
     /**
-     * Nikud (vowel marks) to simplified IPA for coloring.
+     * Nikud (vowel marks) to simplified IPA - generated from NikudVowel enum.
      */
-    private val NIKUD_IPA = mapOf(
-        0x05B0 to "@",   // shva
-        0x05B1 to "e",   // hataf segol
-        0x05B2 to "a",   // hataf patach
-        0x05B3 to "o",   // hataf kamatz
-        0x05B4 to "i",   // chirik
-        0x05B5 to "e",   // tzere
-        0x05B6 to "E",   // segol
-        0x05B7 to "a",   // patach
-        0x05B8 to "a",   // kamatz
-        0x05B9 to "o",   // cholam
-        0x05BA to "o",   // cholam haser
-        0x05BB to "u"    // kubutz
-    )
+    private val NIKUD_IPA: Map<Int, String> = NikudVowel.entries
+        .associateBy({ it.unicode }, { it.colorIpa })
 
     /**
      * Convert Hebrew word to IPA using nikud and consonants.
