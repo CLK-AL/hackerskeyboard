@@ -40,6 +40,7 @@ enum class DocTag(
     val isBlock: Boolean = true,
     val isContainer: Boolean = false
 ) {
+    // ═══ Document Structure ═══
     HTML(
         TagPattern("<html", "[^>]*", ">"),
         isContainer = true
@@ -52,6 +53,8 @@ enum class DocTag(
         TagPattern("<body", "[^>]*", ">"),
         isContainer = true
     ),
+
+    // ═══ Headings ═══
     H1(
         TagPattern("<h1", "[^>]*", ">"),
         TagPattern("^#\\s+", ".*", "$")
@@ -76,10 +79,46 @@ enum class DocTag(
         TagPattern("<h6", "[^>]*", ">"),
         TagPattern("^######\\s+", ".*", "$")
     ),
+
+    // ═══ Block Elements ═══
     P(
         TagPattern("<p", "[^>]*", ">"),
         TagPattern("^(?![-*#>])", ".+", "$")
     ),
+    DIV(
+        TagPattern("<div", "[^>]*", ">"),
+        isContainer = true
+    ),
+    SECTION(
+        TagPattern("<section", "[^>]*", ">"),
+        isContainer = true
+    ),
+    ARTICLE(
+        TagPattern("<article", "[^>]*", ">"),
+        isContainer = true
+    ),
+    ASIDE(
+        TagPattern("<aside", "[^>]*", ">"),
+        isContainer = true
+    ),
+    HEADER(
+        TagPattern("<header", "[^>]*", ">"),
+        isContainer = true
+    ),
+    FOOTER(
+        TagPattern("<footer", "[^>]*", ">"),
+        isContainer = true
+    ),
+    NAV(
+        TagPattern("<nav", "[^>]*", ">"),
+        isContainer = true
+    ),
+    MAIN(
+        TagPattern("<main", "[^>]*", ">"),
+        isContainer = true
+    ),
+
+    // ═══ Lists ═══
     OL(
         TagPattern("<ol", "[^>]*", ">"),
         isContainer = true
@@ -92,6 +131,18 @@ enum class DocTag(
         TagPattern("<li", "[^>]*", ">"),
         TagPattern("^[-*]\\s+|^\\d+\\.\\s+", ".*", "$")
     ),
+    DL(
+        TagPattern("<dl", "[^>]*", ">"),
+        isContainer = true
+    ),
+    DT(
+        TagPattern("<dt", "[^>]*", ">")
+    ),
+    DD(
+        TagPattern("<dd", "[^>]*", ">")
+    ),
+
+    // ═══ Code/Preformatted ═══
     PRE(
         TagPattern("<pre", "[^>]*", ">"),
         TagPattern("^```", ".*", "```$")
@@ -101,19 +152,82 @@ enum class DocTag(
         TagPattern("`", "[^`]+", "`"),
         isBlock = false
     ),
+    KBD(
+        TagPattern("<kbd", "[^>]*", ">"),
+        isBlock = false
+    ),
+    SAMP(
+        TagPattern("<samp", "[^>]*", ">"),
+        isBlock = false
+    ),
+    VAR(
+        TagPattern("<var", "[^>]*", ">"),
+        isBlock = false
+    ),
+
+    // ═══ Inline Text Formatting ═══
     SPAN(
         TagPattern("<span", "[^>]*", ">"),
         isBlock = false
     ),
-    DIV(
-        TagPattern("<div", "[^>]*", ">"),
-        isContainer = true
-    ),
-    A(
-        TagPattern("<a", "[^>]*", ">"),
-        TagPattern("\\[", "[^\\]]+", "\\]\\([^)]+\\)"),
+    B(
+        TagPattern("<b", "[^>]*", ">"),
+        TagPattern("\\*\\*", ".+?", "\\*\\*"),
         isBlock = false
     ),
+    I(
+        TagPattern("<i", "[^>]*", ">"),
+        TagPattern("\\*", "[^*]+", "\\*"),
+        isBlock = false
+    ),
+    U(
+        TagPattern("<u", "[^>]*", ">"),
+        isBlock = false
+    ),
+    S(
+        TagPattern("<s", "[^>]*", ">"),
+        TagPattern("~~", ".+?", "~~"),
+        isBlock = false
+    ),
+    STRIKE(
+        TagPattern("<strike", "[^>]*", ">"),
+        TagPattern("~~", ".+?", "~~"),
+        isBlock = false
+    ),
+    DEL(
+        TagPattern("<del", "[^>]*", ">"),
+        TagPattern("~~", ".+?", "~~"),
+        isBlock = false
+    ),
+    INS(
+        TagPattern("<ins", "[^>]*", ">"),
+        isBlock = false
+    ),
+    MARK(
+        TagPattern("<mark", "[^>]*", ">"),
+        TagPattern("==", ".+?", "=="),
+        isBlock = false
+    ),
+    SMALL(
+        TagPattern("<small", "[^>]*", ">"),
+        isBlock = false
+    ),
+    BIG(
+        TagPattern("<big", "[^>]*", ">"),
+        isBlock = false
+    ),
+    SUB(
+        TagPattern("<sub", "[^>]*", ">"),
+        TagPattern("~", "[^~]+", "~"),
+        isBlock = false
+    ),
+    SUP(
+        TagPattern("<sup", "[^>]*", ">"),
+        TagPattern("\\^", "[^^]+", "\\^"),
+        isBlock = false
+    ),
+
+    // ═══ Semantic Inline ═══
     STRONG(
         TagPattern("<strong", "[^>]*", ">"),
         TagPattern("\\*\\*|__", ".+?", "\\*\\*|__"),
@@ -124,13 +238,112 @@ enum class DocTag(
         TagPattern("\\*|_", ".+?", "\\*|_"),
         isBlock = false
     ),
+    CITE(
+        TagPattern("<cite", "[^>]*", ">"),
+        isBlock = false
+    ),
+    DFN(
+        TagPattern("<dfn", "[^>]*", ">"),
+        isBlock = false
+    ),
+    ABBR(
+        TagPattern("<abbr", "[^>]*", ">"),
+        isBlock = false
+    ),
+    TIME(
+        TagPattern("<time", "[^>]*", ">"),
+        isBlock = false
+    ),
+    DATA(
+        TagPattern("<data", "[^>]*", ">"),
+        isBlock = false
+    ),
+    Q(
+        TagPattern("<q", "[^>]*", ">"),
+        isBlock = false
+    ),
+
+    // ═══ Links ═══
+    A(
+        TagPattern("<a", "[^>]*", ">"),
+        TagPattern("\\[", "[^\\]]+", "\\]\\([^)]+\\)"),
+        isBlock = false
+    ),
+
+    // ═══ Bidirectional Text (important for Hebrew/Arabic) ═══
+    BDO(
+        TagPattern("<bdo", "[^>]*", ">"),
+        isBlock = false
+    ),
+    BDI(
+        TagPattern("<bdi", "[^>]*", ">"),
+        isBlock = false
+    ),
+
+    // ═══ Ruby Annotations (for phonetic guides) ═══
+    RUBY(
+        TagPattern("<ruby", "[^>]*", ">"),
+        isBlock = false
+    ),
+    RT(
+        TagPattern("<rt", "[^>]*", ">"),
+        isBlock = false
+    ),
+    RP(
+        TagPattern("<rp", "[^>]*", ">"),
+        isBlock = false
+    ),
+
+    // ═══ Line Breaks ═══
+    BR(
+        TagPattern("<br", "[^>]*", "/?>"),
+        isBlock = false
+    ),
+    WBR(
+        TagPattern("<wbr", "[^>]*", "/?>"),
+        isBlock = false
+    ),
+    HR(
+        TagPattern("<hr", "[^>]*", "/?>"),
+        TagPattern("^---+$|^\\*\\*\\*+$|^___+$", "", "")
+    ),
+
+    // ═══ Quotes ═══
     BLOCKQUOTE(
         TagPattern("<blockquote", "[^>]*", ">"),
         TagPattern("^>\\s*", ".*", "$"),
         isContainer = true
     ),
+
+    // ═══ Figures ═══
+    FIGURE(
+        TagPattern("<figure", "[^>]*", ">"),
+        isContainer = true
+    ),
+    FIGCAPTION(
+        TagPattern("<figcaption", "[^>]*", ">")
+    ),
+    IMG(
+        TagPattern("<img", "[^>]*", "/?>"),
+        TagPattern("!\\[", "[^\\]]*", "\\]\\([^)]+\\)"),
+        isBlock = false
+    ),
+
+    // ═══ Tables ═══
     TABLE(
         TagPattern("<table", "[^>]*", ">"),
+        isContainer = true
+    ),
+    THEAD(
+        TagPattern("<thead", "[^>]*", ">"),
+        isContainer = true
+    ),
+    TBODY(
+        TagPattern("<tbody", "[^>]*", ">"),
+        isContainer = true
+    ),
+    TFOOT(
+        TagPattern("<tfoot", "[^>]*", ">"),
         isContainer = true
     ),
     TR(
@@ -142,6 +355,118 @@ enum class DocTag(
     ),
     TD(
         TagPattern("<td", "[^>]*", ">")
+    ),
+    CAPTION(
+        TagPattern("<caption", "[^>]*", ">")
+    ),
+    COLGROUP(
+        TagPattern("<colgroup", "[^>]*", ">"),
+        isContainer = true
+    ),
+    COL(
+        TagPattern("<col", "[^>]*", "/?>"),
+        isBlock = false
+    ),
+
+    // ═══ Forms (for completeness) ═══
+    FORM(
+        TagPattern("<form", "[^>]*", ">"),
+        isContainer = true
+    ),
+    INPUT(
+        TagPattern("<input", "[^>]*", "/?>"),
+        isBlock = false
+    ),
+    TEXTAREA(
+        TagPattern("<textarea", "[^>]*", ">")
+    ),
+    BUTTON(
+        TagPattern("<button", "[^>]*", ">"),
+        isBlock = false
+    ),
+    SELECT(
+        TagPattern("<select", "[^>]*", ">"),
+        isContainer = true
+    ),
+    OPTION(
+        TagPattern("<option", "[^>]*", ">")
+    ),
+    LABEL(
+        TagPattern("<label", "[^>]*", ">"),
+        isBlock = false
+    ),
+    FIELDSET(
+        TagPattern("<fieldset", "[^>]*", ">"),
+        isContainer = true
+    ),
+    LEGEND(
+        TagPattern("<legend", "[^>]*", ">")
+    ),
+
+    // ═══ Details/Summary ═══
+    DETAILS(
+        TagPattern("<details", "[^>]*", ">"),
+        isContainer = true
+    ),
+    SUMMARY(
+        TagPattern("<summary", "[^>]*", ">")
+    ),
+
+    // ═══ Media ═══
+    AUDIO(
+        TagPattern("<audio", "[^>]*", ">"),
+        isContainer = true
+    ),
+    VIDEO(
+        TagPattern("<video", "[^>]*", ">"),
+        isContainer = true
+    ),
+    SOURCE(
+        TagPattern("<source", "[^>]*", "/?>"),
+        isBlock = false
+    ),
+    TRACK(
+        TagPattern("<track", "[^>]*", "/?>"),
+        isBlock = false
+    ),
+
+    // ═══ Embedded Content ═══
+    IFRAME(
+        TagPattern("<iframe", "[^>]*", ">"),
+        isBlock = false
+    ),
+    EMBED(
+        TagPattern("<embed", "[^>]*", "/?>"),
+        isBlock = false
+    ),
+    OBJECT(
+        TagPattern("<object", "[^>]*", ">"),
+        isContainer = true
+    ),
+
+    // ═══ Script/Style (metadata) ═══
+    SCRIPT(
+        TagPattern("<script", "[^>]*", ">"),
+        isBlock = false
+    ),
+    STYLE(
+        TagPattern("<style", "[^>]*", ">"),
+        isBlock = false
+    ),
+    LINK(
+        TagPattern("<link", "[^>]*", "/?>"),
+        isBlock = false
+    ),
+    META(
+        TagPattern("<meta", "[^>]*", "/?>"),
+        isBlock = false
+    ),
+    TITLE(
+        TagPattern("<title", "[^>]*", ">")
+    ),
+    BASE(
+        TagPattern("<base", "[^>]*", "/?>"),
+        isBlock = false
     );
 
     /** Check if this tag has a Markdown equivalent */
@@ -160,37 +485,114 @@ enum class DocTag(
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
+// SCRIPT ATTRIBUTES - lang, dir for internationalization
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/**
+ * Text direction for bidirectional text support.
+ */
+enum class TextDir(val value: String) {
+    LTR("ltr"),   // Left-to-right (English, etc.)
+    RTL("rtl"),   // Right-to-left (Hebrew, Arabic)
+    AUTO("auto"); // Auto-detect
+
+    companion object {
+        fun fromValue(v: String): TextDir? = entries.find { it.value == v.lowercase() }
+    }
+}
+
+/**
+ * Script/language attributes for a document element.
+ */
+data class ScriptAttrs(
+    val lang: String? = null,    // Language code: "he", "en", "ar"
+    val dir: TextDir? = null     // Text direction
+) {
+    /** Format as attribute string: @lang=he@dir=rtl */
+    val formatted: String get() = buildString {
+        lang?.let { append("@lang=$it") }
+        dir?.let { append("@dir=${it.value}") }
+    }
+
+    /** Check if any script attributes are set */
+    val isEmpty: Boolean get() = lang == null && dir == null
+
+    companion object {
+        val EMPTY = ScriptAttrs()
+        val HEBREW = ScriptAttrs("he", TextDir.RTL)
+        val ARABIC = ScriptAttrs("ar", TextDir.RTL)
+        val ENGLISH = ScriptAttrs("en", TextDir.LTR)
+
+        /**
+         * Parse from attribute string like "@lang=he@dir=rtl"
+         */
+        fun parse(s: String): ScriptAttrs {
+            var lang: String? = null
+            var dir: TextDir? = null
+
+            val langMatch = Regex("@lang=([a-z]{2,3})").find(s)
+            langMatch?.let { lang = it.groupValues[1] }
+
+            val dirMatch = Regex("@dir=(ltr|rtl|auto)").find(s)
+            dirMatch?.let { dir = TextDir.fromValue(it.groupValues[1]) }
+
+            return ScriptAttrs(lang, dir)
+        }
+
+        /**
+         * Parse from HTML attributes map.
+         */
+        fun fromAttributes(attrs: Map<String, String>): ScriptAttrs {
+            val lang = attrs["lang"]
+            val dir = attrs["dir"]?.let { TextDir.fromValue(it) }
+            return ScriptAttrs(lang, dir)
+        }
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
 // INDEX SEGMENT - Single element in the document path
 // ═══════════════════════════════════════════════════════════════════════════════
 
 /**
  * A single segment in a document index path.
- * Format: TAG1.class1.class2=attr1=val1
+ * Format: TAG1.class1.class2@lang=he@dir=rtl=attr1=val1
  */
 data class IndexSegment(
     val tag: DocTag,
-    val instance: Int,                          // 1-based instance number
-    val cssClasses: List<String> = emptyList(), // CSS classes
+    val instance: Int,                              // 1-based instance number
+    val cssClasses: List<String> = emptyList(),     // CSS classes
+    val scriptAttrs: ScriptAttrs = ScriptAttrs.EMPTY, // lang, dir attributes
     val dataAttrs: Map<String, String> = emptyMap() // data-* attributes
 ) {
-    /** Formatted segment: P1.poem.intro=data-verse=1 */
+    /** Formatted segment: P1.poem.intro@lang=he@dir=rtl=data-verse=1 */
     val formatted: String get() = buildString {
         append(tag.name)
         append(instance)
         cssClasses.forEach { append(".$it") }
+        if (!scriptAttrs.isEmpty) append(scriptAttrs.formatted)
         dataAttrs.forEach { (k, v) -> append("=$k=$v") }
     }
 
+    /** Get language code if set */
+    val lang: String? get() = scriptAttrs.lang
+
+    /** Get text direction if set */
+    val dir: TextDir? get() = scriptAttrs.dir
+
+    /** Check if this is RTL text */
+    val isRtl: Boolean get() = scriptAttrs.dir == TextDir.RTL
+
     companion object {
         /**
-         * Parse a segment string like "P1.poem.intro=data-verse=1"
+         * Parse a segment string like "P1.poem.intro@lang=he@dir=rtl=data-verse=1"
          * Returns null if format is invalid.
          */
         fun parse(segment: String): IndexSegment? {
             if (segment.isBlank()) return null
 
-            // Split by delimiters while preserving order
-            val parts = segment.split(Regex("(?=[.=])"))
+            // Split by delimiters while preserving order (. for class, @ for script, = for data)
+            val parts = segment.split(Regex("(?=[.@=])"))
             if (parts.isEmpty()) return null
 
             // First part is TAG + instance (e.g., "P1", "LI23")
@@ -205,6 +607,8 @@ data class IndexSegment(
             // Parse remaining parts
             val cssClasses = mutableListOf<String>()
             val dataAttrs = mutableMapOf<String, String>()
+            var lang: String? = null
+            var dir: TextDir? = null
 
             var i = 1
             while (i < parts.size) {
@@ -212,6 +616,12 @@ data class IndexSegment(
                 when {
                     part.startsWith(".") -> {
                         cssClasses.add(part.drop(1))
+                    }
+                    part.startsWith("@lang=") -> {
+                        lang = part.drop(6)
+                    }
+                    part.startsWith("@dir=") -> {
+                        dir = TextDir.fromValue(part.drop(5))
                     }
                     part.startsWith("=") -> {
                         // Attribute: =name=value (consumes two parts)
@@ -225,7 +635,8 @@ data class IndexSegment(
                 i++
             }
 
-            return IndexSegment(tag, instance, cssClasses, dataAttrs)
+            val scriptAttrs = ScriptAttrs(lang, dir)
+            return IndexSegment(tag, instance, cssClasses, scriptAttrs, dataAttrs)
         }
     }
 }
@@ -345,9 +756,10 @@ class DocumentParser {
 
                         val attrs = parseAttributes(attrString)
                         val cssClasses = attrs["class"]?.split(" ")?.filter { it.isNotBlank() } ?: emptyList()
+                        val scriptAttrs = ScriptAttrs.fromAttributes(attrs)
                         val dataAttrs = attrs.filterKeys { it.startsWith("data-") }
 
-                        val segment = IndexSegment(tag, count, cssClasses, dataAttrs)
+                        val segment = IndexSegment(tag, count, cssClasses, scriptAttrs, dataAttrs)
                         stack.add(segment)
 
                         val index = DocumentIndex(stack.toList())

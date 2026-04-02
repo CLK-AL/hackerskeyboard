@@ -21,6 +21,90 @@ class DocumentIndexTest {
     }
 
     @Test
+    fun testDocTagInlineFormatting() {
+        // Test B, I, U and other inline tags
+        assertNotNull(DocTag.fromName("b"))
+        assertNotNull(DocTag.fromName("i"))
+        assertNotNull(DocTag.fromName("u"))
+        assertNotNull(DocTag.fromName("s"))
+        assertNotNull(DocTag.fromName("del"))
+        assertNotNull(DocTag.fromName("ins"))
+        assertNotNull(DocTag.fromName("mark"))
+        assertNotNull(DocTag.fromName("sub"))
+        assertNotNull(DocTag.fromName("sup"))
+        assertNotNull(DocTag.fromName("small"))
+        assertNotNull(DocTag.fromName("kbd"))
+        assertNotNull(DocTag.fromName("code"))
+
+        // These should be inline (not block)
+        assertFalse(DocTag.B.isBlock)
+        assertFalse(DocTag.I.isBlock)
+        assertFalse(DocTag.U.isBlock)
+        assertFalse(DocTag.SPAN.isBlock)
+    }
+
+    @Test
+    fun testDocTagBidirectional() {
+        // BDO and BDI for RTL/LTR text
+        assertNotNull(DocTag.fromName("bdo"))
+        assertNotNull(DocTag.fromName("bdi"))
+        assertFalse(DocTag.BDO.isBlock)
+        assertFalse(DocTag.BDI.isBlock)
+    }
+
+    // ═══ ScriptAttrs Tests ═══
+
+    @Test
+    fun testScriptAttrsBasic() {
+        val hebrew = ScriptAttrs.HEBREW
+        assertEquals("he", hebrew.lang)
+        assertEquals(TextDir.RTL, hebrew.dir)
+
+        val english = ScriptAttrs.ENGLISH
+        assertEquals("en", english.lang)
+        assertEquals(TextDir.LTR, english.dir)
+    }
+
+    @Test
+    fun testScriptAttrsFormatted() {
+        val attrs = ScriptAttrs("he", TextDir.RTL)
+        assertEquals("@lang=he@dir=rtl", attrs.formatted)
+
+        val langOnly = ScriptAttrs("ar", null)
+        assertEquals("@lang=ar", langOnly.formatted)
+
+        val dirOnly = ScriptAttrs(null, TextDir.RTL)
+        assertEquals("@dir=rtl", dirOnly.formatted)
+    }
+
+    @Test
+    fun testScriptAttrsParse() {
+        val parsed = ScriptAttrs.parse("@lang=he@dir=rtl")
+        assertEquals("he", parsed.lang)
+        assertEquals(TextDir.RTL, parsed.dir)
+
+        val partial = ScriptAttrs.parse("@dir=ltr")
+        assertNull(partial.lang)
+        assertEquals(TextDir.LTR, partial.dir)
+    }
+
+    @Test
+    fun testScriptAttrsFromAttributes() {
+        val attrs = mapOf("lang" to "he", "dir" to "rtl", "class" to "verse")
+        val script = ScriptAttrs.fromAttributes(attrs)
+        assertEquals("he", script.lang)
+        assertEquals(TextDir.RTL, script.dir)
+    }
+
+    @Test
+    fun testTextDirFromValue() {
+        assertEquals(TextDir.LTR, TextDir.fromValue("ltr"))
+        assertEquals(TextDir.RTL, TextDir.fromValue("rtl"))
+        assertEquals(TextDir.AUTO, TextDir.fromValue("auto"))
+        assertNull(TextDir.fromValue("invalid"))
+    }
+
+    @Test
     fun testDocTagPatterns() {
         val h1 = DocTag.H1
         assertNotNull(h1.htmlRegex())
@@ -69,9 +153,36 @@ class DocumentIndexTest {
         val segmentWithAttrs = IndexSegment(
             DocTag.P, 3,
             listOf("verse"),
+            ScriptAttrs.EMPTY,
             mapOf("data-index" to "5")
         )
         assertEquals("P3.verse=data-index=5", segmentWithAttrs.formatted)
+    }
+
+    @Test
+    fun testIndexSegmentWithScriptAttrs() {
+        val segment = IndexSegment(
+            DocTag.P, 1,
+            listOf("verse"),
+            ScriptAttrs.HEBREW,
+            mapOf("data-index" to "1")
+        )
+        assertEquals("P1.verse@lang=he@dir=rtl=data-index=1", segment.formatted)
+        assertEquals("he", segment.lang)
+        assertEquals(TextDir.RTL, segment.dir)
+        assertTrue(segment.isRtl)
+    }
+
+    @Test
+    fun testIndexSegmentParseWithScriptAttrs() {
+        val segment = IndexSegment.parse("P1.verse@lang=he@dir=rtl=data-index=1")
+        assertNotNull(segment)
+        assertEquals(DocTag.P, segment.tag)
+        assertEquals(1, segment.instance)
+        assertEquals(listOf("verse"), segment.cssClasses)
+        assertEquals("he", segment.lang)
+        assertEquals(TextDir.RTL, segment.dir)
+        assertEquals("1", segment.dataAttrs["data-index"])
     }
 
     @Test
@@ -228,6 +339,35 @@ class DocumentIndexTest {
         val pElement = elements.first { it.tag == DocTag.P }
         assertEquals("5", pElement.attributes["data-index"])
         assertEquals("2", pElement.attributes["data-verse"])
+    }
+
+    @Test
+    fun testParseHtmlWithScriptAttrs() {
+        val html = """<p lang="he" dir="rtl" class="verse">שלום</p>"""
+        val parser = DocumentParser()
+        val elements = parser.parseHtml(html)
+
+        val pElement = elements.first { it.tag == DocTag.P }
+        assertEquals("he", pElement.attributes["lang"])
+        assertEquals("rtl", pElement.attributes["dir"])
+
+        // Check that IndexSegment has script attrs
+        val segment = pElement.index.leaf
+        assertNotNull(segment)
+        assertEquals("he", segment.lang)
+        assertEquals(TextDir.RTL, segment.dir)
+        assertTrue(segment.isRtl)
+    }
+
+    @Test
+    fun testParseHtmlInlineTags() {
+        val html = """<p>This is <b>bold</b> and <i>italic</i> and <u>underlined</u></p>"""
+        val parser = DocumentParser()
+        val elements = parser.parseHtml(html)
+
+        assertTrue(elements.any { it.tag == DocTag.B })
+        assertTrue(elements.any { it.tag == DocTag.I })
+        assertTrue(elements.any { it.tag == DocTag.U })
     }
 
     @Test
