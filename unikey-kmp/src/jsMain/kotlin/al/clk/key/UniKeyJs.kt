@@ -479,11 +479,11 @@ fun getAllVowels(): Array<dynamic> {
     }.toTypedArray()
 }
 
-// ═══ PoetryLanguage System (23 Language Support) ═══
+// ═══ KeyLanguage System (23 Language Support) ═══
 
-@JsName("getPoetryLanguages")
-fun getSupportedPoetryLanguages(): Array<dynamic> {
-    return PoetryLanguage.ALL.map { lang ->
+@JsName("getKeyLanguages")
+fun getKeyLanguages(): Array<dynamic> {
+    return KeyLanguage.ALL.map { lang ->
         val obj = js("{}")
         obj["code"] = lang.code
         obj["nativeName"] = lang.nativeName
@@ -495,11 +495,11 @@ fun getSupportedPoetryLanguages(): Array<dynamic> {
 }
 
 @JsName("getLanguageCount")
-fun getLanguageCount(): Int = PoetryLanguage.COUNT
+fun getLanguageCount(): Int = KeyLanguage.COUNT
 
-@JsName("getPoetryLanguage")
-fun getPoetryLanguage(code: String): dynamic? {
-    val lang = PoetryLanguage.fromCode(code) ?: return null
+@JsName("getKeyLanguage")
+fun getKeyLanguage(code: String): dynamic? {
+    val lang = KeyLanguage.fromCode(code) ?: return null
     val obj = js("{}")
     obj["code"] = lang.code
     obj["nativeName"] = lang.nativeName
@@ -542,8 +542,8 @@ fun rhymeKeyForLang(word: String, langCode: String, syllableCount: Int = 1): Str
 
 @JsName("parseSyllablesForLang")
 fun parseSyllablesForLang(word: String, langCode: String): Array<dynamic> {
-    val poetryLang = PoetryLanguage.fromCode(langCode) ?: return emptyArray()
-    return poetryLang.parseSyllables(word).map { syl ->
+    val keyLang = KeyLanguage.fromCode(langCode) ?: return emptyArray()
+    return keyLang.parseSyllables(word).map { syl ->
         val obj = js("{}")
         obj["consonant"] = syl.consonant
         obj["vowel"] = syl.vowel
@@ -555,8 +555,8 @@ fun parseSyllablesForLang(word: String, langCode: String): Array<dynamic> {
 
 @JsName("getLanguagePromptHints")
 fun getLanguagePromptHints(langCode: String): dynamic? {
-    val poetryLang = PoetryLanguage.fromCode(langCode) ?: return null
-    val hints = poetryLang.aiPromptHints
+    val keyLang = KeyLanguage.fromCode(langCode) ?: return null
+    val hints = keyLang.aiPromptHints
     val obj = js("{}")
     obj["linguistRole"] = hints.linguistRole
     obj["culturalNotes"] = hints.culturalNotes
@@ -597,5 +597,5 @@ fun getTranslationPair(srcLangCode: String, tgtLangCode: String): dynamic? {
 
 @JsName("getAllTranslationPairIds")
 fun getAllTranslationPairIds(): Array<String> {
-    return PoetryLanguage.allPairs().map { it.pairId }.toTypedArray()
+    return KeyLanguage.allPairs().map { it.pairId }.toTypedArray()
 }

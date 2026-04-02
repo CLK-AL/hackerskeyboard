@@ -1,13 +1,16 @@
 package al.clk.key
 
 /**
- * Language configuration for bilingual poetry translation.
- * Supports all 23 Chatterbox languages as both source and target.
- * Uses IPA as the universal phonetic hub for cross-language rhyme matching.
+ * Language configuration for keyboard and phonetic processing.
+ * Supports all 23 Chatterbox languages with IPA conversions, syllable parsing,
+ * and script-aware text direction.
  *
- * This enables the poetry editor to support any (source, target) language pair.
+ * Not limited to poetry - usable for any application requiring:
+ * - IPA phonetic conversion
+ * - Cross-language sound matching
+ * - Script detection and text direction
  */
-data class PoetryLanguage(
+data class KeyLanguage(
     val lang: Lang,
     val nativeName: String,
     val englishName: String,
@@ -45,7 +48,7 @@ data class PoetryLanguage(
         // NON-LATIN SCRIPTS (9 languages)
         // ═══════════════════════════════════════════════════════════════════════════
 
-        val HEBREW = PoetryLanguage(
+        val HEBREW = KeyLanguage(
             lang = Lang.HE,
             nativeName = "עברית",
             englishName = "Hebrew",
@@ -55,7 +58,7 @@ data class PoetryLanguage(
             aiPromptHints = LanguagePromptHints.HEBREW
         )
 
-        val ARABIC = PoetryLanguage(
+        val ARABIC = KeyLanguage(
             lang = Lang.AR,
             nativeName = "العربية",
             englishName = "Arabic",
@@ -65,7 +68,7 @@ data class PoetryLanguage(
             aiPromptHints = LanguagePromptHints.ARABIC
         )
 
-        val RUSSIAN = PoetryLanguage(
+        val RUSSIAN = KeyLanguage(
             lang = Lang.RU,
             nativeName = "Русский",
             englishName = "Russian",
@@ -75,7 +78,7 @@ data class PoetryLanguage(
             aiPromptHints = LanguagePromptHints.RUSSIAN
         )
 
-        val GREEK = PoetryLanguage(
+        val GREEK = KeyLanguage(
             lang = Lang.EL,
             nativeName = "Ελληνικά",
             englishName = "Greek",
@@ -85,7 +88,7 @@ data class PoetryLanguage(
             aiPromptHints = LanguagePromptHints.GREEK
         )
 
-        val HINDI = PoetryLanguage(
+        val HINDI = KeyLanguage(
             lang = Lang.HI,
             nativeName = "हिन्दी",
             englishName = "Hindi",
@@ -95,7 +98,7 @@ data class PoetryLanguage(
             aiPromptHints = LanguagePromptHints.HINDI
         )
 
-        val JAPANESE = PoetryLanguage(
+        val JAPANESE = KeyLanguage(
             lang = Lang.JA,
             nativeName = "日本語",
             englishName = "Japanese",
@@ -105,7 +108,7 @@ data class PoetryLanguage(
             aiPromptHints = LanguagePromptHints.JAPANESE
         )
 
-        val KOREAN = PoetryLanguage(
+        val KOREAN = KeyLanguage(
             lang = Lang.KO,
             nativeName = "한국어",
             englishName = "Korean",
@@ -115,7 +118,7 @@ data class PoetryLanguage(
             aiPromptHints = LanguagePromptHints.KOREAN
         )
 
-        val CHINESE = PoetryLanguage(
+        val CHINESE = KeyLanguage(
             lang = Lang.ZH,
             nativeName = "中文",
             englishName = "Chinese",
@@ -129,7 +132,7 @@ data class PoetryLanguage(
         // LATIN SCRIPTS (14 languages)
         // ═══════════════════════════════════════════════════════════════════════════
 
-        val ENGLISH = PoetryLanguage(
+        val ENGLISH = KeyLanguage(
             lang = Lang.EN,
             nativeName = "English",
             englishName = "English",
@@ -139,7 +142,7 @@ data class PoetryLanguage(
             aiPromptHints = LanguagePromptHints.ENGLISH
         )
 
-        val GERMAN = PoetryLanguage(
+        val GERMAN = KeyLanguage(
             lang = Lang.DE,
             nativeName = "Deutsch",
             englishName = "German",
@@ -149,7 +152,7 @@ data class PoetryLanguage(
             aiPromptHints = LanguagePromptHints.GERMAN
         )
 
-        val FRENCH = PoetryLanguage(
+        val FRENCH = KeyLanguage(
             lang = Lang.FR,
             nativeName = "Français",
             englishName = "French",
@@ -159,7 +162,7 @@ data class PoetryLanguage(
             aiPromptHints = LanguagePromptHints.FRENCH
         )
 
-        val SPANISH = PoetryLanguage(
+        val SPANISH = KeyLanguage(
             lang = Lang.ES,
             nativeName = "Español",
             englishName = "Spanish",
@@ -169,7 +172,7 @@ data class PoetryLanguage(
             aiPromptHints = LanguagePromptHints.SPANISH
         )
 
-        val ITALIAN = PoetryLanguage(
+        val ITALIAN = KeyLanguage(
             lang = Lang.IT,
             nativeName = "Italiano",
             englishName = "Italian",
@@ -179,7 +182,7 @@ data class PoetryLanguage(
             aiPromptHints = LanguagePromptHints.ITALIAN
         )
 
-        val PORTUGUESE = PoetryLanguage(
+        val PORTUGUESE = KeyLanguage(
             lang = Lang.PT,
             nativeName = "Português",
             englishName = "Portuguese",
@@ -189,7 +192,7 @@ data class PoetryLanguage(
             aiPromptHints = LanguagePromptHints.PORTUGUESE
         )
 
-        val DUTCH = PoetryLanguage(
+        val DUTCH = KeyLanguage(
             lang = Lang.NL,
             nativeName = "Nederlands",
             englishName = "Dutch",
@@ -199,7 +202,7 @@ data class PoetryLanguage(
             aiPromptHints = LanguagePromptHints.DUTCH
         )
 
-        val POLISH = PoetryLanguage(
+        val POLISH = KeyLanguage(
             lang = Lang.PL,
             nativeName = "Polski",
             englishName = "Polish",
@@ -209,7 +212,7 @@ data class PoetryLanguage(
             aiPromptHints = LanguagePromptHints.POLISH
         )
 
-        val TURKISH = PoetryLanguage(
+        val TURKISH = KeyLanguage(
             lang = Lang.TR,
             nativeName = "Türkçe",
             englishName = "Turkish",
@@ -219,7 +222,7 @@ data class PoetryLanguage(
             aiPromptHints = LanguagePromptHints.TURKISH
         )
 
-        val DANISH = PoetryLanguage(
+        val DANISH = KeyLanguage(
             lang = Lang.DA,
             nativeName = "Dansk",
             englishName = "Danish",
@@ -229,7 +232,7 @@ data class PoetryLanguage(
             aiPromptHints = LanguagePromptHints.DANISH
         )
 
-        val FINNISH = PoetryLanguage(
+        val FINNISH = KeyLanguage(
             lang = Lang.FI,
             nativeName = "Suomi",
             englishName = "Finnish",
@@ -239,7 +242,7 @@ data class PoetryLanguage(
             aiPromptHints = LanguagePromptHints.FINNISH
         )
 
-        val NORWEGIAN = PoetryLanguage(
+        val NORWEGIAN = KeyLanguage(
             lang = Lang.NO,
             nativeName = "Norsk",
             englishName = "Norwegian",
@@ -249,7 +252,7 @@ data class PoetryLanguage(
             aiPromptHints = LanguagePromptHints.NORWEGIAN
         )
 
-        val SWEDISH = PoetryLanguage(
+        val SWEDISH = KeyLanguage(
             lang = Lang.SV,
             nativeName = "Svenska",
             englishName = "Swedish",
@@ -259,7 +262,7 @@ data class PoetryLanguage(
             aiPromptHints = LanguagePromptHints.SWEDISH
         )
 
-        val MALAY = PoetryLanguage(
+        val MALAY = KeyLanguage(
             lang = Lang.MS,
             nativeName = "Bahasa Melayu",
             englishName = "Malay",
@@ -269,7 +272,7 @@ data class PoetryLanguage(
             aiPromptHints = LanguagePromptHints.MALAY
         )
 
-        val SWAHILI = PoetryLanguage(
+        val SWAHILI = KeyLanguage(
             lang = Lang.SW,
             nativeName = "Kiswahili",
             englishName = "Swahili",
@@ -280,7 +283,7 @@ data class PoetryLanguage(
         )
 
         /** All 23 supported languages */
-        val ALL: List<PoetryLanguage> = listOf(
+        val ALL: List<KeyLanguage> = listOf(
             // Non-Latin scripts
             HEBREW, ARABIC, RUSSIAN, GREEK, HINDI, JAPANESE, KOREAN, CHINESE,
             // Latin scripts
@@ -295,10 +298,10 @@ data class PoetryLanguage(
         private val byLang = ALL.associateBy { it.lang }
 
         /** Get language by ISO code */
-        fun fromCode(code: String): PoetryLanguage? = byCode[code.lowercase()]
+        fun fromCode(code: String): KeyLanguage? = byCode[code.lowercase()]
 
         /** Get language by Lang enum */
-        fun fromLang(lang: Lang): PoetryLanguage? = byLang[lang]
+        fun fromLang(lang: Lang): KeyLanguage? = byLang[lang]
 
         /** Get all valid translation pairs (23 x 22 = 506 pairs) */
         fun allPairs(): List<TranslationPair> = ALL.flatMap { src ->
@@ -318,8 +321,9 @@ data class PoetryLanguage(
     }
 }
 
-/** Backward compatibility alias */
-typealias TargetLanguage = PoetryLanguage
+/** Backward compatibility aliases */
+typealias TargetLanguage = KeyLanguage
+typealias PoetryLanguage = KeyLanguage
 
 /**
  * Text direction for layout
@@ -541,8 +545,8 @@ data class LanguagePromptHints(
  * Supports any of the 23×22 = 506 possible language pairs.
  */
 data class TranslationPair(
-    val source: PoetryLanguage,
-    val target: PoetryLanguage
+    val source: KeyLanguage,
+    val target: KeyLanguage
 ) {
     /** Source language code */
     val srcCode: String get() = source.code
@@ -606,8 +610,8 @@ data class TranslationPair(
     companion object {
         /** Create pair from language codes */
         fun fromCodes(srcCode: String, tgtCode: String): TranslationPair? {
-            val src = PoetryLanguage.fromCode(srcCode) ?: return null
-            val tgt = PoetryLanguage.fromCode(tgtCode) ?: return null
+            val src = KeyLanguage.fromCode(srcCode) ?: return null
+            val tgt = KeyLanguage.fromCode(tgtCode) ?: return null
             if (src == tgt) return null
             return TranslationPair(src, tgt)
         }
@@ -615,26 +619,26 @@ data class TranslationPair(
         // === Common pairs (for convenience) ===
 
         // English as source
-        val EN_TO_HE = TranslationPair(PoetryLanguage.ENGLISH, PoetryLanguage.HEBREW)
-        val EN_TO_AR = TranslationPair(PoetryLanguage.ENGLISH, PoetryLanguage.ARABIC)
-        val EN_TO_RU = TranslationPair(PoetryLanguage.ENGLISH, PoetryLanguage.RUSSIAN)
-        val EN_TO_DE = TranslationPair(PoetryLanguage.ENGLISH, PoetryLanguage.GERMAN)
-        val EN_TO_FR = TranslationPair(PoetryLanguage.ENGLISH, PoetryLanguage.FRENCH)
-        val EN_TO_ES = TranslationPair(PoetryLanguage.ENGLISH, PoetryLanguage.SPANISH)
-        val EN_TO_IT = TranslationPair(PoetryLanguage.ENGLISH, PoetryLanguage.ITALIAN)
-        val EN_TO_JA = TranslationPair(PoetryLanguage.ENGLISH, PoetryLanguage.JAPANESE)
-        val EN_TO_ZH = TranslationPair(PoetryLanguage.ENGLISH, PoetryLanguage.CHINESE)
+        val EN_TO_HE = TranslationPair(KeyLanguage.ENGLISH, KeyLanguage.HEBREW)
+        val EN_TO_AR = TranslationPair(KeyLanguage.ENGLISH, KeyLanguage.ARABIC)
+        val EN_TO_RU = TranslationPair(KeyLanguage.ENGLISH, KeyLanguage.RUSSIAN)
+        val EN_TO_DE = TranslationPair(KeyLanguage.ENGLISH, KeyLanguage.GERMAN)
+        val EN_TO_FR = TranslationPair(KeyLanguage.ENGLISH, KeyLanguage.FRENCH)
+        val EN_TO_ES = TranslationPair(KeyLanguage.ENGLISH, KeyLanguage.SPANISH)
+        val EN_TO_IT = TranslationPair(KeyLanguage.ENGLISH, KeyLanguage.ITALIAN)
+        val EN_TO_JA = TranslationPair(KeyLanguage.ENGLISH, KeyLanguage.JAPANESE)
+        val EN_TO_ZH = TranslationPair(KeyLanguage.ENGLISH, KeyLanguage.CHINESE)
 
         // Hebrew as source (original POC direction reversed)
-        val HE_TO_EN = TranslationPair(PoetryLanguage.HEBREW, PoetryLanguage.ENGLISH)
+        val HE_TO_EN = TranslationPair(KeyLanguage.HEBREW, KeyLanguage.ENGLISH)
 
         // Other common pairs
-        val FR_TO_EN = TranslationPair(PoetryLanguage.FRENCH, PoetryLanguage.ENGLISH)
-        val DE_TO_EN = TranslationPair(PoetryLanguage.GERMAN, PoetryLanguage.ENGLISH)
-        val ES_TO_EN = TranslationPair(PoetryLanguage.SPANISH, PoetryLanguage.ENGLISH)
-        val RU_TO_EN = TranslationPair(PoetryLanguage.RUSSIAN, PoetryLanguage.ENGLISH)
-        val JA_TO_EN = TranslationPair(PoetryLanguage.JAPANESE, PoetryLanguage.ENGLISH)
-        val ZH_TO_EN = TranslationPair(PoetryLanguage.CHINESE, PoetryLanguage.ENGLISH)
-        val AR_TO_EN = TranslationPair(PoetryLanguage.ARABIC, PoetryLanguage.ENGLISH)
+        val FR_TO_EN = TranslationPair(KeyLanguage.FRENCH, KeyLanguage.ENGLISH)
+        val DE_TO_EN = TranslationPair(KeyLanguage.GERMAN, KeyLanguage.ENGLISH)
+        val ES_TO_EN = TranslationPair(KeyLanguage.SPANISH, KeyLanguage.ENGLISH)
+        val RU_TO_EN = TranslationPair(KeyLanguage.RUSSIAN, KeyLanguage.ENGLISH)
+        val JA_TO_EN = TranslationPair(KeyLanguage.JAPANESE, KeyLanguage.ENGLISH)
+        val ZH_TO_EN = TranslationPair(KeyLanguage.CHINESE, KeyLanguage.ENGLISH)
+        val AR_TO_EN = TranslationPair(KeyLanguage.ARABIC, KeyLanguage.ENGLISH)
     }
 }
