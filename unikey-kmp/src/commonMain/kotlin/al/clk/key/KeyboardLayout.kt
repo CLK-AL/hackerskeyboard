@@ -2,14 +2,15 @@ package al.clk.key
 
 /**
  * Keyboard Layout - defines character mappings for each language
- * Supports all 23 Chatterbox multilingual TTS languages
+ * Supports all 23 Chatterbox multilingual TTS languages.
+ * Uses ILayoutKey interface so enums can be used directly as keys.
  */
 data class KeyboardLayout(
     val code: String,           // ISO 639-1 language code
     val name: String,           // Display name
     val nativeName: String,     // Name in native script
     val script: UniKeySyllable.Companion.Script,
-    val keys: Map<String, LayoutKey>
+    val keys: Map<String, ILayoutKey>
 )
 
 /**
@@ -219,10 +220,10 @@ object KeyboardLayouts {
     )
 
     // ═══ Hebrew (he) ═══
-    // Keys generated from HebrewLetter enum
-    private val hebrewKeys: Map<String, LayoutKey> = HebrewLetter.entries
+    // Use enum values directly - HebrewLetter provides shiftKey for dagesh
+    private val hebrewKeys: Map<String, ILayoutKey> = HebrewLetter.entries
         .filter { it.qwerty.isNotEmpty() }
-        .associate { it.qwerty to it.toLayoutKey() } +
+        .associate { it.qwerty to it as ILayoutKey } +
         mapOf("4" to key("₪", "", "shekel", "$", "", "dollar"))
 
     val HE = KeyboardLayout(

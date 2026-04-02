@@ -358,14 +358,14 @@ fun getLayout(langCode: String): dynamic? {
     return obj
 }
 
-private fun layoutKeysToDynamic(keys: Map<String, LayoutKey>): dynamic {
+private fun layoutKeysToDynamic(keys: Map<String, ILayoutKey>): dynamic {
     val obj = js("{}")
     keys.forEach { (keyId, key) ->
         val keyObj = js("{}")
         keyObj["char"] = key.char
-        keyObj["shift"] = key.shift
+        keyObj["shift"] = key.shiftKey?.char
         keyObj["ipa"] = key.ipa
-        keyObj["name"] = key.name
+        keyObj["name"] = key.displayName
         obj[keyId] = keyObj
     }
     return obj
@@ -377,9 +377,9 @@ fun getLayoutKey(langCode: String, keyId: String): dynamic? {
     val key = layout.keys[keyId] ?: return null
     val obj = js("{}")
     obj["char"] = key.char
-    obj["shift"] = key.shift
+    obj["shift"] = key.shiftKey?.char
     obj["ipa"] = key.ipa
-    obj["name"] = key.name
+    obj["name"] = key.displayName
     return obj
 }
 

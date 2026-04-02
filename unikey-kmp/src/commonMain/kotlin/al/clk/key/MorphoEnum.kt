@@ -722,18 +722,9 @@ fun ArabicSuffix.toMorphoKey(): MorphoKey {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// LAYOUT KEY GENERATORS - Convert enums to LayoutKey instances
+// LAYOUT KEY GENERATORS - Enums now implement ILayoutKey directly with shiftKey
+// These functions kept for backward compatibility if needed
 // ═══════════════════════════════════════════════════════════════════════════════
-
-/**
- * Generate LayoutKey from HebrewLetter
- */
-fun HebrewLetter.toLayoutKey(): LayoutKey {
-    val modifiers = if (ipaDagesh != null && ipaDagesh != ipa) {
-        mapOf(Modifier.SHIFT to LayoutKey("$letter\u05BC", ipaDagesh, "$displayName-dagesh"))
-    } else emptyMap()
-    return LayoutKey(letter.toString(), ipa, displayName, modifiers)
-}
 
 /**
  * Generate UniKey from HebrewLetter
@@ -763,40 +754,22 @@ fun ArabicLetter.toLayoutKey(shiftChar: String? = null, shiftIpa: String? = null
 }
 
 /**
- * Generate LayoutKey from GreekKey - uses enum's shiftKey directly
+ * Greek keyboard keys - use enum values directly
  */
-fun GreekKey.toLayoutKey(): LayoutKey =
-    LayoutKey(char, ipa, displayName, mapOf(Modifier.SHIFT to shiftKey!!))
+val greekKeys: Map<String, ILayoutKey> = GreekKey.entries
+    .associate { it.qwerty to it as ILayoutKey } +
+    mapOf("q" to SimpleKey(";", "", "semicolon", SimpleKey(":", "", "colon")))
 
 /**
- * Generate LayoutKey from CyrillicKey - uses enum's shiftKey directly
+ * Cyrillic (Russian) keyboard keys - use enum values directly
  */
-fun CyrillicKey.toLayoutKey(): LayoutKey =
-    LayoutKey(char, ipa, displayName, mapOf(Modifier.SHIFT to shiftKey!!))
+val cyrillicKeys: Map<String, ILayoutKey> = CyrillicKey.entries
+    .associate { it.qwerty to it as ILayoutKey }
 
 /**
- * Generate LayoutKey from HiraganaKey - uses enum's shiftKey directly
+ * Hiragana (Japanese) keyboard keys - use enum values directly
  */
-fun HiraganaKey.toLayoutKey(): LayoutKey =
-    LayoutKey(char, ipa, displayName, mapOf(Modifier.SHIFT to shiftKey!!))
-
-/**
- * Greek keyboard keys - generated from GreekKey enum
- */
-val greekKeys: Map<String, LayoutKey> = GreekKey.entries
-    .associate { it.qwerty to it.toLayoutKey() } +
-    mapOf("q" to LayoutKey(";", "", "semicolon", mapOf(Modifier.SHIFT to LayoutKey(":", "", "colon"))))
-
-/**
- * Cyrillic (Russian) keyboard keys - generated from CyrillicKey enum
- */
-val cyrillicKeys: Map<String, LayoutKey> = CyrillicKey.entries
-    .associate { it.qwerty to it.toLayoutKey() }
-
-/**
- * Hiragana (Japanese) keyboard keys - generated from HiraganaKey enum
- */
-val hiraganaKeys: Map<String, LayoutKey> = HiraganaKey.entries
+val hiraganaKeys: Map<String, ILayoutKey> = HiraganaKey.entries
     .filter { it.romaji.length == 1 || it.romaji in listOf("ka", "sa", "ta", "na", "ha", "ma", "ya", "ra", "wa") }
     .associate {
         val key = when (it.romaji) {
@@ -816,7 +789,7 @@ val hiraganaKeys: Map<String, LayoutKey> = HiraganaKey.entries
             "wa" -> "w"
             else -> it.romaji
         }
-        key to it.toLayoutKey()
+        key to it as ILayoutKey  // Use enum directly
     }
 
 /**

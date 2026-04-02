@@ -49,6 +49,11 @@ enum class HebrewLetter(
 
     override val char: String get() = letter.toString()
 
+    /** Shift shows letter with dagesh (if applicable) */
+    override val shiftKey: ILayoutKey? get() = if (ipaDagesh != null && ipaDagesh != ipa) {
+        SimpleKey("$letter\u05BC", ipaDagesh, "$displayName-dagesh")
+    } else null
+
     val isFinalForm: Boolean get() = this in listOf(KAF_SOFIT, MEM_SOFIT, NUN_SOFIT, PE_SOFIT, TSADI_SOFIT)
     val isGuttural: Boolean get() = type == LetterType.GUTTURAL
     val isBgdkpt: Boolean get() = type == LetterType.BGDKPT
