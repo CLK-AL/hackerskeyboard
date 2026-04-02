@@ -479,26 +479,31 @@ fun getAllVowels(): Array<dynamic> {
     }.toTypedArray()
 }
 
-// ═══ TargetLanguage System (Multi-language Support) ═══
+// ═══ PoetryLanguage System (23 Language Support) ═══
 
-@JsName("getSupportedTargetLanguages")
-fun getSupportedTargetLanguages(): Array<dynamic> {
-    return TargetLanguage.ALL.map { lang ->
+@JsName("getPoetryLanguages")
+fun getSupportedPoetryLanguages(): Array<dynamic> {
+    return PoetryLanguage.ALL.map { lang ->
         val obj = js("{}")
         obj["code"] = lang.code
         obj["nativeName"] = lang.nativeName
+        obj["englishName"] = lang.englishName
         obj["direction"] = lang.direction.name
         obj["script"] = lang.script.name
         obj
     }.toTypedArray()
 }
 
-@JsName("getTargetLanguage")
-fun getTargetLanguage(code: String): dynamic? {
-    val lang = TargetLanguage.fromCode(code) ?: return null
+@JsName("getLanguageCount")
+fun getLanguageCount(): Int = PoetryLanguage.COUNT
+
+@JsName("getPoetryLanguage")
+fun getPoetryLanguage(code: String): dynamic? {
+    val lang = PoetryLanguage.fromCode(code) ?: return null
     val obj = js("{}")
     obj["code"] = lang.code
     obj["nativeName"] = lang.nativeName
+    obj["englishName"] = lang.englishName
     obj["direction"] = lang.direction.name
     obj["script"] = lang.script.name
     return obj
@@ -537,8 +542,8 @@ fun rhymeKeyForLang(word: String, langCode: String, syllableCount: Int = 1): Str
 
 @JsName("parseSyllablesForLang")
 fun parseSyllablesForLang(word: String, langCode: String): Array<dynamic> {
-    val targetLang = TargetLanguage.fromCode(langCode) ?: return emptyArray()
-    return targetLang.parseSyllables(word).map { syl ->
+    val poetryLang = PoetryLanguage.fromCode(langCode) ?: return emptyArray()
+    return poetryLang.parseSyllables(word).map { syl ->
         val obj = js("{}")
         obj["consonant"] = syl.consonant
         obj["vowel"] = syl.vowel
@@ -550,8 +555,8 @@ fun parseSyllablesForLang(word: String, langCode: String): Array<dynamic> {
 
 @JsName("getLanguagePromptHints")
 fun getLanguagePromptHints(langCode: String): dynamic? {
-    val targetLang = TargetLanguage.fromCode(langCode) ?: return null
-    val hints = targetLang.aiPromptHints
+    val poetryLang = PoetryLanguage.fromCode(langCode) ?: return null
+    val hints = poetryLang.aiPromptHints
     val obj = js("{}")
     obj["linguistRole"] = hints.linguistRole
     obj["culturalNotes"] = hints.culturalNotes
@@ -564,16 +569,33 @@ fun getLanguagePromptHints(langCode: String): dynamic? {
 
 @JsName("generateAnalysisPrompt")
 fun generateAnalysisPrompt(srcLangCode: String, tgtLangCode: String, context: String = ""): String {
-    val srcLang = Lang.fromCode(srcLangCode) ?: return ""
-    val tgtLang = TargetLanguage.fromCode(tgtLangCode) ?: return ""
-    val pair = TranslationPair(srcLang, tgtLang)
+    val pair = TranslationPair.fromCodes(srcLangCode, tgtLangCode) ?: return ""
     return pair.generateAnalysisPrompt(context)
 }
 
 @JsName("generatePathPrompt")
 fun generatePathPrompt(srcLangCode: String, tgtLangCode: String, context: String = ""): String {
-    val srcLang = Lang.fromCode(srcLangCode) ?: return ""
-    val tgtLang = TargetLanguage.fromCode(tgtLangCode) ?: return ""
-    val pair = TranslationPair(srcLang, tgtLang)
+    val pair = TranslationPair.fromCodes(srcLangCode, tgtLangCode) ?: return ""
     return pair.generatePathPrompt(context)
+}
+
+@JsName("getTranslationPair")
+fun getTranslationPair(srcLangCode: String, tgtLangCode: String): dynamic? {
+    val pair = TranslationPair.fromCodes(srcLangCode, tgtLangCode) ?: return null
+    val obj = js("{}")
+    obj["pairId"] = pair.pairId
+    obj["srcCode"] = pair.srcCode
+    obj["tgtCode"] = pair.tgtCode
+    obj["srcNativeName"] = pair.source.nativeName
+    obj["tgtNativeName"] = pair.target.nativeName
+    obj["srcEnglishName"] = pair.source.englishName
+    obj["tgtEnglishName"] = pair.target.englishName
+    obj["srcDirection"] = pair.source.direction.name
+    obj["tgtDirection"] = pair.target.direction.name
+    return obj
+}
+
+@JsName("getAllTranslationPairIds")
+fun getAllTranslationPairIds(): Array<String> {
+    return PoetryLanguage.allPairs().map { it.pairId }.toTypedArray()
 }

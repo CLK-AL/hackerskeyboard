@@ -2,7 +2,16 @@
 
 ## Overview
 
-This is a bilingual poetry translation editor that uses IPA (International Phonetic Alphabet) as a universal phonetic hub to enable cross-language rhyme matching. The current POC focuses on English-Hebrew (en→he), but the architecture supports any source language to any target language.
+This is a bilingual poetry translation editor that uses IPA (International Phonetic Alphabet) as a universal phonetic hub to enable cross-language rhyme matching. 
+
+**Supports 23 languages × 22 target languages = 506 translation pairs:**
+
+| Script | Languages |
+|--------|-----------|
+| **Non-Latin** | Hebrew (עברית), Arabic (العربية), Russian (Русский), Greek (Ελληνικά), Hindi (हिन्दी), Japanese (日本語), Korean (한국어), Chinese (中文) |
+| **Latin** | English, German, French, Spanish, Italian, Portuguese, Dutch, Polish, Turkish, Danish, Finnish, Norwegian, Swedish, Malay, Swahili |
+
+The current POC demonstrates English↔Hebrew, but any pair works via the unified IPA layer.
 
 ## System Components
 
