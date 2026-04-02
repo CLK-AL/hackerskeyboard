@@ -241,14 +241,25 @@ Hebrew's nikud system (male/haser/unpointed) provides the model for understandin
 
 ## Truth Center Architecture
 
-```
-XXXKey.entries.associateBy { it.ipa }  ← Primary truth source
-          ↓
-    LangPatterns.matchEnding(lang, word)  ← Centralized routing
-          ↓
-    XXXPattern.matchEnding(word)?.ipa  ← Pattern-specific logic
-          ↓
-    Lang.matchEndingIpa(word)  ← Public API
+```plantuml
+@startuml Truth Center Architecture
+!theme plain
+skinparam activityShape octagon
+
+start
+:XXXKey.entries.associateBy { it.ipa }|
+note right: Primary truth source
+
+:LangPatterns.matchEnding(lang, word)|
+note right: Centralized routing
+
+:XXXPattern.matchEnding(word)?.ipa|
+note right: Pattern-specific logic
+
+:Lang.matchEndingIpa(word)|
+note right: Public API
+stop
+@enduml
 ```
 
 ## Adding New Language Patterns

@@ -2,27 +2,40 @@
 
 ## Architecture: Common Logic + Compose UI Binding
 
-```
-┌─────────────────────────────────────────────────────────┐
-│                    COMMON LOGIC                          │
-│         (unikey-kmp/src/commonMain/kotlin)              │
-│                                                          │
-│  VerseIndexState    RhymeSchemeState    CursorState     │
-│  - vType: Int       - scheme: List      - pos: Int      │
-│  - lineOrder: Float - ipas: List        - wordIdx: Int  │
-│  - lineIdx: String  - letters: List     - sylBounds: [] │
-└──────────────────────┬──────────────────────────────────┘
-                       │
-        ┌──────────────┼──────────────┐
-        ▼              ▼              ▼
-┌───────────────┐ ┌───────────────┐ ┌───────────────┐
-│  Android UI   │ │    Web UI     │ │   Desktop UI  │
-│   (Compose)   │ │ (HTML/JS/KMP) │ │  (Compose)    │
-│               │ │               │ │               │
-│ VerseScreen() │ │ poetry.html   │ │ VerseScreen() │
-│ LineRow()     │ │ render()      │ │ LineRow()     │
-│ CursorView()  │ │ colorLine..() │ │ CursorView()  │
-└───────────────┘ └───────────────┘ └───────────────┘
+```plantuml
+@startuml Common Logic + UI Binding
+!theme plain
+skinparam packageStyle rectangle
+skinparam componentStyle rectangle
+
+package "COMMON LOGIC\n(unikey-kmp/src/commonMain/kotlin)" as common {
+  component "VerseIndexState\n--\nvType: Int\nlineOrder: Float\nlineIdx: String" as verse
+  component "RhymeSchemeState\n--\nscheme: List\nipas: List\nletters: List" as rhyme
+  component "CursorState\n--\npos: Int\nwordIdx: Int\nsylBounds: []" as cursor
+}
+
+package "Android UI\n(Compose)" as android {
+  component "VerseScreen()" as aScreen
+  component "LineRow()" as aLine
+  component "CursorView()" as aCursor
+}
+
+package "Web UI\n(HTML/JS/KMP)" as web {
+  component "poetry.html" as wPoetry
+  component "render()" as wRender
+  component "colorLine..()" as wColor
+}
+
+package "Desktop UI\n(Compose)" as desktop {
+  component "VerseScreen()" as dScreen
+  component "LineRow()" as dLine
+  component "CursorView()" as dCursor
+}
+
+common --> android
+common --> web
+common --> desktop
+@enduml
 ```
 
 ---

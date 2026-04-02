@@ -15,66 +15,58 @@ The current POC demonstrates English↔Hebrew, but any pair works via the unifie
 
 ## System Components
 
-```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                           POETRY.HTML (Frontend)                         │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐                   │
-│  │ Verse Editor │  │ Rhyme Matrix │  │ Path Picker  │                   │
-│  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘                   │
-│         │                 │                 │                            │
-│         └─────────────────┼─────────────────┘                            │
-│                           ▼                                              │
-│         ┌─────────────────────────────────────┐                          │
-│         │         UniKey JS API               │                          │
-│         │  heIpa(), enIpa(), rhymeScheme()   │                          │
-│         │  wordHue(), rhymeKey(), toIpa()    │                          │
-│         └─────────────────┬───────────────────┘                          │
-└───────────────────────────┼──────────────────────────────────────────────┘
-                            │
-                            ▼
-┌─────────────────────────────────────────────────────────────────────────┐
-│                    UNIKEY-KMP (Kotlin Multiplatform)                     │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐                   │
-│  │   IpaColor   │  │ UniKeySyl    │  │  IpaMatrix   │                   │
-│  │  heIpa()     │  │ parseHebrew  │  │ consonants   │                   │
-│  │  enIpa()     │  │ parseEnglish │  │ vowels       │                   │
-│  │  ipaHue()    │  │ detectScript │  │ phonemeHue   │                   │
-│  └──────────────┘  └──────────────┘  └──────────────┘                   │
-│                           │                                              │
-│  ┌────────────────────────┼────────────────────────────────────────┐    │
-│  │              Language-Specific Modules                           │    │
-│  │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐          │    │
-│  │  │ HebrewLetter │  │EnglishPattern│  │ GermanPattern│          │    │
-│  │  │ NikudVowel   │  │SpanishPattern│  │ FrenchPattern│          │    │
-│  │  │ HebrewPattern│  │ItalianPattern│  │  ...12 more  │          │    │
-│  │  └──────────────┘  └──────────────┘  └──────────────┘          │    │
-│  └─────────────────────────────────────────────────────────────────┘    │
-│                           │                                              │
-│  ┌────────────────────────┼────────────────────────────────────────┐    │
-│  │              Script Parsers (23 Languages)                       │    │
-│  │  ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐   │    │
-│  │  │ Hebrew  │ │ Arabic  │ │ Greek   │ │ Cyrillic│ │ Hangul  │   │    │
-│  │  │ Hiragana│ │Devanagari│ │  CJK   │ │  Latin  │ │  Thai   │   │    │
-│  │  └─────────┘ └─────────┘ └─────────┘ └─────────┘ └─────────┘   │    │
-│  └─────────────────────────────────────────────────────────────────┘    │
-└─────────────────────────────────────────────────────────────────────────┘
-                            │
-                            ▼
-┌─────────────────────────────────────────────────────────────────────────┐
-│                       CLAUDE API (Translation Engine)                    │
-│  ┌─────────────────────────────────────────────────────────────────┐    │
-│  │  Stage 1: analyzeAll()                                           │    │
-│  │  - Input: Hebrew source stanzas                                  │    │
-│  │  - Output: words[], pairs[], targets[] per stanza                │    │
-│  │  - Contains: IPA, synonyms, rhyme pairs, cultural notes          │    │
-│  └─────────────────────────────────────────────────────────────────┘    │
-│  ┌─────────────────────────────────────────────────────────────────┐    │
-│  │  Stage 2: buildPaths(vid)                                        │    │
-│  │  - Input: Hebrew + Current English + Synonym Space               │    │
-│  │  - Output: 6 alternative couplets per stanza                     │    │
-│  │  - Paths: IPA Echo, Literal, Cultural, Emotional, Idiom, Compress│    │
-│  └─────────────────────────────────────────────────────────────────┘    │
-└─────────────────────────────────────────────────────────────────────────┘
+```plantuml
+@startuml System Components
+!theme plain
+skinparam packageStyle rectangle
+skinparam componentStyle rectangle
+
+package "POETRY.HTML (Frontend)" as frontend {
+  component "Verse Editor" as editor
+  component "Rhyme Matrix" as matrix
+  component "Path Picker" as picker
+  
+  component "UniKey JS API\n--\nheIpa(), enIpa(), rhymeScheme()\nwordHue(), rhymeKey(), toIpa()" as jsapi
+  
+  editor --> jsapi
+  matrix --> jsapi
+  picker --> jsapi
+}
+
+package "UNIKEY-KMP (Kotlin Multiplatform)" as kmp {
+  component "IpaColor\n--\nheIpa()\nenIpa()\nipaHue()" as ipacolor
+  component "UniKeySyl\n--\nparseHebrew\nparseEnglish\ndetectScript" as unisyl
+  component "IpaMatrix\n--\nconsonants\nvowels\nphonemeHue" as ipamatrix
+  
+  package "Language-Specific Modules" as langmod {
+    component "HebrewLetter\nNikudVowel\nHebrewPattern" as hebrew
+    component "EnglishPattern\nSpanishPattern\nItalianPattern" as latin1
+    component "GermanPattern\nFrenchPattern\n...12 more" as latin2
+  }
+  
+  package "Script Parsers (23 Languages)" as parsers {
+    component "Hebrew" as pHebrew
+    component "Arabic" as pArabic
+    component "Greek" as pGreek
+    component "Cyrillic" as pCyrillic
+    component "Hangul" as pHangul
+    component "Hiragana" as pHiragana
+    component "Devanagari" as pDevanagari
+    component "CJK" as pCJK
+    component "Latin" as pLatin
+    component "Thai" as pThai
+  }
+}
+
+package "CLAUDE API (Translation Engine)" as claude {
+  component "Stage 1: analyzeAll()\n--\nInput: Hebrew source stanzas\nOutput: words[], pairs[], targets[] per stanza\nContains: IPA, synonyms, rhyme pairs, cultural notes" as stage1
+  
+  component "Stage 2: buildPaths(vid)\n--\nInput: Hebrew + Current English + Synonym Space\nOutput: 6 alternative couplets per stanza\nPaths: IPA Echo, Literal, Cultural, Emotional, Idiom, Compress" as stage2
+}
+
+frontend --> kmp
+kmp --> claude
+@enduml
 ```
 
 ## Current en→he Flow
