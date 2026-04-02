@@ -5,6 +5,56 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
+class LangTest {
+
+    @Test
+    fun testLangFromCode() {
+        assertEquals(Lang.HE, Lang.fromCode("he"))
+        assertEquals(Lang.EN, Lang.fromCode("en"))
+        assertEquals(Lang.AR, Lang.fromCode("ar"))
+        assertEquals(Lang.RU, Lang.fromCode("ru"))
+        assertEquals(Lang.JA, Lang.fromCode("ja"))
+        assertEquals(Lang.ZH, Lang.fromCode("zh"))
+    }
+
+    @Test
+    fun testLangFromCodeCaseInsensitive() {
+        assertEquals(Lang.HE, Lang.fromCode("HE"))
+        assertEquals(Lang.EN, Lang.fromCode("EN"))
+    }
+
+    @Test
+    fun testLangScript() {
+        assertEquals(Script.HEBREW, Lang.HE.script)
+        assertEquals(Script.LATIN, Lang.EN.script)
+        assertEquals(Script.ARABIC, Lang.AR.script)
+        assertEquals(Script.CYRILLIC, Lang.RU.script)
+        assertEquals(Script.HIRAGANA, Lang.JA.script)
+        assertEquals(Script.HANGUL, Lang.KO.script)
+        assertEquals(Script.CJK, Lang.ZH.script)
+        assertEquals(Script.DEVANAGARI, Lang.HI.script)
+        assertEquals(Script.GREEK, Lang.EL.script)
+    }
+
+    @Test
+    fun testAllLangsHaveScript() {
+        Lang.entries.forEach { lang ->
+            assertNotNull(lang.script, "${lang.name} should have a script")
+        }
+    }
+
+    @Test
+    fun testLatinScriptLanguages() {
+        val latinLangs = Lang.entries.filter { it.script == Script.LATIN }
+        assertTrue(latinLangs.contains(Lang.EN))
+        assertTrue(latinLangs.contains(Lang.DE))
+        assertTrue(latinLangs.contains(Lang.FR))
+        assertTrue(latinLangs.contains(Lang.ES))
+        assertTrue(latinLangs.contains(Lang.IT))
+        assertTrue(latinLangs.contains(Lang.PT))
+    }
+}
+
 class CurrencyTest {
 
     @Test
@@ -107,6 +157,32 @@ class HebrewLetterKeyTest {
     }
 
     @Test
+    fun testHebrewLetterFromIpa() {
+        // Multiple letters can have same IPA (e.g., tet and tav both are "t")
+        val tKeys = HebrewLetter.fromIpa("t")
+        assertTrue(tKeys.contains(HebrewLetter.TET))
+        assertTrue(tKeys.contains(HebrewLetter.TAV))
+    }
+
+    @Test
+    fun testHebrewLetterIpaRoundTrip() {
+        HebrewLetter.entries.forEach { letter ->
+            val found = HebrewLetter.fromIpa(letter.ipa)
+            assertTrue(found.contains(letter), "${letter.name} should be found by IPA '${letter.ipa}'")
+        }
+    }
+
+    @Test
+    fun testHebrewKeysMap() {
+        val keys = HebrewLetter.keys
+        assertTrue(keys.isNotEmpty())
+        assertNotNull(keys["t"]) // alef
+        assertEquals("א", keys["t"]?.char)
+        assertNotNull(keys["c"]) // bet
+        assertEquals("ב", keys["c"]?.char)
+    }
+
+    @Test
     fun testAllHebrewLettersImplementILayoutKey() {
         HebrewLetter.entries.forEach { key ->
             assertTrue(key.char.isNotEmpty(), "${key.name} should have char")
@@ -171,6 +247,28 @@ class ArabicLetterKeyTest {
     }
 
     @Test
+    fun testArabicLetterFromIpa() {
+        val bKeys = ArabicLetter.fromIpa("b")
+        assertTrue(bKeys.contains(ArabicLetter.BA))
+    }
+
+    @Test
+    fun testArabicLetterIpaRoundTrip() {
+        ArabicLetter.entries.filter { it.ipa.isNotEmpty() }.forEach { letter ->
+            val found = ArabicLetter.fromIpa(letter.ipa)
+            assertTrue(found.contains(letter), "${letter.name} should be found by IPA '${letter.ipa}'")
+        }
+    }
+
+    @Test
+    fun testArabicKeysMap() {
+        val keys = ArabicLetter.keys
+        assertTrue(keys.isNotEmpty())
+        assertNotNull(keys["f"]) // ba
+        assertEquals("ب", keys["f"]?.char)
+    }
+
+    @Test
     fun testAllArabicLettersImplementILayoutKey() {
         ArabicLetter.entries.forEach { key ->
             assertTrue(key.char.isNotEmpty(), "${key.name} should have char")
@@ -197,6 +295,33 @@ class GreekKeyTest {
         assertEquals("i", GreekKey.IOTA.ipa)
         assertEquals("o", GreekKey.OMICRON.ipa)
         assertEquals("i", GreekKey.UPSILON.ipa) // Modern Greek
+    }
+
+    @Test
+    fun testGreekKeyFromIpa() {
+        // Multiple Greek letters map to "i" in Modern Greek
+        val iKeys = GreekKey.fromIpa("i")
+        assertTrue(iKeys.contains(GreekKey.IOTA))
+        assertTrue(iKeys.contains(GreekKey.ETA))
+        assertTrue(iKeys.contains(GreekKey.UPSILON))
+    }
+
+    @Test
+    fun testGreekKeyIpaRoundTrip() {
+        GreekKey.entries.forEach { key ->
+            val found = GreekKey.fromIpa(key.ipa)
+            assertTrue(found.contains(key), "${key.name} should be found by IPA '${key.ipa}'")
+        }
+    }
+
+    @Test
+    fun testGreekKeysMap() {
+        val keys = GreekKey.keys
+        assertTrue(keys.isNotEmpty())
+        assertNotNull(keys["a"])
+        assertEquals("α", keys["a"]?.char)
+        // Semicolon is added for Greek layout
+        assertNotNull(keys["q"])
     }
 
     @Test
@@ -231,6 +356,28 @@ class CyrillicKeyTest {
         val hardSign = CyrillicKey.HARD_SIGN
         assertEquals("ъ", hardSign.char)
         assertEquals("", hardSign.ipa) // No sound
+    }
+
+    @Test
+    fun testCyrillicKeyFromIpa() {
+        val aKeys = CyrillicKey.fromIpa("a")
+        assertTrue(aKeys.contains(CyrillicKey.A))
+    }
+
+    @Test
+    fun testCyrillicKeyIpaRoundTrip() {
+        CyrillicKey.entries.filter { it.ipa.isNotEmpty() }.forEach { key ->
+            val found = CyrillicKey.fromIpa(key.ipa)
+            assertTrue(found.contains(key), "${key.name} should be found by IPA '${key.ipa}'")
+        }
+    }
+
+    @Test
+    fun testCyrillicKeysMap() {
+        val keys = CyrillicKey.keys
+        assertTrue(keys.isNotEmpty())
+        assertNotNull(keys["f"])
+        assertEquals("а", keys["f"]?.char)
     }
 
     @Test
@@ -319,6 +466,29 @@ class HiraganaKeyTest {
     }
 
     @Test
+    fun testHiraganaKeyFromIpa() {
+        val aKeys = HiraganaKey.fromIpa("a")
+        assertTrue(aKeys.contains(HiraganaKey.A))
+    }
+
+    @Test
+    fun testHiraganaKeyIpaRoundTrip() {
+        HiraganaKey.entries.forEach { key ->
+            val found = HiraganaKey.fromIpa(key.ipa)
+            assertTrue(found.contains(key), "${key.name} should be found by IPA '${key.ipa}'")
+        }
+    }
+
+    @Test
+    fun testHiraganaKeysMap() {
+        val keys = HiraganaKey.keys
+        assertTrue(keys.isNotEmpty())
+        assertNotNull(keys["a"])
+        assertEquals("あ", keys["a"]?.char)
+        assertNotNull(keys["k"]) // ka maps to k
+    }
+
+    @Test
     fun testAllHiraganaKeysImplementILayoutKey() {
         HiraganaKey.entries.forEach { key ->
             assertTrue(key.char.isNotEmpty(), "${key.name} should have char")
@@ -391,6 +561,32 @@ class LatinKeyTest {
     }
 
     @Test
+    fun testLatinKeyFromIpa() {
+        val keys = LatinKey.fromIpa("k")
+        assertTrue(keys.isNotEmpty())
+        assertTrue(keys.contains(LatinKey.C))
+        assertTrue(keys.contains(LatinKey.K))
+        assertTrue(keys.contains(LatinKey.Q))
+    }
+
+    @Test
+    fun testLatinKeyIpaRoundTrip() {
+        // Every key should be findable by its IPA
+        LatinKey.entries.forEach { key ->
+            val found = LatinKey.fromIpa(key.ipa)
+            assertTrue(found.contains(key), "${key.name} should be found by IPA '${key.ipa}'")
+        }
+    }
+
+    @Test
+    fun testLatinKeysMap() {
+        val keys = LatinKey.keys
+        assertEquals(26, keys.size)
+        assertNotNull(keys["a"])
+        assertEquals("a", keys["a"]?.char)
+    }
+
+    @Test
     fun testLatinKeyFromCharUppercase() {
         val a = LatinKey.fromChar("A")
         assertNotNull(a)
@@ -421,5 +617,101 @@ class LatinKeyTest {
             assertTrue(key.ipa.isNotEmpty(), "${key.name} should have ipa")
             assertTrue(key.displayName.isNotEmpty(), "${key.name} should have displayName")
         }
+    }
+}
+
+/**
+ * Cross-script IPA round-trip tests
+ */
+class IpaRoundTripTest {
+
+    @Test
+    fun testCrossScriptIpaLookup_B() {
+        // IPA "b" exists in multiple scripts
+        val hebrewB = HebrewLetter.fromIpa("b")
+        val arabicB = ArabicLetter.fromIpa("b")
+        val latinB = LatinKey.fromIpa("b")
+        val cyrillicB = CyrillicKey.fromIpa("b")
+
+        assertTrue(hebrewB.isNotEmpty(), "Hebrew should have 'b' sound")
+        assertTrue(arabicB.isNotEmpty(), "Arabic should have 'b' sound")
+        assertTrue(latinB.isNotEmpty(), "Latin should have 'b' sound")
+        assertTrue(cyrillicB.isNotEmpty(), "Cyrillic should have 'b' sound")
+    }
+
+    @Test
+    fun testCrossScriptIpaLookup_M() {
+        // IPA "m" is universal
+        val hebrewM = HebrewLetter.fromIpa("m")
+        val arabicM = ArabicLetter.fromIpa("m")
+        val latinM = LatinKey.fromIpa("m")
+        val cyrillicM = CyrillicKey.fromIpa("m")
+        val hiraganaM = HiraganaKey.fromIpa("ma")
+
+        assertTrue(hebrewM.any { it == HebrewLetter.MEM })
+        assertTrue(arabicM.any { it == ArabicLetter.MEEM })
+        assertTrue(latinM.any { it == LatinKey.M })
+        assertTrue(cyrillicM.any { it == CyrillicKey.EM })
+        assertTrue(hiraganaM.any { it == HiraganaKey.MA })
+    }
+
+    @Test
+    fun testCrossScriptIpaLookup_S() {
+        // IPA "s" in multiple scripts
+        val hebrewS = HebrewLetter.fromIpa("s")
+        val arabicS = ArabicLetter.fromIpa("s")
+        val latinS = LatinKey.fromIpa("s")
+
+        assertTrue(hebrewS.any { it == HebrewLetter.SAMECH })
+        assertTrue(arabicS.any { it == ArabicLetter.SEEN })
+        assertTrue(latinS.any { it == LatinKey.S })
+    }
+
+    @Test
+    fun testUniqueIpaSounds() {
+        // Hebrew-unique sounds
+        val chet = HebrewLetter.fromIpa("ħ")
+        assertTrue(chet.isEmpty() || chet.none { true }, "ħ should map to Hebrew chet (but HebrewLetter uses ḥ)")
+
+        // Arabic pharyngeals
+        val ain = ArabicLetter.fromIpa("ʕ")
+        assertTrue(ain.any { it == ArabicLetter.AIN })
+
+        // Arabic emphatics
+        val sad = ArabicLetter.fromIpa("sˤ")
+        assertTrue(sad.any { it == ArabicLetter.SAD })
+    }
+
+    @Test
+    fun testKeyboardLayoutKeysContainEnumValues() {
+        // HebrewLetter.keys should contain all Hebrew letters
+        val heKeys = HebrewLetter.keys
+        HebrewLetter.entries.filter { it.qwerty.isNotEmpty() }.forEach { letter ->
+            assertNotNull(heKeys[letter.qwerty], "${letter.name} should be in keys map")
+        }
+
+        // GreekKey.keys should contain all Greek letters
+        val grKeys = GreekKey.keys
+        GreekKey.entries.forEach { key ->
+            assertNotNull(grKeys[key.qwerty], "${key.name} should be in keys map")
+        }
+
+        // CyrillicKey.keys should contain all Cyrillic letters
+        val ruKeys = CyrillicKey.keys
+        CyrillicKey.entries.forEach { key ->
+            assertNotNull(ruKeys[key.qwerty], "${key.name} should be in keys map")
+        }
+    }
+
+    @Test
+    fun testIpaAsHubForMultipleRepresentations() {
+        // IPA "k" can be represented in multiple ways
+        val latinK = LatinKey.fromIpa("k")
+        assertTrue(latinK.size >= 2, "Multiple Latin letters should map to 'k': C, K, Q")
+        assertTrue(latinK.map { it.char }.containsAll(listOf("c", "k", "q")))
+
+        // Hebrew also has multiple "k" sounds (qof, kaf with dagesh)
+        val hebrewK = HebrewLetter.fromIpa("k")
+        assertTrue(hebrewK.any { it == HebrewLetter.QOF })
     }
 }

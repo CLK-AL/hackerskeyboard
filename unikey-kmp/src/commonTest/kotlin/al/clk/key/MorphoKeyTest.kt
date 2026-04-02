@@ -4,6 +4,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class MorphoKeyTest {
 
@@ -83,13 +84,13 @@ class MorphoKeyTest {
         assertEquals(7, prefixes.size)
         // Check that bet, lamed, mem, kaf, he, vav, shin are present
         val prefixChars = prefixes.map { it.char }
-        assert("ב" in prefixChars)
-        assert("ל" in prefixChars)
-        assert("מ" in prefixChars)
-        assert("כ" in prefixChars)
-        assert("ה" in prefixChars)
-        assert("ו" in prefixChars)
-        assert("ש" in prefixChars)
+        assertTrue("ב" in prefixChars)
+        assertTrue("ל" in prefixChars)
+        assertTrue("מ" in prefixChars)
+        assertTrue("כ" in prefixChars)
+        assertTrue("ה" in prefixChars)
+        assertTrue("ו" in prefixChars)
+        assertTrue("ש" in prefixChars)
     }
 
     @Test
