@@ -859,4 +859,108 @@ class DocumentIndexTest {
         assertNotNull(englishPara)
         assertEquals("ltr", englishPara.attributes["dir"])
     }
+
+    // ═══ ContentStripper Tests ═══
+
+    @Test
+    fun testContentStripperHeaders() {
+        // Markdown headers
+        assertEquals("Title", ContentStripper.stripHeader("# Title"))
+        assertEquals("Subtitle", ContentStripper.stripHeader("## Subtitle"))
+        assertEquals("Deep Header", ContentStripper.stripHeader("###### Deep Header"))
+
+        // With bold
+        assertEquals("Bold Title", ContentStripper.stripHeader("# **Bold Title**"))
+        assertEquals("Title", ContentStripper.stripHeader("**Title**"))
+    }
+
+    @Test
+    fun testContentStripperListItems() {
+        assertEquals("Item one", ContentStripper.stripListItem("- Item one"))
+        assertEquals("Item two", ContentStripper.stripListItem("* Item two"))
+        assertEquals("Numbered", ContentStripper.stripListItem("1. Numbered"))
+        assertEquals("Also numbered", ContentStripper.stripListItem("23) Also numbered"))
+    }
+
+    @Test
+    fun testContentStripperBlockquote() {
+        assertEquals("Quoted text", ContentStripper.stripBlockquote("> Quoted text"))
+        assertEquals("Multiple >", ContentStripper.stripBlockquote("> Multiple >"))
+    }
+
+    @Test
+    fun testContentStripperFull() {
+        assertEquals("Plain text", ContentStripper.strip("**Plain text**"))
+        assertEquals("Code here", ContentStripper.strip("`Code here`"))
+        assertEquals("Strike", ContentStripper.strip("~~Strike~~"))
+    }
+
+    @Test
+    fun testContentStripperIsUnderline() {
+        assertTrue(ContentStripper.isUnderline("==="))
+        assertTrue(ContentStripper.isUnderline("---"))
+        assertTrue(ContentStripper.isUnderline("====="))
+        assertFalse(ContentStripper.isUnderline("=="))  // Too short
+        assertFalse(ContentStripper.isUnderline("text"))
+    }
+
+    @Test
+    fun testContentStripperGetDecoration() {
+        assertEquals("#", ContentStripper.getDecoration("# Title")?.trim())
+        assertEquals(">", ContentStripper.getDecoration("> Quote"))
+        assertEquals("===", ContentStripper.getDecoration("==="))
+        assertNull(ContentStripper.getDecoration("Plain text"))
+    }
+
+    @Test
+    fun testPlainTextParserStripsDecorations() {
+        val text = """
+            # שלום עולם
+            - List item
+            > Quote
+        """.trimIndent()
+
+        val parser = PlainTextParser()
+        val elements = parser.parse(text)
+
+        // Header content should be stripped of # prefix
+        val h1 = elements.find { it.tag == DocTag.H1 }
+        assertNotNull(h1)
+        assertEquals("שלום עולם", h1.content)
+        assertNotNull(h1.attributes["decoration"])
+
+        // List item content should be stripped of - prefix
+        val li = elements.find { it.tag == DocTag.LI }
+        assertNotNull(li)
+        assertEquals("List item", li.content)
+    }
+
+    // ═══ DefinitionPair and IndexSegment Tests ═══
+
+    @Test
+    fun testDefinitionPairFromLine() {
+        val pair = DefinitionPair.fromLine("**מחבר:** תֹּאמַר בַּת-שְׁלֹמֹה")
+        assertNotNull(pair)
+        assertEquals("מחבר", pair.term)
+        assertEquals("תֹּאמַר בַּת-שְׁלֹמֹה", pair.description)
+    }
+
+    @Test
+    fun testDefinitionPairFormatted() {
+        val pair = DefinitionPair("term", "value")
+        assertEquals("[term=value]", pair.formatted)
+    }
+
+    @Test
+    fun testIndexSegmentWithPairs() {
+        val pairs = listOf(
+            DefinitionPair("מחבר", "תֹּאמַר", ScriptAttrs.HEBREW, ScriptAttrs.HEBREW),
+            DefinitionPair("מקור", "file.txt", ScriptAttrs.HEBREW, ScriptAttrs.ENGLISH)
+        )
+        val segment = IndexSegment(DocTag.DL, 1, emptyList(), ScriptAttrs.EMPTY, emptyMap(), pairs)
+
+        assertEquals("תֹּאמַר", segment.getDefinition("מחבר"))
+        assertEquals("file.txt", segment.getDefinition("מקור"))
+        assertEquals(2, segment.definitions.size)
+    }
 }

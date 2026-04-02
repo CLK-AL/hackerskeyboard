@@ -1157,6 +1157,112 @@ object ScriptDetector {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
+// CONTENT STRIPPER - Remove decorations/parent tags from content
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/**
+ * Strips decorations and parent tag markers from content.
+ * Decorations are syntax markers, not part of the actual content.
+ */
+object ContentStripper {
+    // Markdown header prefixes
+    private val MD_HEADER by lazy { Regex("^#{1,6}\\s+") }
+
+    // Underline markers (=== or ---)
+    private val UNDERLINE by lazy { Regex("^[=-]{3,}$") }
+
+    // Bold markers (** or __)
+    private val BOLD by lazy { Regex("\\*\\*|__") }
+
+    // Italic markers (* or _) - careful not to strip mid-word
+    private val ITALIC by lazy { Regex("(?<![\\w*_])\\*(?![\\w*_])|(?<![\\w*_])_(?![\\w*_])") }
+
+    // Strikethrough (~~)
+    private val STRIKE by lazy { Regex("~~") }
+
+    // Inline code (`)
+    private val CODE by lazy { Regex("`") }
+
+    // List markers (- * + or 1. 2))
+    private val LIST_MARKER by lazy { Regex("^\\s*[-*+]\\s+|^\\s*\\d+[.):]\\s+") }
+
+    // Blockquote marker (>)
+    private val BLOCKQUOTE by lazy { Regex("^>\\s*") }
+
+    // Definition marker (: at start)
+    private val DEF_MARKER by lazy { Regex("^:\\s+") }
+
+    /**
+     * Strip all decorations from text, returning clean content.
+     */
+    fun strip(text: String): String {
+        var result = text.trim()
+
+        // Strip in order of precedence
+        result = MD_HEADER.replaceFirst(result, "")
+        result = LIST_MARKER.replaceFirst(result, "")
+        result = BLOCKQUOTE.replaceFirst(result, "")
+        result = DEF_MARKER.replaceFirst(result, "")
+        result = BOLD.replace(result, "")
+        result = ITALIC.replace(result, "")
+        result = STRIKE.replace(result, "")
+        result = CODE.replace(result, "")
+
+        return result.trim()
+    }
+
+    /**
+     * Strip header decorations only (# prefixes, underlines).
+     */
+    fun stripHeader(text: String): String {
+        var result = text.trim()
+        result = MD_HEADER.replaceFirst(result, "")
+        result = BOLD.replace(result, "")
+        result = ITALIC.replace(result, "")
+        return result.trim()
+    }
+
+    /**
+     * Strip list item decorations only (- * + or numbers).
+     */
+    fun stripListItem(text: String): String {
+        var result = text.trim()
+        result = LIST_MARKER.replaceFirst(result, "")
+        result = BOLD.replace(result, "")
+        result = ITALIC.replace(result, "")
+        return result.trim()
+    }
+
+    /**
+     * Strip blockquote decoration only (> prefix).
+     */
+    fun stripBlockquote(text: String): String {
+        var result = text.trim()
+        result = BLOCKQUOTE.replaceFirst(result, "")
+        return result.trim()
+    }
+
+    /**
+     * Check if line is an underline marker (=== or ---).
+     */
+    fun isUnderline(text: String): Boolean = UNDERLINE.matches(text.trim())
+
+    /**
+     * Extract decoration type from line.
+     */
+    fun getDecoration(text: String): String? {
+        val trimmed = text.trim()
+        return when {
+            MD_HEADER.containsMatchIn(trimmed) -> MD_HEADER.find(trimmed)?.value?.trim()
+            UNDERLINE.matches(trimmed) -> trimmed.take(1).repeat(3)  // === or ---
+            LIST_MARKER.containsMatchIn(trimmed) -> LIST_MARKER.find(trimmed)?.value?.trim()
+            BLOCKQUOTE.containsMatchIn(trimmed) -> ">"
+            else -> null
+        }
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
 // RFC/SPEC PATTERNS - RFC 2119 keywords and spec syntax
 // ═══════════════════════════════════════════════════════════════════════════════
 
@@ -1588,6 +1694,19 @@ class PlainTextParser {
 
             val index = DocumentIndex(pathSegments)
 
+            // Strip decorations from content based on tag type
+            val strippedContent = when (tag) {
+                DocTag.H1, DocTag.H2, DocTag.H3, DocTag.H4, DocTag.H5, DocTag.H6 ->
+                    ContentStripper.stripHeader(line)
+                DocTag.LI -> ContentStripper.stripListItem(line)
+                DocTag.BLOCKQUOTE -> ContentStripper.stripBlockquote(line)
+                DocTag.DT, DocTag.DD -> ContentStripper.strip(line)
+                else -> line
+            }
+
+            // Store decoration as attribute
+            val decoration = ContentStripper.getDecoration(line)
+
             elements.add(ParsedElement(
                 index = index,
                 tag = tag,
@@ -1596,8 +1715,9 @@ class PlainTextParser {
                 attributes = buildMap {
                     scriptAttrs.lang?.let { put("lang", it) }
                     scriptAttrs.dir?.let { put("dir", it.value) }
+                    decoration?.let { put("decoration", it) }
                 },
-                content = line
+                content = strippedContent
             ))
 
             offset += line.length + 1  // +1 for line separator
