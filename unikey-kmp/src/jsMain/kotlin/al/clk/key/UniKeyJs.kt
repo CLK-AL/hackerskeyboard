@@ -387,8 +387,96 @@ fun createCursorState(word: String, pos: Int, wordIdx: Int = 0): dynamic {
     obj["nextSylBound"] = state.nextSylBound()
     obj["prevSylBound"] = state.prevSylBound()
     obj["isAtBoundary"] = state.isAtBoundary
+    obj["sylIdx"] = state.sylIdx
     return obj
 }
+
+// ═══ Hierarchical Index System (V1.L2.W3.S4) ═══
+
+@JsName("createHierarchicalIndex")
+fun createHierarchicalIndex(
+    vType: Int,
+    lineIdx: Int? = null,
+    wordIdx: Int? = null,
+    sylIdx: Int? = null,
+    lineOrder: Float = 0f,
+    wordOrder: Float = 0f,
+    sylOrder: Float = 0f
+): dynamic {
+    val index = HierarchicalIndex(vType, lineIdx, wordIdx, sylIdx, lineOrder, wordOrder, sylOrder)
+    val obj = js("{}")
+    obj["vType"] = index.vType
+    obj["lineIdx"] = index.lineIdx
+    obj["wordIdx"] = index.wordIdx
+    obj["sylIdx"] = index.sylIdx
+    obj["lineOrder"] = index.lineOrder
+    obj["wordOrder"] = index.wordOrder
+    obj["sylOrder"] = index.sylOrder
+    obj["depth"] = index.depth
+    obj["formatted"] = index.formatted
+    return obj
+}
+
+@JsName("parseHierarchicalIndex")
+fun parseHierarchicalIndex(formatted: String): dynamic? {
+    val index = HierarchicalIndex.parse(formatted) ?: return null
+    val obj = js("{}")
+    obj["vType"] = index.vType
+    obj["lineIdx"] = index.lineIdx
+    obj["wordIdx"] = index.wordIdx
+    obj["sylIdx"] = index.sylIdx
+    obj["depth"] = index.depth
+    obj["formatted"] = index.formatted
+    return obj
+}
+
+@JsName("createWordState")
+fun createWordState(text: String, order: Float = 1f): dynamic {
+    val word = WordState.fromText(text, order)
+    val obj = js("{}")
+    obj["text"] = word.text
+    obj["order"] = word.order
+    obj["sylBounds"] = word.sylBounds.toTypedArray()
+    obj["hue"] = word.hue
+    obj["syllables"] = word.syllables().map { syl ->
+        val sylObj = js("{}")
+        sylObj["text"] = syl.text
+        sylObj["order"] = syl.order
+        sylObj["startOffset"] = syl.startOffset
+        sylObj["endOffset"] = syl.endOffset
+        sylObj["hue"] = syl.hue
+        sylObj["consonant"] = syl.ipa.consonant
+        sylObj["vowel"] = syl.ipa.vowel
+        sylObj
+    }.toTypedArray()
+    return obj
+}
+
+@JsName("cursorToIndex")
+fun cursorToIndex(
+    word: String,
+    pos: Int,
+    wordIdx: Int,
+    vType: Int,
+    lineIdx: Int,
+    lineOrder: Float = 0f,
+    wordOrder: Float = 0f
+): dynamic {
+    val cursor = CursorState.forWord(word, pos, wordIdx)
+    val index = cursor.toIndex(vType, lineIdx, lineOrder, wordOrder)
+    val obj = js("{}")
+    obj["vType"] = index.vType
+    obj["lineIdx"] = index.lineIdx
+    obj["wordIdx"] = index.wordIdx
+    obj["sylIdx"] = index.sylIdx
+    obj["depth"] = index.depth
+    obj["formatted"] = index.formatted
+    return obj
+}
+
+@JsName("hierarchicalInsertOrder")
+fun hierarchicalInsertOrder(before: Float, after: Float): Float =
+    HierarchicalIndex.insertOrder(before, after)
 
 // ═══ Keyboard Layouts (23 languages) ═══
 
