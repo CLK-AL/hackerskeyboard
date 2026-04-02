@@ -963,4 +963,74 @@ class DocumentIndexTest {
         assertEquals("file.txt", segment.getDefinition("מקור"))
         assertEquals(2, segment.definitions.size)
     }
+
+    // ═══ LineSeparator Tests ═══
+
+    @Test
+    fun testLineSeparatorNormalize() {
+        // CRLF -> LF
+        assertEquals("line1\nline2", LineSeparator.normalize("line1\r\nline2"))
+
+        // CR -> LF
+        assertEquals("line1\nline2", LineSeparator.normalize("line1\rline2"))
+
+        // BR -> LF
+        assertEquals("line1\nline2", LineSeparator.normalize("line1<br>line2"))
+        assertEquals("line1\nline2", LineSeparator.normalize("line1<br/>line2"))
+        assertEquals("line1\nline2", LineSeparator.normalize("line1<br />line2"))
+        assertEquals("line1\nline2", LineSeparator.normalize("line1<BR>line2"))
+
+        // Mixed -> all LF
+        assertEquals("a\nb\nc\nd", LineSeparator.normalize("a\r\nb\rc<br>d"))
+    }
+
+    @Test
+    fun testLineSeparatorSplitLines() {
+        val text = "line1\r\nline2\rline3<br>line4\nline5"
+        val lines = LineSeparator.splitLines(text)
+        assertEquals(5, lines.size)
+        assertEquals("line1", lines[0])
+        assertEquals("line2", lines[1])
+        assertEquals("line3", lines[2])
+        assertEquals("line4", lines[3])
+        assertEquals("line5", lines[4])
+    }
+
+    @Test
+    fun testLineSeparatorHasMixedEndings() {
+        assertTrue(LineSeparator.hasMixedEndings("line1\r\nline2\nline3"))
+        assertFalse(LineSeparator.hasMixedEndings("line1\nline2\nline3"))
+        assertFalse(LineSeparator.hasMixedEndings("line1\r\nline2\r\nline3"))
+    }
+
+    @Test
+    fun testLineSeparatorDetectStyle() {
+        assertEquals("\n", LineSeparator.detectStyle("a\nb\nc"))
+        assertEquals("\r\n", LineSeparator.detectStyle("a\r\nb\r\nc"))
+        assertEquals("\r", LineSeparator.detectStyle("a\rb\rc"))
+    }
+
+    @Test
+    fun testPlainTextParserWithBrTags() {
+        val text = "First line<br>Second line<br/>Third line"
+        val parser = PlainTextParser()
+        val elements = parser.parse(text)
+
+        // Should parse as 3 separate paragraph elements
+        val paragraphs = elements.filter { it.tag == DocTag.P }
+        assertEquals(3, paragraphs.size)
+        assertEquals("First line", paragraphs[0].content)
+        assertEquals("Second line", paragraphs[1].content)
+        assertEquals("Third line", paragraphs[2].content)
+    }
+
+    @Test
+    fun testPlainTextParserWithMixedLineEndings() {
+        val text = "Line 1\r\nLine 2\rLine 3\nLine 4"
+        val parser = PlainTextParser()
+        val elements = parser.parse(text)
+
+        val paragraphs = elements.filter { it.tag == DocTag.P }
+        assertEquals(4, paragraphs.size)
+    }
 }

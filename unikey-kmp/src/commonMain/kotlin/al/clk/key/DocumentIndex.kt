@@ -35,11 +35,12 @@ data class TagPattern(
     /** Compile to regex for full tag with content and closing */
     fun toFullRegex(tagName: String): Regex {
         val close = if (closeTag.isNotEmpty()) closeTag else ""
-        val contentPattern = if (close.isNotEmpty()) ".*?" else ".*"
+        // Use [\s\S] instead of . for multiplatform (DOT_MATCHES_ALL not in common)
+        val contentPattern = if (close.isNotEmpty()) "[\\s\\S]*?" else "[\\s\\S]*"
         val pattern = "(?<${tagName}_prefix>$prefix)(?<${tagName}_attr>$attrPattern)(?<${tagName}_suffix>$suffix)" +
             "(?<${tagName}_content>$contentPattern)" +
             if (close.isNotEmpty()) "(?<${tagName}_close>$close)" else ""
-        return Regex(pattern, setOf(RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL))
+        return Regex(pattern, RegexOption.IGNORE_CASE)
     }
 
     /** Regex for closing tag only */
@@ -1157,68 +1158,121 @@ object ScriptDetector {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// CONTENT STRIPPER - Remove decorations/parent tags from content
+// DECORATION - Enum for content decorations/parent tags
 // ═══════════════════════════════════════════════════════════════════════════════
 
 /**
- * Strips decorations and parent tag markers from content.
- * Decorations are syntax markers, not part of the actual content.
+ * Content decorations - syntax markers that wrap or prefix content.
+ * These are parent tags, not part of the actual content.
+ */
+enum class Decoration(
+    patternStr: String,
+    val isPrefix: Boolean = true,    // Strip from start only
+    val isWrapper: Boolean = false   // Strip all occurrences
+) {
+    // ═══ Block Prefixes ═══
+    MD_H1("^#\\s+"),
+    MD_H2("^##\\s+"),
+    MD_H3("^###\\s+"),
+    MD_H4("^####\\s+"),
+    MD_H5("^#####\\s+"),
+    MD_H6("^######\\s+"),
+    UNDERLINE_EQ("^={3,}$"),
+    UNDERLINE_DASH("^-{3,}$"),
+    BLOCKQUOTE("^>\\s*"),
+    LIST_BULLET("^\\s*[-*+]\\s+"),
+    LIST_NUMBER("^\\s*\\d+[.):]\\s+"),
+    DEF_COLON("^:\\s+"),
+    INDENT("^\\s{2,}"),
+
+    // ═══ Inline Wrappers ═══
+    BOLD("\\*\\*|__", isPrefix = false, isWrapper = true),
+    ITALIC("(?<![\\w*_])\\*(?![\\w*_])|(?<![\\w*_])_(?![\\w*_])", isPrefix = false, isWrapper = true),
+    STRIKE("~~", isPrefix = false, isWrapper = true),
+    CODE_INLINE("`", isPrefix = false, isWrapper = true),
+    CODE_FENCE("^```.*$");
+
+    /** Lazy compiled pattern */
+    val pattern: Regex by lazy { Regex(patternStr) }
+
+    /** Strip this decoration from text */
+    fun strip(text: String): String {
+        return if (isWrapper) {
+            pattern.replace(text, "")
+        } else {
+            pattern.replaceFirst(text, "")
+        }
+    }
+
+    /** Check if this decoration matches the text */
+    fun matches(text: String): Boolean {
+        return if (isPrefix) pattern.containsMatchIn(text) else pattern.containsMatchIn(text)
+    }
+
+    /** Extract the decoration marker from text */
+    fun extract(text: String): String? {
+        return pattern.find(text)?.value?.trim()
+    }
+
+    companion object {
+        /** Get all header decorations */
+        val HEADERS = listOf(MD_H1, MD_H2, MD_H3, MD_H4, MD_H5, MD_H6)
+
+        /** Get all inline wrapper decorations */
+        val WRAPPERS = entries.filter { it.isWrapper }
+
+        /** Get all prefix decorations */
+        val PREFIXES = entries.filter { it.isPrefix && !it.isWrapper }
+
+        /** Detect decoration type from line */
+        fun detect(text: String): Decoration? {
+            val trimmed = text.trim()
+            return entries.find { it.pattern.containsMatchIn(trimmed) }
+        }
+
+        /** Get header level (1-6) from decoration */
+        fun headerLevel(dec: Decoration?): Int = when (dec) {
+            MD_H1, UNDERLINE_EQ -> 1
+            MD_H2, UNDERLINE_DASH -> 2
+            MD_H3 -> 3
+            MD_H4 -> 4
+            MD_H5 -> 5
+            MD_H6 -> 6
+            else -> 0
+        }
+    }
+}
+
+/**
+ * Content stripper utilities using Decoration enum.
  */
 object ContentStripper {
-    // Markdown header prefixes
-    private val MD_HEADER by lazy { Regex("^#{1,6}\\s+") }
-
-    // Underline markers (=== or ---)
-    private val UNDERLINE by lazy { Regex("^[=-]{3,}$") }
-
-    // Bold markers (** or __)
-    private val BOLD by lazy { Regex("\\*\\*|__") }
-
-    // Italic markers (* or _) - careful not to strip mid-word
-    private val ITALIC by lazy { Regex("(?<![\\w*_])\\*(?![\\w*_])|(?<![\\w*_])_(?![\\w*_])") }
-
-    // Strikethrough (~~)
-    private val STRIKE by lazy { Regex("~~") }
-
-    // Inline code (`)
-    private val CODE by lazy { Regex("`") }
-
-    // List markers (- * + or 1. 2))
-    private val LIST_MARKER by lazy { Regex("^\\s*[-*+]\\s+|^\\s*\\d+[.):]\\s+") }
-
-    // Blockquote marker (>)
-    private val BLOCKQUOTE by lazy { Regex("^>\\s*") }
-
-    // Definition marker (: at start)
-    private val DEF_MARKER by lazy { Regex("^:\\s+") }
-
     /**
      * Strip all decorations from text, returning clean content.
      */
     fun strip(text: String): String {
         var result = text.trim()
-
-        // Strip in order of precedence
-        result = MD_HEADER.replaceFirst(result, "")
-        result = LIST_MARKER.replaceFirst(result, "")
-        result = BLOCKQUOTE.replaceFirst(result, "")
-        result = DEF_MARKER.replaceFirst(result, "")
-        result = BOLD.replace(result, "")
-        result = ITALIC.replace(result, "")
-        result = STRIKE.replace(result, "")
-        result = CODE.replace(result, "")
-
+        // Strip prefixes first
+        for (dec in Decoration.PREFIXES) {
+            result = dec.strip(result)
+        }
+        // Then wrappers
+        for (dec in Decoration.WRAPPERS) {
+            result = dec.strip(result)
+        }
         return result.trim()
     }
 
     /**
-     * Strip header decorations only (# prefixes, underlines).
+     * Strip header decorations only (# prefixes and bold/italic).
      */
     fun stripHeader(text: String): String {
         var result = text.trim()
-        result = MD_HEADER.replaceFirst(result, "")
-        result = BOLD.replace(result, "")
-        result = ITALIC.replace(result, "")
+        for (dec in Decoration.HEADERS) {
+            result = dec.strip(result)
+        }
+        result = Decoration.BOLD.strip(result)
+        result = Decoration.ITALIC.strip(result)
         return result.trim()
     }
 
@@ -1227,9 +1281,10 @@ object ContentStripper {
      */
     fun stripListItem(text: String): String {
         var result = text.trim()
-        result = LIST_MARKER.replaceFirst(result, "")
-        result = BOLD.replace(result, "")
-        result = ITALIC.replace(result, "")
+        result = Decoration.LIST_BULLET.strip(result)
+        result = Decoration.LIST_NUMBER.strip(result)
+        result = Decoration.BOLD.strip(result)
+        result = Decoration.ITALIC.strip(result)
         return result.trim()
     }
 
@@ -1238,26 +1293,30 @@ object ContentStripper {
      */
     fun stripBlockquote(text: String): String {
         var result = text.trim()
-        result = BLOCKQUOTE.replaceFirst(result, "")
+        result = Decoration.BLOCKQUOTE.strip(result)
         return result.trim()
     }
 
     /**
      * Check if line is an underline marker (=== or ---).
      */
-    fun isUnderline(text: String): Boolean = UNDERLINE.matches(text.trim())
+    fun isUnderline(text: String): Boolean {
+        val trimmed = text.trim()
+        return Decoration.UNDERLINE_EQ.pattern.matches(trimmed) ||
+               Decoration.UNDERLINE_DASH.pattern.matches(trimmed)
+    }
 
     /**
      * Extract decoration type from line.
      */
     fun getDecoration(text: String): String? {
         val trimmed = text.trim()
-        return when {
-            MD_HEADER.containsMatchIn(trimmed) -> MD_HEADER.find(trimmed)?.value?.trim()
-            UNDERLINE.matches(trimmed) -> trimmed.take(1).repeat(3)  // === or ---
-            LIST_MARKER.containsMatchIn(trimmed) -> LIST_MARKER.find(trimmed)?.value?.trim()
-            BLOCKQUOTE.containsMatchIn(trimmed) -> ">"
-            else -> null
+        val dec = Decoration.detect(trimmed) ?: return null
+        return when (dec) {
+            Decoration.UNDERLINE_EQ -> "==="
+            Decoration.UNDERLINE_DASH -> "---"
+            Decoration.BLOCKQUOTE -> ">"
+            else -> dec.extract(trimmed)
         }
     }
 }
@@ -1431,6 +1490,65 @@ enum class LineType(
 }
 
 /**
+ * Line separator utilities - normalizes BR, CR, LF, CRLF to Linux LF.
+ */
+object LineSeparator {
+    /** Unix/Linux line feed */
+    const val LF = "\n"
+    /** Windows carriage return + line feed */
+    const val CRLF = "\r\n"
+    /** Old Mac carriage return */
+    const val CR = "\r"
+
+    /** HTML/XML line break patterns */
+    private val BR_PATTERN by lazy { Regex("""<br\s*/?>""", RegexOption.IGNORE_CASE) }
+
+    /**
+     * Normalize all line endings to Linux LF (\n).
+     * Handles: <br>, <br/>, <br />, \r\n, \r
+     */
+    fun normalize(text: String): String {
+        var result = BR_PATTERN.replace(text, LF)  // <br> -> \n
+        result = result.replace(CRLF, LF)          // \r\n -> \n
+        result = result.replace(CR, LF)            // \r -> \n
+        return result
+    }
+
+    /**
+     * Split text into lines, normalizing line endings first.
+     */
+    fun splitLines(text: String): List<String> {
+        return normalize(text).split(LF)
+    }
+
+    /**
+     * Check if text contains mixed line endings.
+     */
+    fun hasMixedEndings(text: String): Boolean {
+        val hasCrlf = text.contains(CRLF)
+        val hasCr = text.replace(CRLF, "").contains(CR)
+        val hasLf = text.replace(CRLF, "").contains(LF)
+        return listOf(hasCrlf, hasCr, hasLf).count { it } > 1
+    }
+
+    /**
+     * Detect dominant line ending style in text.
+     */
+    fun detectStyle(text: String): String {
+        val crlfCount = CRLF.toRegex().findAll(text).count()
+        val stripped = text.replace(CRLF, "")
+        val crCount = CR.toRegex().findAll(stripped).count()
+        val lfCount = LF.toRegex().findAll(stripped).count()
+
+        return when {
+            crlfCount >= crCount && crlfCount >= lfCount -> CRLF
+            crCount >= lfCount -> CR
+            else -> LF
+        }
+    }
+}
+
+/**
  * Parser for plain text documents.
  * Splits by line separators and infers HTML-like structure.
  * Builds complete nested paths: HTML1/BODY1/DIV1/OL1/LI1
@@ -1473,8 +1591,8 @@ class PlainTextParser {
         var tableSegment: IndexSegment? = null
         var currentRowSegment: IndexSegment? = null
 
-        // Split by line separators: \r\n, \r, \n
-        val lines = text.split(Regex("\\r\\n|\\r|\\n"))
+        // Split by line separators: <br>, \r\n, \r, \n -> all normalized to LF
+        val lines = LineSeparator.splitLines(text)
         var offset = 0
 
         // Definition list state
@@ -1768,11 +1886,11 @@ class DocumentIndexBuilder {
     private val stack = mutableListOf<IndexSegment>()
 
     /** Push a new tag onto the stack */
-    fun push(tag: DocTag, cssClasses: List<String> = emptyList(), dataAttrs: Map<String, String> = emptyMap()): DocumentIndex {
+    fun push(tag: DocTag, cssClasses: List<String> = emptyList(), scriptAttrs: ScriptAttrs = ScriptAttrs.EMPTY, dataAttrs: Map<String, String> = emptyMap()): DocumentIndex {
         val count = tagCounts.getOrPut(tag) { 0 } + 1
         tagCounts[tag] = count
 
-        val segment = IndexSegment(tag, count, cssClasses, dataAttrs)
+        val segment = IndexSegment(tag, count, cssClasses, scriptAttrs, dataAttrs)
         stack.add(segment)
 
         return DocumentIndex(stack.toList())
