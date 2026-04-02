@@ -1,6 +1,10 @@
 package al.clk.key
 
 import kotlin.math.*
+import kotlinx.serialization.*
+import kotlinx.serialization.json.*
+import kotlinx.serialization.descriptors.*
+import kotlinx.serialization.encoding.*
 
 /**
  * Document Index System - hierarchical indexing for HTML/Markdown documents.
@@ -4577,3 +4581,1118 @@ class DocumentIndexBuilder {
         stack.clear()
     }
 }
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// MCP - Model Context Protocol (tools/resources for LLM agents)
+// Wire protocol with kotlinx.serialization + MessagePack support
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/**
+ * Wire format for protocol messages.
+ */
+enum class WireFormat { JSON, MESSAGE_PACK }
+
+/**
+ * Protocol codec for serialization/deserialization.
+ */
+object McpWire {
+    val json = Json {
+        ignoreUnknownKeys = true
+        encodeDefaults = true
+        classDiscriminator = "type"
+    }
+
+    inline fun <reified T> encode(value: T, format: WireFormat = WireFormat.JSON): ByteArray = when (format) {
+        WireFormat.JSON -> json.encodeToString(value).encodeToByteArray()
+        WireFormat.MESSAGE_PACK -> MessagePack.encode(value)
+    }
+
+    inline fun <reified T> decode(data: ByteArray, format: WireFormat = WireFormat.JSON): T = when (format) {
+        WireFormat.JSON -> json.decodeFromString(data.decodeToString())
+        WireFormat.MESSAGE_PACK -> MessagePack.decode(data)
+    }
+}
+
+/**
+ * MessagePack codec (simplified - full impl needs library).
+ */
+object MessagePack {
+    inline fun <reified T> encode(value: T): ByteArray {
+        // Simplified: encode as JSON bytes with msgpack header
+        // Real impl would use proper MessagePack encoding
+        val jsonBytes = McpWire.json.encodeToString(value).encodeToByteArray()
+        return byteArrayOf(0x92.toByte()) + jsonBytes // fixarray marker
+    }
+
+    inline fun <reified T> decode(data: ByteArray): T {
+        // Skip msgpack header, decode as JSON
+        val jsonBytes = if (data.isNotEmpty() && data[0] == 0x92.toByte()) data.drop(1).toByteArray() else data
+        return McpWire.json.decodeFromString(jsonBytes.decodeToString())
+    }
+}
+
+/**
+ * MCP Tool definition for LLM agent invocation.
+ */
+@Serializable
+data class McpToolDef(
+    val name: String,
+    val description: String,
+    val inputSchema: JsonObject
+)
+
+/**
+ * MCP Tool with handler (non-serializable runtime component).
+ */
+data class McpTool(
+    val def: McpToolDef,
+    val handler: suspend (JsonObject) -> McpToolResult
+) {
+    val name get() = def.name
+    val description get() = def.description
+    val inputSchema get() = def.inputSchema
+}
+
+/**
+ * MCP Tool execution result.
+ */
+@Serializable
+sealed class McpToolResult {
+    @Serializable @SerialName("success")
+    data class Success(val content: List<McpContent>) : McpToolResult()
+    @Serializable @SerialName("error")
+    data class Error(val message: String, val code: Int = -1) : McpToolResult()
+}
+
+/**
+ * MCP Content types.
+ */
+@Serializable
+sealed class McpContent {
+    @Serializable @SerialName("text")
+    data class Text(val text: String) : McpContent()
+    @Serializable @SerialName("image")
+    data class Image(val data: String, val mimeType: String) : McpContent()
+    @Serializable @SerialName("resource")
+    data class Resource(val uri: String, val mimeType: String, val text: String? = null) : McpContent()
+}
+
+/**
+ * MCP Resource definition.
+ */
+@Serializable
+data class McpResource(
+    val uri: String,
+    val name: String,
+    val description: String? = null,
+    val mimeType: String = "application/json"
+)
+
+/**
+ * MCP JSON-RPC Error.
+ */
+@Serializable
+data class McpError(
+    val code: Int,
+    val message: String,
+    val data: JsonElement? = null
+)
+
+/**
+ * MCP Message types for protocol communication.
+ */
+@Serializable
+sealed class McpMessage {
+    abstract val jsonrpc: String
+
+    @Serializable @SerialName("request")
+    data class Request(
+        val id: String,
+        override val jsonrpc: String = "2.0",
+        val method: String,
+        val params: JsonObject? = null
+    ) : McpMessage()
+
+    @Serializable @SerialName("response")
+    data class Response(
+        val id: String,
+        override val jsonrpc: String = "2.0",
+        val result: JsonElement? = null,
+        val error: McpError? = null
+    ) : McpMessage()
+
+    @Serializable @SerialName("notification")
+    data class Notification(
+        override val jsonrpc: String = "2.0",
+        val method: String,
+        val params: JsonObject? = null
+    ) : McpMessage()
+}
+
+/**
+ * MCP Server capabilities.
+ */
+@Serializable
+data class McpCapabilities(
+    val tools: Boolean = true,
+    val resources: Boolean = true,
+    val prompts: Boolean = false,
+    val logging: Boolean = true
+)
+
+/**
+ * MCP Server info.
+ */
+@Serializable
+data class McpServerInfo(
+    val name: String,
+    val version: String
+)
+
+/**
+ * MCP Initialize result.
+ */
+@Serializable
+data class McpInitializeResult(
+    val protocolVersion: String = "2024-11-05",
+    val serverInfo: McpServerInfo,
+    val capabilities: McpCapabilities
+)
+
+/**
+ * MCP Tools list result.
+ */
+@Serializable
+data class McpToolsListResult(val tools: List<McpToolDef>)
+
+/**
+ * MCP Resources list result.
+ */
+@Serializable
+data class McpResourcesListResult(val resources: List<McpResource>)
+
+/**
+ * MCP Resource content.
+ */
+@Serializable
+data class McpResourceContent(
+    val uri: String,
+    val text: String,
+    val mimeType: String? = null
+)
+
+/**
+ * MCP Resource read result.
+ */
+@Serializable
+data class McpResourceReadResult(val contents: List<McpResourceContent>)
+
+/**
+ * MCP Server registry for tools and resources.
+ */
+class McpServer(
+    val name: String,
+    val version: String = "1.0.0",
+    val capabilities: McpCapabilities = McpCapabilities(),
+    val wireFormat: WireFormat = WireFormat.JSON
+) {
+    private val tools = mutableMapOf<String, McpTool>()
+    private val resources = mutableMapOf<String, McpResource>()
+    private val resourceHandlers = mutableMapOf<String, suspend () -> String>()
+
+    fun registerTool(tool: McpTool) {
+        tools[tool.name] = tool
+    }
+
+    fun registerResource(resource: McpResource, handler: suspend () -> String) {
+        resources[resource.uri] = resource
+        resourceHandlers[resource.uri] = handler
+    }
+
+    fun listTools(): List<McpToolDef> = tools.values.map { it.def }
+    fun listResources(): List<McpResource> = resources.values.toList()
+
+    suspend fun invokeTool(name: String, args: JsonObject): McpToolResult {
+        val tool = tools[name] ?: return McpToolResult.Error("Tool not found: $name", -32601)
+        return try {
+            tool.handler(args)
+        } catch (e: Exception) {
+            McpToolResult.Error(e.message ?: "Tool execution failed", -32603)
+        }
+    }
+
+    suspend fun readResource(uri: String): String? {
+        return resourceHandlers[uri]?.invoke()
+    }
+
+    /** Handle incoming wire message */
+    suspend fun handleWire(data: ByteArray): ByteArray {
+        val msg = McpWire.decode<McpMessage>(data, wireFormat)
+        val response = handleMessage(msg)
+        return response?.let { McpWire.encode(it, wireFormat) } ?: byteArrayOf()
+    }
+
+    /** Handle incoming MCP message */
+    suspend fun handleMessage(msg: McpMessage): McpMessage.Response? {
+        return when (msg) {
+            is McpMessage.Request -> handleRequest(msg)
+            is McpMessage.Response -> null
+            is McpMessage.Notification -> { handleNotification(msg); null }
+        }
+    }
+
+    private suspend fun handleRequest(req: McpMessage.Request): McpMessage.Response {
+        return when (req.method) {
+            "initialize" -> {
+                val result = McpInitializeResult(
+                    serverInfo = McpServerInfo(name, version),
+                    capabilities = capabilities
+                )
+                McpMessage.Response(id = req.id, result = McpWire.json.encodeToJsonElement(result))
+            }
+            "tools/list" -> {
+                val result = McpToolsListResult(listTools())
+                McpMessage.Response(id = req.id, result = McpWire.json.encodeToJsonElement(result))
+            }
+            "tools/call" -> {
+                val toolName = req.params?.get("name")?.jsonPrimitive?.content
+                    ?: return McpMessage.Response(req.id, error = McpError(-32602, "Missing tool name"))
+                val args = req.params["arguments"]?.jsonObject ?: JsonObject(emptyMap())
+                when (val result = invokeTool(toolName, args)) {
+                    is McpToolResult.Success -> McpMessage.Response(
+                        id = req.id,
+                        result = McpWire.json.encodeToJsonElement(result)
+                    )
+                    is McpToolResult.Error -> McpMessage.Response(
+                        id = req.id,
+                        error = McpError(result.code, result.message)
+                    )
+                }
+            }
+            "resources/list" -> {
+                val result = McpResourcesListResult(listResources())
+                McpMessage.Response(id = req.id, result = McpWire.json.encodeToJsonElement(result))
+            }
+            "resources/read" -> {
+                val uri = req.params?.get("uri")?.jsonPrimitive?.content
+                    ?: return McpMessage.Response(req.id, error = McpError(-32602, "Missing resource URI"))
+                val content = readResource(uri)
+                    ?: return McpMessage.Response(req.id, error = McpError(-32601, "Resource not found"))
+                val result = McpResourceReadResult(listOf(
+                    McpResourceContent(uri, content, resources[uri]?.mimeType)
+                ))
+                McpMessage.Response(id = req.id, result = McpWire.json.encodeToJsonElement(result))
+            }
+            else -> McpMessage.Response(req.id, error = McpError(-32601, "Method not found: ${req.method}"))
+        }
+    }
+
+    private fun handleNotification(notif: McpMessage.Notification) {
+        // Handle notifications (logging, progress, etc.)
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// WEBDAV - RFC 4918 WebDAV protocol for document storage
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/**
+ * WebDAV HTTP methods.
+ */
+@Serializable
+enum class WebDavMethod {
+    @SerialName("OPTIONS") OPTIONS,
+    @SerialName("GET") GET,
+    @SerialName("HEAD") HEAD,
+    @SerialName("PUT") PUT,
+    @SerialName("DELETE") DELETE,
+    @SerialName("MKCOL") MKCOL,
+    @SerialName("COPY") COPY,
+    @SerialName("MOVE") MOVE,
+    @SerialName("PROPFIND") PROPFIND,
+    @SerialName("PROPPATCH") PROPPATCH,
+    @SerialName("LOCK") LOCK,
+    @SerialName("UNLOCK") UNLOCK
+}
+
+/**
+ * WebDAV property.
+ */
+@Serializable
+data class DavProperty(
+    val namespace: String,
+    val name: String,
+    val value: String?
+)
+
+/**
+ * WebDAV resource properties.
+ */
+@Serializable
+data class DavResource(
+    val href: String,
+    val displayName: String? = null,
+    val contentType: String? = null,
+    val contentLength: Long? = null,
+    val lastModified: String? = null,
+    val etag: String? = null,
+    val isCollection: Boolean = false,
+    val properties: List<DavProperty> = emptyList()
+)
+
+/**
+ * WebDAV lock info.
+ */
+@Serializable
+data class DavLock(
+    val token: String,
+    val owner: String,
+    val scope: DavLockScope = DavLockScope.EXCLUSIVE,
+    val type: DavLockType = DavLockType.WRITE,
+    val depth: DavDepth = DavDepth.INFINITY,
+    val timeout: Long = 3600
+)
+
+@Serializable
+enum class DavLockScope {
+    @SerialName("exclusive") EXCLUSIVE,
+    @SerialName("shared") SHARED
+}
+
+@Serializable
+enum class DavLockType {
+    @SerialName("write") WRITE
+}
+
+@Serializable
+enum class DavDepth {
+    @SerialName("0") ZERO,
+    @SerialName("1") ONE,
+    @SerialName("infinity") INFINITY
+}
+
+/**
+ * WebDAV PROPFIND response.
+ */
+@Serializable
+data class DavMultistatus(
+    val responses: List<DavResponse>
+)
+
+@Serializable
+data class DavResponse(
+    val href: String,
+    val propstat: List<DavPropstat>
+)
+
+@Serializable
+data class DavPropstat(
+    val properties: List<DavProperty>,
+    val status: Int = 200
+)
+
+/**
+ * WebDAV request builder.
+ */
+class DavRequest(
+    val method: WebDavMethod,
+    val path: String,
+    val depth: DavDepth = DavDepth.ONE,
+    val headers: Map<String, String> = emptyMap(),
+    val body: String? = null
+) {
+    fun toXml(): String? = when (method) {
+        WebDavMethod.PROPFIND -> """
+            <?xml version="1.0" encoding="utf-8"?>
+            <D:propfind xmlns:D="DAV:">
+                <D:allprop/>
+            </D:propfind>
+        """.trimIndent()
+        WebDavMethod.LOCK -> """
+            <?xml version="1.0" encoding="utf-8"?>
+            <D:lockinfo xmlns:D="DAV:">
+                <D:lockscope><D:exclusive/></D:lockscope>
+                <D:locktype><D:write/></D:locktype>
+            </D:lockinfo>
+        """.trimIndent()
+        else -> body
+    }
+
+    companion object {
+        fun propfind(path: String, depth: DavDepth = DavDepth.ONE) =
+            DavRequest(WebDavMethod.PROPFIND, path, depth)
+
+        fun get(path: String) = DavRequest(WebDavMethod.GET, path)
+
+        fun put(path: String, content: String, contentType: String = "application/octet-stream") =
+            DavRequest(WebDavMethod.PUT, path, body = content, headers = mapOf("Content-Type" to contentType))
+
+        fun delete(path: String) = DavRequest(WebDavMethod.DELETE, path)
+
+        fun mkcol(path: String) = DavRequest(WebDavMethod.MKCOL, path)
+
+        fun lock(path: String) = DavRequest(WebDavMethod.LOCK, path)
+
+        fun unlock(path: String, token: String) =
+            DavRequest(WebDavMethod.UNLOCK, path, headers = mapOf("Lock-Token" to "<$token>"))
+
+        fun copy(source: String, destination: String, overwrite: Boolean = false) =
+            DavRequest(WebDavMethod.COPY, source, headers = mapOf(
+                "Destination" to destination,
+                "Overwrite" to if (overwrite) "T" else "F"
+            ))
+
+        fun move(source: String, destination: String, overwrite: Boolean = false) =
+            DavRequest(WebDavMethod.MOVE, source, headers = mapOf(
+                "Destination" to destination,
+                "Overwrite" to if (overwrite) "T" else "F"
+            ))
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// MUSHI - Real-time collaboration protocol (SSE + WSS + JsonPatch)
+// Wire protocol with kotlinx.serialization
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/**
+ * Mushi wire codec for protocol messages.
+ */
+object MushiWire {
+    val json = Json {
+        ignoreUnknownKeys = true
+        encodeDefaults = true
+        classDiscriminator = "type"
+    }
+
+    inline fun <reified T> encode(value: T, format: WireFormat = WireFormat.JSON): ByteArray = when (format) {
+        WireFormat.JSON -> json.encodeToString(value).encodeToByteArray()
+        WireFormat.MESSAGE_PACK -> MessagePack.encode(value)
+    }
+
+    inline fun <reified T> decode(data: ByteArray, format: WireFormat = WireFormat.JSON): T = when (format) {
+        WireFormat.JSON -> json.decodeFromString(data.decodeToString())
+        WireFormat.MESSAGE_PACK -> MessagePack.decode(data)
+    }
+
+    fun encodeEvent(event: MushiEvent): String = json.encodeToString(event)
+    fun decodeEvent(data: String): MushiEvent = json.decodeFromString(data)
+}
+
+/**
+ * Mushi collaboration session.
+ */
+@Serializable
+data class MushiSession(
+    val id: String,
+    val documentUri: String,
+    val clientId: String,
+    val createdAt: Long = 0
+)
+
+/**
+ * Selection range for awareness.
+ */
+@Serializable
+data class MushiSelection(
+    val start: Int,
+    val end: Int
+)
+
+/**
+ * Serializable JsonPatchOp wrapper.
+ */
+@Serializable
+sealed class MushiPatchOp {
+    @Serializable @SerialName("add")
+    data class Add(val path: String, val value: JsonElement) : MushiPatchOp()
+    @Serializable @SerialName("remove")
+    data class Remove(val path: String) : MushiPatchOp()
+    @Serializable @SerialName("replace")
+    data class Replace(val path: String, val value: JsonElement) : MushiPatchOp()
+    @Serializable @SerialName("move")
+    data class Move(val path: String, val from: String) : MushiPatchOp()
+    @Serializable @SerialName("copy")
+    data class Copy(val path: String, val from: String) : MushiPatchOp()
+    @Serializable @SerialName("test")
+    data class Test(val path: String, val value: JsonElement) : MushiPatchOp()
+}
+
+/**
+ * Serializable document version.
+ */
+@Serializable
+data class MushiDocVersion(
+    val clientId: String,
+    val clock: Long
+)
+
+/**
+ * Serializable vector clock.
+ */
+@Serializable
+data class MushiVectorClock(
+    val clocks: Map<String, Long>
+)
+
+/**
+ * Mushi event types for SSE/WSS transport.
+ */
+@Serializable
+sealed class MushiEvent {
+    abstract val sessionId: String
+    abstract val clientId: String
+    abstract val timestamp: Long
+
+    /** Document patch event */
+    @Serializable @SerialName("patch")
+    data class Patch(
+        override val sessionId: String,
+        override val clientId: String,
+        override val timestamp: Long,
+        val ops: List<MushiPatchOp>,
+        val version: MushiDocVersion
+    ) : MushiEvent()
+
+    /** Cursor/selection awareness */
+    @Serializable @SerialName("awareness")
+    data class Awareness(
+        override val sessionId: String,
+        override val clientId: String,
+        override val timestamp: Long,
+        val cursor: Int? = null,
+        val selection: MushiSelection? = null,
+        val user: Map<String, String> = emptyMap()
+    ) : MushiEvent()
+
+    /** Client joined */
+    @Serializable @SerialName("join")
+    data class Join(
+        override val sessionId: String,
+        override val clientId: String,
+        override val timestamp: Long,
+        val user: Map<String, String> = emptyMap()
+    ) : MushiEvent()
+
+    /** Client left */
+    @Serializable @SerialName("leave")
+    data class Leave(
+        override val sessionId: String,
+        override val clientId: String,
+        override val timestamp: Long
+    ) : MushiEvent()
+
+    /** Full document sync */
+    @Serializable @SerialName("sync")
+    data class Sync(
+        override val sessionId: String,
+        override val clientId: String,
+        override val timestamp: Long,
+        val document: JsonObject,
+        val version: MushiVectorClock
+    ) : MushiEvent()
+
+    /** Ack/confirmation */
+    @Serializable @SerialName("ack")
+    data class Ack(
+        override val sessionId: String,
+        override val clientId: String,
+        override val timestamp: Long,
+        val ackedVersion: MushiDocVersion
+    ) : MushiEvent()
+
+    /** Convert to SSE format */
+    fun toSse(): String {
+        val eventType = when (this) {
+            is Patch -> "patch"
+            is Awareness -> "awareness"
+            is Join -> "join"
+            is Leave -> "leave"
+            is Sync -> "sync"
+            is Ack -> "ack"
+        }
+        return "event: $eventType\ndata: ${MushiWire.encodeEvent(this)}\n\n"
+    }
+}
+
+/**
+ * Mushi transport abstraction for SSE/WSS.
+ */
+interface MushiTransport {
+    val isConnected: Boolean
+    suspend fun connect(sessionId: String, clientId: String)
+    suspend fun disconnect()
+    suspend fun send(event: MushiEvent)
+    suspend fun receive(): MushiEvent?
+}
+
+/**
+ * Mushi audit log for SSE streaming.
+ */
+class MushiAuditLog {
+    private val events = mutableListOf<MushiEvent>()
+    private val listeners = mutableListOf<(MushiEvent) -> Unit>()
+
+    fun append(event: MushiEvent) {
+        events.add(event)
+        listeners.forEach { it(event) }
+    }
+
+    fun subscribe(listener: (MushiEvent) -> Unit): () -> Unit {
+        listeners.add(listener)
+        return { listeners.remove(listener) }
+    }
+
+    fun replay(fromTimestamp: Long = 0): Sequence<MushiEvent> =
+        events.asSequence().filter { it.timestamp >= fromTimestamp }
+
+    fun toSseStream(fromTimestamp: Long = 0): String =
+        replay(fromTimestamp).joinToString("") { it.toSse() }
+}
+
+/**
+ * Mushi collaboration client.
+ */
+class MushiClient(
+    private val transport: MushiTransport,
+    val clientId: String = generateClientId(),
+    val wireFormat: WireFormat = WireFormat.JSON
+) {
+    private var session: MushiSession? = null
+    private val localClock = VectorClock()
+    private var document = JsonObject(emptyMap())
+    private val pendingOps = mutableListOf<MushiEvent.Patch>()
+    private val eventHandlers = mutableListOf<(MushiEvent) -> Unit>()
+
+    suspend fun join(documentUri: String): MushiSession {
+        val sessionId = generateSessionId()
+        transport.connect(sessionId, clientId)
+        val sess = MushiSession(sessionId, documentUri, clientId, currentTimeMillis())
+        session = sess
+
+        transport.send(MushiEvent.Join(
+            sessionId = sessionId,
+            clientId = clientId,
+            timestamp = currentTimeMillis()
+        ))
+
+        return sess
+    }
+
+    suspend fun leave() {
+        session?.let { sess ->
+            transport.send(MushiEvent.Leave(
+                sessionId = sess.id,
+                clientId = clientId,
+                timestamp = currentTimeMillis()
+            ))
+        }
+        transport.disconnect()
+        session = null
+    }
+
+    suspend fun applyPatch(ops: List<MushiPatchOp>) {
+        val sess = session ?: return
+        val clock = localClock.tick(clientId)
+        val version = MushiDocVersion(clientId, clock)
+
+        // Send to server
+        val event = MushiEvent.Patch(
+            sessionId = sess.id,
+            clientId = clientId,
+            timestamp = currentTimeMillis(),
+            ops = ops,
+            version = version
+        )
+        pendingOps.add(event)
+        transport.send(event)
+    }
+
+    suspend fun updateAwareness(cursor: Int? = null, selection: MushiSelection? = null, user: Map<String, String> = emptyMap()) {
+        val sess = session ?: return
+        transport.send(MushiEvent.Awareness(
+            sessionId = sess.id,
+            clientId = clientId,
+            timestamp = currentTimeMillis(),
+            cursor = cursor,
+            selection = selection,
+            user = user
+        ))
+    }
+
+    suspend fun processIncoming() {
+        val event = transport.receive() ?: return
+        when (event) {
+            is MushiEvent.Patch -> {
+                if (event.clientId != clientId) {
+                    localClock.merge(VectorClock(mutableMapOf(event.version.clientId to event.version.clock)))
+                }
+            }
+            is MushiEvent.Sync -> {
+                document = event.document
+                localClock.merge(VectorClock(event.version.clocks.toMutableMap()))
+            }
+            is MushiEvent.Ack -> {
+                pendingOps.removeAll { it.version == event.ackedVersion }
+            }
+            else -> { }
+        }
+        eventHandlers.forEach { it(event) }
+    }
+
+    fun onEvent(handler: (MushiEvent) -> Unit): () -> Unit {
+        eventHandlers.add(handler)
+        return { eventHandlers.remove(handler) }
+    }
+
+    fun getDocument(): JsonObject = document
+
+    private fun generateSessionId(): String = "sess_${randomId(8)}"
+}
+
+/**
+ * Mushi collaboration server.
+ */
+class MushiServer {
+    private val sessions = mutableMapOf<String, MushiServerSession>()
+    val auditLog = MushiAuditLog()
+
+    fun createSession(documentUri: String): MushiServerSession {
+        val sessionId = "sess_${randomId(12)}"
+        val session = MushiServerSession(sessionId, documentUri, auditLog)
+        sessions[sessionId] = session
+        return session
+    }
+
+    fun getSession(sessionId: String): MushiServerSession? = sessions[sessionId]
+
+    fun closeSession(sessionId: String) {
+        sessions.remove(sessionId)
+    }
+}
+
+class MushiServerSession(
+    val id: String,
+    val documentUri: String,
+    private val auditLog: MushiAuditLog
+) {
+    private val clients = mutableMapOf<String, MushiTransport>()
+    private var document = JsonObject(emptyMap())
+    private val clock = VectorClock()
+
+    suspend fun addClient(clientId: String, transport: MushiTransport) {
+        clients[clientId] = transport
+
+        // Send current state
+        transport.send(MushiEvent.Sync(
+            sessionId = id,
+            clientId = "server",
+            timestamp = currentTimeMillis(),
+            document = document,
+            version = MushiVectorClock(clock.clocks.toMap())
+        ))
+
+        // Broadcast join
+        broadcast(MushiEvent.Join(
+            sessionId = id,
+            clientId = clientId,
+            timestamp = currentTimeMillis()
+        ), exclude = clientId)
+    }
+
+    fun removeClient(clientId: String) {
+        clients.remove(clientId)
+    }
+
+    suspend fun handleEvent(event: MushiEvent) {
+        auditLog.append(event)
+
+        when (event) {
+            is MushiEvent.Patch -> {
+                clock.merge(VectorClock(mutableMapOf(event.version.clientId to event.version.clock)))
+
+                // Ack to sender
+                clients[event.clientId]?.send(MushiEvent.Ack(
+                    sessionId = id,
+                    clientId = "server",
+                    timestamp = currentTimeMillis(),
+                    ackedVersion = event.version
+                ))
+
+                // Broadcast to others
+                broadcast(event, exclude = event.clientId)
+            }
+            is MushiEvent.Awareness -> broadcast(event, exclude = event.clientId)
+            is MushiEvent.Leave -> {
+                removeClient(event.clientId)
+                broadcast(event)
+            }
+            else -> { }
+        }
+    }
+
+    private suspend fun broadcast(event: MushiEvent, exclude: String? = null) {
+        clients.filterKeys { it != exclude }.values.forEach { transport ->
+            transport.send(event)
+        }
+    }
+
+    fun getDocument(): JsonObject = document
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// KTOR CIO TRANSPORT - HTTP client interfaces for Ktor CIO engine
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/**
+ * HTTP request abstraction for Ktor CIO.
+ */
+@Serializable
+data class KtorRequest(
+    val method: String,
+    val url: String,
+    val headers: Map<String, String> = emptyMap(),
+    val body: String? = null,
+    val timeout: Long = 30_000
+)
+
+/**
+ * HTTP response abstraction.
+ */
+@Serializable
+data class KtorResponse(
+    val status: Int,
+    val headers: Map<String, List<String>>,
+    val body: String
+)
+
+/**
+ * WebSocket message types.
+ */
+@Serializable
+sealed class WsMessage {
+    @Serializable @SerialName("text")
+    data class Text(val content: String) : WsMessage()
+    @Serializable @SerialName("binary")
+    data class Binary(@Contextual val data: ByteArray) : WsMessage() {
+        override fun equals(other: Any?) = other is Binary && data.contentEquals(other.data)
+        override fun hashCode() = data.contentHashCode()
+    }
+    @Serializable @SerialName("close")
+    data object Close : WsMessage()
+    @Serializable @SerialName("ping")
+    data object Ping : WsMessage()
+    @Serializable @SerialName("pong")
+    data object Pong : WsMessage()
+}
+
+/**
+ * SSE event from server.
+ */
+@Serializable
+data class SseEvent(
+    val event: String? = null,
+    val data: String,
+    val id: String? = null,
+    val retry: Long? = null
+)
+
+/**
+ * HTTP client interface for Ktor CIO implementation.
+ * Implement with actual Ktor HttpClient in JVM/Native targets.
+ */
+interface KtorCioClient {
+    /** Execute HTTP request */
+    suspend fun request(req: KtorRequest): KtorResponse
+
+    /** Open WebSocket connection */
+    suspend fun websocket(
+        url: String,
+        headers: Map<String, String> = emptyMap(),
+        onMessage: suspend (WsMessage) -> Unit,
+        onClose: suspend () -> Unit = {}
+    ): WsSession
+
+    /** Open SSE stream */
+    suspend fun sse(
+        url: String,
+        headers: Map<String, String> = emptyMap(),
+        onEvent: suspend (SseEvent) -> Unit,
+        onClose: suspend () -> Unit = {}
+    ): SseSession
+}
+
+/**
+ * WebSocket session handle.
+ */
+interface WsSession {
+    val isActive: Boolean
+    suspend fun send(message: WsMessage)
+    suspend fun close()
+}
+
+/**
+ * SSE session handle.
+ */
+interface SseSession {
+    val isActive: Boolean
+    suspend fun close()
+}
+
+/**
+ * Mushi transport implementation using Ktor CIO WebSocket.
+ */
+class MushiWssTransport(
+    private val client: KtorCioClient,
+    private val baseUrl: String
+) : MushiTransport {
+    private var session: WsSession? = null
+    private val messageQueue = mutableListOf<MushiEvent>()
+    override val isConnected: Boolean get() = session?.isActive == true
+
+    override suspend fun connect(sessionId: String, clientId: String) {
+        session = client.websocket(
+            url = "$baseUrl/mushi/$sessionId",
+            headers = mapOf("X-Client-Id" to clientId),
+            onMessage = { msg ->
+                if (msg is WsMessage.Text) {
+                    try {
+                        val event = MushiWire.decodeEvent(msg.content)
+                        messageQueue.add(event)
+                    } catch (_: Exception) { }
+                }
+            }
+        )
+    }
+
+    override suspend fun disconnect() {
+        session?.close()
+        session = null
+    }
+
+    override suspend fun send(event: MushiEvent) {
+        session?.send(WsMessage.Text(MushiWire.encodeEvent(event)))
+    }
+
+    override suspend fun receive(): MushiEvent? {
+        return if (messageQueue.isNotEmpty()) messageQueue.removeAt(0) else null
+    }
+}
+
+/**
+ * Mushi SSE transport for read-only audit stream.
+ */
+class MushiSseTransport(
+    private val client: KtorCioClient,
+    private val baseUrl: String
+) {
+    private var session: SseSession? = null
+    private val eventHandlers = mutableListOf<(MushiEvent) -> Unit>()
+
+    suspend fun connect(sessionId: String, fromTimestamp: Long = 0) {
+        session = client.sse(
+            url = "$baseUrl/mushi/$sessionId/audit?from=$fromTimestamp",
+            onEvent = { sse ->
+                try {
+                    val event = MushiWire.decodeEvent(sse.data)
+                    eventHandlers.forEach { it(event) }
+                } catch (_: Exception) { }
+            }
+        )
+    }
+
+    suspend fun disconnect() {
+        session?.close()
+        session = null
+    }
+
+    fun onEvent(handler: (MushiEvent) -> Unit): () -> Unit {
+        eventHandlers.add(handler)
+        return { eventHandlers.remove(handler) }
+    }
+}
+
+/**
+ * WebDAV client using Ktor CIO.
+ */
+class WebDavClient(
+    private val client: KtorCioClient,
+    private val baseUrl: String
+) {
+    suspend fun propfind(path: String, depth: DavDepth = DavDepth.ONE): DavMultistatus {
+        val req = DavRequest.propfind(path, depth)
+        val resp = client.request(KtorRequest(
+            method = "PROPFIND",
+            url = "$baseUrl$path",
+            headers = mapOf(
+                "Depth" to when (depth) {
+                    DavDepth.ZERO -> "0"
+                    DavDepth.ONE -> "1"
+                    DavDepth.INFINITY -> "infinity"
+                },
+                "Content-Type" to "application/xml"
+            ),
+            body = req.toXml()
+        ))
+        return parseMultistatus(resp.body)
+    }
+
+    suspend fun get(path: String): String {
+        val resp = client.request(KtorRequest(method = "GET", url = "$baseUrl$path"))
+        return resp.body
+    }
+
+    suspend fun put(path: String, content: String, contentType: String = "application/octet-stream"): Boolean {
+        val resp = client.request(KtorRequest(
+            method = "PUT",
+            url = "$baseUrl$path",
+            headers = mapOf("Content-Type" to contentType),
+            body = content
+        ))
+        return resp.status in 200..299
+    }
+
+    suspend fun delete(path: String): Boolean {
+        val resp = client.request(KtorRequest(method = "DELETE", url = "$baseUrl$path"))
+        return resp.status in 200..299
+    }
+
+    suspend fun mkcol(path: String): Boolean {
+        val resp = client.request(KtorRequest(method = "MKCOL", url = "$baseUrl$path"))
+        return resp.status == 201
+    }
+
+    suspend fun lock(path: String): DavLock? {
+        val req = DavRequest.lock(path)
+        val resp = client.request(KtorRequest(
+            method = "LOCK",
+            url = "$baseUrl$path",
+            headers = mapOf("Content-Type" to "application/xml"),
+            body = req.toXml()
+        ))
+        return if (resp.status == 200) parseLock(resp.body, resp.headers) else null
+    }
+
+    suspend fun unlock(path: String, token: String): Boolean {
+        val resp = client.request(KtorRequest(
+            method = "UNLOCK",
+            url = "$baseUrl$path",
+            headers = mapOf("Lock-Token" to "<$token>")
+        ))
+        return resp.status == 204
+    }
+
+    private fun parseMultistatus(xml: String): DavMultistatus {
+        // Simplified - real impl would parse XML
+        return DavMultistatus(emptyList())
+    }
+
+    private fun parseLock(xml: String, headers: Map<String, List<String>>): DavLock? {
+        val token = headers["Lock-Token"]?.firstOrNull()?.removeSurrounding("<", ">") ?: return null
+        return DavLock(token = token, owner = "")
+    }
+}
+
+// Utility functions
+private fun currentTimeMillis(): Long = kotlin.time.TimeSource.Monotonic.markNow().elapsedNow().inWholeMilliseconds
+private fun randomId(len: Int): String = (1..len).map { "abcdefghijklmnopqrstuvwxyz0123456789".random() }.joinToString("")
