@@ -420,17 +420,6 @@ enum class ArabicSuffix(
 }
 
 /**
- * Arabic pattern category
- */
-enum class ArabicPatternCategory {
-    VOWEL,      // Haraka patterns
-    PREFIX,     // Prefix patterns (ال, etc.)
-    SUFFIX,     // Suffix patterns
-    ROOT,       // Root/verb form patterns
-    WORD        // Common word patterns
-}
-
-/**
  * Arabic spelling patterns with harakat (vowel marks) as canonical base.
  * Supports two spelling variants:
  * - withHarakat: Full vowel diacritics (كِتَاب)
@@ -442,7 +431,7 @@ enum class ArabicPattern(
     override val ipa: String,
     override val displayName: String,
     override val examples: List<String>,
-    val category: ArabicPatternCategory = ArabicPatternCategory.WORD,
+    val category: PatternCategory = PatternCategory.WORD,
     override val position: PatternPosition = PatternPosition.ANY
 ) : IArabicPattern {
 
@@ -450,58 +439,58 @@ enum class ArabicPattern(
     // HARAKA (VOWEL) PATTERNS
     // ═══════════════════════════════════════════════════════════════════════════
 
-    FATHA("َ", "", "a", "fatha", listOf("كَتَبَ", "ذَهَبَ"), ArabicPatternCategory.VOWEL),
-    KASRA("ِ", "", "i", "kasra", listOf("بِنْت", "كِتَاب"), ArabicPatternCategory.VOWEL),
-    DAMMA("ُ", "", "u", "damma", listOf("كُتُب", "رُسُل"), ArabicPatternCategory.VOWEL),
-    SUKUN("ْ", "", "", "sukun", listOf("مِنْ", "عَنْ"), ArabicPatternCategory.VOWEL),
-    SHADDA("ّ", "", "ː", "shadda", listOf("كَتَّبَ", "عَلَّمَ"), ArabicPatternCategory.VOWEL),
+    FATHA("َ", "", "a", "fatha", listOf("كَتَبَ", "ذَهَبَ"), PatternCategory.VOWEL),
+    KASRA("ِ", "", "i", "kasra", listOf("بِنْت", "كِتَاب"), PatternCategory.VOWEL),
+    DAMMA("ُ", "", "u", "damma", listOf("كُتُب", "رُسُل"), PatternCategory.VOWEL),
+    SUKUN("ْ", "", "", "sukun", listOf("مِنْ", "عَنْ"), PatternCategory.VOWEL),
+    SHADDA("ّ", "", "ː", "shadda", listOf("كَتَّبَ", "عَلَّمَ"), PatternCategory.VOWEL),
 
     // Tanwin (nunation)
-    TANWIN_FATHA("ً", "", "an", "tanwin-fatha", listOf("كِتَابًا", "بَيْتًا"), ArabicPatternCategory.SUFFIX, PatternPosition.END),
-    TANWIN_KASRA("ٍ", "", "in", "tanwin-kasra", listOf("كِتَابٍ", "بَيْتٍ"), ArabicPatternCategory.SUFFIX, PatternPosition.END),
-    TANWIN_DAMMA("ٌ", "", "un", "tanwin-damma", listOf("كِتَابٌ", "بَيْتٌ"), ArabicPatternCategory.SUFFIX, PatternPosition.END),
+    TANWIN_FATHA("ً", "", "an", "tanwin-fatha", listOf("كِتَابًا", "بَيْتًا"), PatternCategory.SUFFIX, PatternPosition.END),
+    TANWIN_KASRA("ٍ", "", "in", "tanwin-kasra", listOf("كِتَابٍ", "بَيْتٍ"), PatternCategory.SUFFIX, PatternPosition.END),
+    TANWIN_DAMMA("ٌ", "", "un", "tanwin-damma", listOf("كِتَابٌ", "بَيْتٌ"), PatternCategory.SUFFIX, PatternPosition.END),
 
     // Long vowels (with mater lectionis)
-    ALIF_MADD("َا", "ا", "aː", "alif-madd", listOf("كِتَاب", "بَاب"), ArabicPatternCategory.VOWEL),
-    WAW_MADD("ُو", "و", "uː", "waw-madd", listOf("نُور", "سُور"), ArabicPatternCategory.VOWEL),
-    YA_MADD("ِي", "ي", "iː", "ya-madd", listOf("كَبِير", "صَغِير"), ArabicPatternCategory.VOWEL),
+    ALIF_MADD("َا", "ا", "aː", "alif-madd", listOf("كِتَاب", "بَاب"), PatternCategory.VOWEL),
+    WAW_MADD("ُو", "و", "uː", "waw-madd", listOf("نُور", "سُور"), PatternCategory.VOWEL),
+    YA_MADD("ِي", "ي", "iː", "ya-madd", listOf("كَبِير", "صَغِير"), PatternCategory.VOWEL),
 
     // ═══════════════════════════════════════════════════════════════════════════
     // PREFIX PATTERNS
     // ═══════════════════════════════════════════════════════════════════════════
 
-    AL_PREFIX("الـ", "ال", "al", "al-definite", listOf("الْكِتَاب", "الْبَيْت"), ArabicPatternCategory.PREFIX, PatternPosition.START),
-    AL_SHAMS("الـ", "ال", "a", "al-solar", listOf("الشَّمْس", "النُّور"), ArabicPatternCategory.PREFIX, PatternPosition.START), // Assimilates
-    BI_PREFIX("بِـ", "ب", "bi", "bi-with", listOf("بِسْمِ", "بِاللَّه"), ArabicPatternCategory.PREFIX, PatternPosition.START),
-    WA_PREFIX("وَ", "و", "wa", "wa-and", listOf("وَكَتَبَ", "وَذَهَبَ"), ArabicPatternCategory.PREFIX, PatternPosition.START),
-    FA_PREFIX("فَ", "ف", "fa", "fa-then", listOf("فَكَتَبَ", "فَذَهَبَ"), ArabicPatternCategory.PREFIX, PatternPosition.START),
-    LI_PREFIX("لِـ", "ل", "li", "li-for", listOf("لِلَّه", "لِلْكِتَاب"), ArabicPatternCategory.PREFIX, PatternPosition.START),
+    AL_PREFIX("الـ", "ال", "al", "al-definite", listOf("الْكِتَاب", "الْبَيْت"), PatternCategory.PREFIX, PatternPosition.START),
+    AL_SHAMS("الـ", "ال", "a", "al-solar", listOf("الشَّمْس", "النُّور"), PatternCategory.PREFIX, PatternPosition.START), // Assimilates
+    BI_PREFIX("بِـ", "ب", "bi", "bi-with", listOf("بِسْمِ", "بِاللَّه"), PatternCategory.PREFIX, PatternPosition.START),
+    WA_PREFIX("وَ", "و", "wa", "wa-and", listOf("وَكَتَبَ", "وَذَهَبَ"), PatternCategory.PREFIX, PatternPosition.START),
+    FA_PREFIX("فَ", "ف", "fa", "fa-then", listOf("فَكَتَبَ", "فَذَهَبَ"), PatternCategory.PREFIX, PatternPosition.START),
+    LI_PREFIX("لِـ", "ل", "li", "li-for", listOf("لِلَّه", "لِلْكِتَاب"), PatternCategory.PREFIX, PatternPosition.START),
 
     // ═══════════════════════════════════════════════════════════════════════════
     // SUFFIX PATTERNS
     // ═══════════════════════════════════════════════════════════════════════════
 
-    TA_MARBUTA("ـة", "ة", "a", "ta-marbuta", listOf("مَدِينَة", "سَيَّارَة"), ArabicPatternCategory.SUFFIX, PatternPosition.END),
-    ALIF_MAQSURA("ـى", "ى", "aː", "alif-maqsura", listOf("عَلَى", "إِلَى"), ArabicPatternCategory.SUFFIX, PatternPosition.END),
-    WAW_PLURAL("ـون", "ون", "uːn", "waw-plural-m", listOf("مُسْلِمُون", "مُعَلِّمُون"), ArabicPatternCategory.SUFFIX, PatternPosition.END),
-    YA_PLURAL("ـين", "ين", "iːn", "ya-plural-m", listOf("مُسْلِمِين", "مُعَلِّمِين"), ArabicPatternCategory.SUFFIX, PatternPosition.END),
-    AT_PLURAL("ـات", "ات", "aːt", "at-plural-f", listOf("مُسْلِمَات", "سَيَّارَات"), ArabicPatternCategory.SUFFIX, PatternPosition.END),
-    AN_DUAL("ـان", "ان", "aːn", "an-dual", listOf("كِتَابَان", "وَلَدَان"), ArabicPatternCategory.SUFFIX, PatternPosition.END),
-    AYN_DUAL("ـين", "ين", "ajn", "ayn-dual", listOf("كِتَابَيْن", "وَلَدَيْن"), ArabicPatternCategory.SUFFIX, PatternPosition.END),
+    TA_MARBUTA("ـة", "ة", "a", "ta-marbuta", listOf("مَدِينَة", "سَيَّارَة"), PatternCategory.SUFFIX, PatternPosition.END),
+    ALIF_MAQSURA("ـى", "ى", "aː", "alif-maqsura", listOf("عَلَى", "إِلَى"), PatternCategory.SUFFIX, PatternPosition.END),
+    WAW_PLURAL("ـون", "ون", "uːn", "waw-plural-m", listOf("مُسْلِمُون", "مُعَلِّمُون"), PatternCategory.SUFFIX, PatternPosition.END),
+    YA_PLURAL("ـين", "ين", "iːn", "ya-plural-m", listOf("مُسْلِمِين", "مُعَلِّمِين"), PatternCategory.SUFFIX, PatternPosition.END),
+    AT_PLURAL("ـات", "ات", "aːt", "at-plural-f", listOf("مُسْلِمَات", "سَيَّارَات"), PatternCategory.SUFFIX, PatternPosition.END),
+    AN_DUAL("ـان", "ان", "aːn", "an-dual", listOf("كِتَابَان", "وَلَدَان"), PatternCategory.SUFFIX, PatternPosition.END),
+    AYN_DUAL("ـين", "ين", "ajn", "ayn-dual", listOf("كِتَابَيْن", "وَلَدَيْن"), PatternCategory.SUFFIX, PatternPosition.END),
 
     // ═══════════════════════════════════════════════════════════════════════════
     // COMMON ROOT PATTERNS (verb forms)
     // ═══════════════════════════════════════════════════════════════════════════
 
-    FORM_I("فَعَلَ", "فعل", "faʕala", "form-1", listOf("كَتَبَ", "ذَهَبَ", "فَتَحَ"), ArabicPatternCategory.ROOT),
-    FORM_II("فَعَّلَ", "فعّل", "faʕːala", "form-2", listOf("كَتَّبَ", "عَلَّمَ", "دَرَّسَ"), ArabicPatternCategory.ROOT),
-    FORM_III("فَاعَلَ", "فاعل", "faːʕala", "form-3", listOf("كَاتَبَ", "سَافَرَ", "حَاوَلَ"), ArabicPatternCategory.ROOT),
-    FORM_IV("أَفْعَلَ", "أفعل", "ʔafʕala", "form-4", listOf("أَكْتَبَ", "أَرْسَلَ", "أَخْرَجَ"), ArabicPatternCategory.ROOT),
-    FORM_V("تَفَعَّلَ", "تفعّل", "tafaʕːala", "form-5", listOf("تَعَلَّمَ", "تَكَلَّمَ", "تَذَكَّرَ"), ArabicPatternCategory.ROOT),
-    FORM_VI("تَفَاعَلَ", "تفاعل", "tafaːʕala", "form-6", listOf("تَبَادَلَ", "تَعَاوَنَ", "تَقَاتَلَ"), ArabicPatternCategory.ROOT),
-    FORM_VII("اِنْفَعَلَ", "انفعل", "infaʕala", "form-7", listOf("اِنْكَسَرَ", "اِنْفَتَحَ"), ArabicPatternCategory.ROOT),
-    FORM_VIII("اِفْتَعَلَ", "افتعل", "iftaʕala", "form-8", listOf("اِجْتَمَعَ", "اِخْتَارَ"), ArabicPatternCategory.ROOT),
-    FORM_X("اِسْتَفْعَلَ", "استفعل", "istafʕala", "form-10", listOf("اِسْتَخْرَجَ", "اِسْتَعْمَلَ"), ArabicPatternCategory.ROOT),
+    FORM_I("فَعَلَ", "فعل", "faʕala", "form-1", listOf("كَتَبَ", "ذَهَبَ", "فَتَحَ"), PatternCategory.ROOT),
+    FORM_II("فَعَّلَ", "فعّل", "faʕːala", "form-2", listOf("كَتَّبَ", "عَلَّمَ", "دَرَّسَ"), PatternCategory.ROOT),
+    FORM_III("فَاعَلَ", "فاعل", "faːʕala", "form-3", listOf("كَاتَبَ", "سَافَرَ", "حَاوَلَ"), PatternCategory.ROOT),
+    FORM_IV("أَفْعَلَ", "أفعل", "ʔafʕala", "form-4", listOf("أَكْتَبَ", "أَرْسَلَ", "أَخْرَجَ"), PatternCategory.ROOT),
+    FORM_V("تَفَعَّلَ", "تفعّل", "tafaʕːala", "form-5", listOf("تَعَلَّمَ", "تَكَلَّمَ", "تَذَكَّرَ"), PatternCategory.ROOT),
+    FORM_VI("تَفَاعَلَ", "تفاعل", "tafaːʕala", "form-6", listOf("تَبَادَلَ", "تَعَاوَنَ", "تَقَاتَلَ"), PatternCategory.ROOT),
+    FORM_VII("اِنْفَعَلَ", "انفعل", "infaʕala", "form-7", listOf("اِنْكَسَرَ", "اِنْفَتَحَ"), PatternCategory.ROOT),
+    FORM_VIII("اِفْتَعَلَ", "افتعل", "iftaʕala", "form-8", listOf("اِجْتَمَعَ", "اِخْتَارَ"), PatternCategory.ROOT),
+    FORM_X("اِسْتَفْعَلَ", "استفعل", "istafʕala", "form-10", listOf("اِسْتَخْرَجَ", "اِسْتَعْمَلَ"), PatternCategory.ROOT),
 
     // ═══════════════════════════════════════════════════════════════════════════
     // COMMON WORD PATTERNS
@@ -535,12 +524,12 @@ enum class ArabicPattern(
         fun fromNoHarakat(form: String): ArabicPattern? = byNoHarakat[form]
 
         /** Get patterns by category */
-        fun byCategory(cat: ArabicPatternCategory): List<ArabicPattern> = byCategory[cat] ?: emptyList()
+        fun byCategory(cat: PatternCategory): List<ArabicPattern> = byCategory[cat] ?: emptyList()
 
         /** Find best matching suffix pattern */
         fun matchSuffix(word: String): ArabicPattern? {
             return entries
-                .filter { it.category == ArabicPatternCategory.SUFFIX }
+                .filter { it.category == PatternCategory.SUFFIX }
                 .sortedByDescending { it.withHarakat.length }
                 .firstOrNull { word.endsWith(it.withHarakat) || word.endsWith(it.withoutHarakat) }
         }
@@ -548,13 +537,13 @@ enum class ArabicPattern(
         /** Find best matching prefix pattern */
         fun matchPrefix(word: String): ArabicPattern? {
             return entries
-                .filter { it.category == ArabicPatternCategory.PREFIX }
+                .filter { it.category == PatternCategory.PREFIX }
                 .sortedByDescending { it.withHarakat.length }
                 .firstOrNull { word.startsWith(it.withHarakat) || word.startsWith(it.withoutHarakat) }
         }
 
         /** Get root patterns (verb forms) */
-        val rootPatterns: List<ArabicPattern> get() = byCategory[ArabicPatternCategory.ROOT] ?: emptyList()
+        val rootPatterns: List<ArabicPattern> get() = byCategory[PatternCategory.ROOT] ?: emptyList()
     }
 }
 

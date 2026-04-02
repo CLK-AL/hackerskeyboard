@@ -130,6 +130,18 @@ enum class NikudForm {
 }
 
 /**
+ * Generic pattern category for spelling patterns across all languages.
+ */
+enum class PatternCategory {
+    VOWEL,      // Vowel patterns (nikud, harakat, diphthongs)
+    CONSONANT,  // Consonant combinations (clusters, digraphs)
+    PREFIX,     // Prefix patterns
+    SUFFIX,     // Suffix patterns
+    ROOT,       // Root/stem patterns (verb forms, etc.)
+    WORD        // Common word patterns
+}
+
+/**
  * Simple implementation of ILayoutKey for ad-hoc keys (punctuation, numbers)
  */
 data class SimpleKey(

@@ -100,17 +100,6 @@ enum class LetterType {
 }
 
 /**
- * Pattern category for Hebrew spelling patterns
- */
-enum class HebrewPatternCategory {
-    VOWEL,      // Nikud vowel patterns
-    CONSONANT,  // Consonant combinations
-    PREFIX,     // Prefix patterns (ב, ל, מ, כ, ה, ו, ש)
-    SUFFIX,     // Suffix patterns (ים, ות, ה)
-    WORD        // Common word patterns
-}
-
-/**
  * Hebrew spelling patterns with nikud male (full) as canonical base.
  * Supports three spelling variants:
  * - male: Full nikud with mater lectionis (שָׁלוֹם)
@@ -124,7 +113,7 @@ enum class HebrewPattern(
     override val ipa: String,
     override val displayName: String,
     override val examples: List<String>,
-    val category: HebrewPatternCategory = HebrewPatternCategory.WORD,
+    val category: PatternCategory = PatternCategory.WORD,
     override val position: PatternPosition = PatternPosition.ANY
 ) : IHebrewPattern {
 
@@ -133,63 +122,63 @@ enum class HebrewPattern(
     // ═══════════════════════════════════════════════════════════════════════════
 
     // A-class vowels
-    KAMATZ("ָ", "ָ", "", "a", "kamatz", listOf("דָּבָר", "שָׁנָה"), HebrewPatternCategory.VOWEL),
-    PATACH("ַ", "ַ", "", "a", "patach", listOf("יַד", "בַּת"), HebrewPatternCategory.VOWEL),
-    HATAF_PATACH("ֲ", "ֲ", "", "a", "hataf-patach", listOf("אֲנִי", "עֲבוֹדָה"), HebrewPatternCategory.VOWEL),
+    KAMATZ("ָ", "ָ", "", "a", "kamatz", listOf("דָּבָר", "שָׁנָה"), PatternCategory.VOWEL),
+    PATACH("ַ", "ַ", "", "a", "patach", listOf("יַד", "בַּת"), PatternCategory.VOWEL),
+    HATAF_PATACH("ֲ", "ֲ", "", "a", "hataf-patach", listOf("אֲנִי", "עֲבוֹדָה"), PatternCategory.VOWEL),
 
     // E-class vowels
-    TZERE("ֵ", "ֵ", "", "e", "tzere", listOf("שֵׁם", "בֵּן"), HebrewPatternCategory.VOWEL),
-    TZERE_YOD("ֵי", "ֵ", "י", "eː", "tzere-yod", listOf("בֵּית", "אֵין"), HebrewPatternCategory.VOWEL),
-    SEGOL("ֶ", "ֶ", "", "ɛ", "segol", listOf("מֶלֶךְ", "יֶלֶד"), HebrewPatternCategory.VOWEL),
-    HATAF_SEGOL("ֱ", "ֱ", "", "ɛ", "hataf-segol", listOf("אֱמֶת", "אֱלֹהִים"), HebrewPatternCategory.VOWEL),
+    TZERE("ֵ", "ֵ", "", "e", "tzere", listOf("שֵׁם", "בֵּן"), PatternCategory.VOWEL),
+    TZERE_YOD("ֵי", "ֵ", "י", "eː", "tzere-yod", listOf("בֵּית", "אֵין"), PatternCategory.VOWEL),
+    SEGOL("ֶ", "ֶ", "", "ɛ", "segol", listOf("מֶלֶךְ", "יֶלֶד"), PatternCategory.VOWEL),
+    HATAF_SEGOL("ֱ", "ֱ", "", "ɛ", "hataf-segol", listOf("אֱמֶת", "אֱלֹהִים"), PatternCategory.VOWEL),
 
     // I-class vowels (male vs haser)
-    CHIRIK_MALE("ִי", "ִ", "י", "iː", "chirik-male", listOf("שִׁיר", "בִּית"), HebrewPatternCategory.VOWEL),
-    CHIRIK_HASER("ִ", "ִ", "", "i", "chirik-haser", listOf("מִן", "בִּן"), HebrewPatternCategory.VOWEL),
+    CHIRIK_MALE("ִי", "ִ", "י", "iː", "chirik-male", listOf("שִׁיר", "בִּית"), PatternCategory.VOWEL),
+    CHIRIK_HASER("ִ", "ִ", "", "i", "chirik-haser", listOf("מִן", "בִּן"), PatternCategory.VOWEL),
 
     // O-class vowels (male vs haser)
-    CHOLAM_MALE("וֹ", "ֹ", "ו", "oː", "cholam-male", listOf("שָׁלוֹם", "טוֹב"), HebrewPatternCategory.VOWEL),
-    CHOLAM_HASER("ֹ", "ֹ", "", "o", "cholam-haser", listOf("כֹּל", "מֹשֶׁה"), HebrewPatternCategory.VOWEL),
-    KAMATZ_KATAN("ָ", "ָ", "", "o", "kamatz-katan", listOf("חָכְמָה", "קָדְשׁוֹ"), HebrewPatternCategory.VOWEL),
-    HATAF_KAMATZ("ֳ", "ֳ", "", "o", "hataf-kamatz", listOf("חֳלִי", "צֳהֳרַיִם"), HebrewPatternCategory.VOWEL),
+    CHOLAM_MALE("וֹ", "ֹ", "ו", "oː", "cholam-male", listOf("שָׁלוֹם", "טוֹב"), PatternCategory.VOWEL),
+    CHOLAM_HASER("ֹ", "ֹ", "", "o", "cholam-haser", listOf("כֹּל", "מֹשֶׁה"), PatternCategory.VOWEL),
+    KAMATZ_KATAN("ָ", "ָ", "", "o", "kamatz-katan", listOf("חָכְמָה", "קָדְשׁוֹ"), PatternCategory.VOWEL),
+    HATAF_KAMATZ("ֳ", "ֳ", "", "o", "hataf-kamatz", listOf("חֳלִי", "צֳהֳרַיִם"), PatternCategory.VOWEL),
 
     // U-class vowels (male vs haser)
-    SHURUK("וּ", "ֻ", "ו", "uː", "shuruk", listOf("שׁוּר", "קוּם"), HebrewPatternCategory.VOWEL),
-    KUBUTZ("ֻ", "ֻ", "", "u", "kubutz", listOf("קֻם", "סֻכָּה"), HebrewPatternCategory.VOWEL),
+    SHURUK("וּ", "ֻ", "ו", "uː", "shuruk", listOf("שׁוּר", "קוּם"), PatternCategory.VOWEL),
+    KUBUTZ("ֻ", "ֻ", "", "u", "kubutz", listOf("קֻם", "סֻכָּה"), PatternCategory.VOWEL),
 
     // Schwa
-    SHVA_NA("ְ", "ְ", "", "ə", "shva-na", listOf("בְּרֵאשִׁית", "שְׁמַע"), HebrewPatternCategory.VOWEL),
-    SHVA_NACH("ְ", "ְ", "", "", "shva-nach", listOf("יִשְׁמֹר", "מַלְכָּה"), HebrewPatternCategory.VOWEL),
+    SHVA_NA("ְ", "ְ", "", "ə", "shva-na", listOf("בְּרֵאשִׁית", "שְׁמַע"), PatternCategory.VOWEL),
+    SHVA_NACH("ְ", "ְ", "", "", "shva-nach", listOf("יִשְׁמֹר", "מַלְכָּה"), PatternCategory.VOWEL),
 
     // ═══════════════════════════════════════════════════════════════════════════
     // SUFFIX PATTERNS
     // ═══════════════════════════════════════════════════════════════════════════
 
     // Gender/Number suffixes
-    MASC_PLURAL("ִים", "ִם", "ים", "im", "masc-plural", listOf("סְפָרִים", "יְלָדִים"), HebrewPatternCategory.SUFFIX, PatternPosition.END),
-    FEM_PLURAL("וֹת", "ֹת", "ות", "ot", "fem-plural", listOf("בָּנוֹת", "שָׁנוֹת"), HebrewPatternCategory.SUFFIX, PatternPosition.END),
-    FEM_SINGULAR("ָה", "ָה", "ה", "a", "fem-singular", listOf("מַלְכָּה", "תּוֹרָה"), HebrewPatternCategory.SUFFIX, PatternPosition.END),
-    DUAL("ַיִם", "ַיִם", "יים", "ajim", "dual", listOf("יָדַיִם", "עֵינַיִם"), HebrewPatternCategory.SUFFIX, PatternPosition.END),
+    MASC_PLURAL("ִים", "ִם", "ים", "im", "masc-plural", listOf("סְפָרִים", "יְלָדִים"), PatternCategory.SUFFIX, PatternPosition.END),
+    FEM_PLURAL("וֹת", "ֹת", "ות", "ot", "fem-plural", listOf("בָּנוֹת", "שָׁנוֹת"), PatternCategory.SUFFIX, PatternPosition.END),
+    FEM_SINGULAR("ָה", "ָה", "ה", "a", "fem-singular", listOf("מַלְכָּה", "תּוֹרָה"), PatternCategory.SUFFIX, PatternPosition.END),
+    DUAL("ַיִם", "ַיִם", "יים", "ajim", "dual", listOf("יָדַיִם", "עֵינַיִם"), PatternCategory.SUFFIX, PatternPosition.END),
 
     // Possessive suffixes
-    POSS_1S("ִי", "ִי", "י", "i", "poss-1s-my", listOf("סִפְרִי", "בֵּיתִי"), HebrewPatternCategory.SUFFIX, PatternPosition.END),
-    POSS_2MS("ְךָ", "ְךָ", "ך", "xa", "poss-2ms-your", listOf("סִפְרְךָ", "בֵּיתְךָ"), HebrewPatternCategory.SUFFIX, PatternPosition.END),
-    POSS_3MS("וֹ", "ֹו", "ו", "o", "poss-3ms-his", listOf("סִפְרוֹ", "בֵּיתוֹ"), HebrewPatternCategory.SUFFIX, PatternPosition.END),
-    POSS_3FS("ָהּ", "ָהּ", "ה", "a", "poss-3fs-her", listOf("סִפְרָהּ", "בֵּיתָהּ"), HebrewPatternCategory.SUFFIX, PatternPosition.END),
-    POSS_1P("ֵנוּ", "ֵנוּ", "נו", "enu", "poss-1p-our", listOf("סִפְרֵנוּ", "בֵּיתֵנוּ"), HebrewPatternCategory.SUFFIX, PatternPosition.END),
-    POSS_3MP("ָם", "ָם", "ם", "am", "poss-3mp-their", listOf("סִפְרָם", "בֵּיתָם"), HebrewPatternCategory.SUFFIX, PatternPosition.END),
+    POSS_1S("ִי", "ִי", "י", "i", "poss-1s-my", listOf("סִפְרִי", "בֵּיתִי"), PatternCategory.SUFFIX, PatternPosition.END),
+    POSS_2MS("ְךָ", "ְךָ", "ך", "xa", "poss-2ms-your", listOf("סִפְרְךָ", "בֵּיתְךָ"), PatternCategory.SUFFIX, PatternPosition.END),
+    POSS_3MS("וֹ", "ֹו", "ו", "o", "poss-3ms-his", listOf("סִפְרוֹ", "בֵּיתוֹ"), PatternCategory.SUFFIX, PatternPosition.END),
+    POSS_3FS("ָהּ", "ָהּ", "ה", "a", "poss-3fs-her", listOf("סִפְרָהּ", "בֵּיתָהּ"), PatternCategory.SUFFIX, PatternPosition.END),
+    POSS_1P("ֵנוּ", "ֵנוּ", "נו", "enu", "poss-1p-our", listOf("סִפְרֵנוּ", "בֵּיתֵנוּ"), PatternCategory.SUFFIX, PatternPosition.END),
+    POSS_3MP("ָם", "ָם", "ם", "am", "poss-3mp-their", listOf("סִפְרָם", "בֵּיתָם"), PatternCategory.SUFFIX, PatternPosition.END),
 
     // ═══════════════════════════════════════════════════════════════════════════
     // PREFIX PATTERNS
     // ═══════════════════════════════════════════════════════════════════════════
 
-    PREFIX_BE("בְּ", "בְּ", "ב", "be", "prefix-in", listOf("בְּבַיִת", "בְּתוֹךְ"), HebrewPatternCategory.PREFIX, PatternPosition.START),
-    PREFIX_LE("לְ", "לְ", "ל", "le", "prefix-to", listOf("לְמַעַן", "לְבַד"), HebrewPatternCategory.PREFIX, PatternPosition.START),
-    PREFIX_MI("מִ", "מִ", "מ", "mi", "prefix-from", listOf("מִבַּיִת", "מִתּוֹךְ"), HebrewPatternCategory.PREFIX, PatternPosition.START),
-    PREFIX_KE("כְּ", "כְּ", "כ", "ke", "prefix-like", listOf("כְּמוֹ", "כְּאִלּוּ"), HebrewPatternCategory.PREFIX, PatternPosition.START),
-    PREFIX_HA("הַ", "הַ", "ה", "ha", "prefix-the", listOf("הַבַּיִת", "הַיּוֹם"), HebrewPatternCategory.PREFIX, PatternPosition.START),
-    PREFIX_VE("וְ", "וְ", "ו", "ve", "prefix-and", listOf("וְגַם", "וְלֹא"), HebrewPatternCategory.PREFIX, PatternPosition.START),
-    PREFIX_SHE("שֶׁ", "שֶׁ", "ש", "ʃe", "prefix-that", listOf("שֶׁלִּי", "שֶׁאֲנִי"), HebrewPatternCategory.PREFIX, PatternPosition.START),
+    PREFIX_BE("בְּ", "בְּ", "ב", "be", "prefix-in", listOf("בְּבַיִת", "בְּתוֹךְ"), PatternCategory.PREFIX, PatternPosition.START),
+    PREFIX_LE("לְ", "לְ", "ל", "le", "prefix-to", listOf("לְמַעַן", "לְבַד"), PatternCategory.PREFIX, PatternPosition.START),
+    PREFIX_MI("מִ", "מִ", "מ", "mi", "prefix-from", listOf("מִבַּיִת", "מִתּוֹךְ"), PatternCategory.PREFIX, PatternPosition.START),
+    PREFIX_KE("כְּ", "כְּ", "כ", "ke", "prefix-like", listOf("כְּמוֹ", "כְּאִלּוּ"), PatternCategory.PREFIX, PatternPosition.START),
+    PREFIX_HA("הַ", "הַ", "ה", "ha", "prefix-the", listOf("הַבַּיִת", "הַיּוֹם"), PatternCategory.PREFIX, PatternPosition.START),
+    PREFIX_VE("וְ", "וְ", "ו", "ve", "prefix-and", listOf("וְגַם", "וְלֹא"), PatternCategory.PREFIX, PatternPosition.START),
+    PREFIX_SHE("שֶׁ", "שֶׁ", "ש", "ʃe", "prefix-that", listOf("שֶׁלִּי", "שֶׁאֲנִי"), PatternCategory.PREFIX, PatternPosition.START),
 
     // ═══════════════════════════════════════════════════════════════════════════
     // COMMON WORD PATTERNS
@@ -230,7 +219,7 @@ enum class HebrewPattern(
         fun fromUnpointed(form: String): HebrewPattern? = byUnpointed[form]
 
         /** Get patterns by category */
-        fun byCategory(cat: HebrewPatternCategory): List<HebrewPattern> = byCategory[cat] ?: emptyList()
+        fun byCategory(cat: PatternCategory): List<HebrewPattern> = byCategory[cat] ?: emptyList()
 
         /** Get the specified form of a pattern */
         fun getForm(pattern: HebrewPattern, form: NikudForm): String = when (form) {
@@ -242,7 +231,7 @@ enum class HebrewPattern(
         /** Find best matching suffix pattern */
         fun matchSuffix(word: String): HebrewPattern? {
             return entries
-                .filter { it.category == HebrewPatternCategory.SUFFIX }
+                .filter { it.category == PatternCategory.SUFFIX }
                 .sortedByDescending { it.male.length }
                 .firstOrNull { word.endsWith(it.male) || word.endsWith(it.haser) || word.endsWith(it.unpointed) }
         }
@@ -250,7 +239,7 @@ enum class HebrewPattern(
         /** Find best matching prefix pattern */
         fun matchPrefix(word: String): HebrewPattern? {
             return entries
-                .filter { it.category == HebrewPatternCategory.PREFIX }
+                .filter { it.category == PatternCategory.PREFIX }
                 .sortedByDescending { it.male.length }
                 .firstOrNull { word.startsWith(it.male) || word.startsWith(it.haser) || word.startsWith(it.unpointed) }
         }
