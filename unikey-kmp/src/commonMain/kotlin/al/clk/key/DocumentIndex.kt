@@ -1365,6 +1365,534 @@ object RfcPattern {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
+// TABLE DATA - Parse tables to TSV/JSON with cell indexing and formulas
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/**
+ * Cell reference like Excel (A1, B2, AA100).
+ * Column is letter-based (A=0, B=1, Z=25, AA=26).
+ * Row is 1-based.
+ */
+data class CellRef(
+    val col: Int,   // 0-based column index
+    val row: Int    // 0-based row index
+) {
+    /** Column letter (A, B, ..., Z, AA, AB, ...) */
+    val colLetter: String get() {
+        var n = col
+        val sb = StringBuilder()
+        do {
+            sb.insert(0, ('A' + (n % 26)))
+            n = n / 26 - 1
+        } while (n >= 0)
+        return sb.toString()
+    }
+
+    /** Formatted reference: A1, B2, AA100 */
+    val formatted: String get() = "$colLetter${row + 1}"
+
+    /** Range reference for a cell range */
+    fun rangeTo(other: CellRef): String = "$formatted:${other.formatted}"
+
+    companion object {
+        /** Parse cell reference string like "A1", "B2", "AA100" */
+        fun parse(ref: String): CellRef? {
+            val match = Regex("^([A-Z]+)(\\d+)$").matchEntire(ref.uppercase()) ?: return null
+            val colStr = match.groupValues[1]
+            val rowStr = match.groupValues[2]
+
+            var col = 0
+            for (c in colStr) {
+                col = col * 26 + (c - 'A' + 1)
+            }
+            col -= 1  // 0-based
+
+            val row = rowStr.toIntOrNull()?.minus(1) ?: return null
+            return CellRef(col, row)
+        }
+
+        /** Create from 0-based indices */
+        fun of(col: Int, row: Int) = CellRef(col, row)
+    }
+}
+
+/**
+ * Cell value types for table data.
+ */
+sealed class CellValue {
+    abstract val raw: String
+
+    /** Empty cell */
+    data object Empty : CellValue() {
+        override val raw: String = ""
+    }
+
+    /** Text value */
+    data class Text(override val raw: String) : CellValue()
+
+    /** Numeric value */
+    data class Number(val value: Double) : CellValue() {
+        override val raw: String = if (value == value.toLong().toDouble()) {
+            value.toLong().toString()
+        } else {
+            value.toString()
+        }
+    }
+
+    /** Formula (starts with =) */
+    data class Formula(val expression: String, var cachedResult: CellValue? = null) : CellValue() {
+        override val raw: String = "=$expression"
+    }
+
+    companion object {
+        /** Parse cell content into appropriate type */
+        fun parse(content: String): CellValue {
+            val trimmed = content.trim()
+            return when {
+                trimmed.isEmpty() -> Empty
+                trimmed.startsWith("=") -> Formula(trimmed.drop(1))
+                else -> {
+                    val num = trimmed.toDoubleOrNull()
+                    if (num != null) Number(num) else Text(trimmed)
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Table row with indexed cells.
+ */
+data class TableRow(
+    val rowIndex: Int,
+    val cells: List<CellValue>,
+    val isHeader: Boolean = false
+) {
+    /** Get cell by column index */
+    operator fun get(col: Int): CellValue = cells.getOrElse(col) { CellValue.Empty }
+
+    /** Get cell reference for column */
+    fun cellRef(col: Int) = CellRef(col, rowIndex)
+
+    /** Number of cells */
+    val size: Int get() = cells.size
+
+    /** Convert to TSV line */
+    fun toTsv(): String = cells.joinToString("\t") { it.raw }
+
+    /** Convert to JSON array */
+    fun toJsonArray(): String = "[${cells.joinToString(",") { "\"${escapeJson(it.raw)}\"" }}]"
+
+    private fun escapeJson(s: String): String = s
+        .replace("\\", "\\\\")
+        .replace("\"", "\\\"")
+        .replace("\n", "\\n")
+        .replace("\r", "\\r")
+        .replace("\t", "\\t")
+}
+
+/**
+ * Table data with headers, rows, and cell indexing.
+ * Supports TSV/JSON export and formula evaluation.
+ */
+data class TableData(
+    val headers: List<String>,
+    val rows: List<TableRow>,
+    val name: String = ""  // Sheet name from first header or caption
+) {
+    /** Number of columns */
+    val colCount: Int get() = headers.size.coerceAtLeast(rows.maxOfOrNull { it.size } ?: 0)
+
+    /** Number of data rows (excluding header) */
+    val rowCount: Int get() = rows.size
+
+    /** Get cell by reference */
+    operator fun get(ref: CellRef): CellValue {
+        if (ref.row < 0 || ref.row >= rows.size) return CellValue.Empty
+        return rows[ref.row][ref.col]
+    }
+
+    /** Get cell by string reference */
+    operator fun get(ref: String): CellValue {
+        val cellRef = CellRef.parse(ref) ?: return CellValue.Empty
+        return get(cellRef)
+    }
+
+    /** Get header by column index */
+    fun header(col: Int): String = headers.getOrElse(col) { CellRef.of(col, 0).colLetter }
+
+    /** Get column index by header name */
+    fun colIndex(headerName: String): Int = headers.indexOf(headerName)
+
+    /** Convert to TSV string */
+    fun toTsv(): String = buildString {
+        if (headers.isNotEmpty()) {
+            appendLine(headers.joinToString("\t"))
+        }
+        rows.forEach { appendLine(it.toTsv()) }
+    }
+
+    /** Convert to JSON array of arrays */
+    fun toJsonArray(): String = buildString {
+        append("[")
+        if (headers.isNotEmpty()) {
+            append("[${headers.joinToString(",") { "\"${escapeJson(it)}\"" }}]")
+            if (rows.isNotEmpty()) append(",")
+        }
+        append(rows.joinToString(",") { it.toJsonArray() })
+        append("]")
+    }
+
+    /** Convert to JSON array of objects (using headers as keys) */
+    fun toJsonObjects(): String = buildString {
+        append("[")
+        append(rows.joinToString(",") { row ->
+            val pairs = headers.mapIndexed { i, h ->
+                "\"${escapeJson(h)}\":\"${escapeJson(row[i].raw)}\""
+            }
+            "{${pairs.joinToString(",")}}"
+        })
+        append("]")
+    }
+
+    private fun escapeJson(s: String): String = s
+        .replace("\\", "\\\\")
+        .replace("\"", "\\\"")
+        .replace("\n", "\\n")
+        .replace("\r", "\\r")
+        .replace("\t", "\\t")
+
+    companion object {
+        /** HTML table pattern */
+        private val TABLE_PATTERN by lazy { Regex("""<table[^>]*>([\s\S]*?)</table>""", RegexOption.IGNORE_CASE) }
+        private val TR_PATTERN by lazy { Regex("""<tr[^>]*>([\s\S]*?)</tr>""", RegexOption.IGNORE_CASE) }
+        private val TH_PATTERN by lazy { Regex("""<th[^>]*>([\s\S]*?)</th>""", RegexOption.IGNORE_CASE) }
+        private val TD_PATTERN by lazy { Regex("""<td[^>]*>([\s\S]*?)</td>""", RegexOption.IGNORE_CASE) }
+        private val CAPTION_PATTERN by lazy { Regex("""<caption[^>]*>([\s\S]*?)</caption>""", RegexOption.IGNORE_CASE) }
+
+        /** Markdown table row pattern */
+        private val MD_ROW_PATTERN by lazy { Regex("""^\|(.+)\|$""") }
+        private val MD_SEPARATOR by lazy { Regex("""^\|[\s:-]+\|$""") }
+
+        /** Parse HTML table */
+        fun parseHtml(html: String): TableData? {
+            val tableMatch = TABLE_PATTERN.find(html) ?: return null
+            val tableContent = tableMatch.groupValues[1]
+
+            // Extract caption for sheet name
+            val caption = CAPTION_PATTERN.find(tableContent)?.groupValues?.get(1)?.trim() ?: ""
+
+            val trMatches = TR_PATTERN.findAll(tableContent).toList()
+            if (trMatches.isEmpty()) return null
+
+            val headers = mutableListOf<String>()
+            val rows = mutableListOf<TableRow>()
+
+            trMatches.forEachIndexed { rowIdx, tr ->
+                val rowContent = tr.groupValues[1]
+                val thCells = TH_PATTERN.findAll(rowContent).map { stripHtml(it.groupValues[1]) }.toList()
+                val tdCells = TD_PATTERN.findAll(rowContent).map { stripHtml(it.groupValues[1]) }.toList()
+
+                if (thCells.isNotEmpty() && headers.isEmpty()) {
+                    // This is the header row
+                    headers.addAll(thCells)
+                    rows.add(TableRow(0, thCells.map { CellValue.parse(it) }, isHeader = true))
+                } else {
+                    val cells = if (tdCells.isNotEmpty()) tdCells else thCells
+                    rows.add(TableRow(rows.size, cells.map { CellValue.parse(it) }))
+                }
+            }
+
+            val name = caption.ifEmpty { headers.firstOrNull() ?: "Sheet1" }
+            return TableData(headers, rows.drop(1), name)  // Drop header row from data rows
+        }
+
+        /** Parse Markdown table */
+        fun parseMarkdown(md: String): TableData? {
+            val lines = LineSeparator.splitLines(md).filter { it.isNotBlank() }
+            if (lines.size < 2) return null
+
+            val headerLine = lines.firstOrNull { MD_ROW_PATTERN.matches(it.trim()) } ?: return null
+            val headerIdx = lines.indexOf(headerLine)
+
+            // Parse headers
+            val headers = headerLine.trim().trim('|').split("|").map { it.trim() }
+            if (headers.isEmpty()) return null
+
+            // Skip separator line
+            val dataLines = lines.drop(headerIdx + 1).filterNot { MD_SEPARATOR.matches(it.trim()) }
+
+            val rows = dataLines.mapIndexed { idx, line ->
+                val cells = line.trim().trim('|').split("|").map { CellValue.parse(it.trim()) }
+                TableRow(idx, cells)
+            }
+
+            return TableData(headers, rows, headers.firstOrNull() ?: "Sheet1")
+        }
+
+        /** Parse TSV string */
+        fun parseTsv(tsv: String, hasHeader: Boolean = true): TableData {
+            val lines = LineSeparator.splitLines(tsv).filter { it.isNotBlank() }
+            if (lines.isEmpty()) return TableData(emptyList(), emptyList())
+
+            val headers = if (hasHeader) lines.first().split("\t") else emptyList()
+            val dataLines = if (hasHeader) lines.drop(1) else lines
+
+            val rows = dataLines.mapIndexed { idx, line ->
+                val cells = line.split("\t").map { CellValue.parse(it) }
+                TableRow(idx, cells)
+            }
+
+            return TableData(headers, rows, headers.firstOrNull() ?: "Sheet1")
+        }
+
+        private fun stripHtml(html: String): String {
+            return html.replace(Regex("<[^>]+>"), "").trim()
+        }
+    }
+}
+
+/**
+ * Formula evaluator for table cells (like Apache POI).
+ * Supports basic functions: SUM, AVG, COUNT, MIN, MAX, IF.
+ */
+class FormulaEvaluator(private val table: TableData) {
+
+    /** Evaluate all formulas in the table */
+    fun evaluateAll(): TableData {
+        val newRows = table.rows.map { row ->
+            val newCells = row.cells.map { cell ->
+                if (cell is CellValue.Formula) {
+                    val result = evaluate(cell.expression)
+                    cell.cachedResult = result
+                    result
+                } else cell
+            }
+            TableRow(row.rowIndex, newCells, row.isHeader)
+        }
+        return table.copy(rows = newRows)
+    }
+
+    /** Evaluate a single formula expression */
+    fun evaluate(expression: String): CellValue {
+        val expr = expression.trim().uppercase()
+        return try {
+            when {
+                expr.startsWith("SUM(") -> evalSum(expr)
+                expr.startsWith("AVG(") || expr.startsWith("AVERAGE(") -> evalAvg(expr)
+                expr.startsWith("COUNT(") -> evalCount(expr)
+                expr.startsWith("MIN(") -> evalMin(expr)
+                expr.startsWith("MAX(") -> evalMax(expr)
+                expr.startsWith("IF(") -> evalIf(expr)
+                expr.contains("+") || expr.contains("-") || expr.contains("*") || expr.contains("/") -> evalArithmetic(expr)
+                CellRef.parse(expr) != null -> table[expr]
+                else -> CellValue.Text(expression)
+            }
+        } catch (e: Exception) {
+            CellValue.Text("#ERROR: ${e.message}")
+        }
+    }
+
+    private fun evalSum(expr: String): CellValue {
+        val values = extractRangeValues(expr)
+        val sum = values.sumOf { it }
+        return CellValue.Number(sum)
+    }
+
+    private fun evalAvg(expr: String): CellValue {
+        val values = extractRangeValues(expr)
+        if (values.isEmpty()) return CellValue.Number(0.0)
+        return CellValue.Number(values.sum() / values.size)
+    }
+
+    private fun evalCount(expr: String): CellValue {
+        val values = extractRangeValues(expr)
+        return CellValue.Number(values.size.toDouble())
+    }
+
+    private fun evalMin(expr: String): CellValue {
+        val values = extractRangeValues(expr)
+        return CellValue.Number(values.minOrNull() ?: 0.0)
+    }
+
+    private fun evalMax(expr: String): CellValue {
+        val values = extractRangeValues(expr)
+        return CellValue.Number(values.maxOrNull() ?: 0.0)
+    }
+
+    private fun evalIf(expr: String): CellValue {
+        // IF(condition, trueValue, falseValue)
+        val args = extractFunctionArgs(expr)
+        if (args.size < 3) return CellValue.Text("#ERROR: IF needs 3 args")
+
+        val condition = evaluateCondition(args[0])
+        return if (condition) evaluate(args[1]) else evaluate(args[2])
+    }
+
+    private fun evalArithmetic(expr: String): CellValue {
+        // Simple arithmetic: A1+B1, A1*2, etc.
+        var result = 0.0
+        var currentOp = '+'
+        var currentNum = ""
+
+        for (c in expr + '+') {  // Add trailing + to process last number
+            when (c) {
+                '+', '-', '*', '/' -> {
+                    val value = resolveValue(currentNum.trim())
+                    result = when (currentOp) {
+                        '+' -> result + value
+                        '-' -> result - value
+                        '*' -> result * value
+                        '/' -> if (value != 0.0) result / value else Double.NaN
+                        else -> result
+                    }
+                    currentOp = c
+                    currentNum = ""
+                }
+                else -> currentNum += c
+            }
+        }
+        return CellValue.Number(result)
+    }
+
+    private fun extractRangeValues(expr: String): List<Double> {
+        val inner = expr.substringAfter("(").substringBefore(")")
+        val values = mutableListOf<Double>()
+
+        for (part in inner.split(",")) {
+            val trimmed = part.trim()
+            if (trimmed.contains(":")) {
+                // Range like A1:A10
+                values.addAll(expandRange(trimmed))
+            } else {
+                // Single cell or value
+                values.add(resolveValue(trimmed))
+            }
+        }
+        return values
+    }
+
+    private fun expandRange(range: String): List<Double> {
+        val parts = range.split(":")
+        if (parts.size != 2) return emptyList()
+
+        val start = CellRef.parse(parts[0].trim()) ?: return emptyList()
+        val end = CellRef.parse(parts[1].trim()) ?: return emptyList()
+
+        val values = mutableListOf<Double>()
+        for (row in start.row..end.row) {
+            for (col in start.col..end.col) {
+                val cell = table[CellRef(col, row)]
+                if (cell is CellValue.Number) values.add(cell.value)
+            }
+        }
+        return values
+    }
+
+    private fun resolveValue(ref: String): Double {
+        val cellRef = CellRef.parse(ref)
+        if (cellRef != null) {
+            return when (val cell = table[cellRef]) {
+                is CellValue.Number -> cell.value
+                is CellValue.Text -> cell.raw.toDoubleOrNull() ?: 0.0
+                else -> 0.0
+            }
+        }
+        return ref.toDoubleOrNull() ?: 0.0
+    }
+
+    private fun extractFunctionArgs(expr: String): List<String> {
+        val inner = expr.substringAfter("(").substringBeforeLast(")")
+        // Simple split by comma (doesn't handle nested functions)
+        return inner.split(",").map { it.trim() }
+    }
+
+    private fun evaluateCondition(condition: String): Boolean {
+        // Simple conditions: A1>10, B2=5, C3<>0
+        val operators = listOf(">=", "<=", "<>", "!=", "=", ">", "<")
+        for (op in operators) {
+            if (condition.contains(op)) {
+                val parts = condition.split(op, limit = 2)
+                if (parts.size == 2) {
+                    val left = resolveValue(parts[0].trim())
+                    val right = resolveValue(parts[1].trim())
+                    return when (op) {
+                        ">=" -> left >= right
+                        "<=" -> left <= right
+                        "<>", "!=" -> left != right
+                        "=" -> left == right
+                        ">" -> left > right
+                        "<" -> left < right
+                        else -> false
+                    }
+                }
+            }
+        }
+        return resolveValue(condition) != 0.0
+    }
+}
+
+/**
+ * Sheet in a workbook.
+ */
+data class Sheet(
+    val name: String,
+    val table: TableData
+) {
+    /** Get cell by reference */
+    operator fun get(ref: String): CellValue = table[ref]
+
+    /** Evaluate formulas */
+    fun evaluate(): Sheet = copy(table = FormulaEvaluator(table).evaluateAll())
+}
+
+/**
+ * Workbook containing multiple sheets (like Apache POI Workbook).
+ */
+data class Workbook(
+    val sheets: List<Sheet> = emptyList()
+) {
+    /** Get sheet by index */
+    operator fun get(index: Int): Sheet? = sheets.getOrNull(index)
+
+    /** Get sheet by name */
+    operator fun get(name: String): Sheet? = sheets.find { it.name.equals(name, ignoreCase = true) }
+
+    /** Number of sheets */
+    val sheetCount: Int get() = sheets.size
+
+    /** Sheet names */
+    val sheetNames: List<String> get() = sheets.map { it.name }
+
+    /** Add a sheet */
+    fun addSheet(sheet: Sheet): Workbook = copy(sheets = sheets + sheet)
+
+    /** Add table as new sheet */
+    fun addTable(table: TableData): Workbook = addSheet(Sheet(table.name, table))
+
+    /** Evaluate all formulas in all sheets */
+    fun evaluateAll(): Workbook = copy(sheets = sheets.map { it.evaluate() })
+
+    companion object {
+        /** Create workbook from HTML containing multiple tables */
+        fun fromHtml(html: String): Workbook {
+            val tablePattern = Regex("""<table[^>]*>[\s\S]*?</table>""", RegexOption.IGNORE_CASE)
+            val tables = tablePattern.findAll(html).mapNotNull { TableData.parseHtml(it.value) }
+            return Workbook(tables.mapIndexed { idx, table ->
+                Sheet(table.name.ifEmpty { "Sheet${idx + 1}" }, table)
+            }.toList())
+        }
+
+        /** Create workbook from multiple TSV strings */
+        fun fromTsvList(tsvList: List<Pair<String, String>>): Workbook {
+            return Workbook(tsvList.map { (name, tsv) ->
+                Sheet(name, TableData.parseTsv(tsv))
+            })
+        }
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
 // LINE TYPE - Detect element type from line content
 // ═══════════════════════════════════════════════════════════════════════════════
 

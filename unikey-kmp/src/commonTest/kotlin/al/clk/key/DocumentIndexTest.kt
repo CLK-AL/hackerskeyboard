@@ -1033,4 +1033,298 @@ class DocumentIndexTest {
         val paragraphs = elements.filter { it.tag == DocTag.P }
         assertEquals(4, paragraphs.size)
     }
+
+    // ═══ CellRef Tests ═══
+
+    @Test
+    fun testCellRefFormat() {
+        assertEquals("A1", CellRef(0, 0).formatted)
+        assertEquals("B1", CellRef(1, 0).formatted)
+        assertEquals("Z1", CellRef(25, 0).formatted)
+        assertEquals("AA1", CellRef(26, 0).formatted)
+        assertEquals("AB1", CellRef(27, 0).formatted)
+        assertEquals("A10", CellRef(0, 9).formatted)
+    }
+
+    @Test
+    fun testCellRefParse() {
+        val a1 = CellRef.parse("A1")
+        assertNotNull(a1)
+        assertEquals(0, a1.col)
+        assertEquals(0, a1.row)
+
+        val z10 = CellRef.parse("Z10")
+        assertNotNull(z10)
+        assertEquals(25, z10.col)
+        assertEquals(9, z10.row)
+
+        val aa1 = CellRef.parse("AA1")
+        assertNotNull(aa1)
+        assertEquals(26, aa1.col)
+        assertEquals(0, aa1.row)
+
+        assertNull(CellRef.parse("invalid"))
+        assertNull(CellRef.parse("1A"))
+    }
+
+    @Test
+    fun testCellRefRange() {
+        val a1 = CellRef(0, 0)
+        val b5 = CellRef(1, 4)
+        assertEquals("A1:B5", a1.rangeTo(b5))
+    }
+
+    // ═══ CellValue Tests ═══
+
+    @Test
+    fun testCellValueParse() {
+        assertTrue(CellValue.parse("") is CellValue.Empty)
+        assertTrue(CellValue.parse("  ") is CellValue.Empty)
+
+        val text = CellValue.parse("Hello")
+        assertTrue(text is CellValue.Text)
+        assertEquals("Hello", text.raw)
+
+        val num = CellValue.parse("42")
+        assertTrue(num is CellValue.Number)
+        assertEquals("42", num.raw)
+
+        val decimal = CellValue.parse("3.14")
+        assertTrue(decimal is CellValue.Number)
+        assertEquals(3.14, (decimal as CellValue.Number).value)
+
+        val formula = CellValue.parse("=SUM(A1:A10)")
+        assertTrue(formula is CellValue.Formula)
+        assertEquals("SUM(A1:A10)", (formula as CellValue.Formula).expression)
+    }
+
+    // ═══ TableData Tests ═══
+
+    @Test
+    fun testTableDataParseHtml() {
+        val html = """
+            <table>
+                <caption>Sales Data</caption>
+                <tr><th>Product</th><th>Price</th><th>Qty</th></tr>
+                <tr><td>Apple</td><td>1.50</td><td>10</td></tr>
+                <tr><td>Banana</td><td>0.75</td><td>20</td></tr>
+            </table>
+        """.trimIndent()
+
+        val table = TableData.parseHtml(html)
+        assertNotNull(table)
+        assertEquals("Sales Data", table.name)
+        assertEquals(3, table.headers.size)
+        assertEquals("Product", table.headers[0])
+        assertEquals(2, table.rowCount)
+        assertEquals("Apple", table[CellRef(0, 0)].raw)
+        assertEquals("1.50", table["B1"].raw)
+    }
+
+    @Test
+    fun testTableDataParseMd() {
+        val md = """
+            | Name | Age | City |
+            |------|-----|------|
+            | John | 30  | NYC  |
+            | Jane | 25  | LA   |
+        """.trimIndent()
+
+        val table = TableData.parseMarkdown(md)
+        assertNotNull(table)
+        assertEquals(3, table.colCount)
+        assertEquals(2, table.rowCount)
+        assertEquals("John", table["A1"].raw)
+        assertEquals("25", table["B2"].raw)
+    }
+
+    @Test
+    fun testTableDataParseTsv() {
+        val tsv = "Name\tAge\tCity\nJohn\t30\tNYC\nJane\t25\tLA"
+        val table = TableData.parseTsv(tsv)
+
+        assertEquals(3, table.colCount)
+        assertEquals(2, table.rowCount)
+        assertEquals("Name", table.headers[0])
+        assertEquals("John", table["A1"].raw)
+    }
+
+    @Test
+    fun testTableDataToTsv() {
+        val table = TableData(
+            headers = listOf("A", "B"),
+            rows = listOf(
+                TableRow(0, listOf(CellValue.Number(1.0), CellValue.Number(2.0))),
+                TableRow(1, listOf(CellValue.Number(3.0), CellValue.Number(4.0)))
+            )
+        )
+
+        val tsv = table.toTsv()
+        assertTrue(tsv.contains("A\tB"))
+        assertTrue(tsv.contains("1\t2"))
+        assertTrue(tsv.contains("3\t4"))
+    }
+
+    @Test
+    fun testTableDataToJson() {
+        val table = TableData(
+            headers = listOf("name", "value"),
+            rows = listOf(
+                TableRow(0, listOf(CellValue.Text("foo"), CellValue.Number(42.0)))
+            )
+        )
+
+        val jsonArray = table.toJsonArray()
+        assertTrue(jsonArray.contains("[\"name\",\"value\"]"))
+        assertTrue(jsonArray.contains("[\"foo\",\"42\"]"))
+
+        val jsonObjects = table.toJsonObjects()
+        assertTrue(jsonObjects.contains("\"name\":\"foo\""))
+        assertTrue(jsonObjects.contains("\"value\":\"42\""))
+    }
+
+    // ═══ FormulaEvaluator Tests ═══
+
+    @Test
+    fun testFormulaEvaluatorSum() {
+        val table = TableData(
+            headers = listOf("A", "B"),
+            rows = listOf(
+                TableRow(0, listOf(CellValue.Number(10.0), CellValue.Number(20.0))),
+                TableRow(1, listOf(CellValue.Number(30.0), CellValue.Number(40.0))),
+                TableRow(2, listOf(CellValue.Formula("SUM(A1:A2)"), CellValue.Empty))
+            )
+        )
+
+        val evaluator = FormulaEvaluator(table)
+        val result = evaluator.evaluate("SUM(A1:A2)")
+        assertTrue(result is CellValue.Number)
+        assertEquals(40.0, (result as CellValue.Number).value)
+    }
+
+    @Test
+    fun testFormulaEvaluatorAvg() {
+        val table = TableData(
+            headers = listOf("A"),
+            rows = listOf(
+                TableRow(0, listOf(CellValue.Number(10.0))),
+                TableRow(1, listOf(CellValue.Number(20.0))),
+                TableRow(2, listOf(CellValue.Number(30.0)))
+            )
+        )
+
+        val evaluator = FormulaEvaluator(table)
+        val result = evaluator.evaluate("AVG(A1:A3)")
+        assertTrue(result is CellValue.Number)
+        assertEquals(20.0, (result as CellValue.Number).value)
+    }
+
+    @Test
+    fun testFormulaEvaluatorArithmetic() {
+        val table = TableData(
+            headers = listOf("A", "B"),
+            rows = listOf(
+                TableRow(0, listOf(CellValue.Number(10.0), CellValue.Number(5.0)))
+            )
+        )
+
+        val evaluator = FormulaEvaluator(table)
+
+        val sum = evaluator.evaluate("A1+B1")
+        assertEquals(15.0, (sum as CellValue.Number).value)
+
+        val diff = evaluator.evaluate("A1-B1")
+        assertEquals(5.0, (diff as CellValue.Number).value)
+
+        val product = evaluator.evaluate("A1*B1")
+        assertEquals(50.0, (product as CellValue.Number).value)
+
+        val quotient = evaluator.evaluate("A1/B1")
+        assertEquals(2.0, (quotient as CellValue.Number).value)
+    }
+
+    @Test
+    fun testFormulaEvaluatorMinMax() {
+        val table = TableData(
+            headers = listOf("A"),
+            rows = listOf(
+                TableRow(0, listOf(CellValue.Number(5.0))),
+                TableRow(1, listOf(CellValue.Number(15.0))),
+                TableRow(2, listOf(CellValue.Number(10.0)))
+            )
+        )
+
+        val evaluator = FormulaEvaluator(table)
+        assertEquals(5.0, (evaluator.evaluate("MIN(A1:A3)") as CellValue.Number).value)
+        assertEquals(15.0, (evaluator.evaluate("MAX(A1:A3)") as CellValue.Number).value)
+    }
+
+    @Test
+    fun testFormulaEvaluatorIf() {
+        val table = TableData(
+            headers = listOf("A"),
+            rows = listOf(
+                TableRow(0, listOf(CellValue.Number(100.0)))
+            )
+        )
+
+        val evaluator = FormulaEvaluator(table)
+
+        val trueResult = evaluator.evaluate("IF(A1>50,1,0)")
+        assertEquals(1.0, (trueResult as CellValue.Number).value)
+
+        val falseResult = evaluator.evaluate("IF(A1<50,1,0)")
+        assertEquals(0.0, (falseResult as CellValue.Number).value)
+    }
+
+    // ═══ Workbook Tests ═══
+
+    @Test
+    fun testWorkbookFromHtml() {
+        val html = """
+            <html>
+            <table><caption>Sheet1</caption><tr><th>A</th></tr><tr><td>1</td></tr></table>
+            <table><caption>Sheet2</caption><tr><th>B</th></tr><tr><td>2</td></tr></table>
+            </html>
+        """.trimIndent()
+
+        val workbook = Workbook.fromHtml(html)
+        assertEquals(2, workbook.sheetCount)
+        assertEquals("Sheet1", workbook.sheetNames[0])
+        assertEquals("Sheet2", workbook.sheetNames[1])
+
+        val sheet1 = workbook["Sheet1"]
+        assertNotNull(sheet1)
+        assertEquals("1", sheet1["A1"].raw)
+    }
+
+    @Test
+    fun testWorkbookAddSheet() {
+        var workbook = Workbook()
+        assertEquals(0, workbook.sheetCount)
+
+        val table = TableData(listOf("Col1"), listOf(TableRow(0, listOf(CellValue.Text("data")))), "MySheet")
+        workbook = workbook.addTable(table)
+
+        assertEquals(1, workbook.sheetCount)
+        assertEquals("MySheet", workbook[0]?.name)
+    }
+
+    @Test
+    fun testWorkbookEvaluateAll() {
+        val table = TableData(
+            headers = listOf("A", "B", "Sum"),
+            rows = listOf(
+                TableRow(0, listOf(CellValue.Number(10.0), CellValue.Number(20.0), CellValue.Formula("A1+B1")))
+            ),
+            name = "Calc"
+        )
+
+        var workbook = Workbook().addTable(table)
+        workbook = workbook.evaluateAll()
+
+        val result = workbook["Calc"]?.get("C1")
+        assertTrue(result is CellValue.Number)
+        assertEquals(30.0, (result as CellValue.Number).value)
+    }
 }
