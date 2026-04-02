@@ -9,6 +9,7 @@ import kotlinx.serialization.json.*
 
 /**
  * Wire format for protocol messages.
+ * Supports content negotiation via Accept header.
  */
 @Serializable
 enum class WireFormat {
@@ -17,7 +18,33 @@ enum class WireFormat {
     @SerialName("cbor") CBOR,
     @SerialName("xml") XML,
     @SerialName("ydoc") YDOC,           // Yjs/YDoc CRDT text format
-    @SerialName("segments") SEGMENTS     // Line range segments (diff hunks)
+    @SerialName("segments") SEGMENTS;    // HTTP Range partial content (206)
+
+    /** MIME content type for this format */
+    fun toContentType(): String = when (this) {
+        JSON -> "application/json"
+        MESSAGE_PACK -> "application/msgpack"
+        CBOR -> "application/cbor"
+        XML -> "application/xml"
+        YDOC -> "application/x-ydoc"
+        SEGMENTS -> "multipart/byteranges"
+    }
+
+    companion object {
+        /** Parse Accept header to determine wire format */
+        fun fromAccept(accept: String): WireFormat = when {
+            accept.contains("application/json") -> JSON
+            accept.contains("application/msgpack") -> MESSAGE_PACK
+            accept.contains("application/cbor") -> CBOR
+            accept.contains("application/xml") || accept.contains("text/xml") -> XML
+            accept.contains("application/x-ydoc") -> YDOC
+            accept.contains("multipart/byteranges") -> SEGMENTS
+            else -> JSON // default
+        }
+
+        /** Parse Content-Type header to determine wire format */
+        fun fromContentType(contentType: String): WireFormat = fromAccept(contentType)
+    }
 }
 
 /**
@@ -42,7 +69,7 @@ data class Range(
 
     companion object {
         /** Parse Range header: "bytes=0-499" */
-        fun parseRange(header: String): Segment? {
+        fun parseRange(header: String): Range? {
             val match = Regex("""(\w+)=(\d+)-(\d*)""").find(header) ?: return null
             val start = match.groupValues[2].toLongOrNull() ?: return null
             val end = match.groupValues[3].toLongOrNull() ?: Long.MAX_VALUE
@@ -50,7 +77,7 @@ data class Range(
         }
 
         /** Parse Content-Range header: "bytes 0-499/1000" */
-        fun parseContentRange(header: String): Segment? {
+        fun parseContentRange(header: String): Range? {
             val match = Regex("""(\w+) (\d+)-(\d+)/(\d+|\*)""").find(header) ?: return null
             val start = match.groupValues[2].toLongOrNull() ?: return null
             val end = match.groupValues[3].toLongOrNull() ?: return null
@@ -71,7 +98,6 @@ data class Range(
  * Value class for session IDs - zero allocation wrapper.
  */
 @Serializable
-@JvmInline
 value class SessionId(val value: String) {
     override fun toString() = value
     companion object {
@@ -83,7 +109,6 @@ value class SessionId(val value: String) {
  * Value class for client IDs - zero allocation wrapper.
  */
 @Serializable
-@JvmInline
 value class ClientId(val value: String) {
     override fun toString() = value
     companion object {
@@ -95,7 +120,6 @@ value class ClientId(val value: String) {
  * Value class for request IDs - zero allocation wrapper.
  */
 @Serializable
-@JvmInline
 value class RequestId(val value: String) {
     override fun toString() = value
     companion object {
@@ -108,7 +132,6 @@ value class RequestId(val value: String) {
  * Value class for resource URIs - zero allocation wrapper.
  */
 @Serializable
-@JvmInline
 value class ResourceUri(val value: String) {
     override fun toString() = value
     val scheme get() = value.substringBefore("://", "")
@@ -119,7 +142,6 @@ value class ResourceUri(val value: String) {
  * Value class for JSON Pointer paths (RFC 6901).
  */
 @Serializable
-@JvmInline
 value class JsonPointer(val value: String) {
     override fun toString() = value
     val segments get() = value.split("/").drop(1).map { it.replace("~1", "/").replace("~0", "~") }
@@ -173,7 +195,7 @@ object RangeCodec {
     }
 
     /** Generate Content-Range header */
-    fun contentRangeHeader(segment: Segment, unit: String = "bytes") = segment.toContentRange(unit)
+    fun contentRangeHeader(range: Range, unit: String = "bytes") = range.toContentRange(unit)
 }
 
 
@@ -304,7 +326,7 @@ object XmlCodec {
  * MessagePack codec (simplified - full impl needs library).
  */
 object MessagePack {
-    private const val MSGPACK_FIXARRAY = 0x92.toByte()
+    @PublishedApi internal const val MSGPACK_FIXARRAY = 0x92.toByte()
 
     inline fun <reified T> encode(value: T): ByteArray {
         val jsonBytes = ProtoWire.json.encodeToString(value).encodeToByteArray()

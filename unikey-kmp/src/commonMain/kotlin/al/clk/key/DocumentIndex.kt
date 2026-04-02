@@ -5,6 +5,7 @@ import kotlinx.serialization.*
 import kotlinx.serialization.json.*
 import kotlinx.serialization.descriptors.*
 import kotlinx.serialization.encoding.*
+import al.clk.key.proto.*
 
 /**
  * Document Index System - hierarchical indexing for HTML/Markdown documents.
@@ -832,7 +833,7 @@ data class IndexRange(
          * Parse a segment string like "P1.poem.intro@lang=he@dir=rtl=data-verse=1"
          * Returns null if format is invalid.
          */
-        fun parse(segment: String): IndexSegment? {
+        fun parse(segment: String): IndexRange? {
             if (segment.isBlank()) return null
 
             // Split by delimiters while preserving order (. for class, @ for script, = for data)
@@ -901,7 +902,7 @@ data class IndexRange(
  * Format: HTML1/BODY1/DIV1.container/P1.intro=data-index=1
  */
 data class DocumentIndex(
-    val segments: List<IndexSegment>
+    val segments: List<IndexRange>
 ) {
     /** Depth of the index (number of path segments) */
     val depth: Int get() = segments.size
@@ -910,7 +911,7 @@ data class DocumentIndex(
     val formatted: String get() = segments.joinToString("/") { it.formatted }
 
     /** Get the leaf (last) segment */
-    val leaf: IndexSegment? get() = segments.lastOrNull()
+    val leaf: IndexRange? get() = segments.lastOrNull()
 
     /** Get parent index (all segments except last) */
     fun parent(): DocumentIndex? {
@@ -919,7 +920,7 @@ data class DocumentIndex(
     }
 
     /** Append a child segment */
-    fun child(segment: IndexSegment): DocumentIndex {
+    fun child(segment: IndexRange): DocumentIndex {
         return DocumentIndex(segments + segment)
     }
 
@@ -938,7 +939,7 @@ data class DocumentIndex(
             if (path.isBlank()) return null
 
             val segmentStrings = path.split("/")
-            val segments = segmentStrings.mapNotNull { IndexSegment.parse(it) }
+            val segments = segmentStrings.mapNotNull { IndexRange.parse(it) }
 
             if (segments.size != segmentStrings.size) return null
 
@@ -979,7 +980,7 @@ class DocumentParser {
     fun parseHtml(html: String): List<ParsedElement> {
         tagCounts.clear()
         val elements = mutableListOf<ParsedElement>()
-        val stack = mutableListOf<IndexSegment>()
+        val stack = mutableListOf<IndexRange>()
 
         // Regex to match opening tags
         val openTagRegex = Regex("<(\\w+)([^>]*)>", RegexOption.IGNORE_CASE)
@@ -2343,12 +2344,12 @@ object JsonPath {
     }
 
     sealed class PathSegment {
-        data class Property(val name: String) : PathRange()
-        data class Index(val index: Int) : PathRange()
-        data object Wildcard : PathRange()
-        data object Recursive : PathRange()
-        data class Slice(val start: Int, val end: Int?) : PathRange()
-        data class Filter(val expr: String) : PathRange()
+        data class Property(val name: String) : PathSegment()
+        data class Index(val index: Int) : PathSegment()
+        data object Wildcard : PathSegment()
+        data object Recursive : PathSegment()
+        data class Slice(val start: Int, val end: Int?) : PathSegment()
+        data class Filter(val expr: String) : PathSegment()
     }
 }
 
@@ -2476,10 +2477,10 @@ object XPath {
     }
 
     sealed class XPathSegment {
-        data class Element(val name: String, val predicate: String?) : XPathRange()
-        data object Wildcard : XPathRange()
-        data object Descendant : XPathRange()
-        data class Attribute(val name: String) : XPathRange()
+        data class Element(val name: String, val predicate: String?) : XPathSegment()
+        data object Wildcard : XPathSegment()
+        data object Descendant : XPathSegment()
+        data class Attribute(val name: String) : XPathSegment()
     }
 }
 
@@ -4226,7 +4227,7 @@ class PlainTextParser {
 
     // Container stack for proper nesting
     private data class ContainerState(
-        val segment: IndexSegment,
+        val segment: IndexRange,
         val level: Int  // Heading level or nesting depth
     )
 
@@ -4248,28 +4249,28 @@ class PlainTextParser {
 
         // Current section DIV (for heading hierarchy)
         var currentSectionLevel = 0
-        var sectionDivSegment: IndexSegment? = null
+        var sectionDivSegment: IndexRange? = null
 
         // List state
-        var currentListSegment: IndexSegment? = null
+        var currentListSegment: IndexRange? = null
         var currentListType: LineType? = null
 
         // Table state
         var inTable = false
-        var tableSegment: IndexSegment? = null
-        var currentRowSegment: IndexSegment? = null
+        var tableSegment: IndexRange? = null
+        var currentRowSegment: IndexRange? = null
 
         // Split by line separators: <br>, \r\n, \r, \n -> all normalized to LF
         val lines = LineSeparator.splitLines(text)
         var offset = 0
 
         // Definition list state
-        var dlSegment: IndexSegment? = null
+        var dlSegment: IndexRange? = null
         var inDefList = false
 
         // Code fence state
         var inCodeFence = false
-        var codeBlockSegment: IndexSegment? = null
+        var codeBlockSegment: IndexRange? = null
 
         for (line in lines) {
             if (line.isBlank()) {
@@ -4515,7 +4516,7 @@ class PlainTextParser {
     /**
      * Push a new tag and return its segment with incremented count.
      */
-    private fun pushTag(tag: DocTag): IndexSegment {
+    private fun pushTag(tag: DocTag): IndexRange {
         val count = tagCounts.getOrPut(tag) { 0 } + 1
         tagCounts[tag] = count
         return IndexRange(tag, count)
@@ -4524,7 +4525,7 @@ class PlainTextParser {
     /**
      * Push a new tag with script attributes and return its segment.
      */
-    private fun pushTagWithScript(tag: DocTag, scriptAttrs: ScriptAttrs = ScriptAttrs.EMPTY): IndexSegment {
+    private fun pushTagWithScript(tag: DocTag, scriptAttrs: ScriptAttrs = ScriptAttrs.EMPTY): IndexRange {
         val count = tagCounts.getOrPut(tag) { 0 } + 1
         tagCounts[tag] = count
         return IndexRange(tag, count, emptyList(), scriptAttrs)
@@ -4551,7 +4552,7 @@ class PlainTextParser {
  */
 class DocumentIndexBuilder {
     private val tagCounts = mutableMapOf<DocTag, Int>()
-    private val stack = mutableListOf<IndexSegment>()
+    private val stack = mutableListOf<IndexRange>()
 
     /** Push a new tag onto the stack */
     fun push(tag: DocTag, cssClasses: List<String> = emptyList(), scriptAttrs: ScriptAttrs = ScriptAttrs.EMPTY, dataAttrs: Map<String, String> = emptyMap()): DocumentIndex {
@@ -4565,7 +4566,7 @@ class DocumentIndexBuilder {
     }
 
     /** Pop the last tag from the stack */
-    fun pop(): IndexSegment? {
+    fun pop(): IndexRange? {
         return if (stack.isNotEmpty()) stack.removeLast() else null
     }
 
@@ -4586,112 +4587,13 @@ class DocumentIndexBuilder {
 // PROTOCOL ABSTRACTION - Unified wire protocol for MCP/WebDAV/Ykt
 // ═══════════════════════════════════════════════════════════════════════════════
 
-/**
- * Wire format for protocol messages.
- */
-@Serializable
-enum class WireFormat {
-    @SerialName("json") JSON,
-    @SerialName("msgpack") MESSAGE_PACK,
-    @SerialName("cbor") CBOR,
-    @SerialName("xml") XML,
-    @SerialName("ydoc") YDOC,           // Yjs/YDoc CRDT text format
-    @SerialName("segments") SEGMENTS     // Line range segments (diff hunks)
-}
+// WireFormat, Range, RangeCodec imported from al.clk.key.proto
 
 /**
- * HTTP Range segment for partial content (206 Partial Content).
- * Represents byte ranges per RFC 7233.
- */
-@Serializable
-data class Range(
-    val start: Long,
-    val end: Long,
-    val total: Long? = null
-) {
-    val length get() = end - start + 1
-    fun contains(pos: Long) = pos in start..end
-
-    /** Format as Content-Range header value */
-    fun toContentRange(unit: String = "bytes") =
-        "$unit $start-$end${total?.let { "/$it" } ?: "/*"}"
-
-    /** Format as Range header value */
-    fun toRangeHeader(unit: String = "bytes") = "$unit=$start-$end"
-
-    companion object {
-        /** Parse Range header: "bytes=0-499" */
-        fun parseRange(header: String): Segment? {
-            val match = Regex("""(\w+)=(\d+)-(\d*)""").find(header) ?: return null
-            val start = match.groupValues[2].toLongOrNull() ?: return null
-            val end = match.groupValues[3].toLongOrNull() ?: Long.MAX_VALUE
-            return Range(start, end)
-        }
-
-        /** Parse Content-Range header: "bytes 0-499/1000" */
-        fun parseContentRange(header: String): Segment? {
-            val match = Regex("""(\w+) (\d+)-(\d+)/(\d+|\*)""").find(header) ?: return null
-            val start = match.groupValues[2].toLongOrNull() ?: return null
-            val end = match.groupValues[3].toLongOrNull() ?: return null
-            val total = match.groupValues[4].toLongOrNull()
-            return Range(start, end, total)
-        }
-
-        fun bytes(start: Long, end: Long, total: Long? = null) = Range(start, end, total)
-    }
-}
-
-
-/**
- * Segment codec for HTTP partial content.
- */
-object RangeCodec {
-    /** Encode multipart/byteranges response */
-    fun encodeMultipart(data: ByteArray, segments: List<Range>, boundary: String, contentType: String): ByteArray {
-        val result = StringBuilder()
-        segments.forEach { seg ->
-            val slice = data.copyOfRange(seg.start.toInt(), minOf(seg.end.toInt() + 1, data.size))
-            result.append("--$boundary\r\n")
-            result.append("Content-Type: $contentType\r\n")
-            result.append("Content-Range: ${seg.toContentRange()}\r\n")
-            result.append("\r\n")
-            result.append(slice.decodeToString())
-            result.append("\r\n")
-        }
-        result.append("--$boundary--\r\n")
-        return result.toString().encodeToByteArray()
-    }
-
-    /** Parse Range header into segments */
-    fun parseRangeHeader(header: String): List<Range> {
-        // bytes=0-499, 1000-1499, 2000-
-        val match = Regex("""(\w+)=(.+)""").find(header) ?: return emptyList()
-        val ranges = match.groupValues[2].split(",").map { it.trim() }
-        return ranges.mapNotNull { range ->
-            val parts = range.split("-")
-            when {
-                parts.size == 2 && parts[0].isNotEmpty() && parts[1].isNotEmpty() ->
-                    Range(parts[0].toLong(), parts[1].toLong())
-                parts.size == 2 && parts[0].isNotEmpty() ->
-                    Range(parts[0].toLong(), Long.MAX_VALUE) // suffix
-                parts.size == 2 && parts[1].isNotEmpty() ->
-                    Range(-parts[1].toLong(), -1) // last N bytes
-                else -> null
-            }
-        }
-    }
-
-    /** Generate Content-Range header */
-    fun contentRangeHeader(segment: Segment, unit: String = "bytes") = segment.toContentRange(unit)
-}
-
-
-/**
- * XML codec for XML wire format.
+ * XML codec for XML wire format (local extension).
  */
 object XmlCodec {
-    fun <T> encode(value: T, rootTag: String = "root"): String {
-        // Simplified XML encoding via JSON conversion
+    inline fun <reified T> encode(value: T, rootTag: String = "root"): String {
         val jsonStr = ProtoWire.json.encodeToString(value)
         return jsonToXml(jsonStr, rootTag)
     }
@@ -4737,215 +4639,10 @@ object XmlCodec {
         .replace("'", "&apos;")
 }
 
-/**
- * Value class for session IDs - zero allocation wrapper.
- */
-@Serializable
-@JvmInline
-value class SessionId(val value: String) {
-    override fun toString() = value
-    companion object {
-        fun generate() = SessionId("sess_${randomId(12)}")
-    }
-}
-
-/**
- * Value class for client IDs - zero allocation wrapper.
- */
-@Serializable
-@JvmInline
-value class ClientId(val value: String) {
-    override fun toString() = value
-    companion object {
-        fun generate() = ClientId("client_${randomId(8)}")
-    }
-}
-
-/**
- * Value class for request IDs - zero allocation wrapper.
- */
-@Serializable
-@JvmInline
-value class RequestId(val value: String) {
-    override fun toString() = value
-    companion object {
-        private var counter = 0L
-        fun next() = RequestId("req_${++counter}")
-    }
-}
-
-/**
- * Value class for resource URIs - zero allocation wrapper.
- */
-@Serializable
-@JvmInline
-value class ResourceUri(val value: String) {
-    override fun toString() = value
-    val scheme get() = value.substringBefore("://", "")
-    val path get() = value.substringAfter("://", value)
-}
-
-/**
- * Value class for JSON Pointer paths (RFC 6901).
- */
-@Serializable
-@JvmInline
-value class JsonPointer(val value: String) {
-    override fun toString() = value
-    val segments get() = value.split("/").drop(1).map { it.replace("~1", "/").replace("~0", "~") }
-    companion object {
-        fun of(vararg parts: String) = JsonPointer("/" + parts.joinToString("/") {
-            it.replace("~", "~0").replace("/", "~1")
-        })
-    }
-}
-
-/**
- * Unified protocol wire codec.
- */
-object ProtoWire {
-    val json = Json {
-        ignoreUnknownKeys = true
-        encodeDefaults = true
-        classDiscriminator = "type"
-        isLenient = true
-    }
-
-    inline fun <reified T> encode(value: T, format: WireFormat = WireFormat.JSON): ByteArray = when (format) {
-        WireFormat.JSON -> json.encodeToString(value).encodeToByteArray()
-        WireFormat.MESSAGE_PACK -> MessagePack.encode(value)
-        WireFormat.CBOR -> json.encodeToString(value).encodeToByteArray() // Fallback
-        WireFormat.XML -> XmlCodec.encode(value).encodeToByteArray()
-        WireFormat.TEXT, WireFormat.LINE_RANGES -> json.encodeToString(value).encodeToByteArray()
-    }
-
-    inline fun <reified T> decode(data: ByteArray, format: WireFormat = WireFormat.JSON): T = when (format) {
-        WireFormat.JSON -> json.decodeFromString(data.decodeToString())
-        WireFormat.MESSAGE_PACK -> MessagePack.decode(data)
-        WireFormat.CBOR -> json.decodeFromString(data.decodeToString()) // Fallback
-        WireFormat.XML, WireFormat.TEXT, WireFormat.LINE_RANGES -> json.decodeFromString(data.decodeToString())
-    }
-
-    inline fun <reified T> encodeToString(value: T): String = json.encodeToString(value)
-    inline fun <reified T> decodeFromString(data: String): T = json.decodeFromString(data)
-
-    /** Encode with line ranges for text diffs */
-    fun encodeLines(lines: List<String>, ranges: List<LineRange>? = null): ByteArray =
-        TextLineCodec.encode(lines, ranges).encodeToByteArray()
-
-    /** Decode line-based content */
-    fun decodeLines(data: ByteArray): Pair<List<String>, List<LineRange>> =
-        TextLineCodec.decode(data.decodeToString())
-}
-
-
-/**
- * MessagePack codec (simplified - full impl needs library).
- */
-object MessagePack {
-    private const val MSGPACK_FIXARRAY = 0x92.toByte()
-
-    inline fun <reified T> encode(value: T): ByteArray {
-        val jsonBytes = ProtoWire.json.encodeToString(value).encodeToByteArray()
-        return byteArrayOf(MSGPACK_FIXARRAY) + jsonBytes
-    }
-
-    inline fun <reified T> decode(data: ByteArray): T {
-        val jsonBytes = if (data.isNotEmpty() && data[0] == MSGPACK_FIXARRAY)
-            data.copyOfRange(1, data.size) else data
-        return ProtoWire.json.decodeFromString(jsonBytes.decodeToString())
-    }
-}
-
-/**
- * Protocol message interface - common to all protocols.
- */
-interface ProtoMessage {
-    val timestamp: Long get() = 0L
-}
-
-/**
- * Protocol event interface - for event-driven protocols.
- */
-interface ProtoEvent : ProtoMessage {
-    val eventType: String
-}
-
-/**
- * Protocol request/response interface - for RPC protocols.
- */
-interface ProtoRpc : ProtoMessage {
-    val id: RequestId
-}
-
-/**
- * Common result type for protocol operations.
- */
-@Serializable
-sealed class ProtoResult<out T> {
-    @Serializable @SerialName("ok")
-    data class Ok<T>(val value: T) : ProtoResult<T>()
-    @Serializable @SerialName("err")
-    data class Err(val code: Int, val message: String, val data: JsonElement? = null) : ProtoResult<Nothing>()
-
-    val isOk get() = this is Ok
-    val isErr get() = this is Err
-    fun getOrNull(): T? = (this as? Ok)?.value
-    fun getOrThrow(): T = (this as? Ok)?.value ?: error((this as Err).message)
-
-    companion object {
-        fun <T> ok(value: T): ProtoResult<T> = Ok(value)
-        fun err(code: Int, message: String, data: JsonElement? = null): ProtoResult<Nothing> = Err(code, message, data)
-    }
-}
-
-/**
- * Common version tracking for CRDT operations.
- */
-@Serializable
-data class ProtoVersion(
-    val clientId: ClientId,
-    val clock: Long,
-    val timestamp: Long = 0L
-) {
-    val formatted get() = "${clientId.value}:$clock"
-
-    companion object {
-        fun parse(s: String): ProtoVersion? {
-            val parts = s.split(":")
-            return if (parts.size == 2) {
-                ProtoVersion(ClientId(parts[0]), parts[1].toLongOrNull() ?: return null)
-            } else null
-        }
-    }
-}
-
-/**
- * Common vector clock for CRDT sync.
- */
-@Serializable
-data class ProtoVectorClock(
-    val clocks: Map<String, Long> = emptyMap()
-) {
-    operator fun get(clientId: String) = clocks[clientId] ?: 0L
-    operator fun get(clientId: ClientId) = clocks[clientId.value] ?: 0L
-
-    fun tick(clientId: ClientId): ProtoVectorClock {
-        val current = this[clientId]
-        return copy(clocks = clocks + (clientId.value to current + 1))
-    }
-
-    fun merge(other: ProtoVectorClock): ProtoVectorClock {
-        val merged = (clocks.keys + other.clocks.keys).associateWith { key ->
-            maxOf(clocks[key] ?: 0L, other.clocks[key] ?: 0L)
-        }
-        return ProtoVectorClock(merged)
-    }
-
-    fun happensBefore(other: ProtoVectorClock): Boolean =
-        clocks.all { (k, v) -> v <= (other.clocks[k] ?: 0L) } &&
-        clocks.any { (k, v) -> v < (other.clocks[k] ?: 0L) }
-}
+// Proto types imported from al.clk.key.proto:
+// - SessionId, ClientId, RequestId, ResourceUri, JsonPointer (value classes)
+// - ProtoRpc, ProtoResult, ProtoVersion, ProtoVectorClock (protocol types)
+// - WireFormat, Range, RangeCodec, ProtoWire (codecs)
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // MCP - Model Context Protocol (tools/resources for LLM agents)
@@ -5147,9 +4844,9 @@ class McpServer(
 
     /** Handle incoming wire message */
     suspend fun handleWire(data: ByteArray): ByteArray {
-        val msg = McpWire.decode<McpMessage>(data, wireFormat)
+        val msg = ProtoWire.decode<McpMessage>(data, wireFormat)
         val response = handleMessage(msg)
-        return response?.let { McpWire.encode(it, wireFormat) } ?: byteArrayOf()
+        return response?.let { ProtoWire.encode(it, wireFormat) } ?: byteArrayOf()
     }
 
     /** Handle incoming MCP message */
@@ -5168,11 +4865,11 @@ class McpServer(
                     serverInfo = McpServerInfo(name, version),
                     capabilities = capabilities
                 )
-                McpMessage.Response(id = req.id, result = McpWire.json.encodeToJsonElement(result))
+                McpMessage.Response(id = req.id, result = ProtoWire.json.encodeToJsonElement(result))
             }
             "tools/list" -> {
                 val result = McpToolsListResult(listTools())
-                McpMessage.Response(id = req.id, result = McpWire.json.encodeToJsonElement(result))
+                McpMessage.Response(id = req.id, result = ProtoWire.json.encodeToJsonElement(result))
             }
             "tools/call" -> {
                 val toolName = req.params?.get("name")?.jsonPrimitive?.content
@@ -5181,7 +4878,7 @@ class McpServer(
                 when (val result = invokeTool(toolName, args)) {
                     is McpToolResult.Success -> McpMessage.Response(
                         id = req.id,
-                        result = McpWire.json.encodeToJsonElement(result)
+                        result = ProtoWire.json.encodeToJsonElement(result)
                     )
                     is McpToolResult.Error -> McpMessage.Response(
                         id = req.id,
@@ -5191,7 +4888,7 @@ class McpServer(
             }
             "resources/list" -> {
                 val result = McpResourcesListResult(listResources())
-                McpMessage.Response(id = req.id, result = McpWire.json.encodeToJsonElement(result))
+                McpMessage.Response(id = req.id, result = ProtoWire.json.encodeToJsonElement(result))
             }
             "resources/read" -> {
                 val uri = req.params?.get("uri")?.jsonPrimitive?.content
@@ -5201,7 +4898,7 @@ class McpServer(
                 val result = McpResourceReadResult(listOf(
                     McpResourceContent(uri, content, resources[uri]?.mimeType)
                 ))
-                McpMessage.Response(id = req.id, result = McpWire.json.encodeToJsonElement(result))
+                McpMessage.Response(id = req.id, result = ProtoWire.json.encodeToJsonElement(result))
             }
             else -> McpMessage.Response(req.id, error = McpError(-32601, "Method not found: ${req.method}"))
         }
@@ -5217,23 +4914,39 @@ class McpServer(
 // ═══════════════════════════════════════════════════════════════════════════════
 
 /**
- * WebDAV HTTP methods.
+ * WebDAV HTTP methods extending Ktor HttpMethod.
+ * RFC 4918 defines PROPFIND, PROPPATCH, MKCOL, COPY, MOVE, LOCK, UNLOCK.
  */
 @Serializable
-enum class WebDavMethod {
-    @SerialName("OPTIONS") OPTIONS,
-    @SerialName("GET") GET,
-    @SerialName("HEAD") HEAD,
-    @SerialName("PUT") PUT,
-    @SerialName("DELETE") DELETE,
-    @SerialName("MKCOL") MKCOL,
-    @SerialName("COPY") COPY,
-    @SerialName("MOVE") MOVE,
-    @SerialName("PROPFIND") PROPFIND,
-    @SerialName("PROPPATCH") PROPPATCH,
-    @SerialName("LOCK") LOCK,
-    @SerialName("UNLOCK") UNLOCK
+enum class WebDavMethod(val value: String) {
+    @SerialName("OPTIONS") OPTIONS("OPTIONS"),
+    @SerialName("GET") GET("GET"),
+    @SerialName("HEAD") HEAD("HEAD"),
+    @SerialName("PUT") PUT("PUT"),
+    @SerialName("DELETE") DELETE("DELETE"),
+    @SerialName("MKCOL") MKCOL("MKCOL"),
+    @SerialName("COPY") COPY("COPY"),
+    @SerialName("MOVE") MOVE("MOVE"),
+    @SerialName("PROPFIND") PROPFIND("PROPFIND"),
+    @SerialName("PROPPATCH") PROPPATCH("PROPPATCH"),
+    @SerialName("LOCK") LOCK("LOCK"),
+    @SerialName("UNLOCK") UNLOCK("UNLOCK");
+
+    companion object {
+        /** Parse HTTP method string to WebDavMethod */
+        fun parse(method: String): WebDavMethod? =
+            entries.find { it.value.equals(method, ignoreCase = true) }
+
+        /** Standard HTTP methods */
+        val standardMethods = listOf(OPTIONS, GET, HEAD, PUT, DELETE)
+
+        /** WebDAV extension methods (RFC 4918) */
+        val davMethods = listOf(MKCOL, COPY, MOVE, PROPFIND, PROPPATCH, LOCK, UNLOCK)
+    }
 }
+
+// Usage with Ktor: io.ktor.http.HttpMethod(webDavMethod.value)
+// Example: HttpMethod(WebDavMethod.PROPFIND.value) creates Ktor's HttpMethod("PROPFIND")
 
 /**
  * WebDAV property.
@@ -5312,61 +5025,154 @@ data class DavPropstat(
 )
 
 /**
- * WebDAV request builder.
+ * WebDAV request builder with wire format content negotiation.
+ * Supports all WireFormat types via Accept header for PROPFIND/PROPPATCH.
  */
 class DavRequest(
     val method: WebDavMethod,
     val path: String,
     val depth: DavDepth = DavDepth.ONE,
     val headers: Map<String, String> = emptyMap(),
-    val body: String? = null
+    val body: String? = null,
+    val format: WireFormat = WireFormat.XML
 ) {
-    fun toXml(): String? = when (method) {
-        WebDavMethod.PROPFIND -> """
+    /** Content-Type for request body based on wire format */
+    val contentType: String get() = format.toContentType()
+
+    /** Accept header for response content negotiation (all methods) */
+    val accept: String get() = format.toContentType()
+
+    /** Ktor HttpMethod for routing */
+    /** HTTP method value for Ktor routing - use with io.ktor.http.HttpMethod(methodValue) */
+    val methodValue: String get() = method.value
+
+    /** All headers including Ktor content negotiation (Accept for all methods) */
+    val allHeaders: Map<String, String> get() {
+        val base = mutableMapOf<String, String>()
+        // Accept header for all methods (Ktor content negotiation)
+        base["Accept"] = accept
+        // Depth header for WebDAV methods
+        if (method in WebDavMethod.davMethods) {
+            base["Depth"] = when (depth) {
+                DavDepth.ZERO -> "0"
+                DavDepth.ONE -> "1"
+                DavDepth.INFINITY -> "infinity"
+            }
+        }
+        // Content-Type for methods with body
+        if (method in listOf(WebDavMethod.PROPFIND, WebDavMethod.PROPPATCH, WebDavMethod.LOCK, WebDavMethod.PUT)) {
+            base["Content-Type"] = contentType
+        }
+        return base + headers
+    }
+
+    /** Generate request body in specified wire format */
+    fun toBody(): String? = when (method) {
+        WebDavMethod.PROPFIND -> encodePropfindBody()
+        WebDavMethod.PROPPATCH -> body?.let { encodeProppatchBody(it) }
+        WebDavMethod.LOCK -> encodeLockBody()
+        else -> body
+    }
+
+    private fun encodePropfindBody(): String = when (format) {
+        WireFormat.XML -> """
             <?xml version="1.0" encoding="utf-8"?>
             <D:propfind xmlns:D="DAV:">
                 <D:allprop/>
             </D:propfind>
         """.trimIndent()
-        WebDavMethod.LOCK -> """
+        WireFormat.JSON -> """{"propfind":{"allprop":true}}"""
+        WireFormat.MESSAGE_PACK -> """{"propfind":{"allprop":true}}"""
+        WireFormat.CBOR -> """{"propfind":{"allprop":true}}"""
+        WireFormat.YDOC -> """{"propfind":{"allprop":true,"format":"ydoc"}}"""
+        WireFormat.SEGMENTS -> """{"propfind":{"allprop":true,"format":"segments"}}"""
+    }
+
+    private fun encodeProppatchBody(props: String): String = when (format) {
+        WireFormat.XML -> """
+            <?xml version="1.0" encoding="utf-8"?>
+            <D:propertyupdate xmlns:D="DAV:">
+                <D:set>
+                    <D:prop>$props</D:prop>
+                </D:set>
+            </D:propertyupdate>
+        """.trimIndent()
+        else -> props // JSON/other formats pass through
+    }
+
+    private fun encodeLockBody(): String = when (format) {
+        WireFormat.XML -> """
             <?xml version="1.0" encoding="utf-8"?>
             <D:lockinfo xmlns:D="DAV:">
                 <D:lockscope><D:exclusive/></D:lockscope>
                 <D:locktype><D:write/></D:locktype>
             </D:lockinfo>
         """.trimIndent()
-        else -> body
+        WireFormat.JSON -> """{"lockinfo":{"scope":"exclusive","type":"write"}}"""
+        WireFormat.MESSAGE_PACK -> """{"lockinfo":{"scope":"exclusive","type":"write"}}"""
+        WireFormat.CBOR -> """{"lockinfo":{"scope":"exclusive","type":"write"}}"""
+        WireFormat.YDOC -> """{"lockinfo":{"scope":"exclusive","type":"write"}}"""
+        WireFormat.SEGMENTS -> """{"lockinfo":{"scope":"exclusive","type":"write"}}"""
     }
 
+    /** Legacy XML body (deprecated, use toBody()) */
+    @Deprecated("Use toBody() with format parameter", ReplaceWith("toBody()"))
+    fun toXml(): String? = DavRequest(method, path, depth, headers, body, WireFormat.XML).toBody()
+
     companion object {
-        fun propfind(path: String, depth: DavDepth = DavDepth.ONE) =
-            DavRequest(WebDavMethod.PROPFIND, path, depth)
+        /** PROPFIND with content negotiation */
+        fun propfind(path: String, depth: DavDepth = DavDepth.ONE, format: WireFormat = WireFormat.JSON) =
+            DavRequest(WebDavMethod.PROPFIND, path, depth, format = format)
 
-        fun get(path: String) = DavRequest(WebDavMethod.GET, path)
+        /** PROPPATCH with content negotiation */
+        fun proppatch(path: String, properties: String, format: WireFormat = WireFormat.JSON) =
+            DavRequest(WebDavMethod.PROPPATCH, path, body = properties, format = format)
 
-        fun put(path: String, content: String, contentType: String = "application/octet-stream") =
-            DavRequest(WebDavMethod.PUT, path, body = content, headers = mapOf("Content-Type" to contentType))
+        /** GET with Accept header for content negotiation */
+        fun get(path: String, format: WireFormat = WireFormat.JSON) =
+            DavRequest(WebDavMethod.GET, path, format = format)
 
-        fun delete(path: String) = DavRequest(WebDavMethod.DELETE, path)
+        /** HEAD with Accept header */
+        fun head(path: String, format: WireFormat = WireFormat.JSON) =
+            DavRequest(WebDavMethod.HEAD, path, format = format)
 
-        fun mkcol(path: String) = DavRequest(WebDavMethod.MKCOL, path)
+        /** OPTIONS with Accept header */
+        fun options(path: String, format: WireFormat = WireFormat.JSON) =
+            DavRequest(WebDavMethod.OPTIONS, path, format = format)
 
-        fun lock(path: String) = DavRequest(WebDavMethod.LOCK, path)
+        /** PUT with content negotiation */
+        fun put(path: String, content: String, format: WireFormat = WireFormat.JSON) =
+            DavRequest(WebDavMethod.PUT, path, body = content, format = format)
 
-        fun unlock(path: String, token: String) =
-            DavRequest(WebDavMethod.UNLOCK, path, headers = mapOf("Lock-Token" to "<$token>"))
+        /** DELETE with Accept header */
+        fun delete(path: String, format: WireFormat = WireFormat.JSON) =
+            DavRequest(WebDavMethod.DELETE, path, format = format)
 
-        fun copy(source: String, destination: String, overwrite: Boolean = false) =
+        /** MKCOL (create collection) */
+        fun mkcol(path: String, format: WireFormat = WireFormat.JSON) =
+            DavRequest(WebDavMethod.MKCOL, path, format = format)
+
+        /** LOCK with content negotiation */
+        fun lock(path: String, format: WireFormat = WireFormat.JSON) =
+            DavRequest(WebDavMethod.LOCK, path, format = format)
+
+        /** UNLOCK */
+        fun unlock(path: String, token: String, format: WireFormat = WireFormat.JSON) =
+            DavRequest(WebDavMethod.UNLOCK, path, headers = mapOf("Lock-Token" to "<$token>"), format = format)
+
+        /** COPY with Accept header */
+        fun copy(source: String, destination: String, overwrite: Boolean = false, format: WireFormat = WireFormat.JSON) =
             DavRequest(WebDavMethod.COPY, source, headers = mapOf(
                 "Destination" to destination,
                 "Overwrite" to if (overwrite) "T" else "F"
-            ))
+            ), format = format)
 
-        fun move(source: String, destination: String, overwrite: Boolean = false) =
+        /** MOVE with Accept header */
+        fun move(source: String, destination: String, overwrite: Boolean = false, format: WireFormat = WireFormat.JSON) =
             DavRequest(WebDavMethod.MOVE, source, headers = mapOf(
                 "Destination" to destination,
                 "Overwrite" to if (overwrite) "T" else "F"
-            ))
+            ), format = format)
     }
 }
 
@@ -5862,7 +5668,7 @@ class YktWssTransport(
             onMessage = { msg ->
                 if (msg is WsMessage.Text) {
                     try {
-                        val event = YktWire.decodeEvent(msg.content)
+                        val event = ProtoWire.decodeEvent(msg.content)
                         messageQueue.add(event)
                     } catch (_: Exception) { }
                 }
@@ -5876,7 +5682,7 @@ class YktWssTransport(
     }
 
     override suspend fun send(event: YktEvent) {
-        session?.send(WsMessage.Text(YktWire.encodeEvent(event)))
+        session?.send(WsMessage.Text(ProtoWire.encodeEvent(event)))
     }
 
     override suspend fun receive(): YktEvent? {
@@ -5899,7 +5705,7 @@ class YktSseTransport(
             url = "$baseUrl/mushi/$sessionId/audit?from=$fromTimestamp",
             onEvent = { sse ->
                 try {
-                    val event = YktWire.decodeEvent(sse.data)
+                    val event = ProtoWire.decodeEvent(sse.data)
                     eventHandlers.forEach { it(event) }
                 } catch (_: Exception) { }
             }
@@ -5920,30 +5726,52 @@ class YktSseTransport(
 /**
  * WebDAV client using Ktor CIO.
  */
+/**
+ * WebDAV client using Ktor CIO with wire format negotiation.
+ * Supports all WireFormat types via Accept header.
+ */
 class WebDavClient(
     private val client: KtorCioClient,
-    private val baseUrl: String
+    private val baseUrl: String,
+    private val defaultFormat: WireFormat = WireFormat.JSON
 ) {
-    suspend fun propfind(path: String, depth: DavDepth = DavDepth.ONE): DavMultistatus {
-        val req = DavRequest.propfind(path, depth)
+    suspend fun propfind(
+        path: String,
+        depth: DavDepth = DavDepth.ONE,
+        format: WireFormat = defaultFormat
+    ): DavMultistatus {
+        val req = DavRequest.propfind(path, depth, format)
         val resp = client.request(KtorRequest(
             method = "PROPFIND",
             url = "$baseUrl$path",
-            headers = mapOf(
-                "Depth" to when (depth) {
-                    DavDepth.ZERO -> "0"
-                    DavDepth.ONE -> "1"
-                    DavDepth.INFINITY -> "infinity"
-                },
-                "Content-Type" to "application/xml"
-            ),
-            body = req.toXml()
+            headers = req.allHeaders,
+            body = req.toBody()
         ))
-        return parseMultistatus(resp.body)
+        return parseMultistatus(resp.body, format)
     }
 
-    suspend fun get(path: String): String {
-        val resp = client.request(KtorRequest(method = "GET", url = "$baseUrl$path"))
+    suspend fun proppatch(
+        path: String,
+        properties: String,
+        format: WireFormat = defaultFormat
+    ): Boolean {
+        val req = DavRequest.proppatch(path, properties, format)
+        val resp = client.request(KtorRequest(
+            method = "PROPPATCH",
+            url = "$baseUrl$path",
+            headers = req.allHeaders,
+            body = req.toBody()
+        ))
+        return resp.status in 200..299
+    }
+
+    suspend fun get(path: String, format: WireFormat = defaultFormat): String {
+        val req = DavRequest.get(path, format)
+        val resp = client.request(KtorRequest(
+            method = "GET",
+            url = "$baseUrl$path",
+            headers = req.allHeaders
+        ))
         return resp.body
     }
 
@@ -5967,15 +5795,15 @@ class WebDavClient(
         return resp.status == 201
     }
 
-    suspend fun lock(path: String): DavLock? {
-        val req = DavRequest.lock(path)
+    suspend fun lock(path: String, format: WireFormat = defaultFormat): DavLock? {
+        val req = DavRequest.lock(path, format)
         val resp = client.request(KtorRequest(
             method = "LOCK",
             url = "$baseUrl$path",
-            headers = mapOf("Content-Type" to "application/xml"),
-            body = req.toXml()
+            headers = req.allHeaders,
+            body = req.toBody()
         ))
-        return if (resp.status == 200) parseLock(resp.body, resp.headers) else null
+        return if (resp.status == 200) parseLock(resp.body, resp.headers, format) else null
     }
 
     suspend fun unlock(path: String, token: String): Boolean {
@@ -5987,14 +5815,30 @@ class WebDavClient(
         return resp.status == 204
     }
 
-    private fun parseMultistatus(xml: String): DavMultistatus {
-        // Simplified - real impl would parse XML
-        return DavMultistatus(emptyList())
+    private fun parseMultistatus(body: String, format: WireFormat): DavMultistatus = when (format) {
+        WireFormat.JSON, WireFormat.MESSAGE_PACK, WireFormat.CBOR ->
+            try { ProtoWire.decodeFromString<DavMultistatus>(body) } catch (_: Exception) { DavMultistatus(emptyList()) }
+        WireFormat.XML -> parseMultistatusXml(body)
+        WireFormat.YDOC -> DavMultistatus(emptyList()) // YDoc state not applicable
+        WireFormat.SEGMENTS -> DavMultistatus(emptyList()) // Segments not applicable
     }
 
-    private fun parseLock(xml: String, headers: Map<String, List<String>>): DavLock? {
+    private fun parseMultistatusXml(xml: String): DavMultistatus {
+        // Simplified XML parsing - extract href elements
+        val hrefRegex = Regex("""<D:href>([^<]+)</D:href>""")
+        val responses = hrefRegex.findAll(xml).map { match ->
+            DavResponse(href = match.groupValues[1], propstat = emptyList())
+        }.toList()
+        return DavMultistatus(responses)
+    }
+
+    private fun parseLock(body: String, headers: Map<String, List<String>>, format: WireFormat): DavLock? {
         val token = headers["Lock-Token"]?.firstOrNull()?.removeSurrounding("<", ">") ?: return null
-        return DavLock(token = token, owner = "")
+        return when (format) {
+            WireFormat.JSON, WireFormat.MESSAGE_PACK, WireFormat.CBOR ->
+                try { ProtoWire.decodeFromString<DavLock>(body) } catch (_: Exception) { DavLock(token = token, owner = "") }
+            else -> DavLock(token = token, owner = "")
+        }
     }
 }
 
