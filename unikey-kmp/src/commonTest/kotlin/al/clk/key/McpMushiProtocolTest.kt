@@ -216,17 +216,17 @@ class McpMushiProtocolTest {
     @Test
     fun testMushiSessionSerialization() {
         val session = MushiSession(
-            id = "sess_abc123",
-            documentUri = "/docs/test.md",
-            clientId = "client_xyz",
+            id = SessionId("sess_abc123"),
+            documentUri = ResourceUri("/docs/test.md"),
+            clientId = ClientId("client_xyz"),
             createdAt = 1234567890L
         )
 
-        val json = MushiWire.json.encodeToString(MushiSession.serializer(), session)
+        val json = ProtoWire.json.encodeToString(MushiSession.serializer(), session)
         assertTrue(json.contains("sess_abc123"))
 
-        val decoded = MushiWire.json.decodeFromString(MushiSession.serializer(), json)
-        assertEquals("sess_abc123", decoded.id)
+        val decoded = ProtoWire.json.decodeFromString(MushiSession.serializer(), json)
+        assertEquals("sess_abc123", decoded.id.value)
     }
 
     @Test
@@ -235,29 +235,40 @@ class McpMushiProtocolTest {
         val remove: MushiPatchOp = MushiPatchOp.Remove("/deprecated")
         val replace: MushiPatchOp = MushiPatchOp.Replace("/count", JsonPrimitive(42))
 
-        val addJson = MushiWire.json.encodeToString(MushiPatchOp.serializer(), add)
+        val addJson = ProtoWire.json.encodeToString(MushiPatchOp.serializer(), add)
         assertTrue(addJson.contains("add"))
         assertTrue(addJson.contains("/title"))
     }
 
     @Test
-    fun testMushiDocVersionSerialization() {
-        val version = MushiDocVersion(clientId = "client_a", clock = 5)
-        val json = MushiWire.json.encodeToString(MushiDocVersion.serializer(), version)
+    fun testProtoVersionSerialization() {
+        val version = ProtoVersion(clientId = ClientId("client_a"), clock = 5)
+        val json = ProtoWire.json.encodeToString(ProtoVersion.serializer(), version)
 
-        val decoded = MushiWire.json.decodeFromString(MushiDocVersion.serializer(), json)
-        assertEquals("client_a", decoded.clientId)
+        val decoded = ProtoWire.json.decodeFromString(ProtoVersion.serializer(), json)
+        assertEquals("client_a", decoded.clientId.value)
         assertEquals(5L, decoded.clock)
     }
 
     @Test
-    fun testMushiVectorClockSerialization() {
-        val clock = MushiVectorClock(clocks = mapOf("a" to 3L, "b" to 5L, "c" to 1L))
-        val json = MushiWire.json.encodeToString(MushiVectorClock.serializer(), clock)
+    fun testProtoVectorClockSerialization() {
+        val clock = ProtoVectorClock(clocks = mapOf("a" to 3L, "b" to 5L, "c" to 1L))
+        val json = ProtoWire.json.encodeToString(ProtoVectorClock.serializer(), clock)
 
-        val decoded = MushiWire.json.decodeFromString(MushiVectorClock.serializer(), json)
+        val decoded = ProtoWire.json.decodeFromString(ProtoVectorClock.serializer(), json)
         assertEquals(3L, decoded.clocks["a"])
         assertEquals(5L, decoded.clocks["b"])
+    }
+
+    @Test
+    fun testProtoVectorClockMerge() {
+        val clock1 = ProtoVectorClock(mapOf("a" to 3L, "b" to 1L))
+        val clock2 = ProtoVectorClock(mapOf("a" to 1L, "b" to 5L, "c" to 2L))
+        val merged = clock1.merge(clock2)
+
+        assertEquals(3L, merged["a"])
+        assertEquals(5L, merged["b"])
+        assertEquals(2L, merged["c"])
     }
 
     @Test
@@ -269,14 +280,14 @@ class McpMushiProtocolTest {
             ops = listOf(
                 MushiPatchOp.Replace("/content", JsonPrimitive("updated"))
             ),
-            version = MushiDocVersion("client_a", 1)
+            version = ProtoVersion(ClientId("client_a"), 1)
         )
 
-        val json = MushiWire.encodeEvent(patch)
+        val json = ProtoWire.encodeEvent(patch)
         assertTrue(json.contains("patch"))
         assertTrue(json.contains("sess_1"))
 
-        val decoded = MushiWire.decodeEvent(json)
+        val decoded = ProtoWire.decodeEvent(json)
         assertTrue(decoded is MushiEvent.Patch)
     }
 
@@ -291,7 +302,7 @@ class McpMushiProtocolTest {
             user = mapOf("name" to "Alice", "color" to "#ff0000")
         )
 
-        val json = MushiWire.encodeEvent(awareness)
+        val json = ProtoWire.encodeEvent(awareness)
         assertTrue(json.contains("awareness"))
         assertTrue(json.contains("Alice"))
     }
@@ -311,8 +322,8 @@ class McpMushiProtocolTest {
             timestamp = 1234567891L
         )
 
-        val joinJson = MushiWire.encodeEvent(join)
-        val leaveJson = MushiWire.encodeEvent(leave)
+        val joinJson = ProtoWire.encodeEvent(join)
+        val leaveJson = ProtoWire.encodeEvent(leave)
 
         assertTrue(joinJson.contains("join"))
         assertTrue(leaveJson.contains("leave"))
@@ -328,12 +339,65 @@ class McpMushiProtocolTest {
                 put("title", "Test Doc")
                 put("content", "Hello world")
             },
-            version = MushiVectorClock(mapOf("a" to 1L, "b" to 2L))
+            version = ProtoVectorClock(mapOf("a" to 1L, "b" to 2L))
         )
 
-        val json = MushiWire.encodeEvent(sync)
+        val json = ProtoWire.encodeEvent(sync)
         assertTrue(json.contains("sync"))
         assertTrue(json.contains("Test Doc"))
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // VALUE CLASS TESTS
+    // ═══════════════════════════════════════════════════════════════════════════
+
+    @Test
+    fun testSessionIdValueClass() {
+        val id = SessionId("sess_test123")
+        assertEquals("sess_test123", id.value)
+        assertEquals("sess_test123", id.toString())
+
+        val generated = SessionId.generate()
+        assertTrue(generated.value.startsWith("sess_"))
+    }
+
+    @Test
+    fun testClientIdValueClass() {
+        val id = ClientId("client_abc")
+        assertEquals("client_abc", id.value)
+
+        val generated = ClientId.generate()
+        assertTrue(generated.value.startsWith("client_"))
+    }
+
+    @Test
+    fun testResourceUriValueClass() {
+        val uri = ResourceUri("file://docs/test.md")
+        assertEquals("file", uri.scheme)
+        assertEquals("docs/test.md", uri.path)
+    }
+
+    @Test
+    fun testJsonPointerValueClass() {
+        val ptr = JsonPointer("/users/0/name")
+        assertEquals(listOf("users", "0", "name"), ptr.segments)
+
+        val built = JsonPointer.of("data", "items", "value")
+        assertEquals("/data/items/value", built.value)
+    }
+
+    @Test
+    fun testLineRangeParse() {
+        val single = LineRange.parse("5")
+        assertNotNull(single)
+        assertEquals(5, single.start)
+        assertEquals(5, single.end)
+
+        val range = LineRange.parse("10-20")
+        assertNotNull(range)
+        assertEquals(10, range.start)
+        assertEquals(20, range.end)
+        assertEquals(11, range.length)
     }
 
     @Test
@@ -343,7 +407,7 @@ class McpMushiProtocolTest {
             clientId = "client_a",
             timestamp = 1234567890L,
             ops = listOf(MushiPatchOp.Add("/new", JsonPrimitive("value"))),
-            version = MushiDocVersion("client_a", 1)
+            version = ProtoVersion(ClientId("client_a"), 1)
         )
 
         val sse = patch.toSse()
@@ -360,7 +424,7 @@ class McpMushiProtocolTest {
         val event2 = MushiEvent.Patch(
             "sess_1", "client_a", 200L,
             listOf(MushiPatchOp.Add("/x", JsonPrimitive(1))),
-            MushiDocVersion("client_a", 1)
+            ProtoVersion(ClientId("client_a"), 1)
         )
         val event3 = MushiEvent.Leave("sess_1", "client_a", 300L)
 

@@ -4583,53 +4583,365 @@ class DocumentIndexBuilder {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// MCP - Model Context Protocol (tools/resources for LLM agents)
-// Wire protocol with kotlinx.serialization + MessagePack support
+// PROTOCOL ABSTRACTION - Unified wire protocol for MCP/WebDAV/Mushi
 // ═══════════════════════════════════════════════════════════════════════════════
 
 /**
  * Wire format for protocol messages.
  */
-enum class WireFormat { JSON, MESSAGE_PACK }
+@Serializable
+enum class WireFormat {
+    @SerialName("json") JSON,
+    @SerialName("msgpack") MESSAGE_PACK,
+    @SerialName("cbor") CBOR,
+    @SerialName("xml") XML,
+    @SerialName("text") TEXT,
+    @SerialName("lines") LINE_RANGES
+}
 
 /**
- * Protocol codec for serialization/deserialization.
+ * Line range for text-based wire format.
  */
-object McpWire {
+@Serializable
+data class LineRange(
+    val start: Int,
+    val end: Int,
+    val content: String? = null
+) {
+    val length get() = end - start + 1
+    fun contains(line: Int) = line in start..end
+    fun toIntRange() = start..end
+
+    companion object {
+        fun single(line: Int, content: String? = null) = LineRange(line, line, content)
+        fun parse(spec: String): LineRange? {
+            val parts = spec.split("-", limit = 2)
+            return when (parts.size) {
+                1 -> parts[0].toIntOrNull()?.let { single(it) }
+                2 -> {
+                    val start = parts[0].toIntOrNull() ?: return null
+                    val end = parts[1].toIntOrNull() ?: return null
+                    LineRange(start, end)
+                }
+                else -> null
+            }
+        }
+    }
+}
+
+/**
+ * Text line codec for LINE_RANGES format.
+ */
+object TextLineCodec {
+    fun encode(lines: List<String>, ranges: List<LineRange>? = null): String {
+        return if (ranges != null) {
+            ranges.mapNotNull { r ->
+                val selected = lines.subList(
+                    maxOf(0, r.start - 1),
+                    minOf(lines.size, r.end)
+                )
+                if (selected.isNotEmpty()) {
+                    "@@ -${r.start},${r.length} @@\n${selected.joinToString("\n")}"
+                } else null
+            }.joinToString("\n\n")
+        } else {
+            lines.joinToString("\n")
+        }
+    }
+
+    fun decode(text: String): Pair<List<String>, List<LineRange>> {
+        val lines = mutableListOf<String>()
+        val ranges = mutableListOf<LineRange>()
+        val chunks = text.split(Regex("""@@ -(\d+),(\d+) @@\n?"""))
+
+        if (chunks.size == 1) {
+            // Plain text, no ranges
+            return text.lines() to listOf(LineRange(1, text.lines().size))
+        }
+
+        val rangePattern = Regex("""@@ -(\d+),(\d+) @@""")
+        var currentLine = 1
+        rangePattern.findAll(text).forEachIndexed { idx, match ->
+            val start = match.groupValues[1].toInt()
+            val length = match.groupValues[2].toInt()
+            ranges.add(LineRange(start, start + length - 1))
+        }
+
+        chunks.drop(1).forEach { chunk ->
+            lines.addAll(chunk.trimStart('\n').lines())
+        }
+
+        return lines to ranges
+    }
+}
+
+/**
+ * XML codec for XML wire format.
+ */
+object XmlCodec {
+    fun <T> encode(value: T, rootTag: String = "root"): String {
+        // Simplified XML encoding via JSON conversion
+        val jsonStr = ProtoWire.json.encodeToString(value)
+        return jsonToXml(jsonStr, rootTag)
+    }
+
+    fun jsonToXml(json: String, rootTag: String = "root"): String {
+        val element = ProtoWire.json.parseToJsonElement(json)
+        return buildString {
+            append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")
+            appendElement(rootTag, element)
+        }
+    }
+
+    private fun StringBuilder.appendElement(tag: String, element: JsonElement) {
+        when (element) {
+            is JsonPrimitive -> {
+                append("<$tag>")
+                append(escapeXml(element.content))
+                append("</$tag>")
+            }
+            is JsonArray -> {
+                element.forEach { item ->
+                    appendElement(tag, item)
+                    append("\n")
+                }
+            }
+            is JsonObject -> {
+                append("<$tag>")
+                element.forEach { (key, value) ->
+                    append("\n  ")
+                    appendElement(key, value)
+                }
+                append("\n</$tag>")
+            }
+            is JsonNull -> append("<$tag/>")
+        }
+    }
+
+    private fun escapeXml(s: String) = s
+        .replace("&", "&amp;")
+        .replace("<", "&lt;")
+        .replace(">", "&gt;")
+        .replace("\"", "&quot;")
+        .replace("'", "&apos;")
+}
+
+/**
+ * Value class for session IDs - zero allocation wrapper.
+ */
+@Serializable
+@JvmInline
+value class SessionId(val value: String) {
+    override fun toString() = value
+    companion object {
+        fun generate() = SessionId("sess_${randomId(12)}")
+    }
+}
+
+/**
+ * Value class for client IDs - zero allocation wrapper.
+ */
+@Serializable
+@JvmInline
+value class ClientId(val value: String) {
+    override fun toString() = value
+    companion object {
+        fun generate() = ClientId("client_${randomId(8)}")
+    }
+}
+
+/**
+ * Value class for request IDs - zero allocation wrapper.
+ */
+@Serializable
+@JvmInline
+value class RequestId(val value: String) {
+    override fun toString() = value
+    companion object {
+        private var counter = 0L
+        fun next() = RequestId("req_${++counter}")
+    }
+}
+
+/**
+ * Value class for resource URIs - zero allocation wrapper.
+ */
+@Serializable
+@JvmInline
+value class ResourceUri(val value: String) {
+    override fun toString() = value
+    val scheme get() = value.substringBefore("://", "")
+    val path get() = value.substringAfter("://", value)
+}
+
+/**
+ * Value class for JSON Pointer paths (RFC 6901).
+ */
+@Serializable
+@JvmInline
+value class JsonPointer(val value: String) {
+    override fun toString() = value
+    val segments get() = value.split("/").drop(1).map { it.replace("~1", "/").replace("~0", "~") }
+    companion object {
+        fun of(vararg parts: String) = JsonPointer("/" + parts.joinToString("/") {
+            it.replace("~", "~0").replace("/", "~1")
+        })
+    }
+}
+
+/**
+ * Unified protocol wire codec.
+ */
+object ProtoWire {
     val json = Json {
         ignoreUnknownKeys = true
         encodeDefaults = true
         classDiscriminator = "type"
+        isLenient = true
     }
 
     inline fun <reified T> encode(value: T, format: WireFormat = WireFormat.JSON): ByteArray = when (format) {
         WireFormat.JSON -> json.encodeToString(value).encodeToByteArray()
         WireFormat.MESSAGE_PACK -> MessagePack.encode(value)
+        WireFormat.CBOR -> json.encodeToString(value).encodeToByteArray() // Fallback
+        WireFormat.XML -> XmlCodec.encode(value).encodeToByteArray()
+        WireFormat.TEXT, WireFormat.LINE_RANGES -> json.encodeToString(value).encodeToByteArray()
     }
 
     inline fun <reified T> decode(data: ByteArray, format: WireFormat = WireFormat.JSON): T = when (format) {
         WireFormat.JSON -> json.decodeFromString(data.decodeToString())
         WireFormat.MESSAGE_PACK -> MessagePack.decode(data)
+        WireFormat.CBOR -> json.decodeFromString(data.decodeToString()) // Fallback
+        WireFormat.XML, WireFormat.TEXT, WireFormat.LINE_RANGES -> json.decodeFromString(data.decodeToString())
     }
+
+    inline fun <reified T> encodeToString(value: T): String = json.encodeToString(value)
+    inline fun <reified T> decodeFromString(data: String): T = json.decodeFromString(data)
+
+    /** Encode with line ranges for text diffs */
+    fun encodeLines(lines: List<String>, ranges: List<LineRange>? = null): ByteArray =
+        TextLineCodec.encode(lines, ranges).encodeToByteArray()
+
+    /** Decode line-based content */
+    fun decodeLines(data: ByteArray): Pair<List<String>, List<LineRange>> =
+        TextLineCodec.decode(data.decodeToString())
 }
+
+/** Alias for backwards compatibility */
+typealias McpWire = ProtoWire
+typealias MushiWire = ProtoWire
 
 /**
  * MessagePack codec (simplified - full impl needs library).
  */
 object MessagePack {
+    private const val MSGPACK_FIXARRAY = 0x92.toByte()
+
     inline fun <reified T> encode(value: T): ByteArray {
-        // Simplified: encode as JSON bytes with msgpack header
-        // Real impl would use proper MessagePack encoding
-        val jsonBytes = McpWire.json.encodeToString(value).encodeToByteArray()
-        return byteArrayOf(0x92.toByte()) + jsonBytes // fixarray marker
+        val jsonBytes = ProtoWire.json.encodeToString(value).encodeToByteArray()
+        return byteArrayOf(MSGPACK_FIXARRAY) + jsonBytes
     }
 
     inline fun <reified T> decode(data: ByteArray): T {
-        // Skip msgpack header, decode as JSON
-        val jsonBytes = if (data.isNotEmpty() && data[0] == 0x92.toByte()) data.drop(1).toByteArray() else data
-        return McpWire.json.decodeFromString(jsonBytes.decodeToString())
+        val jsonBytes = if (data.isNotEmpty() && data[0] == MSGPACK_FIXARRAY)
+            data.copyOfRange(1, data.size) else data
+        return ProtoWire.json.decodeFromString(jsonBytes.decodeToString())
     }
 }
+
+/**
+ * Protocol message interface - common to all protocols.
+ */
+interface ProtoMessage {
+    val timestamp: Long get() = 0L
+}
+
+/**
+ * Protocol event interface - for event-driven protocols.
+ */
+interface ProtoEvent : ProtoMessage {
+    val eventType: String
+}
+
+/**
+ * Protocol request/response interface - for RPC protocols.
+ */
+interface ProtoRpc : ProtoMessage {
+    val id: RequestId
+}
+
+/**
+ * Common result type for protocol operations.
+ */
+@Serializable
+sealed class ProtoResult<out T> {
+    @Serializable @SerialName("ok")
+    data class Ok<T>(val value: T) : ProtoResult<T>()
+    @Serializable @SerialName("err")
+    data class Err(val code: Int, val message: String, val data: JsonElement? = null) : ProtoResult<Nothing>()
+
+    val isOk get() = this is Ok
+    val isErr get() = this is Err
+    fun getOrNull(): T? = (this as? Ok)?.value
+    fun getOrThrow(): T = (this as? Ok)?.value ?: error((this as Err).message)
+
+    companion object {
+        fun <T> ok(value: T): ProtoResult<T> = Ok(value)
+        fun err(code: Int, message: String, data: JsonElement? = null): ProtoResult<Nothing> = Err(code, message, data)
+    }
+}
+
+/**
+ * Common version tracking for CRDT operations.
+ */
+@Serializable
+data class ProtoVersion(
+    val clientId: ClientId,
+    val clock: Long,
+    val timestamp: Long = 0L
+) {
+    val formatted get() = "${clientId.value}:$clock"
+
+    companion object {
+        fun parse(s: String): ProtoVersion? {
+            val parts = s.split(":")
+            return if (parts.size == 2) {
+                ProtoVersion(ClientId(parts[0]), parts[1].toLongOrNull() ?: return null)
+            } else null
+        }
+    }
+}
+
+/**
+ * Common vector clock for CRDT sync.
+ */
+@Serializable
+data class ProtoVectorClock(
+    val clocks: Map<String, Long> = emptyMap()
+) {
+    operator fun get(clientId: String) = clocks[clientId] ?: 0L
+    operator fun get(clientId: ClientId) = clocks[clientId.value] ?: 0L
+
+    fun tick(clientId: ClientId): ProtoVectorClock {
+        val current = this[clientId]
+        return copy(clocks = clocks + (clientId.value to current + 1))
+    }
+
+    fun merge(other: ProtoVectorClock): ProtoVectorClock {
+        val merged = (clocks.keys + other.clocks.keys).associateWith { key ->
+            maxOf(clocks[key] ?: 0L, other.clocks[key] ?: 0L)
+        }
+        return ProtoVectorClock(merged)
+    }
+
+    fun happensBefore(other: ProtoVectorClock): Boolean =
+        clocks.all { (k, v) -> v <= (other.clocks[k] ?: 0L) } &&
+        clocks.any { (k, v) -> v < (other.clocks[k] ?: 0L) }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// MCP - Model Context Protocol (tools/resources for LLM agents)
+// ═══════════════════════════════════════════════════════════════════════════════
 
 /**
  * MCP Tool definition for LLM agent invocation.
@@ -5052,97 +5364,93 @@ class DavRequest(
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // MUSHI - Real-time collaboration protocol (SSE + WSS + JsonPatch)
-// Wire protocol with kotlinx.serialization
+// Uses unified ProtoWire codec
 // ═══════════════════════════════════════════════════════════════════════════════
 
-/**
- * Mushi wire codec for protocol messages.
- */
-object MushiWire {
-    val json = Json {
-        ignoreUnknownKeys = true
-        encodeDefaults = true
-        classDiscriminator = "type"
-    }
-
-    inline fun <reified T> encode(value: T, format: WireFormat = WireFormat.JSON): ByteArray = when (format) {
-        WireFormat.JSON -> json.encodeToString(value).encodeToByteArray()
-        WireFormat.MESSAGE_PACK -> MessagePack.encode(value)
-    }
-
-    inline fun <reified T> decode(data: ByteArray, format: WireFormat = WireFormat.JSON): T = when (format) {
-        WireFormat.JSON -> json.decodeFromString(data.decodeToString())
-        WireFormat.MESSAGE_PACK -> MessagePack.decode(data)
-    }
-
-    fun encodeEvent(event: MushiEvent): String = json.encodeToString(event)
-    fun decodeEvent(data: String): MushiEvent = json.decodeFromString(data)
-}
+/** Extension for MushiEvent encoding */
+fun ProtoWire.encodeEvent(event: MushiEvent): String = encodeToString(event)
+fun ProtoWire.decodeEvent(data: String): MushiEvent = decodeFromString(data)
 
 /**
  * Mushi collaboration session.
  */
 @Serializable
 data class MushiSession(
-    val id: String,
-    val documentUri: String,
-    val clientId: String,
+    val id: SessionId,
+    val documentUri: ResourceUri,
+    val clientId: ClientId,
     val createdAt: Long = 0
-)
-
-/**
- * Selection range for awareness.
- */
-@Serializable
-data class MushiSelection(
-    val start: Int,
-    val end: Int
-)
-
-/**
- * Serializable JsonPatchOp wrapper.
- */
-@Serializable
-sealed class MushiPatchOp {
-    @Serializable @SerialName("add")
-    data class Add(val path: String, val value: JsonElement) : MushiPatchOp()
-    @Serializable @SerialName("remove")
-    data class Remove(val path: String) : MushiPatchOp()
-    @Serializable @SerialName("replace")
-    data class Replace(val path: String, val value: JsonElement) : MushiPatchOp()
-    @Serializable @SerialName("move")
-    data class Move(val path: String, val from: String) : MushiPatchOp()
-    @Serializable @SerialName("copy")
-    data class Copy(val path: String, val from: String) : MushiPatchOp()
-    @Serializable @SerialName("test")
-    data class Test(val path: String, val value: JsonElement) : MushiPatchOp()
+) {
+    constructor(id: String, documentUri: String, clientId: String, createdAt: Long = 0) :
+        this(SessionId(id), ResourceUri(documentUri), ClientId(clientId), createdAt)
 }
 
 /**
- * Serializable document version.
+ * Selection range for awareness - optimized as value class pair.
  */
 @Serializable
-data class MushiDocVersion(
-    val clientId: String,
-    val clock: Long
-)
+data class MushiSelection(val start: Int, val end: Int) {
+    val length get() = end - start
+    val isEmpty get() = start == end
+    fun contains(pos: Int) = pos in start until end
+    fun toIntRange() = start until end
+}
 
 /**
- * Serializable vector clock.
+ * Serializable JsonPatchOp - unified with JsonPointer.
  */
 @Serializable
-data class MushiVectorClock(
-    val clocks: Map<String, Long>
-)
+sealed class MushiPatchOp {
+    abstract val path: JsonPointer
+
+    @Serializable @SerialName("add")
+    data class Add(override val path: JsonPointer, val value: JsonElement) : MushiPatchOp() {
+        constructor(pathStr: String, value: JsonElement) : this(JsonPointer(pathStr), value)
+    }
+    @Serializable @SerialName("remove")
+    data class Remove(override val path: JsonPointer) : MushiPatchOp() {
+        constructor(pathStr: String) : this(JsonPointer(pathStr))
+    }
+    @Serializable @SerialName("replace")
+    data class Replace(override val path: JsonPointer, val value: JsonElement) : MushiPatchOp() {
+        constructor(pathStr: String, value: JsonElement) : this(JsonPointer(pathStr), value)
+    }
+    @Serializable @SerialName("move")
+    data class Move(override val path: JsonPointer, val from: JsonPointer) : MushiPatchOp() {
+        constructor(pathStr: String, fromStr: String) : this(JsonPointer(pathStr), JsonPointer(fromStr))
+    }
+    @Serializable @SerialName("copy")
+    data class Copy(override val path: JsonPointer, val from: JsonPointer) : MushiPatchOp() {
+        constructor(pathStr: String, fromStr: String) : this(JsonPointer(pathStr), JsonPointer(fromStr))
+    }
+    @Serializable @SerialName("test")
+    data class Test(override val path: JsonPointer, val value: JsonElement) : MushiPatchOp() {
+        constructor(pathStr: String, value: JsonElement) : this(JsonPointer(pathStr), value)
+    }
+}
+
+/** Type alias for backwards compatibility */
+typealias MushiDocVersion = ProtoVersion
+typealias MushiVectorClock = ProtoVectorClock
 
 /**
  * Mushi event types for SSE/WSS transport.
+ * Implements ProtoEvent for unified protocol handling.
  */
 @Serializable
-sealed class MushiEvent {
+sealed class MushiEvent : ProtoEvent {
     abstract val sessionId: String
     abstract val clientId: String
-    abstract val timestamp: Long
+    abstract override val timestamp: Long
+
+    override val eventType: String get() = when (this) {
+        is Patch -> "patch"
+        is Awareness -> "awareness"
+        is Join -> "join"
+        is Leave -> "leave"
+        is Sync -> "sync"
+        is Ack -> "ack"
+    }
 
     /** Document patch event */
     @Serializable @SerialName("patch")
@@ -5151,7 +5459,7 @@ sealed class MushiEvent {
         override val clientId: String,
         override val timestamp: Long,
         val ops: List<MushiPatchOp>,
-        val version: MushiDocVersion
+        val version: ProtoVersion
     ) : MushiEvent()
 
     /** Cursor/selection awareness */
@@ -5189,7 +5497,7 @@ sealed class MushiEvent {
         override val clientId: String,
         override val timestamp: Long,
         val document: JsonObject,
-        val version: MushiVectorClock
+        val version: ProtoVectorClock
     ) : MushiEvent()
 
     /** Ack/confirmation */
@@ -5198,21 +5506,11 @@ sealed class MushiEvent {
         override val sessionId: String,
         override val clientId: String,
         override val timestamp: Long,
-        val ackedVersion: MushiDocVersion
+        val ackedVersion: ProtoVersion
     ) : MushiEvent()
 
     /** Convert to SSE format */
-    fun toSse(): String {
-        val eventType = when (this) {
-            is Patch -> "patch"
-            is Awareness -> "awareness"
-            is Join -> "join"
-            is Leave -> "leave"
-            is Sync -> "sync"
-            is Ack -> "ack"
-        }
-        return "event: $eventType\ndata: ${MushiWire.encodeEvent(this)}\n\n"
-    }
+    fun toSse() = "event: $eventType\ndata: ${ProtoWire.encodeEvent(this)}\n\n"
 }
 
 /**
@@ -5251,28 +5549,31 @@ class MushiAuditLog {
 }
 
 /**
- * Mushi collaboration client.
+ * Mushi collaboration client - optimized with value class IDs.
  */
 class MushiClient(
     private val transport: MushiTransport,
-    val clientId: String = generateClientId(),
+    val clientId: ClientId = ClientId.generate(),
     val wireFormat: WireFormat = WireFormat.JSON
 ) {
+    constructor(transport: MushiTransport, clientIdStr: String, wireFormat: WireFormat = WireFormat.JSON) :
+        this(transport, ClientId(clientIdStr), wireFormat)
+
     private var session: MushiSession? = null
-    private val localClock = VectorClock()
+    private var localClock = ProtoVectorClock()
     private var document = JsonObject(emptyMap())
     private val pendingOps = mutableListOf<MushiEvent.Patch>()
     private val eventHandlers = mutableListOf<(MushiEvent) -> Unit>()
 
     suspend fun join(documentUri: String): MushiSession {
-        val sessionId = generateSessionId()
-        transport.connect(sessionId, clientId)
-        val sess = MushiSession(sessionId, documentUri, clientId, currentTimeMillis())
+        val sessionId = SessionId.generate()
+        transport.connect(sessionId.value, clientId.value)
+        val sess = MushiSession(sessionId, ResourceUri(documentUri), clientId, currentTimeMillis())
         session = sess
 
         transport.send(MushiEvent.Join(
-            sessionId = sessionId,
-            clientId = clientId,
+            sessionId = sessionId.value,
+            clientId = clientId.value,
             timestamp = currentTimeMillis()
         ))
 
@@ -5282,8 +5583,8 @@ class MushiClient(
     suspend fun leave() {
         session?.let { sess ->
             transport.send(MushiEvent.Leave(
-                sessionId = sess.id,
-                clientId = clientId,
+                sessionId = sess.id.value,
+                clientId = clientId.value,
                 timestamp = currentTimeMillis()
             ))
         }
@@ -5293,13 +5594,12 @@ class MushiClient(
 
     suspend fun applyPatch(ops: List<MushiPatchOp>) {
         val sess = session ?: return
-        val clock = localClock.tick(clientId)
-        val version = MushiDocVersion(clientId, clock)
+        localClock = localClock.tick(clientId)
+        val version = ProtoVersion(clientId, localClock[clientId])
 
-        // Send to server
         val event = MushiEvent.Patch(
-            sessionId = sess.id,
-            clientId = clientId,
+            sessionId = sess.id.value,
+            clientId = clientId.value,
             timestamp = currentTimeMillis(),
             ops = ops,
             version = version
@@ -5311,8 +5611,8 @@ class MushiClient(
     suspend fun updateAwareness(cursor: Int? = null, selection: MushiSelection? = null, user: Map<String, String> = emptyMap()) {
         val sess = session ?: return
         transport.send(MushiEvent.Awareness(
-            sessionId = sess.id,
-            clientId = clientId,
+            sessionId = sess.id.value,
+            clientId = clientId.value,
             timestamp = currentTimeMillis(),
             cursor = cursor,
             selection = selection,
@@ -5324,13 +5624,13 @@ class MushiClient(
         val event = transport.receive() ?: return
         when (event) {
             is MushiEvent.Patch -> {
-                if (event.clientId != clientId) {
-                    localClock.merge(VectorClock(mutableMapOf(event.version.clientId to event.version.clock)))
+                if (event.clientId != clientId.value) {
+                    localClock = localClock.merge(ProtoVectorClock(mapOf(event.version.clientId.value to event.version.clock)))
                 }
             }
             is MushiEvent.Sync -> {
                 document = event.document
-                localClock.merge(VectorClock(event.version.clocks.toMutableMap()))
+                localClock = localClock.merge(event.version)
             }
             is MushiEvent.Ack -> {
                 pendingOps.removeAll { it.version == event.ackedVersion }
@@ -5346,83 +5646,85 @@ class MushiClient(
     }
 
     fun getDocument(): JsonObject = document
-
-    private fun generateSessionId(): String = "sess_${randomId(8)}"
 }
 
 /**
- * Mushi collaboration server.
+ * Mushi collaboration server - optimized with value class IDs.
  */
 class MushiServer {
-    private val sessions = mutableMapOf<String, MushiServerSession>()
+    private val sessions = mutableMapOf<SessionId, MushiServerSession>()
     val auditLog = MushiAuditLog()
 
     fun createSession(documentUri: String): MushiServerSession {
-        val sessionId = "sess_${randomId(12)}"
-        val session = MushiServerSession(sessionId, documentUri, auditLog)
+        val sessionId = SessionId.generate()
+        val session = MushiServerSession(sessionId, ResourceUri(documentUri), auditLog)
         sessions[sessionId] = session
         return session
     }
 
-    fun getSession(sessionId: String): MushiServerSession? = sessions[sessionId]
+    fun getSession(sessionId: String): MushiServerSession? = sessions[SessionId(sessionId)]
+    fun getSession(sessionId: SessionId): MushiServerSession? = sessions[sessionId]
 
-    fun closeSession(sessionId: String) {
-        sessions.remove(sessionId)
-    }
+    fun closeSession(sessionId: String) = sessions.remove(SessionId(sessionId))
+    fun closeSession(sessionId: SessionId) = sessions.remove(sessionId)
 }
 
 class MushiServerSession(
-    val id: String,
-    val documentUri: String,
+    val id: SessionId,
+    val documentUri: ResourceUri,
     private val auditLog: MushiAuditLog
 ) {
-    private val clients = mutableMapOf<String, MushiTransport>()
-    private var document = JsonObject(emptyMap())
-    private val clock = VectorClock()
+    constructor(id: String, documentUri: String, auditLog: MushiAuditLog) :
+        this(SessionId(id), ResourceUri(documentUri), auditLog)
 
-    suspend fun addClient(clientId: String, transport: MushiTransport) {
+    private val clients = mutableMapOf<ClientId, MushiTransport>()
+    private var document = JsonObject(emptyMap())
+    private var clock = ProtoVectorClock()
+
+    suspend fun addClient(clientId: String, transport: MushiTransport) = addClient(ClientId(clientId), transport)
+
+    suspend fun addClient(clientId: ClientId, transport: MushiTransport) {
         clients[clientId] = transport
 
         // Send current state
         transport.send(MushiEvent.Sync(
-            sessionId = id,
+            sessionId = id.value,
             clientId = "server",
             timestamp = currentTimeMillis(),
             document = document,
-            version = MushiVectorClock(clock.clocks.toMap())
+            version = clock
         ))
 
         // Broadcast join
         broadcast(MushiEvent.Join(
-            sessionId = id,
-            clientId = clientId,
+            sessionId = id.value,
+            clientId = clientId.value,
             timestamp = currentTimeMillis()
         ), exclude = clientId)
     }
 
-    fun removeClient(clientId: String) {
-        clients.remove(clientId)
-    }
+    fun removeClient(clientId: String) = clients.remove(ClientId(clientId))
+    fun removeClient(clientId: ClientId) = clients.remove(clientId)
 
     suspend fun handleEvent(event: MushiEvent) {
         auditLog.append(event)
 
         when (event) {
             is MushiEvent.Patch -> {
-                clock.merge(VectorClock(mutableMapOf(event.version.clientId to event.version.clock)))
+                clock = clock.merge(ProtoVectorClock(mapOf(event.version.clientId.value to event.version.clock)))
 
                 // Ack to sender
-                clients[event.clientId]?.send(MushiEvent.Ack(
-                    sessionId = id,
+                clients[ClientId(event.clientId)]?.send(MushiEvent.Ack(
+                    sessionId = id.value,
                     clientId = "server",
                     timestamp = currentTimeMillis(),
                     ackedVersion = event.version
                 ))
 
                 // Broadcast to others
-                broadcast(event, exclude = event.clientId)
+                broadcast(event, exclude = ClientId(event.clientId))
             }
-            is MushiEvent.Awareness -> broadcast(event, exclude = event.clientId)
+            is MushiEvent.Awareness -> broadcast(event, exclude = ClientId(event.clientId))
             is MushiEvent.Leave -> {
                 removeClient(event.clientId)
                 broadcast(event)
@@ -5431,10 +5733,8 @@ class MushiServerSession(
         }
     }
 
-    private suspend fun broadcast(event: MushiEvent, exclude: String? = null) {
-        clients.filterKeys { it != exclude }.values.forEach { transport ->
-            transport.send(event)
-        }
+    private suspend fun broadcast(event: MushiEvent, exclude: ClientId? = null) {
+        clients.filterKeys { it != exclude }.values.forEach { it.send(event) }
     }
 
     fun getDocument(): JsonObject = document
