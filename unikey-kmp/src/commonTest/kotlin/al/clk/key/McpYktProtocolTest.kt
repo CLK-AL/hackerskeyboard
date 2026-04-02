@@ -1,5 +1,6 @@
 package al.clk.key
 
+import al.clk.key.proto.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -202,7 +203,7 @@ class McpYktProtocolTest {
         assertEquals(WebDavMethod.PROPFIND, propfind.method)
         assertEquals("/files", propfind.path)
 
-        val put = DavRequest.put("/files/test.txt", "content", "text/plain")
+        val put = DavRequest.put("/files/test.txt", "content")
         assertEquals(WebDavMethod.PUT, put.method)
         assertEquals("content", put.body)
 
@@ -569,7 +570,7 @@ class McpYktProtocolTest {
 
         val session = server.createSession("/docs/test.md")
         assertNotNull(session)
-        assertTrue(session.id.startsWith("sess_"))
+        assertTrue(session.id.value.startsWith("sess_"))
 
         val retrieved = server.getSession(session.id)
         assertNotNull(retrieved)

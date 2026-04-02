@@ -199,17 +199,17 @@ class DocumentIndexTest {
         assertEquals(2, data.size)  // Only data-* attributes
     }
 
-    // ═══ IndexSegment Tests ═══
+    // ═══ IndexRange Tests ═══
 
     @Test
-    fun testIndexSegmentFormatted() {
-        val segment = IndexSegment(DocTag.P, 1)
+    fun testIndexRangeFormatted() {
+        val segment = IndexRange(DocTag.P, 1)
         assertEquals("P1", segment.formatted)
 
-        val segmentWithClass = IndexSegment(DocTag.P, 2, listOf("intro", "poem"))
+        val segmentWithClass = IndexRange(DocTag.P, 2, listOf("intro", "poem"))
         assertEquals("P2.intro.poem", segmentWithClass.formatted)
 
-        val segmentWithAttrs = IndexSegment(
+        val segmentWithAttrs = IndexRange(
             DocTag.P, 3,
             listOf("verse"),
             ScriptAttrs.EMPTY,
@@ -219,8 +219,8 @@ class DocumentIndexTest {
     }
 
     @Test
-    fun testIndexSegmentWithScriptAttrs() {
-        val segment = IndexSegment(
+    fun testIndexRangeWithScriptAttrs() {
+        val segment = IndexRange(
             DocTag.P, 1,
             listOf("verse"),
             ScriptAttrs.HEBREW,
@@ -233,8 +233,8 @@ class DocumentIndexTest {
     }
 
     @Test
-    fun testIndexSegmentParseWithScriptAttrs() {
-        val segment = IndexSegment.parse("P1.verse@lang=he@dir=rtl=data-index=1")
+    fun testIndexRangeParseWithScriptAttrs() {
+        val segment = IndexRange.parse("P1.verse@lang=he@dir=rtl=data-index=1")
         assertNotNull(segment)
         assertEquals(DocTag.P, segment.tag)
         assertEquals(1, segment.instance)
@@ -245,20 +245,20 @@ class DocumentIndexTest {
     }
 
     @Test
-    fun testIndexSegmentParse() {
-        val segment1 = IndexSegment.parse("P1")
+    fun testIndexRangeParse() {
+        val segment1 = IndexRange.parse("P1")
         assertNotNull(segment1)
         assertEquals(DocTag.P, segment1.tag)
         assertEquals(1, segment1.instance)
         assertTrue(segment1.cssClasses.isEmpty())
 
-        val segment2 = IndexSegment.parse("LI23.item.active")
+        val segment2 = IndexRange.parse("LI23.item.active")
         assertNotNull(segment2)
         assertEquals(DocTag.LI, segment2.tag)
         assertEquals(23, segment2.instance)
         assertEquals(listOf("item", "active"), segment2.cssClasses)
 
-        val segment3 = IndexSegment.parse("DIV1.container=data-id=abc")
+        val segment3 = IndexRange.parse("DIV1.container=data-id=abc")
         assertNotNull(segment3)
         assertEquals(DocTag.DIV, segment3.tag)
         assertEquals(1, segment3.instance)
@@ -267,11 +267,11 @@ class DocumentIndexTest {
     }
 
     @Test
-    fun testIndexSegmentParseInvalid() {
-        assertNull(IndexSegment.parse(""))
-        assertNull(IndexSegment.parse("P"))        // Missing instance
-        assertNull(IndexSegment.parse("UNKNOWN1")) // Unknown tag
-        assertNull(IndexSegment.parse("123"))      // No tag name
+    fun testIndexRangeParseInvalid() {
+        assertNull(IndexRange.parse(""))
+        assertNull(IndexRange.parse("P"))        // Missing instance
+        assertNull(IndexRange.parse("UNKNOWN1")) // Unknown tag
+        assertNull(IndexRange.parse("123"))      // No tag name
     }
 
     // ═══ DocumentIndex Tests ═══
@@ -279,9 +279,9 @@ class DocumentIndexTest {
     @Test
     fun testDocumentIndexFormatted() {
         val index = DocumentIndex(listOf(
-            IndexSegment(DocTag.HTML, 1),
-            IndexSegment(DocTag.BODY, 1),
-            IndexSegment(DocTag.P, 1, listOf("intro"))
+            IndexRange(DocTag.HTML, 1),
+            IndexRange(DocTag.BODY, 1),
+            IndexRange(DocTag.P, 1, listOf("intro"))
         ))
 
         assertEquals("HTML1/BODY1/P1.intro", index.formatted)
@@ -329,7 +329,7 @@ class DocumentIndexTest {
         val parent = DocumentIndex.parse("HTML1/BODY1")
         assertNotNull(parent)
 
-        val segment = IndexSegment(DocTag.P, 1, listOf("verse"))
+        val segment = IndexRange(DocTag.P, 1, listOf("verse"))
         val child = parent.child(segment)
 
         assertEquals("HTML1/BODY1/P1.verse", child.formatted)
@@ -410,7 +410,7 @@ class DocumentIndexTest {
         assertEquals("he", pElement.attributes["lang"])
         assertEquals("rtl", pElement.attributes["dir"])
 
-        // Check that IndexSegment has script attrs
+        // Check that IndexRange has script attrs
         val segment = pElement.index.leaf
         assertNotNull(segment)
         assertEquals("he", segment.lang)
@@ -514,9 +514,9 @@ class DocumentIndexTest {
     }
 
     @Test
-    fun testLineTypeDetectPre() {
-        assertEquals(LineType.PRE, LineType.detect("    indented code"))
-        assertEquals(LineType.PRE, LineType.detect("\tindented with tab"))
+    fun testLineTypeDetectIndentCode() {
+        assertEquals(LineType.INDENT_CODE, LineType.detect("    indented code"))
+        assertEquals(LineType.INDENT_CODE, LineType.detect("\tindented with tab"))
     }
 
     @Test
@@ -776,12 +776,12 @@ class DocumentIndexTest {
     }
 
     @Test
-    fun testIndexSegmentWithPairs() {
+    fun testIndexRangeWithPairs() {
         val pairs = listOf(
             DefinitionPair("מחבר", "תֹּאמַר", ScriptAttrs.HEBREW, ScriptAttrs.HEBREW),
             DefinitionPair("מקור", "file.txt", ScriptAttrs.HEBREW, ScriptAttrs.ENGLISH)
         )
-        val segment = IndexSegment(DocTag.DL, 1, emptyList(), ScriptAttrs.EMPTY, emptyMap(), pairs)
+        val segment = IndexRange(DocTag.DL, 1, emptyList(), ScriptAttrs.EMPTY, emptyMap(), pairs)
 
         assertEquals("תֹּאמַר", segment.getDefinition("מחבר"))
         assertEquals("file.txt", segment.getDefinition("מקור"))
@@ -933,35 +933,6 @@ class DocumentIndexTest {
         val li = elements.find { it.tag == DocTag.LI }
         assertNotNull(li)
         assertEquals("List item", li.content)
-    }
-
-    // ═══ DefinitionPair and IndexSegment Tests ═══
-
-    @Test
-    fun testDefinitionPairFromLine() {
-        val pair = DefinitionPair.fromLine("**מחבר:** תֹּאמַר בַּת-שְׁלֹמֹה")
-        assertNotNull(pair)
-        assertEquals("מחבר", pair.term)
-        assertEquals("תֹּאמַר בַּת-שְׁלֹמֹה", pair.description)
-    }
-
-    @Test
-    fun testDefinitionPairFormatted() {
-        val pair = DefinitionPair("term", "value")
-        assertEquals("[term=value]", pair.formatted)
-    }
-
-    @Test
-    fun testIndexSegmentWithPairs() {
-        val pairs = listOf(
-            DefinitionPair("מחבר", "תֹּאמַר", ScriptAttrs.HEBREW, ScriptAttrs.HEBREW),
-            DefinitionPair("מקור", "file.txt", ScriptAttrs.HEBREW, ScriptAttrs.ENGLISH)
-        )
-        val segment = IndexSegment(DocTag.DL, 1, emptyList(), ScriptAttrs.EMPTY, emptyMap(), pairs)
-
-        assertEquals("תֹּאמַר", segment.getDefinition("מחבר"))
-        assertEquals("file.txt", segment.getDefinition("מקור"))
-        assertEquals(2, segment.definitions.size)
     }
 
     // ═══ LineSeparator Tests ═══
