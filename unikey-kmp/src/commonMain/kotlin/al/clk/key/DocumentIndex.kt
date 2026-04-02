@@ -239,10 +239,12 @@ enum class DocTag(
         isContainer = true
     ),
     DT(
-        TagPattern.html("dt")
+        TagPattern.html("dt"),
+        TagPattern.md("^[^:\\s].*(?=\\s*::\\s*$|\\s*$)", "", "")  // Term before :: or at end
     ),
     DD(
-        TagPattern.html("dd")
+        TagPattern.html("dd"),
+        TagPattern.md("^:\\s+|^\\s{2,}", ".*", "$")  // : followed by text, or indented
     ),
 
     // ═══ Code/Preformatted ═══
@@ -974,38 +976,193 @@ class DocumentParser {
 // PLAIN TEXT PARSER - Parse plain text by line separators into HTML-like indices
 // ═══════════════════════════════════════════════════════════════════════════════
 
+// ═══════════════════════════════════════════════════════════════════════════════
+// SCRIPT DETECTION - Detect language/direction from text content
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/**
+ * Detect script type and direction from text content.
+ * Used to auto-set lang/dir attributes during parsing.
+ */
+object ScriptDetector {
+    // Unicode ranges for RTL scripts
+    private val HEBREW_RANGE = '\u0590'..'\u05FF'
+    private val ARABIC_RANGE = '\u0600'..'\u06FF'
+    private val ARABIC_SUPP_RANGE = '\u0750'..'\u077F'
+    private val ARABIC_EXT_A_RANGE = '\u08A0'..'\u08FF'
+
+    // Hebrew vowels (nikud) range
+    private val NIKUD_RANGE = '\u05B0'..'\u05C7'
+
+    /**
+     * Detect script attributes from text content.
+     */
+    fun detect(text: String): ScriptAttrs {
+        if (text.isBlank()) return ScriptAttrs.EMPTY
+
+        var hebrewCount = 0
+        var arabicCount = 0
+        var latinCount = 0
+
+        for (c in text) {
+            when (c) {
+                in HEBREW_RANGE -> hebrewCount++
+                in ARABIC_RANGE, in ARABIC_SUPP_RANGE, in ARABIC_EXT_A_RANGE -> arabicCount++
+                in 'A'..'Z', in 'a'..'z' -> latinCount++
+            }
+        }
+
+        return when {
+            hebrewCount > arabicCount && hebrewCount > latinCount -> ScriptAttrs.HEBREW
+            arabicCount > hebrewCount && arabicCount > latinCount -> ScriptAttrs.ARABIC
+            latinCount > 0 -> ScriptAttrs.ENGLISH
+            else -> ScriptAttrs.EMPTY
+        }
+    }
+
+    /**
+     * Check if text contains Hebrew characters.
+     */
+    fun isHebrew(text: String): Boolean = text.any { it in HEBREW_RANGE }
+
+    /**
+     * Check if text contains Arabic characters.
+     */
+    fun isArabic(text: String): Boolean = text.any {
+        it in ARABIC_RANGE || it in ARABIC_SUPP_RANGE || it in ARABIC_EXT_A_RANGE
+    }
+
+    /**
+     * Check if text is RTL (Hebrew or Arabic).
+     */
+    fun isRtl(text: String): Boolean = isHebrew(text) || isArabic(text)
+
+    /**
+     * Check if text contains nikud (Hebrew vowel marks).
+     */
+    fun hasNikud(text: String): Boolean = text.any { it in NIKUD_RANGE }
+
+    /**
+     * Get dominant text direction.
+     */
+    fun getDirection(text: String): TextDir {
+        val script = detect(text)
+        return script.dir ?: TextDir.LTR
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// RFC/SPEC PATTERNS - RFC 2119 keywords and spec syntax
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/**
+ * RFC 2119 keyword detection and spec document patterns.
+ */
+object RfcPattern {
+    // RFC 2119 keywords (MUST, SHOULD, MAY, etc.)
+    private val RFC2119_KEYWORDS = setOf(
+        "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+        "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED",
+        "MAY", "OPTIONAL"
+    )
+
+    /** Pattern for RFC 2119 keywords */
+    val RFC2119 by lazy {
+        Regex("\\b(${RFC2119_KEYWORDS.joinToString("|") { Regex.escape(it) }})\\b")
+    }
+
+    /** Pattern for RFC reference (RFC 1234) */
+    val RFC_REF by lazy { Regex("\\bRFC\\s*\\d{1,5}\\b", RegexOption.IGNORE_CASE) }
+
+    /** Pattern for section reference (Section 1.2.3) */
+    val SECTION_REF by lazy { Regex("\\b[Ss]ection\\s+\\d+(\\.\\d+)*\\b") }
+
+    /** Pattern for ABNF rule definition (rule = ...) */
+    val ABNF_RULE by lazy { Regex("^\\s*[a-zA-Z][a-zA-Z0-9-]*\\s*=.*$") }
+
+    /** Pattern for BNF-style definition (<rule> ::= ...) */
+    val BNF_RULE by lazy { Regex("^\\s*<[^>]+>\\s*::=.*$") }
+
+    /**
+     * Check if text contains RFC 2119 keywords.
+     */
+    fun hasRfc2119Keywords(text: String): Boolean = RFC2119.containsMatchIn(text)
+
+    /**
+     * Extract RFC references from text.
+     */
+    fun findRfcRefs(text: String): List<String> = RFC_REF.findAll(text).map { it.value }.toList()
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// LINE TYPE - Detect element type from line content
+// ═══════════════════════════════════════════════════════════════════════════════
+
 /**
  * Line type detection for plain text parsing.
  * Infers HTML-like structure from line patterns.
+ * Patterns are lazily compiled for performance.
  */
 enum class LineType(
     val tag: DocTag,
-    val pattern: Regex
+    patternString: String,
+    private val options: Set<RegexOption> = emptySet()
 ) {
-    // Headers detected by patterns (ALL CAPS, === underline, etc.)
-    HEADER1(DocTag.H1, Regex("^[A-Z][A-Z0-9 ]{0,50}$|^.+\\n={3,}$")),
-    HEADER2(DocTag.H2, Regex("^[A-Z][A-Za-z0-9 ]{0,50}:$|^.+\\n-{3,}$")),
-    HEADER3(DocTag.H3, Regex("^\\d+\\.\\s+[A-Z].*$")),  // "1. Title"
-    HEADER4(DocTag.H4, Regex("^\\d+\\.\\d+\\.\\s+.*$")),  // "1.1. Subtitle"
-    HEADER5(DocTag.H5, Regex("^[a-z]\\)\\s+.*$")),  // "a) item"
-    HEADER6(DocTag.H6, Regex("^\\([a-z]\\)\\s+.*$")),  // "(a) item"
+    // ═══ Markdown Headers ═══
+    MD_H1(DocTag.H1, "^#\\s+.*$"),
+    MD_H2(DocTag.H2, "^##\\s+.*$"),
+    MD_H3(DocTag.H3, "^###\\s+.*$"),
+    MD_H4(DocTag.H4, "^####\\s+.*$"),
+    MD_H5(DocTag.H5, "^#####\\s+.*$"),
+    MD_H6(DocTag.H6, "^######\\s+.*$"),
 
-    // List items
-    OL_ITEM(DocTag.LI, Regex("^\\s*\\d+[\\.\\)]\\s+.*$")),  // "1. text" or "1) text"
-    UL_ITEM(DocTag.LI, Regex("^\\s*[-*+]\\s+.*$")),  // "- text", "* text"
+    // ═══ Plain Text Headers ═══
+    HEADER1(DocTag.H1, "^[A-Z][A-Z0-9 ]{0,50}$"),  // ALL CAPS
+    HEADER2(DocTag.H2, "^[A-Z][A-Za-z0-9 ]{0,50}:$"),  // Title:
+    HEADER3(DocTag.H3, "^\\d+\\.\\s+[A-Z].*$"),  // "1. Title"
+    HEADER4(DocTag.H4, "^\\d+\\.\\d+\\.\\s+.*$"),  // "1.1. Subtitle"
+    HEADER5(DocTag.H5, "^[a-z]\\)\\s+.*$"),  // "a) item"
+    HEADER6(DocTag.H6, "^\\([a-z]\\)\\s+.*$"),  // "(a) item"
+    UNDERLINE_H1(DocTag.H1, "^={3,}$"),  // === under title
+    UNDERLINE_H2(DocTag.H2, "^-{3,}$"),  // --- under title
 
-    // Table header (pipe-delimited or tab-separated with caps)
-    TABLE_HEADER(DocTag.TH, Regex("^[A-Z][A-Za-z0-9 ]+\\|.*$|^[A-Z][A-Z ]+\\t.*$")),
-    TABLE_ROW(DocTag.TD, Regex("^.*\\|.*$|^.*\\t.*\\t.*$")),
+    // ═══ List Items ═══
+    OL_ITEM(DocTag.LI, "^\\s*\\d+[\\.\\)]\\s+.*$"),  // "1. text" or "1) text"
+    UL_ITEM(DocTag.LI, "^\\s*[-*+]\\s+.*$"),  // "- text", "* text"
 
-    // Code/preformatted (starts with whitespace or has code-like patterns)
-    PRE(DocTag.PRE, Regex("^\\s{4,}.*$|^\\t+.*$|^[a-z_][a-z_0-9]*\\s*[=({].*$", RegexOption.IGNORE_CASE)),
+    // ═══ Definition List ═══
+    DT_ITEM(DocTag.DT, "^[^:\\s][^:]*(?=\\s*::\\s*$|$)"),  // Term (before ::)
+    DD_ITEM(DocTag.DD, "^:\\s+.*$|^\\s{2,}[^\\s].*$"),  // : description or indented
 
-    // Inline span (short fragments, emphasized)
-    SPAN(DocTag.SPAN, Regex("^\\*.*\\*$|^_.*_$")),
+    // ═══ Tables ═══
+    TABLE_HEADER(DocTag.TH, "^\\|?[A-Z][A-Za-z0-9 ]*\\|.*$"),  // |Header|...
+    TABLE_SEP(DocTag.TR, "^\\|?[-:|]+\\|[-:|\\s]*$"),  // |---|---|
+    TABLE_ROW(DocTag.TD, "^\\|.*\\|.*$"),  // |cell|cell|
+    TAB_TABLE(DocTag.TD, "^.*\\t.*\\t.*$"),  // tab-separated
 
-    // Default paragraph (any non-empty line)
-    PARAGRAPH(DocTag.P, Regex("^.+$"));
+    // ═══ Code/Preformatted ═══
+    FENCE_START(DocTag.PRE, "^```.*$"),  // ```lang
+    FENCE_END(DocTag.PRE, "^```$"),
+    INDENT_CODE(DocTag.PRE, "^\\s{4,}.*$|^\\t+.*$"),  // 4+ spaces or tabs
+
+    // ═══ Blockquote ═══
+    BLOCKQUOTE(DocTag.BLOCKQUOTE, "^>\\s*.*$"),
+
+    // ═══ Horizontal Rule ═══
+    HR(DocTag.HR, "^[-*_]{3,}$"),
+
+    // ═══ RFC/Spec Patterns ═══
+    ABNF_DEF(DocTag.PRE, "^\\s*[a-zA-Z][a-zA-Z0-9-]*\\s*=.*$"),  // ABNF rule
+    BNF_DEF(DocTag.PRE, "^\\s*<[^>]+>\\s*::=.*$"),  // BNF rule
+
+    // ═══ Inline ═══
+    SPAN(DocTag.SPAN, "^\\*.*\\*$|^_.*_$"),  // *text* or _text_
+
+    // ═══ Default ═══
+    PARAGRAPH(DocTag.P, "^.+$");
+
+    /** Lazy compiled pattern */
+    val pattern: Regex by lazy { Regex(patternString, options) }
 
     companion object {
         /**
@@ -1015,12 +1172,29 @@ enum class LineType(
         fun detect(line: String): LineType {
             if (line.isBlank()) return PARAGRAPH
 
-            // Check in priority order (headers first, then lists, etc.)
+            // Priority order - more specific patterns first
             val priorityOrder = listOf(
+                // Markdown headers (most specific)
+                MD_H6, MD_H5, MD_H4, MD_H3, MD_H2, MD_H1,
+                // Underline headers
+                UNDERLINE_H1, UNDERLINE_H2,
+                // HR must come before UNDERLINE
+                HR,
+                // Plain text headers
                 HEADER1, HEADER2, HEADER3, HEADER4, HEADER5, HEADER6,
+                // Definition list (before regular lists)
+                DD_ITEM, DT_ITEM,
+                // Lists
                 OL_ITEM, UL_ITEM,
-                TABLE_HEADER, TABLE_ROW,
-                PRE, SPAN,
+                // Tables
+                TABLE_SEP, TABLE_HEADER, TABLE_ROW, TAB_TABLE,
+                // Code
+                FENCE_START, FENCE_END, INDENT_CODE, ABNF_DEF, BNF_DEF,
+                // Blockquote
+                BLOCKQUOTE,
+                // Inline
+                SPAN,
+                // Default
                 PARAGRAPH
             )
 
@@ -1029,6 +1203,16 @@ enum class LineType(
             }
 
             return PARAGRAPH
+        }
+
+        /**
+         * Detect with script awareness.
+         * Returns pair of (LineType, ScriptAttrs).
+         */
+        fun detectWithScript(line: String): Pair<LineType, ScriptAttrs> {
+            val type = detect(line)
+            val script = ScriptDetector.detect(line)
+            return type to script
         }
     }
 }
@@ -1080,77 +1264,139 @@ class PlainTextParser {
         val lines = text.split(Regex("\\r\\n|\\r|\\n"))
         var offset = 0
 
+        // Definition list state
+        var dlSegment: IndexSegment? = null
+        var inDefList = false
+
+        // Code fence state
+        var inCodeFence = false
+        var codeBlockSegment: IndexSegment? = null
+
         for (line in lines) {
             if (line.isBlank()) {
-                // Close lists and tables on blank line
-                currentListSegment = null
-                currentListType = null
-                if (inTable) {
-                    inTable = false
-                    tableSegment = null
-                    currentRowSegment = null
+                // Close lists and tables on blank line (but not code fences)
+                if (!inCodeFence) {
+                    currentListSegment = null
+                    currentListType = null
+                    dlSegment = null
+                    inDefList = false
+                    if (inTable) {
+                        inTable = false
+                        tableSegment = null
+                        currentRowSegment = null
+                    }
                 }
                 offset += line.length + 1
                 continue
             }
 
-            val lineType = LineType.detect(line)
+            // Detect line type and script
+            val (lineType, scriptAttrs) = LineType.detectWithScript(line)
             val tag = lineType.tag
+
+            // Handle code fence state
+            if (lineType == LineType.FENCE_START && !inCodeFence) {
+                inCodeFence = true
+                codeBlockSegment = pushTagWithScript(DocTag.PRE, scriptAttrs)
+            } else if (lineType == LineType.FENCE_END && inCodeFence) {
+                inCodeFence = false
+                codeBlockSegment = null
+                offset += line.length + 1
+                continue
+            }
 
             // Build the full path
             val pathSegments = mutableListOf(htmlSegment, bodySegment)
 
+            // If in code fence, just add to PRE block
+            if (inCodeFence && codeBlockSegment != null) {
+                pathSegments.add(codeBlockSegment)
+                val leafSegment = pushTagWithScript(DocTag.CODE, scriptAttrs)
+                pathSegments.add(leafSegment)
+
+                val index = DocumentIndex(pathSegments)
+                elements.add(ParsedElement(index, DocTag.CODE, offset, offset + line.length, emptyMap(), line))
+                offset += line.length + 1
+                continue
+            }
+
             // Handle section containers (DIV for heading hierarchy)
-            when (lineType) {
-                LineType.HEADER1, LineType.HEADER2, LineType.HEADER3,
-                LineType.HEADER4, LineType.HEADER5, LineType.HEADER6 -> {
-                    val headingLevel = when (lineType) {
-                        LineType.HEADER1 -> 1
-                        LineType.HEADER2 -> 2
-                        LineType.HEADER3 -> 3
-                        LineType.HEADER4 -> 4
-                        LineType.HEADER5 -> 5
-                        LineType.HEADER6 -> 6
-                        else -> 0
-                    }
+            val headingLevel = when (lineType) {
+                LineType.MD_H1, LineType.HEADER1, LineType.UNDERLINE_H1 -> 1
+                LineType.MD_H2, LineType.HEADER2, LineType.UNDERLINE_H2 -> 2
+                LineType.MD_H3, LineType.HEADER3 -> 3
+                LineType.MD_H4, LineType.HEADER4 -> 4
+                LineType.MD_H5, LineType.HEADER5 -> 5
+                LineType.MD_H6, LineType.HEADER6 -> 6
+                else -> 0
+            }
 
-                    // Close deeper sections, open new section DIV
-                    if (headingLevel <= currentSectionLevel || sectionDivSegment == null) {
-                        sectionDivSegment = pushTag(DocTag.DIV)
-                    }
-                    currentSectionLevel = headingLevel
-
-                    // Close any open lists/tables
-                    currentListSegment = null
-                    currentListType = null
-                    inTable = false
-                    tableSegment = null
+            if (headingLevel > 0) {
+                // Close deeper sections, open new section DIV
+                if (headingLevel <= currentSectionLevel || sectionDivSegment == null) {
+                    sectionDivSegment = pushTagWithScript(DocTag.DIV, scriptAttrs)
                 }
-                else -> {}
+                currentSectionLevel = headingLevel
+
+                // Close any open lists/tables
+                currentListSegment = null
+                currentListType = null
+                dlSegment = null
+                inDefList = false
+                inTable = false
+                tableSegment = null
             }
 
             // Add section DIV if we're in a section
             sectionDivSegment?.let { pathSegments.add(it) }
 
+            // Handle definition list containers
+            when (lineType) {
+                LineType.DT_ITEM -> {
+                    if (!inDefList) {
+                        dlSegment = pushTagWithScript(DocTag.DL, scriptAttrs)
+                        inDefList = true
+                    }
+                    dlSegment?.let { pathSegments.add(it) }
+                    // Close other list types
+                    currentListSegment = null
+                    currentListType = null
+                }
+                LineType.DD_ITEM -> {
+                    if (!inDefList) {
+                        dlSegment = pushTagWithScript(DocTag.DL, scriptAttrs)
+                        inDefList = true
+                    }
+                    dlSegment?.let { pathSegments.add(it) }
+                    currentListSegment = null
+                    currentListType = null
+                }
+                else -> {}
+            }
+
             // Handle list containers
             when (lineType) {
                 LineType.OL_ITEM -> {
                     if (currentListType != LineType.OL_ITEM) {
-                        currentListSegment = pushTag(DocTag.OL)
+                        currentListSegment = pushTagWithScript(DocTag.OL, scriptAttrs)
                         currentListType = LineType.OL_ITEM
                     }
                     currentListSegment?.let { pathSegments.add(it) }
+                    dlSegment = null
+                    inDefList = false
                 }
                 LineType.UL_ITEM -> {
                     if (currentListType != LineType.UL_ITEM) {
-                        currentListSegment = pushTag(DocTag.UL)
+                        currentListSegment = pushTagWithScript(DocTag.UL, scriptAttrs)
                         currentListType = LineType.UL_ITEM
                     }
                     currentListSegment?.let { pathSegments.add(it) }
+                    dlSegment = null
+                    inDefList = false
                 }
                 else -> {
-                    // Not a list item - close list
-                    if (lineType != LineType.PARAGRAPH || currentListSegment != null) {
+                    // Not a list item - close list (unless it's a definition list item)
+                    if (lineType !in listOf(LineType.DT_ITEM, LineType.DD_ITEM, LineType.PARAGRAPH)) {
                         currentListSegment = null
                         currentListType = null
                     }
@@ -1159,27 +1405,34 @@ class PlainTextParser {
 
             // Handle table containers
             when (lineType) {
-                LineType.TABLE_HEADER, LineType.TABLE_ROW -> {
+                LineType.TABLE_HEADER, LineType.TABLE_ROW, LineType.TABLE_SEP, LineType.TAB_TABLE -> {
                     if (!inTable) {
-                        tableSegment = pushTag(DocTag.TABLE)
+                        tableSegment = pushTagWithScript(DocTag.TABLE, scriptAttrs)
                         inTable = true
                     }
                     tableSegment?.let { pathSegments.add(it) }
 
+                    // Skip separator rows
+                    if (lineType == LineType.TABLE_SEP) {
+                        offset += line.length + 1
+                        continue
+                    }
+
                     // Each row is a TR
-                    currentRowSegment = pushTag(DocTag.TR)
+                    currentRowSegment = pushTagWithScript(DocTag.TR, scriptAttrs)
                     currentRowSegment?.let { pathSegments.add(it) }
                 }
                 else -> {}
             }
 
-            // Handle PRE container (wraps code blocks)
-            if (lineType == LineType.PRE) {
-                // PRE is self-contained, no extra container needed
+            // Handle blockquote
+            if (lineType == LineType.BLOCKQUOTE) {
+                val bqSegment = pushTagWithScript(DocTag.BLOCKQUOTE, scriptAttrs)
+                pathSegments.add(bqSegment)
             }
 
-            // Add the leaf element
-            val leafSegment = pushTag(tag)
+            // Add the leaf element with script attributes
+            val leafSegment = pushTagWithScript(tag, scriptAttrs)
             pathSegments.add(leafSegment)
 
             val index = DocumentIndex(pathSegments)
@@ -1189,7 +1442,10 @@ class PlainTextParser {
                 tag = tag,
                 startOffset = offset,
                 endOffset = offset + line.length,
-                attributes = emptyMap(),
+                attributes = buildMap {
+                    scriptAttrs.lang?.let { put("lang", it) }
+                    scriptAttrs.dir?.let { put("dir", it.value) }
+                },
                 content = line
             ))
 
@@ -1206,6 +1462,15 @@ class PlainTextParser {
         val count = tagCounts.getOrPut(tag) { 0 } + 1
         tagCounts[tag] = count
         return IndexSegment(tag, count)
+    }
+
+    /**
+     * Push a new tag with script attributes and return its segment.
+     */
+    private fun pushTagWithScript(tag: DocTag, scriptAttrs: ScriptAttrs = ScriptAttrs.EMPTY): IndexSegment {
+        val count = tagCounts.getOrPut(tag) { 0 } + 1
+        tagCounts[tag] = count
+        return IndexSegment(tag, count, emptyList(), scriptAttrs)
     }
 
     /**

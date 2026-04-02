@@ -662,4 +662,128 @@ class DocumentIndexTest {
         // Should have indices for each non-blank line
         assertTrue(elements.size >= 5)
     }
+
+    // ═══ ScriptDetector Tests ═══
+
+    @Test
+    fun testScriptDetectorHebrew() {
+        assertTrue(ScriptDetector.isHebrew("שלום"))
+        assertTrue(ScriptDetector.isRtl("שלום עולם"))
+        assertFalse(ScriptDetector.isHebrew("Hello"))
+
+        val attrs = ScriptDetector.detect("שלום")
+        assertEquals("he", attrs.lang)
+        assertEquals(TextDir.RTL, attrs.dir)
+    }
+
+    @Test
+    fun testScriptDetectorArabic() {
+        assertTrue(ScriptDetector.isArabic("مرحبا"))
+        assertTrue(ScriptDetector.isRtl("مرحبا"))
+
+        val attrs = ScriptDetector.detect("مرحبا")
+        assertEquals("ar", attrs.lang)
+        assertEquals(TextDir.RTL, attrs.dir)
+    }
+
+    @Test
+    fun testScriptDetectorEnglish() {
+        assertFalse(ScriptDetector.isRtl("Hello World"))
+
+        val attrs = ScriptDetector.detect("Hello World")
+        assertEquals("en", attrs.lang)
+        assertEquals(TextDir.LTR, attrs.dir)
+    }
+
+    @Test
+    fun testScriptDetectorMixed() {
+        // Dominant script wins
+        val hebrewDominant = ScriptDetector.detect("שלום Hello עולם")
+        assertEquals("he", hebrewDominant.lang)
+
+        val englishDominant = ScriptDetector.detect("Hello World שלום")
+        assertEquals("en", englishDominant.lang)
+    }
+
+    // ═══ LineType DT/DD Tests ═══
+
+    @Test
+    fun testLineTypeDefinitionList() {
+        // DD item (: description)
+        assertEquals(LineType.DD_ITEM, LineType.detect(": This is a description"))
+
+        // DD item (indented)
+        assertEquals(LineType.DD_ITEM, LineType.detect("  Indented description"))
+    }
+
+    @Test
+    fun testLineTypeMdHeaders() {
+        assertEquals(LineType.MD_H1, LineType.detect("# Heading 1"))
+        assertEquals(LineType.MD_H2, LineType.detect("## Heading 2"))
+        assertEquals(LineType.MD_H3, LineType.detect("### Heading 3"))
+        assertEquals(LineType.MD_H4, LineType.detect("#### Heading 4"))
+        assertEquals(LineType.MD_H5, LineType.detect("##### Heading 5"))
+        assertEquals(LineType.MD_H6, LineType.detect("###### Heading 6"))
+    }
+
+    @Test
+    fun testLineTypeCodeFence() {
+        assertEquals(LineType.FENCE_START, LineType.detect("```kotlin"))
+        assertEquals(LineType.FENCE_END, LineType.detect("```"))
+    }
+
+    @Test
+    fun testLineTypeBlockquote() {
+        assertEquals(LineType.BLOCKQUOTE, LineType.detect("> This is a quote"))
+    }
+
+    @Test
+    fun testLineTypeWithScript() {
+        val (type, script) = LineType.detectWithScript("# שלום")
+        assertEquals(LineType.MD_H1, type)
+        assertEquals("he", script.lang)
+        assertEquals(TextDir.RTL, script.dir)
+    }
+
+    // ═══ RfcPattern Tests ═══
+
+    @Test
+    fun testRfcPatternKeywords() {
+        assertTrue(RfcPattern.hasRfc2119Keywords("You MUST do this"))
+        assertTrue(RfcPattern.hasRfc2119Keywords("This SHOULD work"))
+        assertTrue(RfcPattern.hasRfc2119Keywords("You MAY skip this"))
+        assertFalse(RfcPattern.hasRfc2119Keywords("No keywords here"))
+    }
+
+    @Test
+    fun testRfcPatternRefs() {
+        val refs = RfcPattern.findRfcRefs("See RFC 2119 and RFC 7230 for details")
+        assertEquals(2, refs.size)
+        assertTrue(refs.contains("RFC 2119"))
+        assertTrue(refs.contains("RFC 7230"))
+    }
+
+    // ═══ PlainTextParser Script Detection Tests ═══
+
+    @Test
+    fun testPlainTextParserScriptDetection() {
+        val text = """
+            # שלום עולם
+            This is English
+            זהו טקסט בעברית
+        """.trimIndent()
+
+        val parser = PlainTextParser()
+        val elements = parser.parse(text)
+
+        // Hebrew header should have RTL
+        val hebrewHeader = elements.find { it.content.contains("שלום") }
+        assertNotNull(hebrewHeader)
+        assertEquals("rtl", hebrewHeader.attributes["dir"])
+
+        // English paragraph should have LTR
+        val englishPara = elements.find { it.content.contains("English") }
+        assertNotNull(englishPara)
+        assertEquals("ltr", englishPara.attributes["dir"])
+    }
 }
