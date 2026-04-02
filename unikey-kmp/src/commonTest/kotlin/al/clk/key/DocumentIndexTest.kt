@@ -128,7 +128,7 @@ class DocumentIndexTest {
 
     @Test
     fun testTagPatternToRegex() {
-        val pattern = TagPattern("<h1", "[^>]*", ">")
+        val pattern = TagPattern.html("h1")
         val regex = pattern.toRegex("H1")
 
         val match = regex.find("<h1 class=\"title\">")
@@ -136,8 +136,67 @@ class DocumentIndexTest {
 
         val groups = match.groups
         assertNotNull(groups["H1_prefix"])
-        assertNotNull(groups["H1_middle"])
+        assertNotNull(groups["H1_attr"])
         assertNotNull(groups["H1_suffix"])
+    }
+
+    @Test
+    fun testTagPatternHtml() {
+        val pattern = TagPattern.html("p")
+        assertEquals("<p", pattern.prefix)
+        assertEquals("</p>", pattern.closeTag)
+
+        val selfClosing = TagPattern.html("br", selfClosing = true)
+        assertEquals("<br", selfClosing.prefix)
+        assertEquals("", selfClosing.closeTag)
+    }
+
+    @Test
+    fun testTagPatternMd() {
+        val pattern = TagPattern.md("^#\\s+", ".*", "$")
+        assertEquals("^#\\s+", pattern.prefix)
+        assertEquals("", pattern.closeTag)
+    }
+
+    @Test
+    fun testTagPatternCloseRegex() {
+        val pattern = TagPattern.html("div")
+        val closeRegex = pattern.closeRegex("DIV")
+        assertNotNull(closeRegex)
+        assertTrue(closeRegex.matches("</div>"))
+        assertTrue(closeRegex.matches("</DIV>"))
+    }
+
+    // ═══ AttrPattern Tests ═══
+
+    @Test
+    fun testAttrPatternParseAll() {
+        val attrs = AttrPattern.parseAll("""lang="he" dir="rtl" class="verse poem" data-index="5"""")
+        assertEquals("he", attrs["lang"])
+        assertEquals("rtl", attrs["dir"])
+        assertEquals("verse poem", attrs["class"])
+        assertEquals("5", attrs["data-index"])
+    }
+
+    @Test
+    fun testAttrPatternParseScriptAttrs() {
+        val script = AttrPattern.parseScriptAttrs("""lang="he" dir="rtl" class="test"""")
+        assertEquals("he", script.lang)
+        assertEquals(TextDir.RTL, script.dir)
+    }
+
+    @Test
+    fun testAttrPatternParseClasses() {
+        val classes = AttrPattern.parseClasses("""id="main" class="container wrap fluid"""")
+        assertEquals(listOf("container", "wrap", "fluid"), classes)
+    }
+
+    @Test
+    fun testAttrPatternParseDataAttrs() {
+        val data = AttrPattern.parseDataAttrs("""data-index="5" data-verse="2" class="test"""")
+        assertEquals("5", data["data-index"])
+        assertEquals("2", data["data-verse"])
+        assertEquals(2, data.size)  // Only data-* attributes
     }
 
     // ═══ IndexSegment Tests ═══

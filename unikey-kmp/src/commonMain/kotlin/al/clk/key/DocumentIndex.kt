@@ -17,17 +17,119 @@ package al.clk.key
 // ═══════════════════════════════════════════════════════════════════════════════
 
 /**
- * Pattern parts for regex matching - prefix, middle, suffix.
+ * Pattern parts for regex matching - open tag, attributes, content, close tag.
+ * Supports both HTML tags with attributes and Markdown patterns.
  */
 data class TagPattern(
-    val prefix: String,   // Opening pattern (e.g., "<h1", "# ")
-    val middle: String,   // Content pattern (e.g., "[^>]*", ".*")
-    val suffix: String    // Closing pattern (e.g., ">", "\n")
+    val prefix: String,      // Opening: "<h1" or "# "
+    val attrPattern: String, // Attributes: "[^>]*" or ""
+    val suffix: String,      // Close opening: ">" or ""
+    val closeTag: String = "" // Closing tag: "</h1>" or "" for self-closing/MD
 ) {
-    /** Compile to regex with named groups */
+    /** Compile to regex with named groups for opening tag */
     fun toRegex(tagName: String): Regex {
-        val pattern = "(?<${tagName}_prefix>$prefix)(?<${tagName}_middle>$middle)(?<${tagName}_suffix>$suffix)"
+        val pattern = "(?<${tagName}_prefix>$prefix)(?<${tagName}_attr>$attrPattern)(?<${tagName}_suffix>$suffix)"
         return Regex(pattern, RegexOption.IGNORE_CASE)
+    }
+
+    /** Compile to regex for full tag with content and closing */
+    fun toFullRegex(tagName: String): Regex {
+        val close = if (closeTag.isNotEmpty()) closeTag else ""
+        val contentPattern = if (close.isNotEmpty()) ".*?" else ".*"
+        val pattern = "(?<${tagName}_prefix>$prefix)(?<${tagName}_attr>$attrPattern)(?<${tagName}_suffix>$suffix)" +
+            "(?<${tagName}_content>$contentPattern)" +
+            if (close.isNotEmpty()) "(?<${tagName}_close>$close)" else ""
+        return Regex(pattern, setOf(RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL))
+    }
+
+    /** Regex for closing tag only */
+    fun closeRegex(tagName: String): Regex? {
+        if (closeTag.isEmpty()) return null
+        return Regex(closeTag, RegexOption.IGNORE_CASE)
+    }
+
+    companion object {
+        /** Standard HTML attribute pattern */
+        const val HTML_ATTRS = """(?:\s+[\w-]+(?:\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]*))?)*"""
+
+        /** Create HTML tag pattern with standard attributes */
+        fun html(tag: String, selfClosing: Boolean = false): TagPattern {
+            return if (selfClosing) {
+                TagPattern("<$tag", HTML_ATTRS, """\s*/?>""", "")
+            } else {
+                TagPattern("<$tag", HTML_ATTRS, ">", "</$tag>")
+            }
+        }
+
+        /** Create Markdown pattern (no closing tag) */
+        fun md(prefix: String, content: String, suffix: String): TagPattern {
+            return TagPattern(prefix, content, suffix, "")
+        }
+    }
+}
+
+/**
+ * Attribute pattern for parsing HTML attributes.
+ * Format: name="value" or name='value' or name=value or name (boolean)
+ */
+object AttrPattern {
+    /** Pattern for a single attribute */
+    val SINGLE = Regex("""([\w-]+)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]*)))?""")
+
+    /** Pattern for lang attribute */
+    val LANG = Regex("""lang\s*=\s*["']?([a-z]{2,3})["']?""", RegexOption.IGNORE_CASE)
+
+    /** Pattern for dir attribute */
+    val DIR = Regex("""dir\s*=\s*["']?(ltr|rtl|auto)["']?""", RegexOption.IGNORE_CASE)
+
+    /** Pattern for class attribute */
+    val CLASS = Regex("""class\s*=\s*["']([^"']+)["']""", RegexOption.IGNORE_CASE)
+
+    /** Pattern for id attribute */
+    val ID = Regex("""id\s*=\s*["']([^"']+)["']""", RegexOption.IGNORE_CASE)
+
+    /** Pattern for data-* attributes */
+    val DATA = Regex("""(data-[\w-]+)\s*=\s*["']([^"']+)["']""", RegexOption.IGNORE_CASE)
+
+    /**
+     * Parse all attributes from an attribute string.
+     */
+    fun parseAll(attrString: String): Map<String, String> {
+        val attrs = mutableMapOf<String, String>()
+        SINGLE.findAll(attrString).forEach { match ->
+            val name = match.groupValues[1]
+            val value = match.groupValues[2].ifEmpty {
+                match.groupValues[3].ifEmpty {
+                    match.groupValues[4].ifEmpty { "" }
+                }
+            }
+            attrs[name] = value
+        }
+        return attrs
+    }
+
+    /**
+     * Extract script attributes (lang, dir) from attribute string.
+     */
+    fun parseScriptAttrs(attrString: String): ScriptAttrs {
+        val lang = LANG.find(attrString)?.groupValues?.get(1)
+        val dir = DIR.find(attrString)?.groupValues?.get(1)?.let { TextDir.fromValue(it) }
+        return ScriptAttrs(lang, dir)
+    }
+
+    /**
+     * Extract CSS classes from attribute string.
+     */
+    fun parseClasses(attrString: String): List<String> {
+        val match = CLASS.find(attrString) ?: return emptyList()
+        return match.groupValues[1].split(Regex("\\s+")).filter { it.isNotBlank() }
+    }
+
+    /**
+     * Extract data-* attributes from attribute string.
+     */
+    fun parseDataAttrs(attrString: String): Map<String, String> {
+        return DATA.findAll(attrString).associate { it.groupValues[1] to it.groupValues[2] }
     }
 }
 
@@ -42,430 +144,430 @@ enum class DocTag(
 ) {
     // ═══ Document Structure ═══
     HTML(
-        TagPattern("<html", "[^>]*", ">"),
+        TagPattern.html("html"),
         isContainer = true
     ),
     HEAD(
-        TagPattern("<head", "[^>]*", ">"),
+        TagPattern.html("head"),
         isContainer = true
     ),
     BODY(
-        TagPattern("<body", "[^>]*", ">"),
+        TagPattern.html("body"),
         isContainer = true
     ),
 
     // ═══ Headings ═══
     H1(
-        TagPattern("<h1", "[^>]*", ">"),
-        TagPattern("^#\\s+", ".*", "$")
+        TagPattern.html("h1"),
+        TagPattern.md("^#\\s+", ".*", "$")
     ),
     H2(
-        TagPattern("<h2", "[^>]*", ">"),
-        TagPattern("^##\\s+", ".*", "$")
+        TagPattern.html("h2"),
+        TagPattern.md("^##\\s+", ".*", "$")
     ),
     H3(
-        TagPattern("<h3", "[^>]*", ">"),
-        TagPattern("^###\\s+", ".*", "$")
+        TagPattern.html("h3"),
+        TagPattern.md("^###\\s+", ".*", "$")
     ),
     H4(
-        TagPattern("<h4", "[^>]*", ">"),
-        TagPattern("^####\\s+", ".*", "$")
+        TagPattern.html("h4"),
+        TagPattern.md("^####\\s+", ".*", "$")
     ),
     H5(
-        TagPattern("<h5", "[^>]*", ">"),
-        TagPattern("^#####\\s+", ".*", "$")
+        TagPattern.html("h5"),
+        TagPattern.md("^#####\\s+", ".*", "$")
     ),
     H6(
-        TagPattern("<h6", "[^>]*", ">"),
-        TagPattern("^######\\s+", ".*", "$")
+        TagPattern.html("h6"),
+        TagPattern.md("^######\\s+", ".*", "$")
     ),
 
     // ═══ Block Elements ═══
     P(
-        TagPattern("<p", "[^>]*", ">"),
-        TagPattern("^(?![-*#>])", ".+", "$")
+        TagPattern.html("p"),
+        TagPattern.md("^(?![-*#>])", ".+", "$")
     ),
     DIV(
-        TagPattern("<div", "[^>]*", ">"),
+        TagPattern.html("div"),
         isContainer = true
     ),
     SECTION(
-        TagPattern("<section", "[^>]*", ">"),
+        TagPattern.html("section"),
         isContainer = true
     ),
     ARTICLE(
-        TagPattern("<article", "[^>]*", ">"),
+        TagPattern.html("article"),
         isContainer = true
     ),
     ASIDE(
-        TagPattern("<aside", "[^>]*", ">"),
+        TagPattern.html("aside"),
         isContainer = true
     ),
     HEADER(
-        TagPattern("<header", "[^>]*", ">"),
+        TagPattern.html("header"),
         isContainer = true
     ),
     FOOTER(
-        TagPattern("<footer", "[^>]*", ">"),
+        TagPattern.html("footer"),
         isContainer = true
     ),
     NAV(
-        TagPattern("<nav", "[^>]*", ">"),
+        TagPattern.html("nav"),
         isContainer = true
     ),
     MAIN(
-        TagPattern("<main", "[^>]*", ">"),
+        TagPattern.html("main"),
         isContainer = true
     ),
 
     // ═══ Lists ═══
     OL(
-        TagPattern("<ol", "[^>]*", ">"),
+        TagPattern.html("ol"),
         isContainer = true
     ),
     UL(
-        TagPattern("<ul", "[^>]*", ">"),
+        TagPattern.html("ul"),
         isContainer = true
     ),
     LI(
-        TagPattern("<li", "[^>]*", ">"),
-        TagPattern("^[-*]\\s+|^\\d+\\.\\s+", ".*", "$")
+        TagPattern.html("li"),
+        TagPattern.md("^[-*]\\s+|^\\d+\\.\\s+", ".*", "$")
     ),
     DL(
-        TagPattern("<dl", "[^>]*", ">"),
+        TagPattern.html("dl"),
         isContainer = true
     ),
     DT(
-        TagPattern("<dt", "[^>]*", ">")
+        TagPattern.html("dt")
     ),
     DD(
-        TagPattern("<dd", "[^>]*", ">")
+        TagPattern.html("dd")
     ),
 
     // ═══ Code/Preformatted ═══
     PRE(
-        TagPattern("<pre", "[^>]*", ">"),
-        TagPattern("^```", ".*", "```$")
+        TagPattern.html("pre"),
+        TagPattern.md("^```", ".*", "```$")
     ),
     CODE(
-        TagPattern("<code", "[^>]*", ">"),
-        TagPattern("`", "[^`]+", "`"),
+        TagPattern.html("code"),
+        TagPattern.md("`", "[^`]+", "`"),
         isBlock = false
     ),
     KBD(
-        TagPattern("<kbd", "[^>]*", ">"),
+        TagPattern.html("kbd"),
         isBlock = false
     ),
     SAMP(
-        TagPattern("<samp", "[^>]*", ">"),
+        TagPattern.html("samp"),
         isBlock = false
     ),
     VAR(
-        TagPattern("<var", "[^>]*", ">"),
+        TagPattern.html("var"),
         isBlock = false
     ),
 
     // ═══ Inline Text Formatting ═══
     SPAN(
-        TagPattern("<span", "[^>]*", ">"),
+        TagPattern.html("span"),
         isBlock = false
     ),
     B(
-        TagPattern("<b", "[^>]*", ">"),
-        TagPattern("\\*\\*", ".+?", "\\*\\*"),
+        TagPattern.html("b"),
+        TagPattern.md("\\*\\*", ".+?", "\\*\\*"),
         isBlock = false
     ),
     I(
-        TagPattern("<i", "[^>]*", ">"),
-        TagPattern("\\*", "[^*]+", "\\*"),
+        TagPattern.html("i"),
+        TagPattern.md("\\*", "[^*]+", "\\*"),
         isBlock = false
     ),
     U(
-        TagPattern("<u", "[^>]*", ">"),
+        TagPattern.html("u"),
         isBlock = false
     ),
     S(
-        TagPattern("<s", "[^>]*", ">"),
-        TagPattern("~~", ".+?", "~~"),
+        TagPattern.html("s"),
+        TagPattern.md("~~", ".+?", "~~"),
         isBlock = false
     ),
     STRIKE(
-        TagPattern("<strike", "[^>]*", ">"),
-        TagPattern("~~", ".+?", "~~"),
+        TagPattern.html("strike"),
+        TagPattern.md("~~", ".+?", "~~"),
         isBlock = false
     ),
     DEL(
-        TagPattern("<del", "[^>]*", ">"),
-        TagPattern("~~", ".+?", "~~"),
+        TagPattern.html("del"),
+        TagPattern.md("~~", ".+?", "~~"),
         isBlock = false
     ),
     INS(
-        TagPattern("<ins", "[^>]*", ">"),
+        TagPattern.html("ins"),
         isBlock = false
     ),
     MARK(
-        TagPattern("<mark", "[^>]*", ">"),
-        TagPattern("==", ".+?", "=="),
+        TagPattern.html("mark"),
+        TagPattern.md("==", ".+?", "=="),
         isBlock = false
     ),
     SMALL(
-        TagPattern("<small", "[^>]*", ">"),
+        TagPattern.html("small"),
         isBlock = false
     ),
     BIG(
-        TagPattern("<big", "[^>]*", ">"),
+        TagPattern.html("big"),
         isBlock = false
     ),
     SUB(
-        TagPattern("<sub", "[^>]*", ">"),
-        TagPattern("~", "[^~]+", "~"),
+        TagPattern.html("sub"),
+        TagPattern.md("~", "[^~]+", "~"),
         isBlock = false
     ),
     SUP(
-        TagPattern("<sup", "[^>]*", ">"),
-        TagPattern("\\^", "[^^]+", "\\^"),
+        TagPattern.html("sup"),
+        TagPattern.md("\\^", "[^^]+", "\\^"),
         isBlock = false
     ),
 
     // ═══ Semantic Inline ═══
     STRONG(
-        TagPattern("<strong", "[^>]*", ">"),
-        TagPattern("\\*\\*|__", ".+?", "\\*\\*|__"),
+        TagPattern.html("strong"),
+        TagPattern.md("\\*\\*|__", ".+?", "\\*\\*|__"),
         isBlock = false
     ),
     EM(
-        TagPattern("<em", "[^>]*", ">"),
-        TagPattern("\\*|_", ".+?", "\\*|_"),
+        TagPattern.html("em"),
+        TagPattern.md("\\*|_", ".+?", "\\*|_"),
         isBlock = false
     ),
     CITE(
-        TagPattern("<cite", "[^>]*", ">"),
+        TagPattern.html("cite"),
         isBlock = false
     ),
     DFN(
-        TagPattern("<dfn", "[^>]*", ">"),
+        TagPattern.html("dfn"),
         isBlock = false
     ),
     ABBR(
-        TagPattern("<abbr", "[^>]*", ">"),
+        TagPattern.html("abbr"),
         isBlock = false
     ),
     TIME(
-        TagPattern("<time", "[^>]*", ">"),
+        TagPattern.html("time"),
         isBlock = false
     ),
     DATA(
-        TagPattern("<data", "[^>]*", ">"),
+        TagPattern.html("data"),
         isBlock = false
     ),
     Q(
-        TagPattern("<q", "[^>]*", ">"),
+        TagPattern.html("q"),
         isBlock = false
     ),
 
     // ═══ Links ═══
     A(
-        TagPattern("<a", "[^>]*", ">"),
-        TagPattern("\\[", "[^\\]]+", "\\]\\([^)]+\\)"),
+        TagPattern.html("a"),
+        TagPattern.md("\\[", "[^\\]]+", "\\]\\([^)]+\\)"),
         isBlock = false
     ),
 
     // ═══ Bidirectional Text (important for Hebrew/Arabic) ═══
     BDO(
-        TagPattern("<bdo", "[^>]*", ">"),
+        TagPattern.html("bdo"),
         isBlock = false
     ),
     BDI(
-        TagPattern("<bdi", "[^>]*", ">"),
+        TagPattern.html("bdi"),
         isBlock = false
     ),
 
     // ═══ Ruby Annotations (for phonetic guides) ═══
     RUBY(
-        TagPattern("<ruby", "[^>]*", ">"),
+        TagPattern.html("ruby"),
         isBlock = false
     ),
     RT(
-        TagPattern("<rt", "[^>]*", ">"),
+        TagPattern.html("rt"),
         isBlock = false
     ),
     RP(
-        TagPattern("<rp", "[^>]*", ">"),
+        TagPattern.html("rp"),
         isBlock = false
     ),
 
     // ═══ Line Breaks ═══
     BR(
-        TagPattern("<br", "[^>]*", "/?>"),
+        TagPattern.html("br", selfClosing = true),
         isBlock = false
     ),
     WBR(
-        TagPattern("<wbr", "[^>]*", "/?>"),
+        TagPattern.html("wbr", selfClosing = true),
         isBlock = false
     ),
     HR(
-        TagPattern("<hr", "[^>]*", "/?>"),
-        TagPattern("^---+$|^\\*\\*\\*+$|^___+$", "", "")
+        TagPattern.html("hr", selfClosing = true),
+        TagPattern.md("^---+$|^\\*\\*\\*+$|^___+$", "", "")
     ),
 
     // ═══ Quotes ═══
     BLOCKQUOTE(
-        TagPattern("<blockquote", "[^>]*", ">"),
-        TagPattern("^>\\s*", ".*", "$"),
+        TagPattern.html("blockquote"),
+        TagPattern.md("^>\\s*", ".*", "$"),
         isContainer = true
     ),
 
     // ═══ Figures ═══
     FIGURE(
-        TagPattern("<figure", "[^>]*", ">"),
+        TagPattern.html("figure"),
         isContainer = true
     ),
     FIGCAPTION(
-        TagPattern("<figcaption", "[^>]*", ">")
+        TagPattern.html("figcaption")
     ),
     IMG(
-        TagPattern("<img", "[^>]*", "/?>"),
-        TagPattern("!\\[", "[^\\]]*", "\\]\\([^)]+\\)"),
+        TagPattern.html("img", selfClosing = true),
+        TagPattern.md("!\\[", "[^\\]]*", "\\]\\([^)]+\\)"),
         isBlock = false
     ),
 
     // ═══ Tables ═══
     TABLE(
-        TagPattern("<table", "[^>]*", ">"),
+        TagPattern.html("table"),
         isContainer = true
     ),
     THEAD(
-        TagPattern("<thead", "[^>]*", ">"),
+        TagPattern.html("thead"),
         isContainer = true
     ),
     TBODY(
-        TagPattern("<tbody", "[^>]*", ">"),
+        TagPattern.html("tbody"),
         isContainer = true
     ),
     TFOOT(
-        TagPattern("<tfoot", "[^>]*", ">"),
+        TagPattern.html("tfoot"),
         isContainer = true
     ),
     TR(
-        TagPattern("<tr", "[^>]*", ">"),
+        TagPattern.html("tr"),
         isContainer = true
     ),
     TH(
-        TagPattern("<th", "[^>]*", ">")
+        TagPattern.html("th")
     ),
     TD(
-        TagPattern("<td", "[^>]*", ">")
+        TagPattern.html("td")
     ),
     CAPTION(
-        TagPattern("<caption", "[^>]*", ">")
+        TagPattern.html("caption")
     ),
     COLGROUP(
-        TagPattern("<colgroup", "[^>]*", ">"),
+        TagPattern.html("colgroup"),
         isContainer = true
     ),
     COL(
-        TagPattern("<col", "[^>]*", "/?>"),
+        TagPattern.html("col", selfClosing = true),
         isBlock = false
     ),
 
     // ═══ Forms (for completeness) ═══
     FORM(
-        TagPattern("<form", "[^>]*", ">"),
+        TagPattern.html("form"),
         isContainer = true
     ),
     INPUT(
-        TagPattern("<input", "[^>]*", "/?>"),
+        TagPattern.html("input", selfClosing = true),
         isBlock = false
     ),
     TEXTAREA(
-        TagPattern("<textarea", "[^>]*", ">")
+        TagPattern.html("textarea")
     ),
     BUTTON(
-        TagPattern("<button", "[^>]*", ">"),
+        TagPattern.html("button"),
         isBlock = false
     ),
     SELECT(
-        TagPattern("<select", "[^>]*", ">"),
+        TagPattern.html("select"),
         isContainer = true
     ),
     OPTION(
-        TagPattern("<option", "[^>]*", ">")
+        TagPattern.html("option")
     ),
     LABEL(
-        TagPattern("<label", "[^>]*", ">"),
+        TagPattern.html("label"),
         isBlock = false
     ),
     FIELDSET(
-        TagPattern("<fieldset", "[^>]*", ">"),
+        TagPattern.html("fieldset"),
         isContainer = true
     ),
     LEGEND(
-        TagPattern("<legend", "[^>]*", ">")
+        TagPattern.html("legend")
     ),
 
     // ═══ Details/Summary ═══
     DETAILS(
-        TagPattern("<details", "[^>]*", ">"),
+        TagPattern.html("details"),
         isContainer = true
     ),
     SUMMARY(
-        TagPattern("<summary", "[^>]*", ">")
+        TagPattern.html("summary")
     ),
 
     // ═══ Media ═══
     AUDIO(
-        TagPattern("<audio", "[^>]*", ">"),
+        TagPattern.html("audio"),
         isContainer = true
     ),
     VIDEO(
-        TagPattern("<video", "[^>]*", ">"),
+        TagPattern.html("video"),
         isContainer = true
     ),
     SOURCE(
-        TagPattern("<source", "[^>]*", "/?>"),
+        TagPattern.html("source", selfClosing = true),
         isBlock = false
     ),
     TRACK(
-        TagPattern("<track", "[^>]*", "/?>"),
+        TagPattern.html("track", selfClosing = true),
         isBlock = false
     ),
 
     // ═══ Embedded Content ═══
     IFRAME(
-        TagPattern("<iframe", "[^>]*", ">"),
+        TagPattern.html("iframe"),
         isBlock = false
     ),
     EMBED(
-        TagPattern("<embed", "[^>]*", "/?>"),
+        TagPattern.html("embed", selfClosing = true),
         isBlock = false
     ),
     OBJECT(
-        TagPattern("<object", "[^>]*", ">"),
+        TagPattern.html("object"),
         isContainer = true
     ),
 
     // ═══ Script/Style (metadata) ═══
     SCRIPT(
-        TagPattern("<script", "[^>]*", ">"),
+        TagPattern.html("script"),
         isBlock = false
     ),
     STYLE(
-        TagPattern("<style", "[^>]*", ">"),
+        TagPattern.html("style"),
         isBlock = false
     ),
     LINK(
-        TagPattern("<link", "[^>]*", "/?>"),
+        TagPattern.html("link", selfClosing = true),
         isBlock = false
     ),
     META(
-        TagPattern("<meta", "[^>]*", "/?>"),
+        TagPattern.html("meta", selfClosing = true),
         isBlock = false
     ),
     TITLE(
-        TagPattern("<title", "[^>]*", ">")
+        TagPattern.html("title")
     ),
     BASE(
-        TagPattern("<base", "[^>]*", "/?>"),
+        TagPattern.html("base", selfClosing = true),
         isBlock = false
     );
 
