@@ -50,6 +50,32 @@ a,a:hover,a:visited,a:active{color:inherit;text-decoration:none}
 .mat-group{margin-bottom:12px;border-radius:6px;overflow:hidden}
 .mat-hdr{padding:4px 10px;display:flex;align-items:center;gap:6px}
 .mat-row{display:flex;align-items:baseline;padding:2px 10px;border-bottom:1px solid rgba(26,26,26,0.27);font-size:12px;gap:4px}
+/* Language picker */
+.lang-picker{background:#111;border:1px solid #222;border-radius:8px;padding:8px;max-height:400px;overflow-y:auto}
+.lang-search{width:100%;padding:6px 10px;background:#0a0a0a;border:1px solid #333;border-radius:4px;color:#e0d8cc;font-size:12px;margin-bottom:8px}
+.lang-search:focus{outline:none;border-color:#887755}
+.lang-groups{display:flex;flex-direction:column;gap:12px}
+.lang-group{border-bottom:1px solid #1a1a1a;padding-bottom:8px}
+.lang-script-hdr{font-size:10px;color:#666;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
+.lang-item{display:flex;align-items:center;gap:8px;padding:4px 8px;cursor:pointer;border-radius:4px;transition:background 0.15s}
+.lang-item:hover{background:#1a1a1a}
+.lang-item.selected{background:#2a2520;border:1px solid #887755}
+.lang-flag{font-size:16px}
+.lang-native{font-size:13px;color:#e0d8cc}
+.lang-en{font-size:11px;color:#666;margin-left:auto}
+/* Pair picker */
+.pair-picker{background:#111;border:1px solid #222;border-radius:8px;padding:8px}
+.pair-section{margin-bottom:12px}
+.pair-hdr{font-size:10px;color:#666;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+.pair-item{display:flex;align-items:center;gap:8px;padding:6px 10px;cursor:pointer;border-radius:4px;transition:background 0.15s}
+.pair-item:hover{background:#1a1a1a}
+.pair-flags{font-size:14px;white-space:nowrap}
+.pair-names{font-size:11px;color:#888}
+.pair-custom{display:flex;align-items:center;gap:8px}
+.pair-custom select{flex:1;padding:6px;background:#0a0a0a;border:1px solid #333;border-radius:4px;color:#e0d8cc;font-size:12px}
+.pair-custom select:focus{outline:none;border-color:#887755}
+.pair-arrow{font-size:16px;cursor:pointer;color:#887755;padding:4px}
+.pair-arrow:hover{color:#c4a882}
 </style>
 </head>
 <body>
@@ -102,6 +128,112 @@ function generateAnalysisPrompt(srcLang, tgtLang, context) { return UK.generateA
 function generatePathPrompt(srcLang, tgtLang, context) { return UK.generatePathPrompt(srcLang, tgtLang, context || ''); }
 function getTranslationPair(srcLang, tgtLang) { return UK.getTranslationPair(srcLang, tgtLang); }
 function getAllTranslationPairIds() { return UK.getAllTranslationPairIds(); }
+
+/* ═══ Language UI State Management ═══ */
+var LangUI = UK.langUI;
+function getLangSelectorState() { return LangUI.getLanguageSelectorState(); }
+function selectLang(code) { return LangUI.selectLanguage(code); }
+function filterLangs(filter) { return LangUI.filterLanguages(filter); }
+function getLangsByScript() { return LangUI.getLanguagesByScript(); }
+function getAllLangItems() { return LangUI.getAllLanguageItems(); }
+function getPairSelectorState() { return LangUI.getPairSelectorState(); }
+function selectSrcLang(code) { return LangUI.selectSourceLanguage(code); }
+function selectTgtLang(code) { return LangUI.selectTargetLanguage(code); }
+function selectPair(pairId) { return LangUI.selectTranslationPair(pairId); }
+function swapLangs() { return LangUI.swapLanguages(); }
+function getPopularPairs() { return LangUI.getPopularPairs(); }
+function getRecentPairs() { return LangUI.getRecentPairs(); }
+function getCurrentPair() { return LangUI.getCurrentTranslationPair(); }
+
+/* ═══ Language Picker UI Renderer ═══ */
+function renderLangPicker(containerId, onSelect) {
+  var container = document.getElementById(containerId);
+  if (!container) return;
+  var langs = getLangsByScript();
+  var html = '<div class="lang-picker">';
+  html += '<input type="text" class="lang-search" placeholder="Search languages..." oninput="filterLangPicker(this.value)">';
+  html += '<div class="lang-groups">';
+  for (var script in langs) {
+    html += '<div class="lang-group"><div class="lang-script-hdr">' + script + '</div>';
+    var items = langs[script];
+    for (var i = 0; i < items.length; i++) {
+      var l = items[i];
+      html += '<div class="lang-item" data-code="' + l.code + '" onclick="onLangSelect(\'' + l.code + '\')">';
+      html += '<span class="lang-flag">' + l.flag + '</span>';
+      html += '<span class="lang-native">' + l.nativeName + '</span>';
+      html += '<span class="lang-en">' + l.englishName + '</span>';
+      html += '</div>';
+    }
+    html += '</div>';
+  }
+  html += '</div></div>';
+  container.innerHTML = html;
+  window._onLangSelect = onSelect;
+}
+function onLangSelect(code) { if (window._onLangSelect) window._onLangSelect(code); }
+function filterLangPicker(filter) {
+  var state = filterLangs(filter);
+  // Re-render with filtered results
+  var items = document.querySelectorAll('.lang-item');
+  items.forEach(function(el) {
+    var code = el.dataset.code;
+    var lang = state.filteredLanguages.find(function(l) { return l.code === code; });
+    el.style.display = lang ? '' : 'none';
+  });
+}
+
+/* ═══ Translation Pair Picker UI ═══ */
+function renderPairPicker(containerId, onPairSelect) {
+  var container = document.getElementById(containerId);
+  if (!container) return;
+  var pairs = getPopularPairs();
+  var html = '<div class="pair-picker">';
+  html += '<div class="pair-section"><div class="pair-hdr">Popular Pairs</div>';
+  for (var i = 0; i < pairs.length; i++) {
+    var p = pairs[i];
+    html += '<div class="pair-item" data-id="' + p.pairId + '" onclick="onPairSelect(\'' + p.pairId + '\')">';
+    html += '<span class="pair-flags">' + p.label + '</span>';
+    html += '<span class="pair-names">' + p.fullLabel + '</span>';
+    html += '</div>';
+  }
+  html += '</div>';
+  html += '<div class="pair-section"><div class="pair-hdr">Custom Pair</div>';
+  html += '<div class="pair-custom">';
+  html += '<select id="src-lang" onchange="updatePairSelection()"></select>';
+  html += '<span class="pair-arrow" onclick="swapPairSelection()">⇄</span>';
+  html += '<select id="tgt-lang" onchange="updatePairSelection()"></select>';
+  html += '</div></div>';
+  html += '</div>';
+  container.innerHTML = html;
+  window._onPairSelect = onPairSelect;
+  // Populate dropdowns
+  var langs = getAllLangItems();
+  var srcSel = document.getElementById('src-lang');
+  var tgtSel = document.getElementById('tgt-lang');
+  langs.forEach(function(l) {
+    srcSel.add(new Option(l.flag + ' ' + l.nativeName, l.code));
+    tgtSel.add(new Option(l.flag + ' ' + l.nativeName, l.code));
+  });
+}
+function onPairSelect(pairId) { if (window._onPairSelect) window._onPairSelect(pairId); }
+function updatePairSelection() {
+  var src = document.getElementById('src-lang').value;
+  var tgt = document.getElementById('tgt-lang').value;
+  if (src && tgt && src !== tgt) {
+    selectSrcLang(src);
+    selectTgtLang(tgt);
+    var pair = getCurrentPair();
+    if (pair && window._onPairSelect) window._onPairSelect(pair.pairId);
+  }
+}
+function swapPairSelection() {
+  var srcSel = document.getElementById('src-lang');
+  var tgtSel = document.getElementById('tgt-lang');
+  var tmp = srcSel.value;
+  srcSel.value = tgtSel.value;
+  tgtSel.value = tmp;
+  updatePairSelection();
+}
 
 var POEM=[
   {id:1,label:"\u05D0\u05F3",he:["\u05D1\u05B7\u05BC\u05D6\u05B6\u05BC\u05DC\u05B6\u05EA \u05D4\u05B7\u05E9\u05B0\u05BC\u05C1\u05D7\u05B7\u05E8\u05B0\u05D7\u05D5\u05B9\u05E8\u05B6\u05EA,","\u05EA\u05BC\u05D5\u05B9\u05D4\u05B8\u05D4, \u05DC\u05B9\u05D0 \u05DE\u05B0\u05D3\u05B7\u05D1\u05B6\u05BC\u05E8\u05B6\u05EA,","\u05DB\u05B8\u05BC\u05DA\u05B0 \u05D1\u05B0\u05BC\u05EA\u05D5\u05B9\u05DB\u05B8\u05D4\u05BC \u05E1\u05D5\u05B9\u05E2\u05B6\u05E8\u05B6\u05EA,","\u05DC\u05B0\u05D0\u05B7\u05D8 \u05DB\u05B7\u05BC\u05E2\u05B7\u05E1 \u05E6\u05D5\u05B9\u05D1\u05B6\u05E8\u05B6\u05EA."],en:["Darkened basalt spring,","musing not uttering,","within its core raging,","slow wrath staging."]},

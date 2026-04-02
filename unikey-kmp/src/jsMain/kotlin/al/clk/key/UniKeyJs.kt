@@ -599,3 +599,61 @@ fun getTranslationPair(srcLangCode: String, tgtLangCode: String): dynamic? {
 fun getAllTranslationPairIds(): Array<String> {
     return KeyLanguage.allPairs().map { it.pairId }.toTypedArray()
 }
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// UI State Management API
+// Re-export from ui package for convenient access via UK namespace
+// ═══════════════════════════════════════════════════════════════════════════════
+
+@JsName("langUI")
+object UniKeyUI {
+    // Language Selector
+    @JsName("getLanguageSelectorState")
+    fun getLanguageSelectorState() = al.clk.key.ui.getLanguageSelectorState()
+
+    @JsName("selectLanguage")
+    fun selectLanguage(code: String) = al.clk.key.ui.selectLanguage(code)
+
+    @JsName("filterLanguages")
+    fun filterLanguages(filter: String) = al.clk.key.ui.filterLanguages(filter)
+
+    @JsName("toggleGroupByScript")
+    fun toggleGroupByScript(enabled: Boolean) = al.clk.key.ui.toggleGroupByScript(enabled)
+
+    @JsName("clearLanguageSelection")
+    fun clearLanguageSelection() = al.clk.key.ui.clearLanguageSelection()
+
+    @JsName("getAllLanguageItems")
+    fun getAllLanguageItems() = al.clk.key.ui.getAllLanguageItems()
+
+    @JsName("getLanguagesByScript")
+    fun getLanguagesByScript() = al.clk.key.ui.getLanguagesByScript()
+
+    // Translation Pair Selector
+    @JsName("getPairSelectorState")
+    fun getPairSelectorState() = al.clk.key.ui.getPairSelectorState()
+
+    @JsName("selectSourceLanguage")
+    fun selectSourceLanguage(code: String) = al.clk.key.ui.selectSourceLanguage(code)
+
+    @JsName("selectTargetLanguage")
+    fun selectTargetLanguage(code: String) = al.clk.key.ui.selectTargetLanguage(code)
+
+    @JsName("selectTranslationPair")
+    fun selectTranslationPair(pairId: String) = al.clk.key.ui.selectTranslationPair(pairId)
+
+    @JsName("swapLanguages")
+    fun swapLanguages() = al.clk.key.ui.swapLanguages()
+
+    @JsName("clearPairSelection")
+    fun clearPairSelection() = al.clk.key.ui.clearPairSelection()
+
+    @JsName("getPopularPairs")
+    fun getPopularPairs() = al.clk.key.ui.getPopularPairs()
+
+    @JsName("getRecentPairs")
+    fun getRecentPairs() = al.clk.key.ui.getRecentPairs()
+
+    @JsName("getCurrentTranslationPair")
+    fun getCurrentTranslationPair() = al.clk.key.ui.getCurrentTranslationPair()
+}
