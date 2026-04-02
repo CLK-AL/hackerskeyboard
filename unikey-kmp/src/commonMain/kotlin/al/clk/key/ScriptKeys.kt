@@ -638,3 +638,139 @@ enum class PatternPosition {
     END,    // End of word (-tion, -ight)
     ANY     // Can occur anywhere
 }
+
+/**
+ * Chinese Pinyin finals (韵母) for rhyme matching.
+ * Chinese poetry rhymes by matching finals (vowel + optional nasal coda).
+ * These are the standard Pinyin finals mapped to IPA.
+ */
+enum class PinyinFinal(
+    val pinyin: String,
+    override val ipa: String,
+    override val displayName: String,
+    val examples: List<String> = emptyList()
+) : ILayoutKey {
+    // Simple finals (单韵母)
+    A("a", "a", "a", listOf("大", "他", "妈")),
+    O("o", "o", "o", listOf("波", "泼", "摸")),
+    E("e", "ɤ", "e", listOf("得", "乐", "可")),
+    I("i", "i", "i", listOf("一", "七", "西")),
+    U("u", "u", "u", listOf("五", "不", "路")),
+    V("ü", "y", "ü", listOf("女", "绿", "雨")),
+
+    // Compound finals (复韵母)
+    AI("ai", "aɪ", "ai", listOf("爱", "太", "来")),
+    EI("ei", "eɪ", "ei", listOf("北", "给", "美")),
+    AO("ao", "aʊ", "ao", listOf("高", "好", "老")),
+    OU("ou", "oʊ", "ou", listOf("走", "后", "狗")),
+    IA("ia", "ia", "ia", listOf("家", "下", "花")),
+    IE("ie", "iɛ", "ie", listOf("写", "别", "夜")),
+    IU("iu", "ioʊ", "iu", listOf("六", "久", "有")),
+    UA("ua", "ua", "ua", listOf("瓜", "话", "挂")),
+    UO("uo", "uo", "uo", listOf("多", "过", "国")),
+    UE("üe", "yɛ", "üe", listOf("月", "学", "雪")),
+    UI("ui", "ueɪ", "ui", listOf("水", "回", "对")),
+
+    // Nasal finals (鼻韵母)
+    AN("an", "an", "an", listOf("安", "三", "看")),
+    EN("en", "ən", "en", listOf("人", "分", "很")),
+    IN("in", "in", "in", listOf("今", "心", "金")),
+    UN("un", "un", "un", listOf("春", "论", "昆")),
+    VN("ün", "yn", "ün", listOf("军", "群", "云")),
+    ANG("ang", "aŋ", "ang", listOf("上", "忙", "长")),
+    ENG("eng", "əŋ", "eng", listOf("风", "灯", "能")),
+    ING("ing", "iŋ", "ing", listOf("星", "听", "名")),
+    ONG("ong", "uŋ", "ong", listOf("中", "红", "东")),
+    IANG("iang", "iaŋ", "iang", listOf("亮", "想", "将")),
+    IONG("iong", "yŋ", "iong", listOf("穷", "用", "雄")),
+    UANG("uang", "uaŋ", "uang", listOf("黄", "光", "王")),
+    UENG("ueng", "uəŋ", "ueng", listOf("翁")),
+
+    // Er finals (儿化韵)
+    ER("er", "ɤɻ", "er", listOf("二", "而", "耳"));
+
+    override val char: String get() = pinyin
+    override val shiftKey: ILayoutKey? get() = null
+
+    companion object {
+        private val byPinyin = entries.associateBy { it.pinyin }
+        private val byIpa = entries.groupBy { it.ipa }
+
+        /** Find final by Pinyin spelling */
+        fun fromPinyin(pinyin: String): PinyinFinal? = byPinyin[pinyin.lowercase()]
+
+        /** Find finals by IPA */
+        fun fromIpa(ipa: String): List<PinyinFinal> = byIpa[ipa] ?: emptyList()
+
+        /** Extract final from a Pinyin syllable (e.g., "guang" → UANG) */
+        fun matchFinal(syllable: String): PinyinFinal? {
+            val s = syllable.lowercase()
+            // Try longest finals first
+            return entries
+                .sortedByDescending { it.pinyin.length }
+                .firstOrNull { s.endsWith(it.pinyin) }
+        }
+
+        /** Check if two syllables rhyme (same final) */
+        fun rhymes(syllable1: String, syllable2: String): Boolean {
+            val f1 = matchFinal(syllable1)
+            val f2 = matchFinal(syllable2)
+            return f1 != null && f1 == f2
+        }
+    }
+}
+
+/**
+ * Chinese Pinyin initials (声母) for completeness.
+ */
+enum class PinyinInitial(
+    val pinyin: String,
+    override val ipa: String,
+    override val displayName: String
+) : ILayoutKey {
+    B("b", "p", "b"),
+    P("p", "pʰ", "p"),
+    M("m", "m", "m"),
+    F("f", "f", "f"),
+    D("d", "t", "d"),
+    T("t", "tʰ", "t"),
+    N("n", "n", "n"),
+    L("l", "l", "l"),
+    G("g", "k", "g"),
+    K("k", "kʰ", "k"),
+    H("h", "x", "h"),
+    J("j", "tɕ", "j"),
+    Q("q", "tɕʰ", "q"),
+    X("x", "ɕ", "x"),
+    ZH("zh", "tʂ", "zh"),
+    CH("ch", "tʂʰ", "ch"),
+    SH("sh", "ʂ", "sh"),
+    R("r", "ɻ", "r"),
+    Z("z", "ts", "z"),
+    C("c", "tsʰ", "c"),
+    S("s", "s", "s"),
+    Y("y", "j", "y"),
+    W("w", "w", "w"),
+    ZERO("", "", "zero-initial");  // For syllables starting with vowels
+
+    override val char: String get() = pinyin
+    override val shiftKey: ILayoutKey? get() = null
+
+    companion object {
+        private val byPinyin = entries.associateBy { it.pinyin }
+
+        /** Find initial by Pinyin spelling */
+        fun fromPinyin(pinyin: String): PinyinInitial? = byPinyin[pinyin.lowercase()]
+
+        /** Extract initial from a Pinyin syllable */
+        fun matchInitial(syllable: String): PinyinInitial {
+            val s = syllable.lowercase()
+            // Try two-letter initials first
+            for (init in listOf(ZH, CH, SH)) {
+                if (s.startsWith(init.pinyin)) return init
+            }
+            // Then single-letter initials
+            return entries.firstOrNull { it.pinyin.length == 1 && s.startsWith(it.pinyin) } ?: ZERO
+        }
+    }
+}
