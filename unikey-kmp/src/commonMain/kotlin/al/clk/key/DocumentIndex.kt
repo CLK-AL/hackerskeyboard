@@ -507,29 +507,45 @@ enum class LineType(
 /**
  * Parser for plain text documents.
  * Splits by line separators and infers HTML-like structure.
+ * Builds complete nested paths: HTML1/BODY1/DIV1/OL1/LI1
  */
 class PlainTextParser {
     private val tagCounts = mutableMapOf<DocTag, Int>()
 
+    // Container stack for proper nesting
+    private data class ContainerState(
+        val segment: IndexSegment,
+        val level: Int  // Heading level or nesting depth
+    )
+
     /**
      * Parse plain text into indexed elements.
      * Lines are split and categorized into HTML-like elements.
+     * Full paths include all container tags.
      */
     fun parse(text: String): List<ParsedElement> {
         tagCounts.clear()
         val elements = mutableListOf<ParsedElement>()
 
-        // Wrap in HTML/BODY structure
-        val htmlSegment = IndexSegment(DocTag.HTML, 1)
-        val bodySegment = IndexSegment(DocTag.BODY, 1)
-        tagCounts[DocTag.HTML] = 1
-        tagCounts[DocTag.BODY] = 1
+        // Root structure
+        val htmlSegment = pushTag(DocTag.HTML)
+        val bodySegment = pushTag(DocTag.BODY)
 
-        // Track container state (OL/UL)
-        var inOrderedList = false
-        var inUnorderedList = false
-        var olCount = 0
-        var ulCount = 0
+        // Container stack: tracks DIVs for sections, OL/UL for lists, TABLE/TR for tables
+        val containerStack = mutableListOf<ContainerState>()
+
+        // Current section DIV (for heading hierarchy)
+        var currentSectionLevel = 0
+        var sectionDivSegment: IndexSegment? = null
+
+        // List state
+        var currentListSegment: IndexSegment? = null
+        var currentListType: LineType? = null
+
+        // Table state
+        var inTable = false
+        var tableSegment: IndexSegment? = null
+        var currentRowSegment: IndexSegment? = null
 
         // Split by line separators: \r\n, \r, \n
         val lines = text.split(Regex("\\r\\n|\\r|\\n"))
@@ -537,9 +553,14 @@ class PlainTextParser {
 
         for (line in lines) {
             if (line.isBlank()) {
-                // Close any open lists
-                inOrderedList = false
-                inUnorderedList = false
+                // Close lists and tables on blank line
+                currentListSegment = null
+                currentListType = null
+                if (inTable) {
+                    inTable = false
+                    tableSegment = null
+                    currentRowSegment = null
+                }
                 offset += line.length + 1
                 continue
             }
@@ -547,44 +568,92 @@ class PlainTextParser {
             val lineType = LineType.detect(line)
             val tag = lineType.tag
 
-            // Handle list containers
-            val containerSegments = mutableListOf<IndexSegment>()
+            // Build the full path
+            val pathSegments = mutableListOf(htmlSegment, bodySegment)
 
+            // Handle section containers (DIV for heading hierarchy)
+            when (lineType) {
+                LineType.HEADER1, LineType.HEADER2, LineType.HEADER3,
+                LineType.HEADER4, LineType.HEADER5, LineType.HEADER6 -> {
+                    val headingLevel = when (lineType) {
+                        LineType.HEADER1 -> 1
+                        LineType.HEADER2 -> 2
+                        LineType.HEADER3 -> 3
+                        LineType.HEADER4 -> 4
+                        LineType.HEADER5 -> 5
+                        LineType.HEADER6 -> 6
+                        else -> 0
+                    }
+
+                    // Close deeper sections, open new section DIV
+                    if (headingLevel <= currentSectionLevel || sectionDivSegment == null) {
+                        sectionDivSegment = pushTag(DocTag.DIV)
+                    }
+                    currentSectionLevel = headingLevel
+
+                    // Close any open lists/tables
+                    currentListSegment = null
+                    currentListType = null
+                    inTable = false
+                    tableSegment = null
+                }
+                else -> {}
+            }
+
+            // Add section DIV if we're in a section
+            sectionDivSegment?.let { pathSegments.add(it) }
+
+            // Handle list containers
             when (lineType) {
                 LineType.OL_ITEM -> {
-                    if (!inOrderedList) {
-                        olCount++
-                        inOrderedList = true
-                        inUnorderedList = false
+                    if (currentListType != LineType.OL_ITEM) {
+                        currentListSegment = pushTag(DocTag.OL)
+                        currentListType = LineType.OL_ITEM
                     }
-                    containerSegments.add(IndexSegment(DocTag.OL, olCount))
+                    currentListSegment?.let { pathSegments.add(it) }
                 }
                 LineType.UL_ITEM -> {
-                    if (!inUnorderedList) {
-                        ulCount++
-                        inUnorderedList = true
-                        inOrderedList = false
+                    if (currentListType != LineType.UL_ITEM) {
+                        currentListSegment = pushTag(DocTag.UL)
+                        currentListType = LineType.UL_ITEM
                     }
-                    containerSegments.add(IndexSegment(DocTag.UL, ulCount))
+                    currentListSegment?.let { pathSegments.add(it) }
                 }
                 else -> {
-                    inOrderedList = false
-                    inUnorderedList = false
+                    // Not a list item - close list
+                    if (lineType != LineType.PARAGRAPH || currentListSegment != null) {
+                        currentListSegment = null
+                        currentListType = null
+                    }
                 }
             }
 
-            // Increment tag count and create segment
-            val count = tagCounts.getOrPut(tag) { 0 } + 1
-            tagCounts[tag] = count
+            // Handle table containers
+            when (lineType) {
+                LineType.TABLE_HEADER, LineType.TABLE_ROW -> {
+                    if (!inTable) {
+                        tableSegment = pushTag(DocTag.TABLE)
+                        inTable = true
+                    }
+                    tableSegment?.let { pathSegments.add(it) }
 
-            val segment = IndexSegment(tag, count)
+                    // Each row is a TR
+                    currentRowSegment = pushTag(DocTag.TR)
+                    currentRowSegment?.let { pathSegments.add(it) }
+                }
+                else -> {}
+            }
 
-            // Build full path: HTML1/BODY1/[OL1/]P1
-            val allSegments = mutableListOf(htmlSegment, bodySegment)
-            allSegments.addAll(containerSegments)
-            allSegments.add(segment)
+            // Handle PRE container (wraps code blocks)
+            if (lineType == LineType.PRE) {
+                // PRE is self-contained, no extra container needed
+            }
 
-            val index = DocumentIndex(allSegments)
+            // Add the leaf element
+            val leafSegment = pushTag(tag)
+            pathSegments.add(leafSegment)
+
+            val index = DocumentIndex(pathSegments)
 
             elements.add(ParsedElement(
                 index = index,
@@ -599,6 +668,15 @@ class PlainTextParser {
         }
 
         return elements
+    }
+
+    /**
+     * Push a new tag and return its segment with incremented count.
+     */
+    private fun pushTag(tag: DocTag): IndexSegment {
+        val count = tagCounts.getOrPut(tag) { 0 } + 1
+        tagCounts[tag] = count
+        return IndexSegment(tag, count)
     }
 
     /**

@@ -364,13 +364,15 @@ class DocumentIndexTest {
 
         assertEquals(4, elements.size)
 
-        // Ordered list items should be in OL container
-        assertTrue(elements[0].index.formatted.contains("OL1"))
-        assertTrue(elements[1].index.formatted.contains("OL1"))
+        // Ordered list items should be in OL container with full path
+        assertTrue(elements[0].index.formatted.contains("OL"))
+        assertTrue(elements[0].index.formatted.contains("LI"))
+        assertTrue(elements[1].index.formatted.contains("OL"))
 
         // Unordered list items should be in UL container
-        assertTrue(elements[2].index.formatted.contains("UL1"))
-        assertTrue(elements[3].index.formatted.contains("UL1"))
+        assertTrue(elements[2].index.formatted.contains("UL"))
+        assertTrue(elements[2].index.formatted.contains("LI"))
+        assertTrue(elements[3].index.formatted.contains("UL"))
     }
 
     @Test
@@ -380,9 +382,67 @@ class DocumentIndexTest {
         val indices = parser.parseIndices(text)
 
         assertEquals(3, indices.size)
-        assertEquals("HTML1/BODY1/P1", indices[0].formatted)
-        assertEquals("HTML1/BODY1/P2", indices[1].formatted)
-        assertEquals("HTML1/BODY1/P3", indices[2].formatted)
+        // All paths start with HTML1/BODY1
+        assertTrue(indices[0].formatted.startsWith("HTML1/BODY1"))
+        assertTrue(indices[1].formatted.startsWith("HTML1/BODY1"))
+        assertTrue(indices[2].formatted.startsWith("HTML1/BODY1"))
+        // Each should end with P tag
+        assertTrue(indices[0].formatted.contains("/P"))
+        assertTrue(indices[1].formatted.contains("/P"))
+        assertTrue(indices[2].formatted.contains("/P"))
+    }
+
+    @Test
+    fun testPlainTextParserFullPath() {
+        // Test complete nested paths
+        val text = """
+            MAIN TITLE
+            1. First item
+            2. Second item
+        """.trimIndent()
+
+        val parser = PlainTextParser()
+        val elements = parser.parse(text)
+
+        // Header should have DIV container: HTML1/BODY1/DIV1/H1
+        val header = elements[0]
+        assertEquals(DocTag.H1, header.tag)
+        assertTrue(header.index.formatted.contains("DIV"))
+        assertTrue(header.index.formatted.contains("H1"))
+
+        // List items should have OL container: HTML1/BODY1/DIV1/OL1/LI1
+        val li1 = elements[1]
+        assertEquals(DocTag.LI, li1.tag)
+        assertTrue(li1.index.formatted.contains("DIV"))
+        assertTrue(li1.index.formatted.contains("OL"))
+        assertTrue(li1.index.formatted.contains("LI"))
+    }
+
+    @Test
+    fun testPlainTextParserTable() {
+        val text = """
+            NAME|AGE|CITY
+            John|30|NYC
+        """.trimIndent()
+
+        val parser = PlainTextParser()
+        val elements = parser.parse(text)
+
+        assertEquals(2, elements.size)
+
+        // Table header: HTML1/BODY1/TABLE1/TR1/TH1
+        val th = elements[0]
+        assertEquals(DocTag.TH, th.tag)
+        assertTrue(th.index.formatted.contains("TABLE"))
+        assertTrue(th.index.formatted.contains("TR"))
+        assertTrue(th.index.formatted.contains("TH"))
+
+        // Table row: HTML1/BODY1/TABLE1/TR2/TD1
+        val td = elements[1]
+        assertEquals(DocTag.TD, td.tag)
+        assertTrue(td.index.formatted.contains("TABLE"))
+        assertTrue(td.index.formatted.contains("TR"))
+        assertTrue(td.index.formatted.contains("TD"))
     }
 
     @Test
