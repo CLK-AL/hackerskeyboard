@@ -71,25 +71,26 @@ data class TagPattern(
 /**
  * Attribute pattern for parsing HTML attributes.
  * Format: name="value" or name='value' or name=value or name (boolean)
+ * All regex patterns are lazily compiled for performance.
  */
 object AttrPattern {
     /** Pattern for a single attribute */
-    val SINGLE = Regex("""([\w-]+)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]*)))?""")
+    val SINGLE by lazy { Regex("""([\w-]+)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]*)))?""") }
 
     /** Pattern for lang attribute */
-    val LANG = Regex("""lang\s*=\s*["']?([a-z]{2,3})["']?""", RegexOption.IGNORE_CASE)
+    val LANG by lazy { Regex("""lang\s*=\s*["']?([a-z]{2,3})["']?""", RegexOption.IGNORE_CASE) }
 
     /** Pattern for dir attribute */
-    val DIR = Regex("""dir\s*=\s*["']?(ltr|rtl|auto)["']?""", RegexOption.IGNORE_CASE)
+    val DIR by lazy { Regex("""dir\s*=\s*["']?(ltr|rtl|auto)["']?""", RegexOption.IGNORE_CASE) }
 
     /** Pattern for class attribute */
-    val CLASS = Regex("""class\s*=\s*["']([^"']+)["']""", RegexOption.IGNORE_CASE)
+    val CLASS by lazy { Regex("""class\s*=\s*["']([^"']+)["']""", RegexOption.IGNORE_CASE) }
 
     /** Pattern for id attribute */
-    val ID = Regex("""id\s*=\s*["']([^"']+)["']""", RegexOption.IGNORE_CASE)
+    val ID by lazy { Regex("""id\s*=\s*["']([^"']+)["']""", RegexOption.IGNORE_CASE) }
 
     /** Pattern for data-* attributes */
-    val DATA = Regex("""(data-[\w-]+)\s*=\s*["']([^"']+)["']""", RegexOption.IGNORE_CASE)
+    val DATA by lazy { Regex("""(data-[\w-]+)\s*=\s*["']([^"']+)["']""", RegexOption.IGNORE_CASE) }
 
     /**
      * Parse all attributes from an attribute string.
@@ -574,15 +575,29 @@ enum class DocTag(
     /** Check if this tag has a Markdown equivalent */
     val hasMdPattern: Boolean get() = mdPattern != null
 
-    /** Get the HTML regex pattern with named groups */
-    fun htmlRegex(): Regex = htmlPattern.toRegex(name)
+    /** Get the HTML regex pattern with named groups (lazy cached) */
+    fun htmlRegex(): Regex = htmlRegexCache.getOrPut(this) { htmlPattern.toRegex(name) }
 
-    /** Get the Markdown regex pattern with named groups (if available) */
-    fun mdRegex(): Regex? = mdPattern?.toRegex(name)
+    /** Get the Markdown regex pattern with named groups (lazy cached) */
+    fun mdRegex(): Regex? = mdPattern?.let { mdRegexCache.getOrPut(this) { it.toRegex(name) } }
+
+    /** Get the full HTML regex including content and closing tag (lazy cached) */
+    fun htmlFullRegex(): Regex = htmlFullRegexCache.getOrPut(this) { htmlPattern.toFullRegex(name) }
+
+    /** Get the closing tag regex (lazy cached) */
+    fun closeRegex(): Regex? = htmlPattern.closeTag.takeIf { it.isNotEmpty() }?.let {
+        closeRegexCache.getOrPut(this) { htmlPattern.closeRegex(name)!! }
+    }
 
     companion object {
-        private val byName = entries.associateBy { it.name.uppercase() }
+        private val byName by lazy { entries.associateBy { it.name.uppercase() } }
         fun fromName(name: String): DocTag? = byName[name.uppercase()]
+
+        // Lazy regex caches - avoid recompiling regex on every call
+        private val htmlRegexCache = mutableMapOf<DocTag, Regex>()
+        private val mdRegexCache = mutableMapOf<DocTag, Regex>()
+        private val htmlFullRegexCache = mutableMapOf<DocTag, Regex>()
+        private val closeRegexCache = mutableMapOf<DocTag, Regex>()
     }
 }
 
@@ -625,19 +640,16 @@ data class ScriptAttrs(
         val ARABIC = ScriptAttrs("ar", TextDir.RTL)
         val ENGLISH = ScriptAttrs("en", TextDir.LTR)
 
+        // Lazy compiled regex patterns
+        private val LANG_REGEX by lazy { Regex("@lang=([a-z]{2,3})") }
+        private val DIR_REGEX by lazy { Regex("@dir=(ltr|rtl|auto)") }
+
         /**
          * Parse from attribute string like "@lang=he@dir=rtl"
          */
         fun parse(s: String): ScriptAttrs {
-            var lang: String? = null
-            var dir: TextDir? = null
-
-            val langMatch = Regex("@lang=([a-z]{2,3})").find(s)
-            langMatch?.let { lang = it.groupValues[1] }
-
-            val dirMatch = Regex("@dir=(ltr|rtl|auto)").find(s)
-            dirMatch?.let { dir = TextDir.fromValue(it.groupValues[1]) }
-
+            val lang = LANG_REGEX.find(s)?.groupValues?.get(1)
+            val dir = DIR_REGEX.find(s)?.groupValues?.get(1)?.let { TextDir.fromValue(it) }
             return ScriptAttrs(lang, dir)
         }
 
@@ -686,6 +698,10 @@ data class IndexSegment(
     val isRtl: Boolean get() = scriptAttrs.dir == TextDir.RTL
 
     companion object {
+        // Lazy compiled regex patterns
+        private val SPLIT_REGEX by lazy { Regex("(?=[.@=])") }
+        private val TAG_REGEX by lazy { Regex("^([A-Z]+)(\\d+)$", RegexOption.IGNORE_CASE) }
+
         /**
          * Parse a segment string like "P1.poem.intro@lang=he@dir=rtl=data-verse=1"
          * Returns null if format is invalid.
@@ -694,13 +710,12 @@ data class IndexSegment(
             if (segment.isBlank()) return null
 
             // Split by delimiters while preserving order (. for class, @ for script, = for data)
-            val parts = segment.split(Regex("(?=[.@=])"))
+            val parts = segment.split(SPLIT_REGEX)
             if (parts.isEmpty()) return null
 
             // First part is TAG + instance (e.g., "P1", "LI23")
             val tagPart = parts[0]
-            val tagMatch = Regex("^([A-Z]+)(\\d+)$", RegexOption.IGNORE_CASE).find(tagPart)
-                ?: return null
+            val tagMatch = TAG_REGEX.find(tagPart) ?: return null
 
             val tagName = tagMatch.groupValues[1].uppercase()
             val instance = tagMatch.groupValues[2].toIntOrNull() ?: return null
