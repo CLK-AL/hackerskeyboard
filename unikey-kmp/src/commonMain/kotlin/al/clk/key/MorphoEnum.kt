@@ -316,23 +316,71 @@ enum class ArabicLetter(
 }
 
 /**
- * Arabic vowels (harakat)
+ * Arabic vowels (harakat) with keyboard mappings
  */
 enum class Haraka(
     val char: Char,
     val ipa: String,
-    val tanwin: Char?,    // Nunation form
-    val tanwinIpa: String?
+    val displayName: String,
+    val qwerty: Char,           // Shift key for this haraka
+    val tanwin: Char?,          // Nunation form
+    val tanwinIpa: String?,
+    val tanwinQwerty: Char?     // Shift key for tanwin
 ) {
-    FATHA('َ', "a", 'ً', "an"),
-    KASRA('ِ', "i", 'ٍ', "in"),
-    DAMMA('ُ', "u", 'ٌ', "un"),
-    SUKUN('ْ', "", null, null),
-    SHADDA('ّ', "ː", null, null);  // Gemination
+    FATHA('َ', "a", "fatha", 'q', 'ً', "an", 'w'),
+    KASRA('ِ', "i", "kasra", 't', 'ٍ', "in", 'y'),
+    DAMMA('ُ', "u", "damma", 'e', 'ٌ', "un", 'r'),
+    SUKUN('ْ', "", "sukun", 'i', null, null, null),
+    SHADDA('ّ', "", "shadda", 'u', null, null, null);
 
     companion object {
         private val byChar = entries.associateBy { it.char }
+        private val byQwerty = entries.associateBy { it.qwerty }
+        private val byTanwinQwerty = entries.filter { it.tanwinQwerty != null }.associateBy { it.tanwinQwerty }
         fun fromChar(c: Char): Haraka? = byChar[c]
+        fun fromQwerty(c: Char): Haraka? = byQwerty[c]
+        fun fromTanwinQwerty(c: Char): Haraka? = byTanwinQwerty[c]
+
+        /** Get shift character and IPA for qwerty key */
+        fun shiftFor(qwerty: Char): Triple<String, String, String>? {
+            // Check if it's a haraka
+            byQwerty[qwerty]?.let { return Triple(it.char.toString(), it.ipa, it.displayName) }
+            // Check if it's a tanwin
+            byTanwinQwerty[qwerty]?.let {
+                return Triple(it.tanwin!!.toString(), it.tanwinIpa!!, "tanwin-${it.displayName.take(4)}")
+            }
+            return null
+        }
+    }
+}
+
+/**
+ * Arabic keyboard shift symbols (non-haraka)
+ */
+enum class ArabicKeySymbol(
+    val char: String,
+    val ipa: String,
+    val displayName: String,
+    val qwerty: Char
+) {
+    TATWEEL("ـ", "", "tatweel", 'o'),
+    SEMICOLON("؛", "", "semicolon", 'p'),
+    BACKSLASH("\\", "", "backslash", 'a'),
+    BRACKET_RIGHT("]", "", "bracket-right", 'd'),
+    BRACKET_LEFT("[", "", "bracket-left", 'f'),
+    LAM_HAMZA("لأ", "laʔ", "lam-hamza", 'g'),
+    ALIF_HAMZA("أ", "ʔ", "alif-hamza", 'h'),
+    TATWEEL2("ـ", "", "tatweel", 'j'),
+    COMMA("،", "", "comma", 'k'),
+    SLASH("/", "", "slash", 'l'),
+    COMMA_EN(",", "", "comma", ','),
+    PERIOD(".", "", "period", '.');
+
+    companion object {
+        private val byQwerty = entries.associateBy { it.qwerty }
+        fun fromQwerty(c: Char): ArabicKeySymbol? = byQwerty[c]
+        fun shiftFor(qwerty: Char): Triple<String, String, String>? =
+            byQwerty[qwerty]?.let { Triple(it.char, it.ipa, it.displayName) }
     }
 }
 
@@ -778,34 +826,26 @@ val hiraganaKeys: Map<String, LayoutKey> = HiraganaKey.entries
     }
 
 /**
- * Arabic keyboard shift modifiers (harakat and punctuation) by qwerty key
+ * Arabic keyboard shift modifiers - derived from Haraka and ArabicKeySymbol enums
  */
-val arabicShiftMap: Map<Char, Triple<String, String, String>> = mapOf(
-    'q' to Triple("َ", "a", "fatha"),
-    'w' to Triple("ً", "an", "tanwin-fath"),
-    'e' to Triple("ُ", "u", "damma"),
-    'r' to Triple("ٌ", "un", "tanwin-damm"),
-    't' to Triple("ِ", "i", "kasra"),
-    'y' to Triple("ٍ", "in", "tanwin-kasr"),
-    'u' to Triple("ّ", "", "shadda"),
-    'i' to Triple("ْ", "", "sukun"),
-    'o' to Triple("ـ", "", "tatweel"),
-    'p' to Triple("؛", "", "semicolon"),
-    'a' to Triple("\\", "", "backslash"),
-    'd' to Triple("]", "", "bracket-right"),
-    'f' to Triple("[", "", "bracket-left"),
-    'g' to Triple("لأ", "laʔ", "lam-hamza"),
-    'h' to Triple("أ", "ʔ", "alif-hamza"),
-    'j' to Triple("ـ", "", "tatweel"),
-    'k' to Triple("،", "", "comma"),
-    'l' to Triple("/", "", "slash"),
-    'z' to Triple("~", "", "tilde"),
-    'x' to Triple("ْ", "", "sukun"),
-    'c' to Triple("}", "", "brace-right"),
-    'v' to Triple("{", "", "brace-left"),
-    ',' to Triple(",", "", "comma"),
-    '.' to Triple(".", "", "period")
-)
+val arabicShiftMap: Map<Char, Triple<String, String, String>> = buildMap {
+    // Add haraka (vowel marks) and tanwin from enum
+    for (h in Haraka.entries) {
+        put(h.qwerty, Triple(h.char.toString(), h.ipa, h.displayName))
+        if (h.tanwinQwerty != null) {
+            put(h.tanwinQwerty, Triple(h.tanwin!!.toString(), h.tanwinIpa!!, "tanwin-${h.displayName.take(4)}"))
+        }
+    }
+    // Add symbols from enum
+    for (s in ArabicKeySymbol.entries) {
+        put(s.qwerty, Triple(s.char, s.ipa, s.displayName))
+    }
+    // Additional punctuation not worth enum entries
+    put('z', Triple("~", "", "tilde"))
+    put('x', Triple("ْ", "", "sukun"))
+    put('c', Triple("}", "", "brace-right"))
+    put('v', Triple("{", "", "brace-left"))
+}
 
 /**
  * Arabic keyboard keys generated from enum with shift modifiers

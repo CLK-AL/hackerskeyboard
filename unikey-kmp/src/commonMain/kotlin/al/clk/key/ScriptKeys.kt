@@ -281,25 +281,26 @@ enum class HiraganaKey(
 }
 
 /**
- * Devanagari (Hindi) consonants
+ * Devanagari (Hindi) letters - vowels include their matra (vowel sign) form
  */
 enum class DevanagariKey(
     override val char: String,
     override val ipa: String,
     override val displayName: String,
-    val isVowel: Boolean = false
+    val isVowel: Boolean = false,
+    val matra: Char? = null  // vowel sign form (null for consonants and अ)
 ) : ILayoutKey {
-    // Vowels
-    A("अ", "ə", "a", true),
-    AA("आ", "aː", "aa", true),
-    I("इ", "ɪ", "i", true),
-    II("ई", "iː", "ii", true),
-    U("उ", "ʊ", "u", true),
-    UU("ऊ", "uː", "uu", true),
-    E("ए", "eː", "e", true),
-    AI("ऐ", "ɛː", "ai", true),
-    O("ओ", "oː", "o", true),
-    AU("औ", "ɔː", "au", true),
+    // Vowels with their matra forms
+    A("अ", "ə", "a", true),  // no matra - inherent vowel
+    AA("आ", "aː", "aa", true, 'ा'),
+    I("इ", "ɪ", "i", true, 'ि'),
+    II("ई", "iː", "ii", true, 'ी'),
+    U("उ", "ʊ", "u", true, 'ु'),
+    UU("ऊ", "uː", "uu", true, 'ू'),
+    E("ए", "eː", "e", true, 'े'),
+    AI("ऐ", "ɛː", "ai", true, 'ै'),
+    O("ओ", "oː", "o", true, 'ो'),
+    AU("औ", "ɔː", "au", true, 'ौ'),
 
     // Consonants
     KA("क", "k", "ka"),
@@ -340,15 +341,12 @@ enum class DevanagariKey(
         val consonants = entries.filter { !it.isVowel }
         val vowels = entries.filter { it.isVowel }
         private val byChar = entries.associateBy { it.char.firstOrNull() }
-        // Matra (vowel sign) to IPA mapping
-        private val matraIpa = mapOf(
-            'ा' to "aː", 'ि' to "ɪ", 'ी' to "iː",
-            'ु' to "ʊ", 'ू' to "uː", 'े' to "eː",
-            'ै' to "ɛː", 'ो' to "oː", 'ौ' to "ɔː"
-        )
+        // Matra lookup derived from vowel entries
+        private val byMatra = entries.filter { it.matra != null }.associateBy { it.matra }
         fun fromChar(c: Char): DevanagariKey? = byChar[c]
-        fun matraToIpa(c: Char): String? = matraIpa[c]
-        fun vowelIpa(c: Char): String = byChar[c]?.ipa ?: matraIpa[c] ?: "ə"
+        fun fromMatra(c: Char): DevanagariKey? = byMatra[c]
+        fun matraToIpa(c: Char): String? = byMatra[c]?.ipa
+        fun vowelIpa(c: Char): String = byChar[c]?.ipa ?: byMatra[c]?.ipa ?: "ə"
     }
 }
 

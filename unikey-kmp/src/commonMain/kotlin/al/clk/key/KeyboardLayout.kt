@@ -568,7 +568,7 @@ object KeyboardLayouts {
         for (c in 'a'..'z') {
             val lower = c.toString()
             val upper = lower.uppercase()
-            val ipa = getLatinIpa(c)
+            val ipa = LatinKey.fromChar(lower)?.ipa ?: ""
             base[lower] = key(lower, ipa, lower, upper, ipa, upper)
         }
 
@@ -588,36 +588,6 @@ object KeyboardLayouts {
         base.putAll(overrides)
 
         return base
-    }
-
-    private fun getLatinIpa(c: Char): String = when (c) {
-        'a' -> "a"
-        'b' -> "b"
-        'c' -> "k"
-        'd' -> "d"
-        'e' -> "e"
-        'f' -> "f"
-        'g' -> "ɡ"
-        'h' -> "h"
-        'i' -> "i"
-        'j' -> "dʒ"
-        'k' -> "k"
-        'l' -> "l"
-        'm' -> "m"
-        'n' -> "n"
-        'o' -> "o"
-        'p' -> "p"
-        'q' -> "k"
-        'r' -> "r"
-        's' -> "s"
-        't' -> "t"
-        'u' -> "u"
-        'v' -> "v"
-        'w' -> "w"
-        'x' -> "ks"
-        'y' -> "j"
-        'z' -> "z"
-        else -> ""
     }
 
     /**
