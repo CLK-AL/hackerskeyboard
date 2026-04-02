@@ -238,4 +238,144 @@ class UniKeyJsTest {
         assertTrue(ids.contains("en→he"), "Should contain en→he")
         assertTrue(ids.contains("he→en"), "Should contain he→en")
     }
+
+    // ═══ Hierarchical Index API Tests (V1.L2.W3.S4) ═══
+
+    @Test
+    fun testCreateHierarchicalIndexVerseOnly() {
+        val idx = createHierarchicalIndex(1)
+        assertEquals(1, idx["vType"])
+        assertEquals(null, idx["lineIdx"])
+        assertEquals(1, idx["depth"])
+        assertEquals("V1", idx["formatted"])
+    }
+
+    @Test
+    fun testCreateHierarchicalIndexFull() {
+        val idx = createHierarchicalIndex(1, 1, 2, 3)
+        assertEquals(1, idx["vType"])
+        assertEquals(1, idx["lineIdx"])
+        assertEquals(2, idx["wordIdx"])
+        assertEquals(3, idx["sylIdx"])
+        assertEquals(4, idx["depth"])
+        assertEquals("V1.L2.W3.S4", idx["formatted"])
+    }
+
+    @Test
+    fun testCreateHierarchicalIndexWithOrders() {
+        val idx = createHierarchicalIndex(2, 0, null, null, 1.5f, 2.0f, 0f)
+        assertEquals(2, idx["vType"])
+        assertEquals(0, idx["lineIdx"])
+        assertEquals(1.5f, idx["lineOrder"])
+        assertEquals(2.0f, idx["wordOrder"])
+    }
+
+    @Test
+    fun testParseHierarchicalIndexVerseLine() {
+        val idx = parseHierarchicalIndex("V2.L3")
+        assertNotNull(idx)
+        assertEquals(2, idx["vType"])
+        assertEquals(2, idx["lineIdx"])  // L3 = index 2 (0-based)
+        assertEquals(null, idx["wordIdx"])
+        assertEquals(2, idx["depth"])
+    }
+
+    @Test
+    fun testParseHierarchicalIndexFull() {
+        val idx = parseHierarchicalIndex("V1.L2.W3.S4")
+        assertNotNull(idx)
+        assertEquals(1, idx["vType"])
+        assertEquals(1, idx["lineIdx"])  // L2 = index 1
+        assertEquals(2, idx["wordIdx"])  // W3 = index 2
+        assertEquals(3, idx["sylIdx"])   // S4 = index 3
+        assertEquals(4, idx["depth"])
+    }
+
+    @Test
+    fun testParseHierarchicalIndexInvalid() {
+        val idx = parseHierarchicalIndex("invalid")
+        assertEquals(null, idx)
+    }
+
+    @Test
+    fun testParseHierarchicalIndexCaseInsensitive() {
+        val idx = parseHierarchicalIndex("v1.l2.w3.s4")
+        assertNotNull(idx)
+        assertEquals(1, idx["vType"])
+    }
+
+    @Test
+    fun testCreateWordState() {
+        val word = createWordState("hello")
+        assertEquals("hello", word["text"])
+        assertEquals(1f, word["order"])
+        assertTrue((word["sylBounds"] as Array<*>).isNotEmpty())
+        assertTrue((word["hue"] as Int) in 0..360)
+    }
+
+    @Test
+    fun testCreateWordStateWithOrder() {
+        val word = createWordState("world", 2.5f)
+        assertEquals("world", word["text"])
+        assertEquals(2.5f, word["order"])
+    }
+
+    @Test
+    fun testCreateWordStateSyllables() {
+        val word = createWordState("raging")
+        val syllables = word["syllables"]
+        assertNotNull(syllables)
+
+        // Access first syllable properties through dynamic word object
+        val firstText = word["syllables"].unsafeCast<Array<dynamic>>()[0]["text"]
+        val firstStart = word["syllables"].unsafeCast<Array<dynamic>>()[0]["startOffset"]
+        val firstEnd = word["syllables"].unsafeCast<Array<dynamic>>()[0]["endOffset"]
+        val firstHue = word["syllables"].unsafeCast<Array<dynamic>>()[0]["hue"]
+
+        assertNotNull(firstText)
+        assertNotNull(firstStart)
+        assertNotNull(firstEnd)
+        assertNotNull(firstHue)
+    }
+
+    @Test
+    fun testCursorToIndex() {
+        val idx = cursorToIndex("hello", 2, 3, 1, 2)
+        assertEquals(1, idx["vType"])
+        assertEquals(2, idx["lineIdx"])
+        assertEquals(3, idx["wordIdx"])
+        assertNotNull(idx["sylIdx"])
+        assertEquals(4, idx["depth"])
+        assertTrue((idx["formatted"] as String).startsWith("V1.L3.W4.S"))
+    }
+
+    @Test
+    fun testCursorToIndexWithOrders() {
+        val idx = cursorToIndex("world", 0, 1, 2, 0, 1.5f, 2.0f)
+        assertEquals(2, idx["vType"])
+        assertEquals(0, idx["lineIdx"])
+        assertEquals(1, idx["wordIdx"])
+    }
+
+    @Test
+    fun testHierarchicalInsertOrder() {
+        val order = hierarchicalInsertOrder(1.0f, 2.0f)
+        assertEquals(1.5f, order)
+
+        val order2 = hierarchicalInsertOrder(1.5f, 2.0f)
+        assertEquals(1.75f, order2)
+    }
+
+    @Test
+    fun testCursorStateSylIdx() {
+        val cursor = createCursorState("raging", 0)
+        assertNotNull(cursor["sylIdx"])
+        assertEquals(0, cursor["sylIdx"], "Cursor at start should be in syllable 0")
+    }
+
+    @Test
+    fun testCursorStateSylIdxMid() {
+        val cursor = createCursorState("hello", 3)
+        assertTrue((cursor["sylIdx"] as Int) >= 0)
+    }
 }

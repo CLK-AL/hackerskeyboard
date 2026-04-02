@@ -411,3 +411,266 @@ class UniKeySyllableTest {
         assertTrue(dist3 > 30, "Non-rhyming words should have high distance")
     }
 }
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// Hierarchical Index Tests (V1.L2.W3.S4)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+class HierarchicalIndexTest {
+
+    @Test
+    fun testFormattedVerseOnly() {
+        val idx = HierarchicalIndex(vType = 1)
+        assertEquals("V1", idx.formatted)
+        assertEquals(1, idx.depth)
+    }
+
+    @Test
+    fun testFormattedVerseLine() {
+        val idx = HierarchicalIndex(vType = 2, lineIdx = 0)
+        assertEquals("V2.L1", idx.formatted)
+        assertEquals(2, idx.depth)
+    }
+
+    @Test
+    fun testFormattedVerseLineWord() {
+        val idx = HierarchicalIndex(vType = 1, lineIdx = 1, wordIdx = 2)
+        assertEquals("V1.L2.W3", idx.formatted)
+        assertEquals(3, idx.depth)
+    }
+
+    @Test
+    fun testFormattedFull() {
+        val idx = HierarchicalIndex(vType = 1, lineIdx = 1, wordIdx = 2, sylIdx = 3)
+        assertEquals("V1.L2.W3.S4", idx.formatted)
+        assertEquals(4, idx.depth)
+    }
+
+    @Test
+    fun testParseVerseOnly() {
+        val idx = HierarchicalIndex.parse("V1")
+        assertNotNull(idx)
+        assertEquals(1, idx.vType)
+        assertNull(idx.lineIdx)
+        assertNull(idx.wordIdx)
+        assertNull(idx.sylIdx)
+    }
+
+    @Test
+    fun testParseVerseLine() {
+        val idx = HierarchicalIndex.parse("V2.L3")
+        assertNotNull(idx)
+        assertEquals(2, idx.vType)
+        assertEquals(2, idx.lineIdx) // L3 = index 2 (0-based)
+        assertNull(idx.wordIdx)
+    }
+
+    @Test
+    fun testParseFull() {
+        val idx = HierarchicalIndex.parse("V1.L2.W3.S4")
+        assertNotNull(idx)
+        assertEquals(1, idx.vType)
+        assertEquals(1, idx.lineIdx)  // L2 = index 1
+        assertEquals(2, idx.wordIdx)  // W3 = index 2
+        assertEquals(3, idx.sylIdx)   // S4 = index 3
+    }
+
+    @Test
+    fun testParseCaseInsensitive() {
+        val idx = HierarchicalIndex.parse("v1.l2.w3.s4")
+        assertNotNull(idx)
+        assertEquals(1, idx.vType)
+        assertEquals(1, idx.lineIdx)
+    }
+
+    @Test
+    fun testParseInvalid() {
+        assertNull(HierarchicalIndex.parse(""))
+        assertNull(HierarchicalIndex.parse("L1"))  // Missing V
+        assertNull(HierarchicalIndex.parse("X1.Y2"))
+    }
+
+    @Test
+    fun testRoundTrip() {
+        val original = HierarchicalIndex(vType = 3, lineIdx = 4, wordIdx = 1, sylIdx = 0)
+        val parsed = HierarchicalIndex.parse(original.formatted)
+        assertNotNull(parsed)
+        assertEquals(original.vType, parsed.vType)
+        assertEquals(original.lineIdx, parsed.lineIdx)
+        assertEquals(original.wordIdx, parsed.wordIdx)
+        assertEquals(original.sylIdx, parsed.sylIdx)
+    }
+
+    @Test
+    fun testToVerseIndexState() {
+        val idx = HierarchicalIndex(vType = 2, lineIdx = 3, lineOrder = 3.5f)
+        val vis = idx.toVerseIndexState()
+        assertEquals(2, vis.vType)
+        assertEquals(3, vis.lineIdx)
+        assertEquals(3.5f, vis.order)
+    }
+
+    @Test
+    fun testFromVerseIndexState() {
+        val vis = VerseIndexState(vType = 1, lineIdx = 2, order = 2.5f)
+        val idx = HierarchicalIndex.fromVerseIndexState(vis)
+        assertEquals(1, idx.vType)
+        assertEquals(2, idx.lineIdx)
+        assertEquals(2.5f, idx.lineOrder)
+        assertNull(idx.wordIdx)
+        assertNull(idx.sylIdx)
+    }
+
+    @Test
+    fun testInsertOrder() {
+        val order = HierarchicalIndex.insertOrder(1.0f, 2.0f)
+        assertEquals(1.5f, order)
+
+        val order2 = HierarchicalIndex.insertOrder(1.5f, 2.0f)
+        assertEquals(1.75f, order2)
+    }
+}
+
+class WordStateTest {
+
+    @Test
+    fun testFromTextBasic() {
+        val word = WordState.fromText("hello")
+        assertEquals("hello", word.text)
+        assertEquals(1f, word.order)
+        assertTrue(word.sylBounds.isNotEmpty())
+        assertTrue(word.hue in 0..360)
+    }
+
+    @Test
+    fun testFromTextWithOrder() {
+        val word = WordState.fromText("world", 2.5f)
+        assertEquals("world", word.text)
+        assertEquals(2.5f, word.order)
+    }
+
+    @Test
+    fun testSyllables() {
+        val word = WordState.fromText("raging")
+        val syllables = word.syllables()
+        assertTrue(syllables.isNotEmpty(), "Should have syllables")
+
+        // Check syllable structure
+        val first = syllables.first()
+        assertTrue(first.startOffset >= 0)
+        assertTrue(first.endOffset > first.startOffset)
+        assertTrue(first.text.isNotEmpty())
+    }
+
+    @Test
+    fun testSyllableBounds() {
+        val word = WordState.fromText("hello")
+        assertTrue(word.sylBounds.first() == 0, "First bound should be 0")
+        assertTrue(word.sylBounds.last() == word.text.length, "Last bound should be word length")
+    }
+
+    @Test
+    fun testSyllableOffsets() {
+        val word = WordState.fromText("raging")
+        val syllables = word.syllables()
+
+        // Syllable offsets should be contiguous
+        for (i in 1 until syllables.size) {
+            assertEquals(syllables[i - 1].endOffset, syllables[i].startOffset,
+                "Syllable end should match next syllable start")
+        }
+    }
+}
+
+class SyllableStateTest {
+
+    @Test
+    fun testSyllableProperties() {
+        val ipa = UniKeySyllable("r", "a", "ra")
+        val syl = SyllableState(ipa, 1f, 0, 2)
+
+        assertEquals("ra", syl.text)
+        assertEquals(ipa.hue, syl.hue)
+        assertEquals(0, syl.startOffset)
+        assertEquals(2, syl.endOffset)
+    }
+
+    @Test
+    fun testSyllableHue() {
+        val ipa = UniKeySyllable("b", "a", "ba")
+        val syl = SyllableState(ipa, 1f, 0, 2)
+        assertTrue(syl.hue in 0..360)
+    }
+}
+
+class CursorStateExtendedTest {
+
+    @Test
+    fun testSylIdxAtStart() {
+        val cursor = CursorState.forWord("raging", 0)
+        assertEquals(0, cursor.sylIdx, "Cursor at start should be in syllable 0")
+    }
+
+    @Test
+    fun testSylIdxInMiddle() {
+        val cursor = CursorState.forWord("raging", 3)
+        // Position 3 is in the middle of the word
+        assertTrue(cursor.sylIdx >= 0)
+    }
+
+    @Test
+    fun testSylIdxAtEnd() {
+        val word = "hello"
+        val cursor = CursorState.forWord(word, word.length)
+        // At end should be in last syllable
+        val maxIdx = cursor.sylBounds.size - 2  // -2 because bounds include both start and end
+        assertTrue(cursor.sylIdx >= 0)
+        assertTrue(cursor.sylIdx <= maxIdx.coerceAtLeast(0))
+    }
+
+    @Test
+    fun testToIndex() {
+        val cursor = CursorState.forWord("hello", 2, wordIdx = 3)
+        val idx = cursor.toIndex(vType = 1, lineIdx = 2)
+
+        assertEquals(1, idx.vType)
+        assertEquals(2, idx.lineIdx)
+        assertEquals(3, idx.wordIdx)
+        assertEquals(cursor.sylIdx, idx.sylIdx)
+        assertEquals(4, idx.depth)
+    }
+
+    @Test
+    fun testToIndexWithOrders() {
+        val cursor = CursorState.forWord("world", 0, wordIdx = 1)
+        val idx = cursor.toIndex(vType = 2, lineIdx = 0, lineOrder = 1.5f, wordOrder = 2.0f)
+
+        assertEquals(2, idx.vType)
+        assertEquals(1.5f, idx.lineOrder)
+        assertEquals(2.0f, idx.wordOrder)
+    }
+
+    @Test
+    fun testToIndexFormattedOutput() {
+        val cursor = CursorState.forWord("test", 0, wordIdx = 0)
+        val idx = cursor.toIndex(vType = 1, lineIdx = 0)
+
+        // Should produce V1.L1.W1.S1
+        assertTrue(idx.formatted.startsWith("V1.L1.W1.S"))
+    }
+}
+
+class VerseIndexStateTest {
+
+    @Test
+    fun testFormatted() {
+        val vis = VerseIndexState(vType = 2, lineIdx = 3)
+        assertEquals("V2.L4", vis.formatted)
+    }
+
+    @Test
+    fun testInsertOrder() {
+        val order = VerseIndexState.insertOrder(1.0f, 2.0f)
+        assertEquals(1.5f, order)
+    }
+}
