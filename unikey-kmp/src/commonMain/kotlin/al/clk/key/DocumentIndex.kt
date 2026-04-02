@@ -4583,7 +4583,7 @@ class DocumentIndexBuilder {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// PROTOCOL ABSTRACTION - Unified wire protocol for MCP/WebDAV/Mushi
+// PROTOCOL ABSTRACTION - Unified wire protocol for MCP/WebDAV/Ykt
 // ═══════════════════════════════════════════════════════════════════════════════
 
 /**
@@ -5371,19 +5371,19 @@ class DavRequest(
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// MUSHI - Real-time collaboration protocol (SSE + WSS + JsonPatch)
+// YKT - Real-time collaboration protocol (SSE + WSS + JsonPatch)
 // Uses unified ProtoWire codec
 // ═══════════════════════════════════════════════════════════════════════════════
 
-/** Extension for MushiEvent encoding */
-fun ProtoWire.encodeEvent(event: MushiEvent): String = encodeToString(event)
-fun ProtoWire.decodeEvent(data: String): MushiEvent = decodeFromString(data)
+/** Extension for YktEvent encoding */
+fun ProtoWire.encodeEvent(event: YktEvent): String = encodeToString(event)
+fun ProtoWire.decodeEvent(data: String): YktEvent = decodeFromString(data)
 
 /**
- * Mushi collaboration session.
+ * Ykt collaboration session.
  */
 @Serializable
-data class MushiSession(
+data class YktSession(
     val id: SessionId,
     val documentUri: ResourceUri,
     val clientId: ClientId,
@@ -5397,7 +5397,7 @@ data class MushiSession(
  * Selection range for awareness - optimized as value class pair.
  */
 @Serializable
-data class MushiSelection(val start: Int, val end: Int) {
+data class YktSelection(val start: Int, val end: Int) {
     val length get() = end - start
     val isEmpty get() = start == end
     fun contains(pos: Int) = pos in start until end
@@ -5408,42 +5408,42 @@ data class MushiSelection(val start: Int, val end: Int) {
  * Serializable JsonPatchOp - unified with JsonPointer.
  */
 @Serializable
-sealed class MushiPatchOp {
+sealed class YktPatchOp {
     abstract val path: JsonPointer
 
     @Serializable @SerialName("add")
-    data class Add(override val path: JsonPointer, val value: JsonElement) : MushiPatchOp() {
+    data class Add(override val path: JsonPointer, val value: JsonElement) : YktPatchOp() {
         constructor(pathStr: String, value: JsonElement) : this(JsonPointer(pathStr), value)
     }
     @Serializable @SerialName("remove")
-    data class Remove(override val path: JsonPointer) : MushiPatchOp() {
+    data class Remove(override val path: JsonPointer) : YktPatchOp() {
         constructor(pathStr: String) : this(JsonPointer(pathStr))
     }
     @Serializable @SerialName("replace")
-    data class Replace(override val path: JsonPointer, val value: JsonElement) : MushiPatchOp() {
+    data class Replace(override val path: JsonPointer, val value: JsonElement) : YktPatchOp() {
         constructor(pathStr: String, value: JsonElement) : this(JsonPointer(pathStr), value)
     }
     @Serializable @SerialName("move")
-    data class Move(override val path: JsonPointer, val from: JsonPointer) : MushiPatchOp() {
+    data class Move(override val path: JsonPointer, val from: JsonPointer) : YktPatchOp() {
         constructor(pathStr: String, fromStr: String) : this(JsonPointer(pathStr), JsonPointer(fromStr))
     }
     @Serializable @SerialName("copy")
-    data class Copy(override val path: JsonPointer, val from: JsonPointer) : MushiPatchOp() {
+    data class Copy(override val path: JsonPointer, val from: JsonPointer) : YktPatchOp() {
         constructor(pathStr: String, fromStr: String) : this(JsonPointer(pathStr), JsonPointer(fromStr))
     }
     @Serializable @SerialName("test")
-    data class Test(override val path: JsonPointer, val value: JsonElement) : MushiPatchOp() {
+    data class Test(override val path: JsonPointer, val value: JsonElement) : YktPatchOp() {
         constructor(pathStr: String, value: JsonElement) : this(JsonPointer(pathStr), value)
     }
 }
 
 
 /**
- * Mushi event types for SSE/WSS transport.
+ * Ykt event types for SSE/WSS transport.
  * Implements ProtoEvent for unified protocol handling.
  */
 @Serializable
-sealed class MushiEvent : ProtoEvent {
+sealed class YktEvent : ProtoEvent {
     abstract val sessionId: String
     abstract val clientId: String
     abstract override val timestamp: Long
@@ -5463,9 +5463,9 @@ sealed class MushiEvent : ProtoEvent {
         override val sessionId: String,
         override val clientId: String,
         override val timestamp: Long,
-        val ops: List<MushiPatchOp>,
+        val ops: List<YktPatchOp>,
         val version: ProtoVersion
-    ) : MushiEvent()
+    ) : YktEvent()
 
     /** Cursor/selection awareness */
     @Serializable @SerialName("awareness")
@@ -5474,9 +5474,9 @@ sealed class MushiEvent : ProtoEvent {
         override val clientId: String,
         override val timestamp: Long,
         val cursor: Int? = null,
-        val selection: MushiSelection? = null,
+        val selection: YktSelection? = null,
         val user: Map<String, String> = emptyMap()
-    ) : MushiEvent()
+    ) : YktEvent()
 
     /** Client joined */
     @Serializable @SerialName("join")
@@ -5485,7 +5485,7 @@ sealed class MushiEvent : ProtoEvent {
         override val clientId: String,
         override val timestamp: Long,
         val user: Map<String, String> = emptyMap()
-    ) : MushiEvent()
+    ) : YktEvent()
 
     /** Client left */
     @Serializable @SerialName("leave")
@@ -5493,7 +5493,7 @@ sealed class MushiEvent : ProtoEvent {
         override val sessionId: String,
         override val clientId: String,
         override val timestamp: Long
-    ) : MushiEvent()
+    ) : YktEvent()
 
     /** Full document sync */
     @Serializable @SerialName("sync")
@@ -5503,7 +5503,7 @@ sealed class MushiEvent : ProtoEvent {
         override val timestamp: Long,
         val document: JsonObject,
         val version: ProtoVectorClock
-    ) : MushiEvent()
+    ) : YktEvent()
 
     /** Ack/confirmation */
     @Serializable @SerialName("ack")
@@ -5512,41 +5512,41 @@ sealed class MushiEvent : ProtoEvent {
         override val clientId: String,
         override val timestamp: Long,
         val ackedVersion: ProtoVersion
-    ) : MushiEvent()
+    ) : YktEvent()
 
     /** Convert to SSE format */
     fun toSse() = "event: $eventType\ndata: ${ProtoWire.encodeEvent(this)}\n\n"
 }
 
 /**
- * Mushi transport abstraction for SSE/WSS.
+ * Ykt transport abstraction for SSE/WSS.
  */
-interface MushiTransport {
+interface YktTransport {
     val isConnected: Boolean
     suspend fun connect(sessionId: String, clientId: String)
     suspend fun disconnect()
-    suspend fun send(event: MushiEvent)
-    suspend fun receive(): MushiEvent?
+    suspend fun send(event: YktEvent)
+    suspend fun receive(): YktEvent?
 }
 
 /**
- * Mushi audit log for SSE streaming.
+ * Ykt audit log for SSE streaming.
  */
-class MushiAuditLog {
-    private val events = mutableListOf<MushiEvent>()
-    private val listeners = mutableListOf<(MushiEvent) -> Unit>()
+class YktAuditLog {
+    private val events = mutableListOf<YktEvent>()
+    private val listeners = mutableListOf<(YktEvent) -> Unit>()
 
-    fun append(event: MushiEvent) {
+    fun append(event: YktEvent) {
         events.add(event)
         listeners.forEach { it(event) }
     }
 
-    fun subscribe(listener: (MushiEvent) -> Unit): () -> Unit {
+    fun subscribe(listener: (YktEvent) -> Unit): () -> Unit {
         listeners.add(listener)
         return { listeners.remove(listener) }
     }
 
-    fun replay(fromTimestamp: Long = 0): Sequence<MushiEvent> =
+    fun replay(fromTimestamp: Long = 0): Sequence<YktEvent> =
         events.asSequence().filter { it.timestamp >= fromTimestamp }
 
     fun toSseStream(fromTimestamp: Long = 0): String =
@@ -5554,29 +5554,29 @@ class MushiAuditLog {
 }
 
 /**
- * Mushi collaboration client - optimized with value class IDs.
+ * Ykt collaboration client - optimized with value class IDs.
  */
-class MushiClient(
-    private val transport: MushiTransport,
+class YktClient(
+    private val transport: YktTransport,
     val clientId: ClientId = ClientId.generate(),
     val wireFormat: WireFormat = WireFormat.JSON
 ) {
-    constructor(transport: MushiTransport, clientIdStr: String, wireFormat: WireFormat = WireFormat.JSON) :
+    constructor(transport: YktTransport, clientIdStr: String, wireFormat: WireFormat = WireFormat.JSON) :
         this(transport, ClientId(clientIdStr), wireFormat)
 
-    private var session: MushiSession? = null
+    private var session: YktSession? = null
     private var localClock = ProtoVectorClock()
     private var document = JsonObject(emptyMap())
-    private val pendingOps = mutableListOf<MushiEvent.Patch>()
-    private val eventHandlers = mutableListOf<(MushiEvent) -> Unit>()
+    private val pendingOps = mutableListOf<YktEvent.Patch>()
+    private val eventHandlers = mutableListOf<(YktEvent) -> Unit>()
 
-    suspend fun join(documentUri: String): MushiSession {
+    suspend fun join(documentUri: String): YktSession {
         val sessionId = SessionId.generate()
         transport.connect(sessionId.value, clientId.value)
-        val sess = MushiSession(sessionId, ResourceUri(documentUri), clientId, currentTimeMillis())
+        val sess = YktSession(sessionId, ResourceUri(documentUri), clientId, currentTimeMillis())
         session = sess
 
-        transport.send(MushiEvent.Join(
+        transport.send(YktEvent.Join(
             sessionId = sessionId.value,
             clientId = clientId.value,
             timestamp = currentTimeMillis()
@@ -5587,7 +5587,7 @@ class MushiClient(
 
     suspend fun leave() {
         session?.let { sess ->
-            transport.send(MushiEvent.Leave(
+            transport.send(YktEvent.Leave(
                 sessionId = sess.id.value,
                 clientId = clientId.value,
                 timestamp = currentTimeMillis()
@@ -5597,12 +5597,12 @@ class MushiClient(
         session = null
     }
 
-    suspend fun applyPatch(ops: List<MushiPatchOp>) {
+    suspend fun applyPatch(ops: List<YktPatchOp>) {
         val sess = session ?: return
         localClock = localClock.tick(clientId)
         val version = ProtoVersion(clientId, localClock[clientId])
 
-        val event = MushiEvent.Patch(
+        val event = YktEvent.Patch(
             sessionId = sess.id.value,
             clientId = clientId.value,
             timestamp = currentTimeMillis(),
@@ -5613,9 +5613,9 @@ class MushiClient(
         transport.send(event)
     }
 
-    suspend fun updateAwareness(cursor: Int? = null, selection: MushiSelection? = null, user: Map<String, String> = emptyMap()) {
+    suspend fun updateAwareness(cursor: Int? = null, selection: YktSelection? = null, user: Map<String, String> = emptyMap()) {
         val sess = session ?: return
-        transport.send(MushiEvent.Awareness(
+        transport.send(YktEvent.Awareness(
             sessionId = sess.id.value,
             clientId = clientId.value,
             timestamp = currentTimeMillis(),
@@ -5628,16 +5628,16 @@ class MushiClient(
     suspend fun processIncoming() {
         val event = transport.receive() ?: return
         when (event) {
-            is MushiEvent.Patch -> {
+            is YktEvent.Patch -> {
                 if (event.clientId != clientId.value) {
                     localClock = localClock.merge(ProtoVectorClock(mapOf(event.version.clientId.value to event.version.clock)))
                 }
             }
-            is MushiEvent.Sync -> {
+            is YktEvent.Sync -> {
                 document = event.document
                 localClock = localClock.merge(event.version)
             }
-            is MushiEvent.Ack -> {
+            is YktEvent.Ack -> {
                 pendingOps.removeAll { it.version == event.ackedVersion }
             }
             else -> { }
@@ -5645,7 +5645,7 @@ class MushiClient(
         eventHandlers.forEach { it(event) }
     }
 
-    fun onEvent(handler: (MushiEvent) -> Unit): () -> Unit {
+    fun onEvent(handler: (YktEvent) -> Unit): () -> Unit {
         eventHandlers.add(handler)
         return { eventHandlers.remove(handler) }
     }
@@ -5654,45 +5654,45 @@ class MushiClient(
 }
 
 /**
- * Mushi collaboration server - optimized with value class IDs.
+ * Ykt collaboration server - optimized with value class IDs.
  */
-class MushiServer {
-    private val sessions = mutableMapOf<SessionId, MushiServerSession>()
-    val auditLog = MushiAuditLog()
+class YktServer {
+    private val sessions = mutableMapOf<SessionId, YktServerSession>()
+    val auditLog = YktAuditLog()
 
-    fun createSession(documentUri: String): MushiServerSession {
+    fun createSession(documentUri: String): YktServerSession {
         val sessionId = SessionId.generate()
-        val session = MushiServerSession(sessionId, ResourceUri(documentUri), auditLog)
+        val session = YktServerSession(sessionId, ResourceUri(documentUri), auditLog)
         sessions[sessionId] = session
         return session
     }
 
-    fun getSession(sessionId: String): MushiServerSession? = sessions[SessionId(sessionId)]
-    fun getSession(sessionId: SessionId): MushiServerSession? = sessions[sessionId]
+    fun getSession(sessionId: String): YktServerSession? = sessions[SessionId(sessionId)]
+    fun getSession(sessionId: SessionId): YktServerSession? = sessions[sessionId]
 
     fun closeSession(sessionId: String) = sessions.remove(SessionId(sessionId))
     fun closeSession(sessionId: SessionId) = sessions.remove(sessionId)
 }
 
-class MushiServerSession(
+class YktServerSession(
     val id: SessionId,
     val documentUri: ResourceUri,
-    private val auditLog: MushiAuditLog
+    private val auditLog: YktAuditLog
 ) {
-    constructor(id: String, documentUri: String, auditLog: MushiAuditLog) :
+    constructor(id: String, documentUri: String, auditLog: YktAuditLog) :
         this(SessionId(id), ResourceUri(documentUri), auditLog)
 
-    private val clients = mutableMapOf<ClientId, MushiTransport>()
+    private val clients = mutableMapOf<ClientId, YktTransport>()
     private var document = JsonObject(emptyMap())
     private var clock = ProtoVectorClock()
 
-    suspend fun addClient(clientId: String, transport: MushiTransport) = addClient(ClientId(clientId), transport)
+    suspend fun addClient(clientId: String, transport: YktTransport) = addClient(ClientId(clientId), transport)
 
-    suspend fun addClient(clientId: ClientId, transport: MushiTransport) {
+    suspend fun addClient(clientId: ClientId, transport: YktTransport) {
         clients[clientId] = transport
 
         // Send current state
-        transport.send(MushiEvent.Sync(
+        transport.send(YktEvent.Sync(
             sessionId = id.value,
             clientId = "server",
             timestamp = currentTimeMillis(),
@@ -5701,7 +5701,7 @@ class MushiServerSession(
         ))
 
         // Broadcast join
-        broadcast(MushiEvent.Join(
+        broadcast(YktEvent.Join(
             sessionId = id.value,
             clientId = clientId.value,
             timestamp = currentTimeMillis()
@@ -5711,15 +5711,15 @@ class MushiServerSession(
     fun removeClient(clientId: String) = clients.remove(ClientId(clientId))
     fun removeClient(clientId: ClientId) = clients.remove(clientId)
 
-    suspend fun handleEvent(event: MushiEvent) {
+    suspend fun handleEvent(event: YktEvent) {
         auditLog.append(event)
 
         when (event) {
-            is MushiEvent.Patch -> {
+            is YktEvent.Patch -> {
                 clock = clock.merge(ProtoVectorClock(mapOf(event.version.clientId.value to event.version.clock)))
 
                 // Ack to sender
-                clients[ClientId(event.clientId)]?.send(MushiEvent.Ack(
+                clients[ClientId(event.clientId)]?.send(YktEvent.Ack(
                     sessionId = id.value,
                     clientId = "server",
                     timestamp = currentTimeMillis(),
@@ -5729,8 +5729,8 @@ class MushiServerSession(
                 // Broadcast to others
                 broadcast(event, exclude = ClientId(event.clientId))
             }
-            is MushiEvent.Awareness -> broadcast(event, exclude = ClientId(event.clientId))
-            is MushiEvent.Leave -> {
+            is YktEvent.Awareness -> broadcast(event, exclude = ClientId(event.clientId))
+            is YktEvent.Leave -> {
                 removeClient(event.clientId)
                 broadcast(event)
             }
@@ -5738,7 +5738,7 @@ class MushiServerSession(
         }
     }
 
-    private suspend fun broadcast(event: MushiEvent, exclude: ClientId? = null) {
+    private suspend fun broadcast(event: YktEvent, exclude: ClientId? = null) {
         clients.filterKeys { it != exclude }.values.forEach { it.send(event) }
     }
 
@@ -5845,14 +5845,14 @@ interface SseSession {
 }
 
 /**
- * Mushi transport implementation using Ktor CIO WebSocket.
+ * Ykt transport implementation using Ktor CIO WebSocket.
  */
-class MushiWssTransport(
+class YktWssTransport(
     private val client: KtorCioClient,
     private val baseUrl: String
-) : MushiTransport {
+) : YktTransport {
     private var session: WsSession? = null
-    private val messageQueue = mutableListOf<MushiEvent>()
+    private val messageQueue = mutableListOf<YktEvent>()
     override val isConnected: Boolean get() = session?.isActive == true
 
     override suspend fun connect(sessionId: String, clientId: String) {
@@ -5862,7 +5862,7 @@ class MushiWssTransport(
             onMessage = { msg ->
                 if (msg is WsMessage.Text) {
                     try {
-                        val event = MushiWire.decodeEvent(msg.content)
+                        val event = YktWire.decodeEvent(msg.content)
                         messageQueue.add(event)
                     } catch (_: Exception) { }
                 }
@@ -5875,31 +5875,31 @@ class MushiWssTransport(
         session = null
     }
 
-    override suspend fun send(event: MushiEvent) {
-        session?.send(WsMessage.Text(MushiWire.encodeEvent(event)))
+    override suspend fun send(event: YktEvent) {
+        session?.send(WsMessage.Text(YktWire.encodeEvent(event)))
     }
 
-    override suspend fun receive(): MushiEvent? {
+    override suspend fun receive(): YktEvent? {
         return if (messageQueue.isNotEmpty()) messageQueue.removeAt(0) else null
     }
 }
 
 /**
- * Mushi SSE transport for read-only audit stream.
+ * Ykt SSE transport for read-only audit stream.
  */
-class MushiSseTransport(
+class YktSseTransport(
     private val client: KtorCioClient,
     private val baseUrl: String
 ) {
     private var session: SseSession? = null
-    private val eventHandlers = mutableListOf<(MushiEvent) -> Unit>()
+    private val eventHandlers = mutableListOf<(YktEvent) -> Unit>()
 
     suspend fun connect(sessionId: String, fromTimestamp: Long = 0) {
         session = client.sse(
             url = "$baseUrl/mushi/$sessionId/audit?from=$fromTimestamp",
             onEvent = { sse ->
                 try {
-                    val event = MushiWire.decodeEvent(sse.data)
+                    val event = YktWire.decodeEvent(sse.data)
                     eventHandlers.forEach { it(event) }
                 } catch (_: Exception) { }
             }
@@ -5911,7 +5911,7 @@ class MushiSseTransport(
         session = null
     }
 
-    fun onEvent(handler: (MushiEvent) -> Unit): () -> Unit {
+    fun onEvent(handler: (YktEvent) -> Unit): () -> Unit {
         eventHandlers.add(handler)
         return { eventHandlers.remove(handler) }
     }

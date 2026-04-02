@@ -4,7 +4,7 @@ import kotlinx.serialization.*
 import kotlinx.serialization.json.*
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// PROTOCOL ABSTRACTION - Unified wire protocol for MCP/WebDAV/Mushi
+// PROTOCOL ABSTRACTION - Unified wire protocol for MCP/WebDAV/Ykt
 // ═══════════════════════════════════════════════════════════════════════════════
 
 /**

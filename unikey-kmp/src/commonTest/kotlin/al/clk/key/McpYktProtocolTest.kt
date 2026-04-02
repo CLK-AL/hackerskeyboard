@@ -9,7 +9,9 @@ import kotlin.test.assertFalse
 import kotlinx.serialization.json.*
 
 /**
- * MCP/Mushi Protocol Tests with Markdown Table Coverage
+ * MCP/YKT Protocol Tests with Markdown Table Coverage
+ *
+ * YKT = Yjs-Kotlin (extends Yjs CRDT)
  *
  * ## Test Coverage Matrix
  *
@@ -17,7 +19,7 @@ import kotlinx.serialization.json.*
  * |-----------|------|-------------|------|-------|
  * | MCP       | =5   | =2          | =3   | =SUM(B2:D2) |
  * | WebDAV    | =4   | =1          | =2   | =SUM(B3:D3) |
- * | Mushi     | =6   | =2          | =3   | =SUM(B4:D4) |
+ * | YKT       | =6   | =2          | =3   | =SUM(B4:D4) |
  * | Ktor      | =3   | =1          | =2   | =SUM(B5:D5) |
  * | **Total** | =SUM(B2:B5) | =SUM(C2:C5) | =SUM(D2:D5) | =SUM(E2:E5) |
  *
@@ -25,7 +27,7 @@ import kotlinx.serialization.json.*
  * - Cell coverage: `=COUNTIF(tests, "PASS")/COUNT(tests)*100`
  * - Risk score: `=IF(coverage<80, "HIGH", IF(coverage<95, "MEDIUM", "LOW"))`
  */
-class McpMushiProtocolTest {
+class McpYktProtocolTest {
 
     // ═══════════════════════════════════════════════════════════════════════════
     // MCP PROTOCOL TESTS
@@ -210,32 +212,32 @@ class McpMushiProtocolTest {
     }
 
     // ═══════════════════════════════════════════════════════════════════════════
-    // MUSHI COLLABORATION TESTS
+    // YKT COLLABORATION TESTS
     // ═══════════════════════════════════════════════════════════════════════════
 
     @Test
-    fun testMushiSessionSerialization() {
-        val session = MushiSession(
+    fun testYktSessionSerialization() {
+        val session = YktSession(
             id = SessionId("sess_abc123"),
             documentUri = ResourceUri("/docs/test.md"),
             clientId = ClientId("client_xyz"),
             createdAt = 1234567890L
         )
 
-        val json = ProtoWire.json.encodeToString(MushiSession.serializer(), session)
+        val json = ProtoWire.json.encodeToString(YktSession.serializer(), session)
         assertTrue(json.contains("sess_abc123"))
 
-        val decoded = ProtoWire.json.decodeFromString(MushiSession.serializer(), json)
+        val decoded = ProtoWire.json.decodeFromString(YktSession.serializer(), json)
         assertEquals("sess_abc123", decoded.id.value)
     }
 
     @Test
-    fun testMushiPatchOpSerialization() {
-        val add: MushiPatchOp = MushiPatchOp.Add("/title", JsonPrimitive("New Title"))
-        val remove: MushiPatchOp = MushiPatchOp.Remove("/deprecated")
-        val replace: MushiPatchOp = MushiPatchOp.Replace("/count", JsonPrimitive(42))
+    fun testYktPatchOpSerialization() {
+        val add: YktPatchOp = YktPatchOp.Add("/title", JsonPrimitive("New Title"))
+        val remove: YktPatchOp = YktPatchOp.Remove("/deprecated")
+        val replace: YktPatchOp = YktPatchOp.Replace("/count", JsonPrimitive(42))
 
-        val addJson = ProtoWire.json.encodeToString(MushiPatchOp.serializer(), add)
+        val addJson = ProtoWire.json.encodeToString(YktPatchOp.serializer(), add)
         assertTrue(addJson.contains("add"))
         assertTrue(addJson.contains("/title"))
     }
@@ -272,13 +274,13 @@ class McpMushiProtocolTest {
     }
 
     @Test
-    fun testMushiEventPatchSerialization() {
-        val patch = MushiEvent.Patch(
+    fun testYktEventPatchSerialization() {
+        val patch = YktEvent.Patch(
             sessionId = "sess_1",
             clientId = "client_a",
             timestamp = 1234567890L,
             ops = listOf(
-                MushiPatchOp.Replace("/content", JsonPrimitive("updated"))
+                YktPatchOp.Replace("/content", JsonPrimitive("updated"))
             ),
             version = ProtoVersion(ClientId("client_a"), 1)
         )
@@ -288,17 +290,17 @@ class McpMushiProtocolTest {
         assertTrue(json.contains("sess_1"))
 
         val decoded = ProtoWire.decodeEvent(json)
-        assertTrue(decoded is MushiEvent.Patch)
+        assertTrue(decoded is YktEvent.Patch)
     }
 
     @Test
-    fun testMushiEventAwarenessSerialization() {
-        val awareness = MushiEvent.Awareness(
+    fun testYktEventAwarenessSerialization() {
+        val awareness = YktEvent.Awareness(
             sessionId = "sess_1",
             clientId = "client_a",
             timestamp = 1234567890L,
             cursor = 42,
-            selection = MushiSelection(10, 20),
+            selection = YktSelection(10, 20),
             user = mapOf("name" to "Alice", "color" to "#ff0000")
         )
 
@@ -308,15 +310,15 @@ class McpMushiProtocolTest {
     }
 
     @Test
-    fun testMushiEventJoinLeaveSerialization() {
-        val join = MushiEvent.Join(
+    fun testYktEventJoinLeaveSerialization() {
+        val join = YktEvent.Join(
             sessionId = "sess_1",
             clientId = "client_a",
             timestamp = 1234567890L,
             user = mapOf("name" to "Bob")
         )
 
-        val leave = MushiEvent.Leave(
+        val leave = YktEvent.Leave(
             sessionId = "sess_1",
             clientId = "client_a",
             timestamp = 1234567891L
@@ -330,8 +332,8 @@ class McpMushiProtocolTest {
     }
 
     @Test
-    fun testMushiEventSyncSerialization() {
-        val sync = MushiEvent.Sync(
+    fun testYktEventSyncSerialization() {
+        val sync = YktEvent.Sync(
             sessionId = "sess_1",
             clientId = "server",
             timestamp = 1234567890L,
@@ -408,12 +410,12 @@ class McpMushiProtocolTest {
     }
 
     @Test
-    fun testMushiEventToSse() {
-        val patch = MushiEvent.Patch(
+    fun testYktEventToSse() {
+        val patch = YktEvent.Patch(
             sessionId = "sess_1",
             clientId = "client_a",
             timestamp = 1234567890L,
-            ops = listOf(MushiPatchOp.Add("/new", JsonPrimitive("value"))),
+            ops = listOf(YktPatchOp.Add("/new", JsonPrimitive("value"))),
             version = ProtoVersion(ClientId("client_a"), 1)
         )
 
@@ -424,16 +426,16 @@ class McpMushiProtocolTest {
     }
 
     @Test
-    fun testMushiAuditLog() {
-        val auditLog = MushiAuditLog()
+    fun testYktAuditLog() {
+        val auditLog = YktAuditLog()
 
-        val event1 = MushiEvent.Join("sess_1", "client_a", 100L)
-        val event2 = MushiEvent.Patch(
+        val event1 = YktEvent.Join("sess_1", "client_a", 100L)
+        val event2 = YktEvent.Patch(
             "sess_1", "client_a", 200L,
-            listOf(MushiPatchOp.Add("/x", JsonPrimitive(1))),
+            listOf(YktPatchOp.Add("/x", JsonPrimitive(1))),
             ProtoVersion(ClientId("client_a"), 1)
         )
-        val event3 = MushiEvent.Leave("sess_1", "client_a", 300L)
+        val event3 = YktEvent.Leave("sess_1", "client_a", 300L)
 
         auditLog.append(event1)
         auditLog.append(event2)
@@ -562,8 +564,8 @@ class McpMushiProtocolTest {
     }
 
     @Test
-    fun testMushiServerSessionManagement() {
-        val server = MushiServer()
+    fun testYktServerSessionManagement() {
+        val server = YktServer()
 
         val session = server.createSession("/docs/test.md")
         assertNotNull(session)
