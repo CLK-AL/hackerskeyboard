@@ -4,7 +4,8 @@ package al.clk.key
  * Language codes with script association.
  * This is the single source of truth for language identification in forms maps.
  */
-enum class Lang(val code: String, val script: Script) {
+enum class Lang(val code: String, val script: Script, val baseLang: Lang? = null) {
+    // Base languages
     HE("he", Script.HEBREW),
     EN("en", Script.LATIN),
     AR("ar", Script.ARABIC),
@@ -28,11 +29,24 @@ enum class Lang(val code: String, val script: Script) {
     PT("pt", Script.LATIN),
     SV("sv", Script.LATIN),
     SW("sw", Script.LATIN),
-    TR("tr", Script.LATIN);
+    TR("tr", Script.LATIN),
+    // Regional variants
+    EN_GB("en-gb", Script.LATIN, EN),
+    EN_AU("en-au", Script.LATIN, EN),
+    EN_CA("en-ca", Script.LATIN, EN),
+    EN_IN("en-in", Script.LATIN, EN),
+    PT_BR("pt-br", Script.LATIN, PT),
+    ES_419("es-419", Script.LATIN, ES);
+
+    /** Is this a regional variant? */
+    val isVariant: Boolean get() = baseLang != null
 
     companion object {
         private val byCode = entries.associateBy { it.code }
         fun fromCode(code: String): Lang? = byCode[code.lowercase()]
+
+        /** Get base languages only (no regional variants) */
+        val baseLanguages: List<Lang> get() = entries.filter { !it.isVariant }
     }
 }
 

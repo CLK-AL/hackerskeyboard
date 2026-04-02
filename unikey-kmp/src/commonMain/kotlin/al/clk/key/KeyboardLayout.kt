@@ -6,12 +6,15 @@ package al.clk.key
  * Uses ILayoutKey interface so enums can be used directly as keys.
  */
 data class KeyboardLayout(
-    val code: String,           // ISO 639-1 language code
+    val lang: Lang,             // Language enum (source of truth)
     val name: String,           // Display name
     val nativeName: String,     // Name in native script
-    val script: Script,
+    val script: Script = lang.script,  // Derived from Lang
     val keys: Map<String, ILayoutKey>
-)
+) {
+    /** ISO 639-1 language code (derived from Lang) */
+    val code: String get() = lang.code
+}
 
 /**
  * A single key in a layout - immutable phonetic key definition.
@@ -117,19 +120,17 @@ object KeyboardLayouts {
 
     // ═══ Arabic (ar) ═══
     val AR = KeyboardLayout(
-        code = "ar",
+        lang = Lang.AR,
         name = "Arabic",
         nativeName = "العربية",
-        script = Script.ARABIC,
         keys = ArabicLetter.keys
     )
 
     // ═══ Danish (da) ═══
     val DA = KeyboardLayout(
-        code = "da",
+        lang = Lang.DA,
         name = "Danish",
         nativeName = "Dansk",
-        script = Script.LATIN,
         keys = buildLatinLayout("kr", "krone", mapOf(
             ";" to key("æ", "ɛ", "ae", "Æ", "ɛ", "AE"),
             "'" to key("ø", "ø", "oe", "Ø", "ø", "OE"),
@@ -139,10 +140,9 @@ object KeyboardLayouts {
 
     // ═══ German (de) ═══
     val DE = KeyboardLayout(
-        code = "de",
+        lang = Lang.DE,
         name = "German",
         nativeName = "Deutsch",
-        script = Script.LATIN,
         keys = buildLatinLayout("€", "euro", mapOf(
             ";" to key("ö", "ø", "o-umlaut", "Ö", "ø", "O-umlaut"),
             "'" to key("ä", "ɛ", "a-umlaut", "Ä", "ɛ", "A-umlaut"),
@@ -153,28 +153,25 @@ object KeyboardLayouts {
 
     // ═══ Greek (el) ═══
     val EL = KeyboardLayout(
-        code = "el",
+        lang = Lang.EL,
         name = "Greek",
         nativeName = "Ελληνικά",
-        script = Script.GREEK,
         keys = GreekKey.keys
     )
 
     // ═══ English US (en) ═══
     val EN = KeyboardLayout(
-        code = "en",
+        lang = Lang.EN,
         name = "English (US)",
         nativeName = "English",
-        script = Script.LATIN,
         keys = buildLatinLayout("$", "dollar", emptyMap())
     )
 
     // ═══ English GB (en-gb) ═══
     val EN_GB = KeyboardLayout(
-        code = "en-gb",
+        lang = Lang.EN_GB,
         name = "English (UK)",
         nativeName = "English",
-        script = Script.LATIN,
         keys = buildLatinLayout("£", "pound", mapOf(
             "3" to key("3", "", "three", "£", "", "pound")
         ))
@@ -182,10 +179,9 @@ object KeyboardLayouts {
 
     // ═══ Spanish (es) ═══
     val ES = KeyboardLayout(
-        code = "es",
+        lang = Lang.ES,
         name = "Spanish",
         nativeName = "Español",
-        script = Script.LATIN,
         keys = buildLatinLayout("€", "euro", mapOf(
             ";" to key("ñ", "ɲ", "ene", "Ñ", "ɲ", "Ene"),
             "'" to key("´", "", "acute", "¨", "", "diaeresis"),
@@ -195,10 +191,9 @@ object KeyboardLayouts {
 
     // ═══ Finnish (fi) ═══
     val FI = KeyboardLayout(
-        code = "fi",
+        lang = Lang.FI,
         name = "Finnish",
         nativeName = "Suomi",
-        script = Script.LATIN,
         keys = buildLatinLayout("€", "euro", mapOf(
             ";" to key("ö", "ø", "o-umlaut", "Ö", "ø", "O-umlaut"),
             "'" to key("ä", "æ", "a-umlaut", "Ä", "æ", "A-umlaut")
@@ -207,10 +202,9 @@ object KeyboardLayouts {
 
     // ═══ French (fr) ═══
     val FR = KeyboardLayout(
-        code = "fr",
+        lang = Lang.FR,
         name = "French",
         nativeName = "Français",
-        script = Script.LATIN,
         keys = buildLatinLayout("€", "euro", mapOf(
             ";" to key("é", "e", "e-acute", "É", "e", "E-acute"),
             "'" to key("è", "ɛ", "e-grave", "È", "ɛ", "E-grave"),
@@ -221,19 +215,17 @@ object KeyboardLayouts {
 
     // ═══ Hebrew (he) ═══
     val HE = KeyboardLayout(
-        code = "he",
+        lang = Lang.HE,
         name = "Hebrew",
         nativeName = "עברית",
-        script = Script.HEBREW,
         keys = HebrewLetter.keys + mapOf("4" to key("₪", "", "shekel", "$", "", "dollar"))
     )
 
     // ═══ Hindi (hi) ═══
     val HI = KeyboardLayout(
-        code = "hi",
+        lang = Lang.HI,
         name = "Hindi",
         nativeName = "हिन्दी",
-        script = Script.DEVANAGARI,
         keys = mapOf(
             // Vowels (with matra shifts)
             "q" to key("औ", "ɔː", "au", "ौ", "ɔː", "au-matra"),
@@ -274,10 +266,9 @@ object KeyboardLayouts {
 
     // ═══ Italian (it) ═══
     val IT = KeyboardLayout(
-        code = "it",
+        lang = Lang.IT,
         name = "Italian",
         nativeName = "Italiano",
-        script = Script.LATIN,
         keys = buildLatinLayout("€", "euro", mapOf(
             ";" to key("ò", "ɔ", "o-grave", "Ò", "ɔ", "O-grave"),
             "'" to key("à", "a", "a-grave", "À", "a", "A-grave"),
@@ -289,10 +280,9 @@ object KeyboardLayouts {
 
     // ═══ Japanese (ja) ═══
     val JA = KeyboardLayout(
-        code = "ja",
+        lang = Lang.JA,
         name = "Japanese",
         nativeName = "日本語",
-        script = Script.HIRAGANA,
         keys = HiraganaKey.keys + mapOf(
             "l" to key("ー", "ː", "long-vowel"),
             "q" to key("。", "", "period"),
@@ -303,10 +293,9 @@ object KeyboardLayouts {
 
     // ═══ Korean (ko) ═══
     val KO = KeyboardLayout(
-        code = "ko",
+        lang = Lang.KO,
         name = "Korean",
         nativeName = "한국어",
-        script = Script.HANGUL,
         keys = mapOf(
             // Consonants (초성) with tensed shift
             "q" to key("ㅂ", "p", "bieup", "ㅃ", "p͈", "ssang-bieup"),
@@ -342,19 +331,17 @@ object KeyboardLayouts {
 
     // ═══ Malay (ms) ═══
     val MS = KeyboardLayout(
-        code = "ms",
+        lang = Lang.MS,
         name = "Malay",
         nativeName = "Bahasa Melayu",
-        script = Script.LATIN,
         keys = buildLatinLayout("RM", "ringgit", emptyMap())
     )
 
     // ═══ Dutch (nl) ═══
     val NL = KeyboardLayout(
-        code = "nl",
+        lang = Lang.NL,
         name = "Dutch",
         nativeName = "Nederlands",
-        script = Script.LATIN,
         keys = buildLatinLayout("€", "euro", mapOf(
             "'" to key("´", "", "acute", "¨", "", "diaeresis"),
             "[" to key("ij", "ɛi", "ij", "IJ", "ɛi", "IJ")
@@ -363,10 +350,9 @@ object KeyboardLayouts {
 
     // ═══ Norwegian (no) ═══
     val NO = KeyboardLayout(
-        code = "no",
+        lang = Lang.NO,
         name = "Norwegian",
         nativeName = "Norsk",
-        script = Script.LATIN,
         keys = buildLatinLayout("kr", "krone", mapOf(
             ";" to key("ø", "ø", "oe", "Ø", "ø", "OE"),
             "'" to key("æ", "æ", "ae", "Æ", "æ", "AE"),
@@ -376,10 +362,9 @@ object KeyboardLayouts {
 
     // ═══ Polish (pl) ═══
     val PL = KeyboardLayout(
-        code = "pl",
+        lang = Lang.PL,
         name = "Polish",
         nativeName = "Polski",
-        script = Script.LATIN,
         keys = buildLatinLayout("zł", "zloty", mapOf(
             "a" to key("a", "a", "a", "ą", "ɔ̃", "a-ogonek"),
             "c" to key("c", "ts", "c", "ć", "tɕ", "c-acute"),
@@ -395,10 +380,9 @@ object KeyboardLayouts {
 
     // ═══ Portuguese (pt) ═══
     val PT = KeyboardLayout(
-        code = "pt",
+        lang = Lang.PT,
         name = "Portuguese",
         nativeName = "Português",
-        script = Script.LATIN,
         keys = buildLatinLayout("€", "euro", mapOf(
             ";" to key("ç", "s", "c-cedilla", "Ç", "s", "C-cedilla"),
             "'" to key("~", "", "tilde", "^", "", "circumflex"),
@@ -409,10 +393,9 @@ object KeyboardLayouts {
 
     // ═══ Portuguese Brazil (pt-br) ═══
     val PT_BR = KeyboardLayout(
-        code = "pt-br",
+        lang = Lang.PT_BR,
         name = "Portuguese (Brazil)",
         nativeName = "Português (Brasil)",
-        script = Script.LATIN,
         keys = buildLatinLayout("R$", "real", mapOf(
             ";" to key("ç", "s", "c-cedilla", "Ç", "s", "C-cedilla"),
             "'" to key("~", "", "tilde", "^", "", "circumflex"),
@@ -423,19 +406,17 @@ object KeyboardLayouts {
 
     // ═══ Russian (ru) ═══
     val RU = KeyboardLayout(
-        code = "ru",
+        lang = Lang.RU,
         name = "Russian",
         nativeName = "Русский",
-        script = Script.CYRILLIC,
         keys = CyrillicKey.keys + mapOf("4" to key("₽", "", "ruble", "$", "", "dollar"))
     )
 
     // ═══ Swedish (sv) ═══
     val SV = KeyboardLayout(
-        code = "sv",
+        lang = Lang.SV,
         name = "Swedish",
         nativeName = "Svenska",
-        script = Script.LATIN,
         keys = buildLatinLayout("kr", "krona", mapOf(
             ";" to key("ö", "ø", "o-umlaut", "Ö", "ø", "O-umlaut"),
             "'" to key("ä", "ɛ", "a-umlaut", "Ä", "ɛ", "A-umlaut"),
@@ -445,19 +426,17 @@ object KeyboardLayouts {
 
     // ═══ Swahili (sw) ═══
     val SW = KeyboardLayout(
-        code = "sw",
+        lang = Lang.SW,
         name = "Swahili",
         nativeName = "Kiswahili",
-        script = Script.LATIN,
         keys = buildLatinLayout("TSh", "shilling", emptyMap())
     )
 
     // ═══ Turkish (tr) ═══
     val TR = KeyboardLayout(
-        code = "tr",
+        lang = Lang.TR,
         name = "Turkish",
         nativeName = "Türkçe",
-        script = Script.LATIN,
         keys = buildLatinLayout("₺", "lira", mapOf(
             "i" to key("ı", "ɯ", "dotless-i", "I", "ɯ", "Dotless-I"),
             ";" to key("ş", "ʃ", "s-cedilla", "Ş", "ʃ", "S-cedilla"),
@@ -471,10 +450,9 @@ object KeyboardLayouts {
 
     // ═══ Chinese (zh) ═══
     val ZH = KeyboardLayout(
-        code = "zh",
+        lang = Lang.ZH,
         name = "Chinese",
         nativeName = "中文",
-        script = Script.CJK,
         keys = mapOf(
             // Pinyin initials
             "b" to key("b", "p", "bo"),
@@ -510,37 +488,33 @@ object KeyboardLayouts {
 
     // ═══ English Australia (en-au) ═══
     val EN_AU = KeyboardLayout(
-        code = "en-au",
+        lang = Lang.EN_AU,
         name = "English (Australia)",
         nativeName = "English",
-        script = Script.LATIN,
         keys = buildLatinLayout("$", "dollar", emptyMap())
     )
 
     // ═══ English Canada (en-ca) ═══
     val EN_CA = KeyboardLayout(
-        code = "en-ca",
+        lang = Lang.EN_CA,
         name = "English (Canada)",
         nativeName = "English",
-        script = Script.LATIN,
         keys = buildLatinLayout("$", "dollar", emptyMap())
     )
 
     // ═══ English India (en-in) ═══
     val EN_IN = KeyboardLayout(
-        code = "en-in",
+        lang = Lang.EN_IN,
         name = "English (India)",
         nativeName = "English",
-        script = Script.LATIN,
         keys = buildLatinLayout("₹", "rupee", emptyMap())
     )
 
     // ═══ Spanish Latin America (es-419) ═══
     val ES_419 = KeyboardLayout(
-        code = "es-419",
+        lang = Lang.ES_419,
         name = "Spanish (Latin America)",
         nativeName = "Español (Latinoamérica)",
-        script = Script.LATIN,
         keys = buildLatinLayout("$", "dollar", mapOf(
             ";" to key("ñ", "ɲ", "ene", "Ñ", "ɲ", "Ene"),
             "'" to key("´", "", "acute", "¨", "", "diaeresis"),
@@ -593,21 +567,37 @@ object KeyboardLayouts {
     )
 
     /**
-     * All layouts by language code - generated from allLayouts list
+     * All layouts by Lang enum - primary lookup method
+     */
+    val byLang: Map<Lang, KeyboardLayout> = allLayouts.associateBy { it.lang }
+
+    /**
+     * All layouts by language code - for string-based lookup
      * Includes regional variants (en-gb, en-au, etc.)
      */
     val layouts: Map<String, KeyboardLayout> = allLayouts.associateBy { it.code } +
         mapOf("en-us" to EN)  // US English alias
 
     /**
+     * Get layout by Lang enum (preferred)
+     */
+    fun get(lang: Lang): KeyboardLayout? = byLang[lang]
+
+    /**
      * Get layout by language code (case-insensitive)
      */
+    @Deprecated("Use get(Lang) instead", ReplaceWith("get(Lang.fromCode(code)!!)"))
     fun get(code: String): KeyboardLayout? = layouts[code.lowercase()]
+
+    /**
+     * Get all supported languages (base languages only)
+     */
+    val supportedLangs: List<Lang> = Lang.baseLanguages
 
     /**
      * Get all supported language codes (base languages only)
      */
-    val supportedLanguages: List<String> = layouts.keys.filter { !it.contains("-") || it == "en-gb" || it == "pt-br" || it == "es-419" }.sorted()
+    val supportedLanguages: List<String> = supportedLangs.map { it.code }.sorted()
 
     /**
      * Get all supported language codes including all variants

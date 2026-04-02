@@ -420,7 +420,8 @@ fun getIpaVowelFull(ipa: String): dynamic? {
 
 @JsName("getConsonantsForLanguage")
 fun getConsonantsForLanguage(langCode: String): Array<dynamic> {
-    return IpaMatrix.getConsonantsForLanguage(langCode).map { cons ->
+    val lang = Lang.fromCode(langCode) ?: return emptyArray()
+    return IpaMatrix.getConsonantsForLanguage(lang).map { cons ->
         val obj = js("{}")
         obj["ipa"] = cons.ipa
         obj["name"] = cons.name
@@ -434,7 +435,8 @@ fun getConsonantsForLanguage(langCode: String): Array<dynamic> {
 
 @JsName("getVowelsForLanguage")
 fun getVowelsForLanguage(langCode: String): Array<dynamic> {
-    return IpaMatrix.getVowelsForLanguage(langCode).map { vowel ->
+    val lang = Lang.fromCode(langCode) ?: return emptyArray()
+    return IpaMatrix.getVowelsForLanguage(lang).map { vowel ->
         val obj = js("{}")
         obj["ipa"] = vowel.ipa
         obj["name"] = vowel.name

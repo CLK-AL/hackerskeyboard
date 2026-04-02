@@ -97,15 +97,18 @@ data class MorphoKey(
  * Unified morphological keyboard layout
  */
 data class MorphoLayout(
-    val code: String,
+    val lang: Lang,
     val name: String,
     val nativeName: String,
-    val script: Script,
+    val script: Script = lang.script,
     val keys: Map<String, MorphoKey>,
     val prefixes: List<MorphoKey> = emptyList(),
     val suffixes: Map<Gender, MorphoKey> = emptyMap(),
     val pluralSuffixes: Map<Gender, MorphoKey> = emptyMap()
 ) {
+    /** ISO 639-1 language code (derived from Lang) */
+    val code: String get() = lang.code
+
     /**
      * Get key by QWERTY position
      */
@@ -123,20 +126,18 @@ data class MorphoLayout(
 object MorphoLayouts {
 
     val HE = MorphoLayout(
-        code = "he",
+        lang = Lang.HE,
         name = "Hebrew",
         nativeName = "עברית",
-        script = Script.HEBREW,
         keys = HebrewMorphoEnum.keys,
         prefixes = HebrewMorphoEnum.prefixes,
         pluralSuffixes = HebrewMorphoEnum.pluralSuffixes
     )
 
     val AR = MorphoLayout(
-        code = "ar",
+        lang = Lang.AR,
         name = "Arabic",
         nativeName = "العربية",
-        script = Script.ARABIC,
         keys = ArabicMorphoEnum.keys,
         prefixes = ArabicMorphoEnum.prefixes,
         pluralSuffixes = ArabicMorphoEnum.pluralSuffixes
@@ -148,12 +149,23 @@ object MorphoLayouts {
     private val allLayouts: List<MorphoLayout> = listOf(HE, AR)
 
     /**
-     * All layouts by language code - generated from allLayouts list
+     * All layouts by Lang enum - primary lookup method
+     */
+    val byLang: Map<Lang, MorphoLayout> = allLayouts.associateBy { it.lang }
+
+    /**
+     * All layouts by language code - for string-based lookup
      */
     val layouts: Map<String, MorphoLayout> = allLayouts.associateBy { it.code }
 
     /**
-     * Get layout by code
+     * Get layout by Lang enum (preferred)
      */
+    operator fun get(lang: Lang): MorphoLayout? = byLang[lang]
+
+    /**
+     * Get layout by code (deprecated)
+     */
+    @Deprecated("Use get(Lang) instead", ReplaceWith("get(Lang.fromCode(code)!!)"))
     operator fun get(code: String): MorphoLayout? = layouts[code.lowercase()]
 }

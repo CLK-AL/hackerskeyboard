@@ -54,7 +54,7 @@ object IpaMatrix {
         val aspirated: Boolean = false,
         val breathy: Boolean = false,
         val emphatic: Boolean = false,
-        val languages: List<String>  // ISO codes where this sound exists
+        val languages: List<Lang>  // Languages where this sound exists
     ) {
         val hue: Int by lazy { computeHue() }
 
@@ -76,33 +76,33 @@ object IpaMatrix {
         // ═══ PLOSIVES ═══
         // Bilabial
         Consonant("p", "voiceless bilabial plosive", Place.BILABIAL, Manner.PLOSIVE, false,
-            languages = listOf("ar", "da", "de", "el", "en", "es", "fi", "fr", "he", "hi", "it", "ja", "ko", "ms", "nl", "no", "pl", "pt", "ru", "sv", "sw", "tr", "zh")),
+            languages = listOf(Lang.AR, Lang.DA, Lang.DE, Lang.EL, Lang.EN, Lang.ES, Lang.FI, Lang.FR, Lang.HE, Lang.HI, Lang.IT, Lang.JA, Lang.KO, Lang.MS, Lang.NL, Lang.NO, Lang.PL, Lang.PT, Lang.RU, Lang.SV, Lang.SW, Lang.TR, Lang.ZH)),
         Consonant("b", "voiced bilabial plosive", Place.BILABIAL, Manner.PLOSIVE, true,
-            languages = listOf("ar", "da", "de", "el", "en", "es", "fi", "fr", "he", "hi", "it", "ja", "ko", "ms", "nl", "no", "pl", "pt", "ru", "sv", "sw", "tr", "zh")),
+            languages = listOf(Lang.AR, Lang.DA, Lang.DE, Lang.EL, Lang.EN, Lang.ES, Lang.FI, Lang.FR, Lang.HE, Lang.HI, Lang.IT, Lang.JA, Lang.KO, Lang.MS, Lang.NL, Lang.NO, Lang.PL, Lang.PT, Lang.RU, Lang.SV, Lang.SW, Lang.TR, Lang.ZH)),
         Consonant("pʰ", "aspirated bilabial plosive", Place.BILABIAL, Manner.PLOSIVE, false, aspirated = true,
-            languages = listOf("hi", "ko", "zh")),
+            languages = listOf(Lang.HI, Lang.KO, Lang.ZH)),
         Consonant("bʱ", "breathy bilabial plosive", Place.BILABIAL, Manner.PLOSIVE, true, breathy = true,
-            languages = listOf("hi")),
+            languages = listOf(Lang.HI)),
 
         // Alveolar
         Consonant("t", "voiceless alveolar plosive", Place.ALVEOLAR, Manner.PLOSIVE, false,
-            languages = listOf("ar", "da", "de", "el", "en", "es", "fi", "fr", "he", "hi", "it", "ja", "ko", "ms", "nl", "no", "pl", "pt", "ru", "sv", "sw", "tr", "zh")),
+            languages = listOf(Lang.AR, Lang.DA, Lang.DE, Lang.EL, Lang.EN, Lang.ES, Lang.FI, Lang.FR, Lang.HE, Lang.HI, Lang.IT, Lang.JA, Lang.KO, Lang.MS, Lang.NL, Lang.NO, Lang.PL, Lang.PT, Lang.RU, Lang.SV, Lang.SW, Lang.TR, Lang.ZH)),
         Consonant("d", "voiced alveolar plosive", Place.ALVEOLAR, Manner.PLOSIVE, true,
-            languages = listOf("ar", "da", "de", "el", "en", "es", "fi", "fr", "he", "hi", "it", "ja", "ko", "ms", "nl", "no", "pl", "pt", "ru", "sv", "sw", "tr", "zh")),
+            languages = listOf(Lang.AR, Lang.DA, Lang.DE, Lang.EL, Lang.EN, Lang.ES, Lang.FI, Lang.FR, Lang.HE, Lang.HI, Lang.IT, Lang.JA, Lang.KO, Lang.MS, Lang.NL, Lang.NO, Lang.PL, Lang.PT, Lang.RU, Lang.SV, Lang.SW, Lang.TR, Lang.ZH)),
         Consonant("tʰ", "aspirated alveolar plosive", Place.ALVEOLAR, Manner.PLOSIVE, false, aspirated = true,
-            languages = listOf("hi", "ko", "zh")),
+            languages = listOf(Lang.HI, Lang.KO, Lang.ZH)),
         Consonant("dʱ", "breathy alveolar plosive", Place.ALVEOLAR, Manner.PLOSIVE, true, breathy = true,
-            languages = listOf("hi")),
+            languages = listOf(Lang.HI)),
 
         // Retroflex
         Consonant("ʈ", "voiceless retroflex plosive", Place.RETROFLEX, Manner.PLOSIVE, false,
-            languages = listOf("hi")),
+            languages = listOf(Lang.HI)),
         Consonant("ɖ", "voiced retroflex plosive", Place.RETROFLEX, Manner.PLOSIVE, true,
-            languages = listOf("hi")),
+            languages = listOf(Lang.HI)),
         Consonant("ʈʰ", "aspirated retroflex plosive", Place.RETROFLEX, Manner.PLOSIVE, false, aspirated = true,
-            languages = listOf("hi")),
+            languages = listOf(Lang.HI)),
         Consonant("ɖʱ", "breathy retroflex plosive", Place.RETROFLEX, Manner.PLOSIVE, true, breathy = true,
-            languages = listOf("hi")),
+            languages = listOf(Lang.HI)),
 
         // Palatal
         Consonant("c", "voiceless palatal plosive", Place.PALATAL, Manner.PLOSIVE, false,
@@ -112,168 +112,168 @@ object IpaMatrix {
 
         // Velar
         Consonant("k", "voiceless velar plosive", Place.VELAR, Manner.PLOSIVE, false,
-            languages = listOf("ar", "da", "de", "el", "en", "es", "fi", "fr", "he", "hi", "it", "ja", "ko", "ms", "nl", "no", "pl", "pt", "ru", "sv", "sw", "tr", "zh")),
+            languages = listOf(Lang.AR, Lang.DA, Lang.DE, Lang.EL, Lang.EN, Lang.ES, Lang.FI, Lang.FR, Lang.HE, Lang.HI, Lang.IT, Lang.JA, Lang.KO, Lang.MS, Lang.NL, Lang.NO, Lang.PL, Lang.PT, Lang.RU, Lang.SV, Lang.SW, Lang.TR, Lang.ZH)),
         Consonant("ɡ", "voiced velar plosive", Place.VELAR, Manner.PLOSIVE, true,
-            languages = listOf("ar", "da", "de", "el", "en", "es", "fi", "fr", "he", "hi", "it", "ja", "ko", "ms", "nl", "no", "pl", "pt", "ru", "sv", "sw", "tr")),
+            languages = listOf(Lang.AR, Lang.DA, Lang.DE, Lang.EL, Lang.EN, Lang.ES, Lang.FI, Lang.FR, Lang.HE, Lang.HI, Lang.IT, Lang.JA, Lang.KO, Lang.MS, Lang.NL, Lang.NO, Lang.PL, Lang.PT, Lang.RU, Lang.SV, Lang.SW, Lang.TR)),
         Consonant("kʰ", "aspirated velar plosive", Place.VELAR, Manner.PLOSIVE, false, aspirated = true,
-            languages = listOf("hi", "ko", "zh")),
+            languages = listOf(Lang.HI, Lang.KO, Lang.ZH)),
         Consonant("ɡʱ", "breathy velar plosive", Place.VELAR, Manner.PLOSIVE, true, breathy = true,
-            languages = listOf("hi")),
+            languages = listOf(Lang.HI)),
 
         // Uvular
         Consonant("q", "voiceless uvular plosive", Place.UVULAR, Manner.PLOSIVE, false,
-            languages = listOf("ar")),
+            languages = listOf(Lang.AR)),
         Consonant("ɢ", "voiced uvular plosive", Place.UVULAR, Manner.PLOSIVE, true,
             languages = listOf()),
 
         // Glottal
         Consonant("ʔ", "glottal stop", Place.GLOTTAL, Manner.PLOSIVE, false,
-            languages = listOf("ar", "he", "de")),
+            languages = listOf(Lang.AR, Lang.HE, Lang.DE)),
 
         // ═══ NASALS ═══
         Consonant("m", "bilabial nasal", Place.BILABIAL, Manner.NASAL, true,
-            languages = listOf("ar", "da", "de", "el", "en", "es", "fi", "fr", "he", "hi", "it", "ja", "ko", "ms", "nl", "no", "pl", "pt", "ru", "sv", "sw", "tr", "zh")),
+            languages = listOf(Lang.AR, Lang.DA, Lang.DE, Lang.EL, Lang.EN, Lang.ES, Lang.FI, Lang.FR, Lang.HE, Lang.HI, Lang.IT, Lang.JA, Lang.KO, Lang.MS, Lang.NL, Lang.NO, Lang.PL, Lang.PT, Lang.RU, Lang.SV, Lang.SW, Lang.TR, Lang.ZH)),
         Consonant("n", "alveolar nasal", Place.ALVEOLAR, Manner.NASAL, true,
-            languages = listOf("ar", "da", "de", "el", "en", "es", "fi", "fr", "he", "hi", "it", "ja", "ko", "ms", "nl", "no", "pl", "pt", "ru", "sv", "sw", "tr", "zh")),
+            languages = listOf(Lang.AR, Lang.DA, Lang.DE, Lang.EL, Lang.EN, Lang.ES, Lang.FI, Lang.FR, Lang.HE, Lang.HI, Lang.IT, Lang.JA, Lang.KO, Lang.MS, Lang.NL, Lang.NO, Lang.PL, Lang.PT, Lang.RU, Lang.SV, Lang.SW, Lang.TR, Lang.ZH)),
         Consonant("ɳ", "retroflex nasal", Place.RETROFLEX, Manner.NASAL, true,
-            languages = listOf("hi")),
+            languages = listOf(Lang.HI)),
         Consonant("ɲ", "palatal nasal", Place.PALATAL, Manner.NASAL, true,
-            languages = listOf("es", "it", "ja", "hi")),
+            languages = listOf(Lang.ES, Lang.IT, Lang.JA, Lang.HI)),
         Consonant("ŋ", "velar nasal", Place.VELAR, Manner.NASAL, true,
-            languages = listOf("en", "de", "nl", "ja", "ko", "zh", "hi", "sw")),
+            languages = listOf(Lang.EN, Lang.DE, Lang.NL, Lang.JA, Lang.KO, Lang.ZH, Lang.HI, Lang.SW)),
         Consonant("ɴ", "uvular nasal", Place.UVULAR, Manner.NASAL, true,
-            languages = listOf("ja")),
+            languages = listOf(Lang.JA)),
 
         // ═══ TRILLS ═══
         Consonant("r", "alveolar trill", Place.ALVEOLAR, Manner.TRILL, true,
-            languages = listOf("es", "it", "ru", "pl", "fi", "ar")),
+            languages = listOf(Lang.ES, Lang.IT, Lang.RU, Lang.PL, Lang.FI, Lang.AR)),
         Consonant("ʀ", "uvular trill", Place.UVULAR, Manner.TRILL, true,
-            languages = listOf("de", "fr")),
+            languages = listOf(Lang.DE, Lang.FR)),
 
         // ═══ TAPS/FLAPS ═══
         Consonant("ɾ", "alveolar tap", Place.ALVEOLAR, Manner.TAP, true,
-            languages = listOf("es", "it", "ja", "ko", "pt")),
+            languages = listOf(Lang.ES, Lang.IT, Lang.JA, Lang.KO, Lang.PT)),
         Consonant("ɽ", "retroflex flap", Place.RETROFLEX, Manner.TAP, true,
-            languages = listOf("hi")),
+            languages = listOf(Lang.HI)),
 
         // ═══ FRICATIVES ═══
         // Labiodental
         Consonant("f", "voiceless labiodental fricative", Place.LABIODENTAL, Manner.FRICATIVE, false,
-            languages = listOf("ar", "da", "de", "el", "en", "es", "fi", "fr", "he", "hi", "it", "ko", "ms", "nl", "no", "pl", "pt", "ru", "sv", "sw", "tr", "zh")),
+            languages = listOf(Lang.AR, Lang.DA, Lang.DE, Lang.EL, Lang.EN, Lang.ES, Lang.FI, Lang.FR, Lang.HE, Lang.HI, Lang.IT, Lang.KO, Lang.MS, Lang.NL, Lang.NO, Lang.PL, Lang.PT, Lang.RU, Lang.SV, Lang.SW, Lang.TR, Lang.ZH)),
         Consonant("v", "voiced labiodental fricative", Place.LABIODENTAL, Manner.FRICATIVE, true,
-            languages = listOf("da", "de", "el", "en", "fi", "fr", "he", "it", "nl", "no", "pl", "pt", "ru", "sv", "tr")),
+            languages = listOf(Lang.DA, Lang.DE, Lang.EL, Lang.EN, Lang.FI, Lang.FR, Lang.HE, Lang.IT, Lang.NL, Lang.NO, Lang.PL, Lang.PT, Lang.RU, Lang.SV, Lang.TR)),
 
         // Dental
         Consonant("θ", "voiceless dental fricative", Place.DENTAL, Manner.FRICATIVE, false,
-            languages = listOf("ar", "el", "en")),
+            languages = listOf(Lang.AR, Lang.EL, Lang.EN)),
         Consonant("ð", "voiced dental fricative", Place.DENTAL, Manner.FRICATIVE, true,
-            languages = listOf("ar", "el", "en")),
+            languages = listOf(Lang.AR, Lang.EL, Lang.EN)),
 
         // Alveolar
         Consonant("s", "voiceless alveolar fricative", Place.ALVEOLAR, Manner.FRICATIVE, false,
-            languages = listOf("ar", "da", "de", "el", "en", "es", "fi", "fr", "he", "hi", "it", "ja", "ko", "ms", "nl", "no", "pl", "pt", "ru", "sv", "sw", "tr", "zh")),
+            languages = listOf(Lang.AR, Lang.DA, Lang.DE, Lang.EL, Lang.EN, Lang.ES, Lang.FI, Lang.FR, Lang.HE, Lang.HI, Lang.IT, Lang.JA, Lang.KO, Lang.MS, Lang.NL, Lang.NO, Lang.PL, Lang.PT, Lang.RU, Lang.SV, Lang.SW, Lang.TR, Lang.ZH)),
         Consonant("z", "voiced alveolar fricative", Place.ALVEOLAR, Manner.FRICATIVE, true,
-            languages = listOf("da", "de", "el", "en", "fi", "fr", "he", "it", "ja", "nl", "no", "pl", "pt", "ru", "sv", "tr")),
+            languages = listOf(Lang.DA, Lang.DE, Lang.EL, Lang.EN, Lang.FI, Lang.FR, Lang.HE, Lang.IT, Lang.JA, Lang.NL, Lang.NO, Lang.PL, Lang.PT, Lang.RU, Lang.SV, Lang.TR)),
 
         // Postalveolar
         Consonant("ʃ", "voiceless postalveolar fricative", Place.POSTALVEOLAR, Manner.FRICATIVE, false,
-            languages = listOf("ar", "de", "en", "fr", "he", "hi", "it", "pl", "pt", "ru", "tr")),
+            languages = listOf(Lang.AR, Lang.DE, Lang.EN, Lang.FR, Lang.HE, Lang.HI, Lang.IT, Lang.PL, Lang.PT, Lang.RU, Lang.TR)),
         Consonant("ʒ", "voiced postalveolar fricative", Place.POSTALVEOLAR, Manner.FRICATIVE, true,
-            languages = listOf("en", "fr", "pl", "pt", "ru", "tr")),
+            languages = listOf(Lang.EN, Lang.FR, Lang.PL, Lang.PT, Lang.RU, Lang.TR)),
 
         // Retroflex
         Consonant("ʂ", "voiceless retroflex fricative", Place.RETROFLEX, Manner.FRICATIVE, false,
-            languages = listOf("hi", "pl", "zh")),
+            languages = listOf(Lang.HI, Lang.PL, Lang.ZH)),
         Consonant("ʐ", "voiced retroflex fricative", Place.RETROFLEX, Manner.FRICATIVE, true,
-            languages = listOf("pl", "zh")),
+            languages = listOf(Lang.PL, Lang.ZH)),
 
         // Palatal
         Consonant("ɕ", "voiceless alveolo-palatal fricative", Place.PALATAL, Manner.FRICATIVE, false,
-            languages = listOf("ja", "ko", "pl", "zh")),
+            languages = listOf(Lang.JA, Lang.KO, Lang.PL, Lang.ZH)),
         Consonant("ʑ", "voiced alveolo-palatal fricative", Place.PALATAL, Manner.FRICATIVE, true,
-            languages = listOf("ja", "pl")),
+            languages = listOf(Lang.JA, Lang.PL)),
         Consonant("ç", "voiceless palatal fricative", Place.PALATAL, Manner.FRICATIVE, false,
-            languages = listOf("de", "ja")),
+            languages = listOf(Lang.DE, Lang.JA)),
 
         // Velar
         Consonant("x", "voiceless velar fricative", Place.VELAR, Manner.FRICATIVE, false,
-            languages = listOf("ar", "de", "el", "he", "nl", "pl", "ru", "zh")),
+            languages = listOf(Lang.AR, Lang.DE, Lang.EL, Lang.HE, Lang.NL, Lang.PL, Lang.RU, Lang.ZH)),
         Consonant("ɣ", "voiced velar fricative", Place.VELAR, Manner.FRICATIVE, true,
-            languages = listOf("ar", "el", "nl")),
+            languages = listOf(Lang.AR, Lang.EL, Lang.NL)),
 
         // Uvular
         Consonant("χ", "voiceless uvular fricative", Place.UVULAR, Manner.FRICATIVE, false,
-            languages = listOf("de", "nl", "he")),
+            languages = listOf(Lang.DE, Lang.NL, Lang.HE)),
         Consonant("ʁ", "voiced uvular fricative", Place.UVULAR, Manner.FRICATIVE, true,
-            languages = listOf("de", "fr", "he", "nl", "pt")),
+            languages = listOf(Lang.DE, Lang.FR, Lang.HE, Lang.NL, Lang.PT)),
 
         // Pharyngeal
         Consonant("ħ", "voiceless pharyngeal fricative", Place.PHARYNGEAL, Manner.FRICATIVE, false,
-            languages = listOf("ar")),
+            languages = listOf(Lang.AR)),
         Consonant("ʕ", "voiced pharyngeal fricative", Place.PHARYNGEAL, Manner.FRICATIVE, true,
-            languages = listOf("ar", "he")),
+            languages = listOf(Lang.AR, Lang.HE)),
 
         // Glottal
         Consonant("h", "voiceless glottal fricative", Place.GLOTTAL, Manner.FRICATIVE, false,
-            languages = listOf("ar", "da", "de", "en", "fi", "he", "hi", "ja", "ko", "nl", "no", "sv", "sw", "tr")),
+            languages = listOf(Lang.AR, Lang.DA, Lang.DE, Lang.EN, Lang.FI, Lang.HE, Lang.HI, Lang.JA, Lang.KO, Lang.NL, Lang.NO, Lang.SV, Lang.SW, Lang.TR)),
         Consonant("ɦ", "voiced glottal fricative", Place.GLOTTAL, Manner.FRICATIVE, true,
-            languages = listOf("hi", "nl")),
+            languages = listOf(Lang.HI, Lang.NL)),
 
         // ═══ APPROXIMANTS ═══
         Consonant("ʋ", "labiodental approximant", Place.LABIODENTAL, Manner.APPROXIMANT, true,
-            languages = listOf("hi", "nl")),
+            languages = listOf(Lang.HI, Lang.NL)),
         Consonant("ɹ", "alveolar approximant", Place.ALVEOLAR, Manner.APPROXIMANT, true,
-            languages = listOf("en")),
+            languages = listOf(Lang.EN)),
         Consonant("ɻ", "retroflex approximant", Place.RETROFLEX, Manner.APPROXIMANT, true,
-            languages = listOf("zh")),
+            languages = listOf(Lang.ZH)),
         Consonant("j", "palatal approximant", Place.PALATAL, Manner.APPROXIMANT, true,
-            languages = listOf("ar", "da", "de", "el", "en", "es", "fi", "fr", "he", "hi", "it", "ja", "ko", "ms", "nl", "no", "pl", "pt", "ru", "sv", "sw", "tr", "zh")),
+            languages = listOf(Lang.AR, Lang.DA, Lang.DE, Lang.EL, Lang.EN, Lang.ES, Lang.FI, Lang.FR, Lang.HE, Lang.HI, Lang.IT, Lang.JA, Lang.KO, Lang.MS, Lang.NL, Lang.NO, Lang.PL, Lang.PT, Lang.RU, Lang.SV, Lang.SW, Lang.TR, Lang.ZH)),
         Consonant("w", "labio-velar approximant", Place.VELAR, Manner.APPROXIMANT, true,
-            languages = listOf("ar", "en", "es", "fr", "it", "ja", "ko", "ms", "nl", "pt", "sw", "zh")),
+            languages = listOf(Lang.AR, Lang.EN, Lang.ES, Lang.FR, Lang.IT, Lang.JA, Lang.KO, Lang.MS, Lang.NL, Lang.PT, Lang.SW, Lang.ZH)),
         Consonant("ɰ", "velar approximant", Place.VELAR, Manner.APPROXIMANT, true,
-            languages = listOf("ko")),
+            languages = listOf(Lang.KO)),
 
         // ═══ LATERAL APPROXIMANTS ═══
         Consonant("l", "alveolar lateral approximant", Place.ALVEOLAR, Manner.LATERAL_APPROXIMANT, true,
-            languages = listOf("ar", "da", "de", "el", "en", "es", "fi", "fr", "he", "hi", "it", "ja", "ko", "ms", "nl", "no", "pl", "pt", "ru", "sv", "sw", "tr", "zh")),
+            languages = listOf(Lang.AR, Lang.DA, Lang.DE, Lang.EL, Lang.EN, Lang.ES, Lang.FI, Lang.FR, Lang.HE, Lang.HI, Lang.IT, Lang.JA, Lang.KO, Lang.MS, Lang.NL, Lang.NO, Lang.PL, Lang.PT, Lang.RU, Lang.SV, Lang.SW, Lang.TR, Lang.ZH)),
         Consonant("ɭ", "retroflex lateral approximant", Place.RETROFLEX, Manner.LATERAL_APPROXIMANT, true,
-            languages = listOf("hi")),
+            languages = listOf(Lang.HI)),
         Consonant("ʎ", "palatal lateral approximant", Place.PALATAL, Manner.LATERAL_APPROXIMANT, true,
-            languages = listOf("es", "it", "pt")),
+            languages = listOf(Lang.ES, Lang.IT, Lang.PT)),
         Consonant("ʟ", "velar lateral approximant", Place.VELAR, Manner.LATERAL_APPROXIMANT, true,
             languages = listOf()),
 
         // ═══ AFFRICATES ═══
         Consonant("ts", "voiceless alveolar affricate", Place.ALVEOLAR, Manner.AFFRICATE, false,
-            languages = listOf("de", "he", "it", "ja", "ko", "pl", "ru", "zh")),
+            languages = listOf(Lang.DE, Lang.HE, Lang.IT, Lang.JA, Lang.KO, Lang.PL, Lang.RU, Lang.ZH)),
         Consonant("dz", "voiced alveolar affricate", Place.ALVEOLAR, Manner.AFFRICATE, true,
-            languages = listOf("it", "ja", "pl")),
+            languages = listOf(Lang.IT, Lang.JA, Lang.PL)),
         Consonant("tʃ", "voiceless postalveolar affricate", Place.POSTALVEOLAR, Manner.AFFRICATE, false,
-            languages = listOf("en", "es", "it", "ru", "tr")),
+            languages = listOf(Lang.EN, Lang.ES, Lang.IT, Lang.RU, Lang.TR)),
         Consonant("dʒ", "voiced postalveolar affricate", Place.POSTALVEOLAR, Manner.AFFRICATE, true,
-            languages = listOf("en", "hi", "it", "ja", "ko", "tr")),
+            languages = listOf(Lang.EN, Lang.HI, Lang.IT, Lang.JA, Lang.KO, Lang.TR)),
         Consonant("tɕ", "voiceless alveolo-palatal affricate", Place.PALATAL, Manner.AFFRICATE, false,
-            languages = listOf("ja", "ko", "pl", "zh")),
+            languages = listOf(Lang.JA, Lang.KO, Lang.PL, Lang.ZH)),
         Consonant("dʑ", "voiced alveolo-palatal affricate", Place.PALATAL, Manner.AFFRICATE, true,
-            languages = listOf("ja", "ko", "pl")),
+            languages = listOf(Lang.JA, Lang.KO, Lang.PL)),
         Consonant("tɕʰ", "aspirated alveolo-palatal affricate", Place.PALATAL, Manner.AFFRICATE, false, aspirated = true,
-            languages = listOf("ko", "zh")),
+            languages = listOf(Lang.KO, Lang.ZH)),
 
         // Emphatic consonants (Arabic)
         Consonant("sˤ", "emphatic voiceless alveolar fricative", Place.ALVEOLAR, Manner.FRICATIVE, false, emphatic = true,
-            languages = listOf("ar")),
+            languages = listOf(Lang.AR)),
         Consonant("dˤ", "emphatic voiced alveolar plosive", Place.ALVEOLAR, Manner.PLOSIVE, true, emphatic = true,
-            languages = listOf("ar")),
+            languages = listOf(Lang.AR)),
         Consonant("tˤ", "emphatic voiceless alveolar plosive", Place.ALVEOLAR, Manner.PLOSIVE, false, emphatic = true,
-            languages = listOf("ar")),
+            languages = listOf(Lang.AR)),
         Consonant("ðˤ", "emphatic voiced dental fricative", Place.DENTAL, Manner.FRICATIVE, true, emphatic = true,
-            languages = listOf("ar")),
+            languages = listOf(Lang.AR)),
 
         // Bilabial fricative
         Consonant("ɸ", "voiceless bilabial fricative", Place.BILABIAL, Manner.FRICATIVE, false,
-            languages = listOf("ja")),
+            languages = listOf(Lang.JA)),
         Consonant("β", "voiced bilabial fricative", Place.BILABIAL, Manner.FRICATIVE, true,
-            languages = listOf("es"))
+            languages = listOf(Lang.ES))
     )
 
     // ═══════════════════════════════════════════════════════════════════════
@@ -313,7 +313,7 @@ object IpaMatrix {
         val rounded: Boolean,
         val long: Boolean = false,
         val nasal: Boolean = false,
-        val languages: List<String>
+        val languages: List<Lang>
     ) {
         val hue: Int by lazy { computeHue() }
 
@@ -334,105 +334,105 @@ object IpaMatrix {
     val vowels = listOf(
         // ═══ CLOSE VOWELS ═══
         Vowel("i", "close front unrounded", Height.CLOSE, Backness.FRONT, false,
-            languages = listOf("ar", "da", "de", "el", "en", "es", "fi", "fr", "he", "hi", "it", "ja", "ko", "ms", "nl", "no", "pl", "pt", "ru", "sv", "sw", "tr", "zh")),
+            languages = listOf(Lang.AR, Lang.DA, Lang.DE, Lang.EL, Lang.EN, Lang.ES, Lang.FI, Lang.FR, Lang.HE, Lang.HI, Lang.IT, Lang.JA, Lang.KO, Lang.MS, Lang.NL, Lang.NO, Lang.PL, Lang.PT, Lang.RU, Lang.SV, Lang.SW, Lang.TR, Lang.ZH)),
         Vowel("iː", "long close front unrounded", Height.CLOSE, Backness.FRONT, false, long = true,
-            languages = listOf("de", "fi", "hi", "ja")),
+            languages = listOf(Lang.DE, Lang.FI, Lang.HI, Lang.JA)),
         Vowel("y", "close front rounded", Height.CLOSE, Backness.FRONT, true,
-            languages = listOf("da", "de", "fi", "fr", "nl", "no", "sv", "tr", "zh")),
+            languages = listOf(Lang.DA, Lang.DE, Lang.FI, Lang.FR, Lang.NL, Lang.NO, Lang.SV, Lang.TR, Lang.ZH)),
         Vowel("yː", "long close front rounded", Height.CLOSE, Backness.FRONT, true, long = true,
-            languages = listOf("de", "fi")),
+            languages = listOf(Lang.DE, Lang.FI)),
         Vowel("ɨ", "close central unrounded", Height.CLOSE, Backness.CENTRAL, false,
-            languages = listOf("ko", "pl", "ru")),
+            languages = listOf(Lang.KO, Lang.PL, Lang.RU)),
         Vowel("ʉ", "close central rounded", Height.CLOSE, Backness.CENTRAL, true,
-            languages = listOf("no", "sv")),
+            languages = listOf(Lang.NO, Lang.SV)),
         Vowel("ɯ", "close back unrounded", Height.CLOSE, Backness.BACK, false,
-            languages = listOf("ja", "ko", "tr")),
+            languages = listOf(Lang.JA, Lang.KO, Lang.TR)),
         Vowel("u", "close back rounded", Height.CLOSE, Backness.BACK, true,
-            languages = listOf("ar", "da", "de", "el", "en", "es", "fi", "fr", "he", "hi", "it", "ja", "ko", "ms", "nl", "no", "pl", "pt", "ru", "sv", "sw", "tr", "zh")),
+            languages = listOf(Lang.AR, Lang.DA, Lang.DE, Lang.EL, Lang.EN, Lang.ES, Lang.FI, Lang.FR, Lang.HE, Lang.HI, Lang.IT, Lang.JA, Lang.KO, Lang.MS, Lang.NL, Lang.NO, Lang.PL, Lang.PT, Lang.RU, Lang.SV, Lang.SW, Lang.TR, Lang.ZH)),
         Vowel("uː", "long close back rounded", Height.CLOSE, Backness.BACK, true, long = true,
-            languages = listOf("de", "fi", "hi", "ja")),
+            languages = listOf(Lang.DE, Lang.FI, Lang.HI, Lang.JA)),
 
         // ═══ NEAR-CLOSE VOWELS ═══
         Vowel("ɪ", "near-close front unrounded", Height.NEAR_CLOSE, Backness.FRONT, false,
-            languages = listOf("de", "en", "hi", "nl")),
+            languages = listOf(Lang.DE, Lang.EN, Lang.HI, Lang.NL)),
         Vowel("ʏ", "near-close front rounded", Height.NEAR_CLOSE, Backness.FRONT, true,
-            languages = listOf("da", "de", "nl", "no", "sv")),
+            languages = listOf(Lang.DA, Lang.DE, Lang.NL, Lang.NO, Lang.SV)),
         Vowel("ʊ", "near-close back rounded", Height.NEAR_CLOSE, Backness.BACK, true,
-            languages = listOf("de", "en", "hi", "nl")),
+            languages = listOf(Lang.DE, Lang.EN, Lang.HI, Lang.NL)),
 
         // ═══ CLOSE-MID VOWELS ═══
         Vowel("e", "close-mid front unrounded", Height.CLOSE_MID, Backness.FRONT, false,
-            languages = listOf("da", "de", "el", "es", "fi", "fr", "he", "hi", "it", "ja", "ko", "ms", "nl", "no", "pl", "pt", "ru", "sv", "sw", "tr", "zh")),
+            languages = listOf(Lang.DA, Lang.DE, Lang.EL, Lang.ES, Lang.FI, Lang.FR, Lang.HE, Lang.HI, Lang.IT, Lang.JA, Lang.KO, Lang.MS, Lang.NL, Lang.NO, Lang.PL, Lang.PT, Lang.RU, Lang.SV, Lang.SW, Lang.TR, Lang.ZH)),
         Vowel("eː", "long close-mid front unrounded", Height.CLOSE_MID, Backness.FRONT, false, long = true,
-            languages = listOf("de", "fi", "hi", "ja")),
+            languages = listOf(Lang.DE, Lang.FI, Lang.HI, Lang.JA)),
         Vowel("ø", "close-mid front rounded", Height.CLOSE_MID, Backness.FRONT, true,
-            languages = listOf("da", "de", "fi", "fr", "nl", "no", "sv", "tr")),
+            languages = listOf(Lang.DA, Lang.DE, Lang.FI, Lang.FR, Lang.NL, Lang.NO, Lang.SV, Lang.TR)),
         Vowel("øː", "long close-mid front rounded", Height.CLOSE_MID, Backness.FRONT, true, long = true,
-            languages = listOf("de", "fi")),
+            languages = listOf(Lang.DE, Lang.FI)),
         Vowel("ɘ", "close-mid central unrounded", Height.CLOSE_MID, Backness.CENTRAL, false,
             languages = listOf()),
         Vowel("ɵ", "close-mid central rounded", Height.CLOSE_MID, Backness.CENTRAL, true,
-            languages = listOf("no", "sv")),
+            languages = listOf(Lang.NO, Lang.SV)),
         Vowel("ɤ", "close-mid back unrounded", Height.CLOSE_MID, Backness.BACK, false,
-            languages = listOf("ko", "zh")),
+            languages = listOf(Lang.KO, Lang.ZH)),
         Vowel("o", "close-mid back rounded", Height.CLOSE_MID, Backness.BACK, true,
-            languages = listOf("da", "de", "el", "es", "fi", "fr", "he", "hi", "it", "ja", "ko", "ms", "nl", "no", "pl", "pt", "ru", "sv", "sw", "tr", "zh")),
+            languages = listOf(Lang.DA, Lang.DE, Lang.EL, Lang.ES, Lang.FI, Lang.FR, Lang.HE, Lang.HI, Lang.IT, Lang.JA, Lang.KO, Lang.MS, Lang.NL, Lang.NO, Lang.PL, Lang.PT, Lang.RU, Lang.SV, Lang.SW, Lang.TR, Lang.ZH)),
         Vowel("oː", "long close-mid back rounded", Height.CLOSE_MID, Backness.BACK, true, long = true,
-            languages = listOf("de", "fi", "hi", "ja")),
+            languages = listOf(Lang.DE, Lang.FI, Lang.HI, Lang.JA)),
 
         // ═══ MID VOWELS ═══
         Vowel("ə", "schwa", Height.MID, Backness.CENTRAL, false,
-            languages = listOf("da", "de", "en", "fr", "hi", "nl", "pt", "ru", "zh")),
+            languages = listOf(Lang.DA, Lang.DE, Lang.EN, Lang.FR, Lang.HI, Lang.NL, Lang.PT, Lang.RU, Lang.ZH)),
 
         // ═══ OPEN-MID VOWELS ═══
         Vowel("ɛ", "open-mid front unrounded", Height.OPEN_MID, Backness.FRONT, false,
-            languages = listOf("da", "de", "el", "en", "fi", "fr", "he", "hi", "it", "ko", "nl", "no", "pl", "pt", "sv", "tr")),
+            languages = listOf(Lang.DA, Lang.DE, Lang.EL, Lang.EN, Lang.FI, Lang.FR, Lang.HE, Lang.HI, Lang.IT, Lang.KO, Lang.NL, Lang.NO, Lang.PL, Lang.PT, Lang.SV, Lang.TR)),
         Vowel("ɛː", "long open-mid front unrounded", Height.OPEN_MID, Backness.FRONT, false, long = true,
-            languages = listOf("de", "fi", "hi")),
+            languages = listOf(Lang.DE, Lang.FI, Lang.HI)),
         Vowel("œ", "open-mid front rounded", Height.OPEN_MID, Backness.FRONT, true,
-            languages = listOf("da", "de", "fr", "nl")),
+            languages = listOf(Lang.DA, Lang.DE, Lang.FR, Lang.NL)),
         Vowel("œː", "long open-mid front rounded", Height.OPEN_MID, Backness.FRONT, true, long = true,
-            languages = listOf("de")),
+            languages = listOf(Lang.DE)),
         Vowel("ɜ", "open-mid central unrounded", Height.OPEN_MID, Backness.CENTRAL, false,
-            languages = listOf("en")),
+            languages = listOf(Lang.EN)),
         Vowel("ʌ", "open-mid back unrounded", Height.OPEN_MID, Backness.BACK, false,
-            languages = listOf("en", "ko")),
+            languages = listOf(Lang.EN, Lang.KO)),
         Vowel("ɔ", "open-mid back rounded", Height.OPEN_MID, Backness.BACK, true,
-            languages = listOf("da", "de", "el", "en", "fi", "fr", "it", "ko", "nl", "no", "pl", "pt", "sv", "tr")),
+            languages = listOf(Lang.DA, Lang.DE, Lang.EL, Lang.EN, Lang.FI, Lang.FR, Lang.IT, Lang.KO, Lang.NL, Lang.NO, Lang.PL, Lang.PT, Lang.SV, Lang.TR)),
         Vowel("ɔː", "long open-mid back rounded", Height.OPEN_MID, Backness.BACK, true, long = true,
-            languages = listOf("de", "en", "fi", "hi")),
+            languages = listOf(Lang.DE, Lang.EN, Lang.FI, Lang.HI)),
 
         // ═══ NEAR-OPEN VOWELS ═══
         Vowel("æ", "near-open front unrounded", Height.NEAR_OPEN, Backness.FRONT, false,
-            languages = listOf("da", "en", "fi", "no", "sv")),
+            languages = listOf(Lang.DA, Lang.EN, Lang.FI, Lang.NO, Lang.SV)),
         Vowel("ɐ", "near-open central", Height.NEAR_OPEN, Backness.CENTRAL, false,
-            languages = listOf("de", "pt")),
+            languages = listOf(Lang.DE, Lang.PT)),
 
         // ═══ OPEN VOWELS ═══
         Vowel("a", "open front unrounded", Height.OPEN, Backness.FRONT, false,
-            languages = listOf("ar", "da", "de", "el", "es", "fi", "fr", "he", "hi", "it", "ja", "ko", "ms", "nl", "no", "pl", "pt", "ru", "sv", "sw", "tr", "zh")),
+            languages = listOf(Lang.AR, Lang.DA, Lang.DE, Lang.EL, Lang.ES, Lang.FI, Lang.FR, Lang.HE, Lang.HI, Lang.IT, Lang.JA, Lang.KO, Lang.MS, Lang.NL, Lang.NO, Lang.PL, Lang.PT, Lang.RU, Lang.SV, Lang.SW, Lang.TR, Lang.ZH)),
         Vowel("aː", "long open front unrounded", Height.OPEN, Backness.FRONT, false, long = true,
-            languages = listOf("de", "fi", "hi", "ja")),
+            languages = listOf(Lang.DE, Lang.FI, Lang.HI, Lang.JA)),
         Vowel("ɑ", "open back unrounded", Height.OPEN, Backness.BACK, false,
-            languages = listOf("en", "nl", "no")),
+            languages = listOf(Lang.EN, Lang.NL, Lang.NO)),
         Vowel("ɑː", "long open back unrounded", Height.OPEN, Backness.BACK, false, long = true,
-            languages = listOf("en", "nl")),
+            languages = listOf(Lang.EN, Lang.NL)),
         Vowel("ɒ", "open back rounded", Height.OPEN, Backness.BACK, true,
-            languages = listOf("en")),
+            languages = listOf(Lang.EN)),
 
         // ═══ NASAL VOWELS ═══
         Vowel("ɛ̃", "nasal open-mid front unrounded", Height.OPEN_MID, Backness.FRONT, false, nasal = true,
-            languages = listOf("fr", "pt")),
+            languages = listOf(Lang.FR, Lang.PT)),
         Vowel("œ̃", "nasal open-mid front rounded", Height.OPEN_MID, Backness.FRONT, true, nasal = true,
-            languages = listOf("fr")),
+            languages = listOf(Lang.FR)),
         Vowel("ɔ̃", "nasal open-mid back rounded", Height.OPEN_MID, Backness.BACK, true, nasal = true,
-            languages = listOf("fr", "pt")),
+            languages = listOf(Lang.FR, Lang.PT)),
         Vowel("ã", "nasal open front unrounded", Height.OPEN, Backness.FRONT, false, nasal = true,
-            languages = listOf("pt")),
+            languages = listOf(Lang.PT)),
         Vowel("ĩ", "nasal close front unrounded", Height.CLOSE, Backness.FRONT, false, nasal = true,
-            languages = listOf("pt")),
+            languages = listOf(Lang.PT)),
         Vowel("ũ", "nasal close back rounded", Height.CLOSE, Backness.BACK, true, nasal = true,
-            languages = listOf("pt"))
+            languages = listOf(Lang.PT))
     )
 
     // ═══════════════════════════════════════════════════════════════════════
@@ -445,11 +445,11 @@ object IpaMatrix {
     fun getConsonant(ipa: String): Consonant? = consonantByIpa[ipa]
     fun getVowel(ipa: String): Vowel? = vowelByIpa[ipa]
 
-    fun getConsonantsForLanguage(langCode: String): List<Consonant> =
-        consonants.filter { langCode in it.languages }
+    fun getConsonantsForLanguage(lang: Lang): List<Consonant> =
+        consonants.filter { lang in it.languages }
 
-    fun getVowelsForLanguage(langCode: String): List<Vowel> =
-        vowels.filter { langCode in it.languages }
+    fun getVowelsForLanguage(lang: Lang): List<Vowel> =
+        vowels.filter { lang in it.languages }
 
     fun getPhonemeHue(ipa: String): Int {
         consonantByIpa[ipa]?.let { return it.hue }
@@ -465,10 +465,10 @@ object IpaMatrix {
         val vowels: List<Vowel>
     )
 
-    fun getInventory(langCode: String): LanguageInventory {
+    fun getInventory(lang: Lang): LanguageInventory {
         return LanguageInventory(
-            consonants = getConsonantsForLanguage(langCode),
-            vowels = getVowelsForLanguage(langCode)
+            consonants = getConsonantsForLanguage(lang),
+            vowels = getVowelsForLanguage(lang)
         )
     }
 
@@ -476,8 +476,8 @@ object IpaMatrix {
      * All supported language codes
      */
     val supportedLanguages = listOf(
-        "ar", "da", "de", "el", "en", "es", "fi", "fr", "he", "hi",
-        "it", "ja", "ko", "ms", "nl", "no", "pl", "pt", "ru", "sv",
-        "sw", "tr", "zh"
+        Lang.AR, Lang.DA, Lang.DE, Lang.EL, Lang.EN, Lang.ES, Lang.FI, Lang.FR, Lang.HE, Lang.HI,
+        Lang.IT, Lang.JA, Lang.KO, Lang.MS, Lang.NL, Lang.NO, Lang.PL, Lang.PT, Lang.RU, Lang.SV,
+        Lang.SW, Lang.TR, Lang.ZH
     )
 }
