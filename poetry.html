@@ -88,6 +88,21 @@ function rhymeDistance(w1, h1, w2, h2) { return UK.rhymeDistance(w1, h1, w2, h2)
 /* Rhyme scheme using KMP */
 function rhymeScheme(ipas) { return UK.rhymeScheme(ipas); }
 
+/* ═══ Multi-Language API (23 Languages) ═══ */
+function getKeyLanguages() { return UK.getKeyLanguages(); }
+function getLanguageCount() { return UK.getLanguageCount(); }
+function getKeyLanguage(code) { return UK.getKeyLanguage(code); }
+function toIpaForLang(word, langCode) { return UK.toIpaForLang(word, langCode); }
+function wordHueForLang(word, langCode) { return UK.wordHueForLang(word, langCode); }
+function wordEndColorForLang(word, langCode) { return UK.wordEndColorForLang(word, langCode); }
+function rhymeKeyForLang(word, langCode, syllableCount) { return UK.rhymeKeyForLang(word, langCode, syllableCount || 1); }
+function parseSyllablesForLang(word, langCode) { return UK.parseSyllablesForLang(word, langCode); }
+function getLanguagePromptHints(langCode) { return UK.getLanguagePromptHints(langCode); }
+function generateAnalysisPrompt(srcLang, tgtLang, context) { return UK.generateAnalysisPrompt(srcLang, tgtLang, context || ''); }
+function generatePathPrompt(srcLang, tgtLang, context) { return UK.generatePathPrompt(srcLang, tgtLang, context || ''); }
+function getTranslationPair(srcLang, tgtLang) { return UK.getTranslationPair(srcLang, tgtLang); }
+function getAllTranslationPairIds() { return UK.getAllTranslationPairIds(); }
+
 var POEM=[
   {id:1,label:"\u05D0\u05F3",he:["\u05D1\u05B7\u05BC\u05D6\u05B6\u05BC\u05DC\u05B6\u05EA \u05D4\u05B7\u05E9\u05B0\u05BC\u05C1\u05D7\u05B7\u05E8\u05B0\u05D7\u05D5\u05B9\u05E8\u05B6\u05EA,","\u05EA\u05BC\u05D5\u05B9\u05D4\u05B8\u05D4, \u05DC\u05B9\u05D0 \u05DE\u05B0\u05D3\u05B7\u05D1\u05B6\u05BC\u05E8\u05B6\u05EA,","\u05DB\u05B8\u05BC\u05DA\u05B0 \u05D1\u05B0\u05BC\u05EA\u05D5\u05B9\u05DB\u05B8\u05D4\u05BC \u05E1\u05D5\u05B9\u05E2\u05B6\u05E8\u05B6\u05EA,","\u05DC\u05B0\u05D0\u05B7\u05D8 \u05DB\u05B7\u05BC\u05E2\u05B7\u05E1 \u05E6\u05D5\u05B9\u05D1\u05B6\u05E8\u05B6\u05EA."],en:["Darkened basalt spring,","musing not uttering,","within its core raging,","slow wrath staging."]},
   {id:2,label:"\u05D1\u05F3",he:["\u05D1\u05B7\u05BC\u05D6\u05B6\u05BC\u05DC\u05B6\u05EA \u05DE\u05B4\u05EA\u05B0\u05D1\u05BC\u05D5\u05B9\u05E0\u05B6\u05E0\u05B6\u05EA,","\u05D0\u05B7\u05DA\u05B0 \u05DC\u05B9\u05D0 \u05DE\u05B4\u05EA\u05B0\u05DC\u05D5\u05B9\u05E0\u05B6\u05E0\u05B6\u05EA,","\u05DC\u05B9\u05D0 \u05E0\u05B8\u05E2\u05B4\u05D9\u05DD \u05DC\u05B8\u05D4\u05BC \u05DC\u05B0\u05D1\u05B7\u05E7\u05B5\u05BC\u05E9\u05C1,","\u05D4\u05B7\u05E8 \u05D2\u05BC\u05D5\u05B9\u05E2\u05B5\u05E9\u05C1 \u05E8\u05B8\u05D3\u05D5\u05BC\u05DD \u05DE\u05B0\u05D9\u05B8\u05D0\u05B5\u05E9\u05C1."],en:["Basalt stands contemplating,","keeps silent not protesting,","uneasy to beseech knees bent,","depressed mountain dormant."]},

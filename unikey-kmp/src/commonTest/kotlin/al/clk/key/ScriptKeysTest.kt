@@ -112,9 +112,9 @@ class CurrencyTest {
     }
 
     @Test
-    fun testAllCurrenciesHaveRegions() {
+    fun testAllCurrenciesHaveLangs() {
         Currency.entries.forEach { currency ->
-            assertTrue(currency.regions.isNotEmpty(), "${currency.name} should have regions")
+            assertTrue(currency.langs.isNotEmpty(), "${currency.name} should have langs")
         }
     }
 }
@@ -829,5 +829,242 @@ class IpaRoundTripTest {
         // Hebrew also has multiple "k" sounds (qof, kaf with dagesh)
         val hebrewK = HebrewLetter.fromIpa("k")
         assertTrue(hebrewK.any { it == HebrewLetter.QOF })
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// LangPatterns Tests - Centralized Pattern Matching
+// ═══════════════════════════════════════════════════════════════════════════════
+
+class LangPatternsTest {
+
+    @Test
+    fun testMatchEndingForLatinLanguages() {
+        // German patterns
+        val germanIpa = LangPatterns.matchEnding(Lang.DE, "machen")
+        assertNotNull(germanIpa, "German word should have IPA ending")
+
+        // French patterns
+        val frenchIpa = LangPatterns.matchEnding(Lang.FR, "nation")
+        assertNotNull(frenchIpa, "French -tion should have IPA")
+
+        // Spanish patterns
+        val spanishIpa = LangPatterns.matchEnding(Lang.ES, "nación")
+        assertNotNull(spanishIpa, "Spanish -ción should have IPA")
+    }
+
+    @Test
+    fun testMatchEndingForEnglish() {
+        val tion = LangPatterns.matchEnding(Lang.EN, "nation")
+        assertNotNull(tion, "English -tion should match")
+        assertEquals("ʃən", tion)
+
+        val ing = LangPatterns.matchEnding(Lang.EN, "running")
+        assertNotNull(ing, "English -ing should match")
+    }
+
+    @Test
+    fun testMatchEndingReturnsNullForNonLatinScripts() {
+        // Hebrew doesn't use spelling patterns (uses HebrewLetter directly)
+        val hebrewResult = LangPatterns.matchEnding(Lang.HE, "שלום")
+        assertEquals(null, hebrewResult, "Hebrew should return null (uses letter enums)")
+
+        // Arabic doesn't use spelling patterns
+        val arabicResult = LangPatterns.matchEnding(Lang.AR, "سلام")
+        assertEquals(null, arabicResult, "Arabic should return null")
+    }
+
+    @Test
+    fun testMatchEndingUsesBaseLangForVariants() {
+        // EN_GB should use EN patterns
+        val ukEnglish = LangPatterns.matchEnding(Lang.EN_GB, "nation")
+        val usEnglish = LangPatterns.matchEnding(Lang.EN, "nation")
+        assertEquals(usEnglish, ukEnglish, "EN_GB should use EN patterns")
+
+        // PT_BR should use PT patterns
+        val brazilian = LangPatterns.matchEnding(Lang.PT_BR, "nação")
+        val portuguese = LangPatterns.matchEnding(Lang.PT, "nação")
+        assertEquals(portuguese, brazilian, "PT_BR should use PT patterns")
+    }
+
+    @Test
+    fun testHasSpellingPatterns() {
+        // Latin languages with patterns
+        assertTrue(LangPatterns.hasSpellingPatterns(Lang.EN))
+        assertTrue(LangPatterns.hasSpellingPatterns(Lang.DE))
+        assertTrue(LangPatterns.hasSpellingPatterns(Lang.FR))
+        assertTrue(LangPatterns.hasSpellingPatterns(Lang.ES))
+
+        // Non-Latin scripts without spelling patterns
+        assertTrue(!LangPatterns.hasSpellingPatterns(Lang.HE))
+        assertTrue(!LangPatterns.hasSpellingPatterns(Lang.AR))
+        assertTrue(!LangPatterns.hasSpellingPatterns(Lang.JA))
+        assertTrue(!LangPatterns.hasSpellingPatterns(Lang.KO))
+    }
+
+    @Test
+    fun testLangMatchEndingIpaMethod() {
+        // Test the Lang extension method
+        val german = Lang.DE.matchEndingIpa("machen")
+        assertNotNull(german)
+
+        val hebrew = Lang.HE.matchEndingIpa("שלום")
+        assertEquals(null, hebrew)
+    }
+
+    @Test
+    fun testAllLatinLangsHavePatterns() {
+        val latinLangsWithPatterns = listOf(
+            Lang.EN, Lang.DE, Lang.FR, Lang.ES, Lang.IT, Lang.PT, Lang.NL, Lang.PL, Lang.TR,
+            Lang.DA, Lang.FI, Lang.NO, Lang.SV, Lang.MS, Lang.SW
+        )
+        latinLangsWithPatterns.forEach { lang ->
+            assertTrue(LangPatterns.hasSpellingPatterns(lang), "${lang.code} should have spelling patterns")
+        }
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// KeyLanguage Tests - Multi-Language Configuration
+// ═══════════════════════════════════════════════════════════════════════════════
+
+class KeyLanguageTest {
+
+    @Test
+    fun testKeyLanguageCount() {
+        assertEquals(23, KeyLanguage.COUNT, "Should have 23 languages")
+        assertEquals(23, KeyLanguage.ALL.size)
+    }
+
+    @Test
+    fun testKeyLanguageFromCode() {
+        val hebrew = KeyLanguage.fromCode("he")
+        assertNotNull(hebrew)
+        assertEquals(Lang.HE, hebrew.lang)
+        assertEquals("עברית", hebrew.nativeName)
+        assertEquals("Hebrew", hebrew.englishName)
+        assertEquals(TextDirection.RTL, hebrew.direction)
+
+        val english = KeyLanguage.fromCode("en")
+        assertNotNull(english)
+        assertEquals(Lang.EN, english.lang)
+        assertEquals(TextDirection.LTR, english.direction)
+    }
+
+    @Test
+    fun testKeyLanguageFromLang() {
+        val german = KeyLanguage.fromLang(Lang.DE)
+        assertNotNull(german)
+        assertEquals("Deutsch", german.nativeName)
+        assertEquals(Script.LATIN, german.script)
+    }
+
+    @Test
+    fun testAllKeyLanguagesHaveIpaConverter() {
+        KeyLanguage.ALL.forEach { lang ->
+            val ipa = lang.toIpa("test")
+            assertTrue(ipa.isNotEmpty(), "${lang.englishName} should produce IPA")
+        }
+    }
+
+    @Test
+    fun testAllKeyLanguagesHaveSyllableParser() {
+        KeyLanguage.ALL.forEach { lang ->
+            val syllables = lang.parseSyllables("hello")
+            // Some languages may return empty for non-matching text, but function should work
+            assertNotNull(syllables, "${lang.englishName} should have syllable parser")
+        }
+    }
+
+    @Test
+    fun testAllKeyLanguagesHavePromptHints() {
+        KeyLanguage.ALL.forEach { lang ->
+            val hints = lang.aiPromptHints
+            assertTrue(hints.linguistRole.isNotEmpty(), "${lang.englishName} should have linguist role")
+            assertTrue(hints.culturalNotes.isNotEmpty(), "${lang.englishName} should have cultural notes")
+            assertTrue(hints.rhymeNotes.isNotEmpty(), "${lang.englishName} should have rhyme notes")
+            assertTrue(hints.grammarNotes.isNotEmpty(), "${lang.englishName} should have grammar notes")
+        }
+    }
+
+    @Test
+    fun testRtlLanguages() {
+        assertEquals(TextDirection.RTL, KeyLanguage.HEBREW.direction)
+        assertEquals(TextDirection.RTL, KeyLanguage.ARABIC.direction)
+        // All others should be LTR
+        KeyLanguage.ALL.filter { it != KeyLanguage.HEBREW && it != KeyLanguage.ARABIC }.forEach {
+            assertEquals(TextDirection.LTR, it.direction, "${it.englishName} should be LTR")
+        }
+    }
+
+    @Test
+    fun testKeyLanguageWordHue() {
+        val hebrewHue = KeyLanguage.HEBREW.wordHue("שלום")
+        assertTrue(hebrewHue in 0..360, "Hue should be 0-360")
+
+        val englishHue = KeyLanguage.ENGLISH.wordHue("hello")
+        assertTrue(englishHue in 0..360, "Hue should be 0-360")
+    }
+
+    @Test
+    fun testKeyLanguageWordEndColor() {
+        val color = KeyLanguage.ENGLISH.wordEndColor("hello")
+        assertTrue(color.startsWith("hsl("), "Should return HSL color")
+        assertTrue(color.contains(","), "HSL should have commas")
+    }
+
+    @Test
+    fun testTranslationPairCount() {
+        val allPairs = KeyLanguage.allPairs()
+        assertEquals(23 * 22, allPairs.size, "Should have 506 translation pairs")
+    }
+
+    @Test
+    fun testTranslationPairFromCodes() {
+        val enToHe = TranslationPair.fromCodes("en", "he")
+        assertNotNull(enToHe)
+        assertEquals("en→he", enToHe.pairId)
+        assertEquals(KeyLanguage.ENGLISH, enToHe.source)
+        assertEquals(KeyLanguage.HEBREW, enToHe.target)
+    }
+
+    @Test
+    fun testTranslationPairRejectsSameLang() {
+        val sameLanguage = TranslationPair.fromCodes("en", "en")
+        assertEquals(null, sameLanguage, "Same language pair should be rejected")
+    }
+
+    @Test
+    fun testTranslationPairGeneratesPrompts() {
+        val pair = TranslationPair.EN_TO_HE
+        val analysisPrompt = pair.generateAnalysisPrompt()
+        assertTrue(analysisPrompt.contains("English"), "Should mention source language")
+        assertTrue(analysisPrompt.contains("Hebrew"), "Should mention target language")
+
+        val pathPrompt = pair.generatePathPrompt()
+        assertTrue(pathPrompt.contains("6 PATHS"), "Should mention 6 translation paths")
+    }
+
+    @Test
+    fun testCommonTranslationPairs() {
+        // Verify pre-defined pairs exist
+        assertNotNull(TranslationPair.EN_TO_HE)
+        assertNotNull(TranslationPair.HE_TO_EN)
+        assertNotNull(TranslationPair.EN_TO_FR)
+        assertNotNull(TranslationPair.EN_TO_DE)
+        assertNotNull(TranslationPair.EN_TO_ES)
+        assertNotNull(TranslationPair.EN_TO_JA)
+        assertNotNull(TranslationPair.EN_TO_ZH)
+    }
+
+    @Test
+    fun testBackwardCompatibilityAliases() {
+        // PoetryLanguage should be alias for KeyLanguage
+        val poetry: PoetryLanguage = KeyLanguage.ENGLISH
+        assertEquals(KeyLanguage.ENGLISH, poetry)
+
+        // TargetLanguage should be alias for KeyLanguage
+        val target: TargetLanguage = KeyLanguage.HEBREW
+        assertEquals(KeyLanguage.HEBREW, target)
     }
 }
