@@ -2,6 +2,7 @@ package al.clk.key
 
 /**
  * UniKey - Universal Keyboard Key with Hebrew/English/IPA mapping
+ * Implements ILayoutKey for unified keyboard interface.
  * Kotlin Multiplatform implementation
  */
 data class UniKey(
@@ -9,7 +10,7 @@ data class UniKey(
     val en: String,
     val EN: String,
     val he: String,
-    val ipa: String = "",
+    override val ipa: String = "",
     val shift: String? = null,
     val heShift: String? = null,
     val syl: List<Syllable>? = null,
@@ -19,7 +20,16 @@ data class UniKey(
     val dagesh: String? = null,
     val guttural: Boolean = false,
     val isFinal: Boolean = false
-) {
+) : ILayoutKey {
+    // ILayoutKey implementation
+    override val char: String get() = he
+    override val displayName: String get() = id
+    override val shiftKey: ILayoutKey? get() = when {
+        dagesh != null -> SimpleKey("$he\u05BC", dagesh, "$id-dagesh")
+        heShift != null -> SimpleKey(heShift, "", "$id-shift")
+        else -> null
+    }
+
     /**
      * Get display label based on mode and modifiers
      */

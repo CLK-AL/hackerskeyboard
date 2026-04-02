@@ -2,7 +2,8 @@ package al.clk.key
 
 /**
  * UNIKEYS - Unified keyboard key mappings (Multiplatform)
- * Maps physical keyboard keys to Hebrew/English/IPA
+ * Maps physical keyboard keys to Hebrew/English/IPA.
+ * UniKey implements ILayoutKey for unified interface.
  */
 object UniKeys {
     // Hebrew letters - generated from HebrewLetter enum
@@ -50,7 +51,11 @@ object UniKeys {
     )
 
     // All keys combined - Hebrew letters from enum + other keys
+    // Type is Map<String, UniKey> but UniKey implements ILayoutKey
     val keys: Map<String, UniKey> = hebrewLetterKeys + punctuationKeys + nonHebrewKeys + numberKeys + symbolKeys
+
+    // Also expose as ILayoutKey for unified interface
+    val layoutKeys: Map<String, ILayoutKey> get() = keys
 
     fun get(id: String): UniKey? = keys[id]
     fun getByHe(he: String): UniKey? = keys.values.find { it.he == he }

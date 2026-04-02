@@ -815,9 +815,10 @@ val arabicShiftMap: Map<Char, Triple<String, String, String>> = buildMap {
 }
 
 /**
- * Arabic keyboard keys generated from enum with shift modifiers
+ * Arabic keyboard keys generated from enum with shift modifiers.
+ * Uses ILayoutKey interface for consistency.
  */
-val arabicKeys: Map<String, LayoutKey> = ArabicLetter.entries
+val arabicKeys: Map<String, ILayoutKey> = ArabicLetter.entries
     .filter { it.qwerty != '/' }  // Skip letters with placeholder qwerty
     .associate { letter ->
         val shift = arabicShiftMap[letter.qwerty]

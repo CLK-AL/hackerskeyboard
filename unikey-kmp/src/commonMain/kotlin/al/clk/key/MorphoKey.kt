@@ -39,13 +39,14 @@ enum class Number {
 }
 
 /**
- * Full morphological variant of a character
+ * Full morphological variant of a character.
+ * Implements ILayoutKey for unified interface.
  */
 data class MorphoVariant(
-    val char: String,
-    val ipa: String,
-    val displayName: String
-)
+    override val char: String,
+    override val ipa: String,
+    override val displayName: String
+) : ILayoutKey
 
 /**
  * A single morphological key with all variants
