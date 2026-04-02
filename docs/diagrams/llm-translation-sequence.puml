@@ -1,0 +1,118 @@
+@startuml llm-translation-sequence
+!theme plain
+title Poetry Translation Flow with Local LLM
+
+actor "Poetry Editor" as editor
+participant "TranslationService" as svc
+participant "LmStudioProvider" as lms
+participant "LM Studio\n(DictaLM3)" as llm
+database "GGUF Model\n(dictalm3-q4_k_m.gguf)" as model
+
+== Initialization ==
+
+editor -> svc: withLmStudio(ModelConfig.DICTA_LM3)
+activate svc
+svc -> lms: new LmStudioProvider(config)
+activate lms
+lms -> llm: GET /v1/models
+llm -> model: Load model
+model --> llm: Model ready
+llm --> lms: {models: ["dictalm3"]}
+lms --> svc: provider ready
+svc --> editor: TranslationService ready
+
+== Stage 1: Analysis ==
+
+editor -> svc: analyze(stanza, HE, EN)
+activate svc
+
+svc -> svc: buildAnalysisPrompt()
+note right
+  System: "You are a Hebrew linguist..."
+  User: "Analyze this stanza:
+  בַּזֶּלֶת הַשְּׁחַרְחוֹרֶת,
+  תּוֹהָה, לֹא מְדַבֶּרֶת,"
+end note
+
+svc -> lms: complete(CompletionRequest)
+lms -> llm: POST /v1/chat/completions
+llm -> model: Generate tokens
+model --> llm: Response tokens
+
+llm --> lms: {choices: [{message: {...}}]}
+lms --> svc: CompletionResponse
+
+svc -> svc: parseAnalysisResult()
+note right
+  {
+    "words": [
+      {"he": "בַּזֶּלֶת", "ipa": "bazelet",
+       "syns": [
+         {"en": "basalt", "end": "lt", "s": true},
+         {"en": "rock", "end": "ok", "s": false}
+       ]
+      }
+    ],
+    "pairs": [{"a": "staging", "b": "raging"}],
+    "targets": ["bazelet", "soeret"]
+  }
+end note
+
+svc --> editor: AnalysisResult
+deactivate svc
+
+== Stage 2: Generate Paths ==
+
+editor -> svc: generatePaths(stanza, HE, EN)
+activate svc
+
+loop for each PathType (IPA_ECHO, LITERAL, CULTURAL, EMOTIONAL, IDIOM, COMPRESS)
+    svc -> svc: buildPathPrompt(pathType)
+
+    svc -> lms: complete(request)
+    lms -> llm: POST /v1/chat/completions
+    llm --> lms: Translation response
+
+    svc -> svc: parsePathLines()
+    svc -> svc: extractRationale()
+end
+
+svc --> editor: List<TranslationPath>
+note right
+  [
+    {type: IPA_ECHO, lines: [...], rationale: "..."},
+    {type: LITERAL, lines: [...], rationale: "..."},
+    {type: CULTURAL, lines: [...], rationale: "..."},
+    {type: EMOTIONAL, lines: [...], rationale: "..."},
+    {type: IDIOM, lines: [...], rationale: "..."},
+    {type: COMPRESS, lines: [...], rationale: "..."}
+  ]
+end note
+deactivate svc
+
+== Streaming Translation ==
+
+editor -> svc: translateLineStream(line, HE, EN)
+activate svc
+
+svc -> lms: completeStream(request)
+lms -> llm: POST /v1/chat/completions\n(stream: true)
+
+loop SSE stream
+    llm --> lms: data: {"choices":[{"delta":{"content":"Dark"}}]}
+    lms --> svc: emit("Dark")
+    svc --> editor: "Dark"
+
+    llm --> lms: data: {"choices":[{"delta":{"content":"ened"}}]}
+    lms --> svc: emit("ened")
+    svc --> editor: "ened"
+
+    llm --> lms: data: {"choices":[{"delta":{"content":" basalt"}}]}
+    lms --> svc: emit(" basalt")
+    svc --> editor: " basalt"
+end
+
+llm --> lms: data: [DONE]
+deactivate svc
+
+@enduml

@@ -1,0 +1,135 @@
+@startuml llm-providers-comparison
+!theme plain
+title LLM Provider Comparison
+
+skinparam class {
+    BackgroundColor<<recommended>> LightGreen
+    BackgroundColor<<local>> LightBlue
+    BackgroundColor<<cloud>> LightYellow
+}
+
+package "Local Inference" {
+    class "LM Studio" <<recommended>> {
+        **Best for Development**
+        --
+        + Easy GUI model management
+        + OpenAI-compatible API
+        + GPU acceleration
+        + Multiple models loaded
+        --
+        Models: DictaLM3, Llama3, Mistral
+        API: localhost:1234/v1/
+    }
+
+    class "JLama" <<local>> {
+        **Pure Java GGUF**
+        --
+        + No native dependencies
+        + Cross-platform
+        + Memory-mapped loading
+        - Slower than native
+        --
+        Format: GGUF only
+        Best for: Portability
+    }
+
+    class "Ollama" <<local>> {
+        **CLI-based Runner**
+        --
+        + Simple model pulling
+        + Background service
+        + REST API
+        --
+        API: localhost:11434
+        Models: ollama pull llama3.1
+    }
+
+    class "DJL" <<local>> {
+        **Deep Java Library**
+        --
+        + PyTorch/ONNX engines
+        + HuggingFace integration
+        + Good for embeddings
+        --
+        Best for: Embeddings,
+        smaller models
+    }
+}
+
+package "Orchestration" {
+    class "LangChain4j" <<recommended>> {
+        **LLM Framework**
+        --
+        + Unified API
+        + Chain composition
+        + Memory/RAG support
+        + Multiple backends
+        --
+        Supports: Ollama, OpenAI,
+        LocalAI, Azure, etc.
+    }
+
+    class "Apache Camel AI" <<local>> {
+        **Integration Framework**
+        --
+        + Enterprise patterns
+        + Message routing
+        + Retry/circuit breaker
+        + Batch processing
+        --
+        Components: camel-langchain4j,
+        camel-http
+    }
+}
+
+package "Hebrew Models" {
+    class "DictaLM3" <<recommended>> {
+        **Hebrew Specialist**
+        --
+        dicta-il/dictalm2.0-instruct
+        --
+        + Hebrew fluency
+        + Instruction following
+        + Poetry understanding
+        --
+        Sizes: 7B (Q4_K_M ~4GB)
+    }
+
+    class "Qwen2" {
+        **Multilingual**
+        --
+        Qwen/Qwen2-7B-Instruct
+        --
+        + Strong Hebrew
+        + 32K context
+        + Fast inference
+    }
+
+    class "Aya-23" {
+        **Cohere Multilingual**
+        --
+        cohere/aya-23-8B
+        --
+        + 23 languages
+        + Translation focus
+    }
+}
+
+' Layout hints
+"LM Studio" -[hidden]right-> "JLama"
+"JLama" -[hidden]right-> "Ollama"
+"Ollama" -[hidden]right-> "DJL"
+
+"LangChain4j" -[hidden]right-> "Apache Camel AI"
+
+"DictaLM3" -[hidden]right-> "Qwen2"
+"Qwen2" -[hidden]right-> "Aya-23"
+
+' Relationships
+"LangChain4j" ..> "LM Studio" : connects to
+"LangChain4j" ..> "Ollama" : connects to
+"Apache Camel AI" ..> "LangChain4j" : uses
+"LM Studio" ..> "DictaLM3" : loads
+"JLama" ..> "DictaLM3" : loads GGUF
+
+@enduml

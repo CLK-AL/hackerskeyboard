@@ -1,0 +1,173 @@
+@startuml llm-integration
+!theme plain
+skinparam packageStyle rectangle
+skinparam componentStyle rectangle
+title LLM Integration Architecture
+
+package "Translation Service" as transvc {
+    class TranslationService {
+        +translateLine(source, srcLang, tgtLang): TranslationResult
+        +translateStanza(stanza, srcLang, tgtLang): StanzaTranslation
+        +generatePaths(stanza, srcLang, tgtLang): List<TranslationPath>
+        +analyze(stanza, srcLang, tgtLang): AnalysisResult
+        +translateLineStream(): Flow<String>
+        --
+        +withLmStudio(): TranslationService
+        +withJLama(): TranslationService
+        +withLangChain4j(): TranslationService
+        +withOllama(): TranslationService
+    }
+
+    enum PathType {
+        IPA_ECHO
+        LITERAL
+        CULTURAL
+        EMOTIONAL
+        IDIOM
+        COMPRESS
+    }
+}
+
+package "LLM Providers" as providers {
+    interface LlmProvider {
+        +backend: LlmBackend
+        +modelConfig: ModelConfig
+        +isReady(): Boolean
+        +initialize()
+        +complete(request): CompletionResponse
+        +completeStream(request): Flow<String>
+        +shutdown()
+    }
+
+    interface EmbeddingProvider {
+        +embed(text): FloatArray
+        +embedBatch(texts): List<FloatArray>
+        +similarity(text1, text2): Float
+    }
+
+    class LangChain4jProvider {
+        OllamaChatModel
+        OpenAiChatModel
+        --
+        +ollama()
+        +lmStudio()
+        +openAiCompatible()
+    }
+
+    class CamelAiProvider {
+        CamelContext
+        ProducerTemplate
+        --
+        Camel Routes for LLM
+    }
+
+    class JLamaProvider {
+        Pure Java GGUF
+        No native deps
+        --
+        +dictaLm3()
+        +fromGguf(path)
+    }
+
+    class DjlProvider {
+        PyTorch Engine
+        ONNX Runtime
+        --
+        Text Generation
+        Embeddings
+    }
+
+    class LmStudioProvider {
+        OpenAI-compatible API
+        Ktor HTTP Client
+        --
+        +listModels()
+        +forModel(name)
+    }
+}
+
+package "Model Configuration" as modelcfg {
+    class ModelConfig {
+        modelId: String
+        modelPath: String?
+        huggingFaceRepo: String?
+        quantization: Quantization
+        contextLength: Int
+        maxTokens: Int
+        temperature: Float
+        --
+        DICTA_LM3
+        DICTA_LM2_INSTRUCT
+        LLAMA_3_1_8B
+        MISTRAL_7B
+        QWEN2_7B
+        AYA_23_8B
+    }
+
+    enum Quantization {
+        F16
+        Q8_0
+        Q6_K
+        Q5_K_M
+        Q4_K_M
+        Q4_0
+        Q3_K_M
+        Q2_K
+        IQ4_NL
+    }
+
+    enum LlmBackend {
+        LANGCHAIN4J
+        CAMEL_AI
+        JLAMA
+        DJL
+        LM_STUDIO
+        OLLAMA
+        OPENAI_COMPATIBLE
+    }
+}
+
+package "Configuration" as config {
+    class LlmConfig {
+        defaultBackend: LlmBackend
+        lmStudio: LmStudioConfig
+        ollama: OllamaConfig
+        jlama: JLamaConfig
+        djl: DjlConfig
+        modelCacheDir: String
+        enableGpu: Boolean
+    }
+
+    class LmStudioConfig {
+        baseUrl: String
+        apiPath: String
+        connectTimeoutMs: Long
+        defaultModel: String?
+    }
+
+    class OllamaConfig {
+        baseUrl: String
+        defaultModel: String
+    }
+
+    class JLamaConfig {
+        modelsDir: String
+        useMemoryMapping: Boolean
+        enableFlashAttention: Boolean
+    }
+}
+
+' Relationships
+TranslationService --> LlmProvider : uses
+LlmProvider <|.. LangChain4jProvider
+LlmProvider <|.. CamelAiProvider
+LlmProvider <|.. JLamaProvider
+LlmProvider <|.. DjlProvider
+LlmProvider <|.. LmStudioProvider
+EmbeddingProvider <|.. DjlProvider
+EmbeddingProvider <|.. LmStudioProvider
+LlmProvider --> ModelConfig
+LlmProvider --> LlmConfig
+TranslationService --> PathType
+
+@enduml
