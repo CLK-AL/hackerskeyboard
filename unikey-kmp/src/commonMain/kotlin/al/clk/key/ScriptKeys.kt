@@ -44,6 +44,9 @@ enum class GreekKey(
     /** Is this a vowel? */
     val isVowel: Boolean get() = ipa in listOf("a", "e", "i", "o")
 
+    /** Shift key returns uppercase */
+    override val shiftKey: ILayoutKey get() = SimpleKey(upper, ipa, displayName.replaceFirstChar { it.uppercase() })
+
     companion object {
         private val byQwerty = entries.associateBy { it.qwerty }
         private val byChar = entries.associateBy { it.char.firstOrNull() }
@@ -102,6 +105,9 @@ enum class CyrillicKey(
     E("э", "Э", "e", "e", "'"),
     YU("ю", "Ю", "ju", "yu", "."),
     YA("я", "Я", "ja", "ya", "z");
+
+    /** Shift key returns uppercase */
+    override val shiftKey: ILayoutKey get() = SimpleKey(upper, ipa, displayName.replaceFirstChar { it.uppercase() })
 
     companion object {
         private val byQwerty = entries.associateBy { it.qwerty }
@@ -282,6 +288,9 @@ enum class HiraganaKey(
     WA("わ", "ワ", "wa", "wa", "w"),
     WO("を", "ヲ", "o", "wo", "wo"),
     N("ん", "ン", "n", "n", "nn");
+
+    /** Shift key returns katakana */
+    override val shiftKey: ILayoutKey get() = SimpleKey(katakana, ipa, "$displayName-katakana")
 
     companion object {
         private val byRomaji = entries.associateBy { it.romaji }

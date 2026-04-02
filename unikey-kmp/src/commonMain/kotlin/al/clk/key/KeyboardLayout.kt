@@ -13,34 +13,33 @@ data class KeyboardLayout(
 )
 
 /**
- * A single key in a layout - immutable phonetic key definition
- * Modifiers (shift, ctrl, alt) reference other LayoutKeys
+ * A single key in a layout - immutable phonetic key definition.
+ * Implements ILayoutKey and adds support for modifier-specific keys.
+ * Use SimpleKey for basic cases, LayoutKey for complex modifier mappings.
  */
 data class LayoutKey(
-    val char: String,                    // The character output
-    val ipa: String,                     // IPA pronunciation (required)
-    val name: String,                    // Name of the character (required)
-    val modifiers: Map<Modifier, LayoutKey> = emptyMap()  // Modified versions
-) {
-    /**
-     * Get the key for a given modifier combination
-     */
-    fun withModifier(mod: Modifier): LayoutKey? = modifiers[mod]
+    override val char: String,
+    override val ipa: String,
+    override val displayName: String,
+    private val modifiers: Map<Modifier, ILayoutKey> = emptyMap()
+) : ILayoutKey {
+    // Legacy alias
+    val name: String get() = displayName
 
-    /**
-     * Get the key for shift modifier (convenience)
-     */
-    val shift: LayoutKey? get() = modifiers[Modifier.SHIFT]
+    // Legacy constructor for compatibility - convert LayoutKey map to ILayoutKey map
+    @Suppress("UNCHECKED_CAST")
+    constructor(char: String, ipa: String, name: String, modifiers: Map<Modifier, LayoutKey>) :
+        this(char, ipa, name, modifiers as Map<Modifier, ILayoutKey>)
 
-    /**
-     * Get the key for ctrl modifier (convenience)
-     */
-    val ctrl: LayoutKey? get() = modifiers[Modifier.CTRL]
+    override fun withModifier(mod: Modifier): ILayoutKey? = modifiers[mod]
+    override val shiftKey: ILayoutKey? get() = modifiers[Modifier.SHIFT]
+    override val ctrlKey: ILayoutKey? get() = modifiers[Modifier.CTRL]
+    override val altKey: ILayoutKey? get() = modifiers[Modifier.ALT]
 
-    /**
-     * Get the key for alt modifier (convenience)
-     */
-    val alt: LayoutKey? get() = modifiers[Modifier.ALT]
+    // Convenience properties (return LayoutKey for compatibility where needed)
+    val shift: LayoutKey? get() = modifiers[Modifier.SHIFT] as? LayoutKey
+    val ctrl: LayoutKey? get() = modifiers[Modifier.CTRL] as? LayoutKey
+    val alt: LayoutKey? get() = modifiers[Modifier.ALT] as? LayoutKey
 
     companion object {
         /**

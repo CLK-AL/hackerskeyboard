@@ -79,7 +79,7 @@ data class MorphoKey(
     /**
      * Get key with modifier
      */
-    fun withModifier(mod: Modifier): MorphoKey? = modifiers[mod]
+    override fun withModifier(mod: Modifier): MorphoKey? = modifiers[mod]
 
     /**
      * Get shifted variant

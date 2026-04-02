@@ -763,28 +763,22 @@ fun ArabicLetter.toLayoutKey(shiftChar: String? = null, shiftIpa: String? = null
 }
 
 /**
- * Generate LayoutKey from GreekKey with uppercase shift
+ * Generate LayoutKey from GreekKey - uses enum's shiftKey directly
  */
-fun GreekKey.toLayoutKey(): LayoutKey {
-    val modifiers = mapOf(Modifier.SHIFT to LayoutKey(upper, ipa, displayName.replaceFirstChar { it.uppercase() }))
-    return LayoutKey(char, ipa, displayName, modifiers)
-}
+fun GreekKey.toLayoutKey(): LayoutKey =
+    LayoutKey(char, ipa, displayName, mapOf(Modifier.SHIFT to shiftKey!!))
 
 /**
- * Generate LayoutKey from CyrillicKey with uppercase shift
+ * Generate LayoutKey from CyrillicKey - uses enum's shiftKey directly
  */
-fun CyrillicKey.toLayoutKey(): LayoutKey {
-    val modifiers = mapOf(Modifier.SHIFT to LayoutKey(upper, ipa, displayName.replaceFirstChar { it.uppercase() }))
-    return LayoutKey(char, ipa, displayName, modifiers)
-}
+fun CyrillicKey.toLayoutKey(): LayoutKey =
+    LayoutKey(char, ipa, displayName, mapOf(Modifier.SHIFT to shiftKey!!))
 
 /**
- * Generate LayoutKey from HiraganaKey with katakana shift
+ * Generate LayoutKey from HiraganaKey - uses enum's shiftKey directly
  */
-fun HiraganaKey.toLayoutKey(): LayoutKey {
-    val modifiers = mapOf(Modifier.SHIFT to LayoutKey(katakana, ipa, "$displayName-katakana"))
-    return LayoutKey(char, ipa, displayName, modifiers)
-}
+fun HiraganaKey.toLayoutKey(): LayoutKey =
+    LayoutKey(char, ipa, displayName, mapOf(Modifier.SHIFT to shiftKey!!))
 
 /**
  * Greek keyboard keys - generated from GreekKey enum
