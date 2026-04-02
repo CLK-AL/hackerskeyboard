@@ -278,39 +278,24 @@ data class UniKeySyllable(
         }
 
         private fun getHebrewConsonantIpa(letter: Char, word: String, pos: Int): String {
+            val hebrewLetter = HebrewLetter.fromChar(letter) ?: return ""
+
             // Check for dagesh after letter (can be at pos+1 or pos+2 if vowel comes first)
             val hasDagesh = (pos + 1 < word.length && word[pos + 1].code == 0x05BC) ||
                             (pos + 2 < word.length && word[pos + 2].code == 0x05BC)
 
-            return when (letter) {
-                '\u05D0' -> ""     // alef - silent
-                '\u05D1' -> if (hasDagesh) "b" else "v"
-                '\u05D2' -> "g"
-                '\u05D3' -> "d"
-                '\u05D4' -> "h"
-                '\u05D5' -> "v"
-                '\u05D6' -> "z"
-                '\u05D7' -> "x"    // chet
-                '\u05D8' -> "t"
-                '\u05D9' -> "j"
-                '\u05DA', '\u05DB' -> if (hasDagesh) "k" else "x"
-                '\u05DC' -> "l"
-                '\u05DD', '\u05DE' -> "m"
-                '\u05DF', '\u05E0' -> "n"
-                '\u05E1' -> "s"
-                '\u05E2' -> ""     // ayin - silent
-                '\u05E3', '\u05E4' -> if (hasDagesh) "p" else "f"
-                '\u05E5', '\u05E6' -> "ts"
-                '\u05E7' -> "k"
-                '\u05E8' -> "r"
-                '\u05E9' -> {
-                    // Check for sin dot
-                    val hasSinDot = (pos + 1 < word.length && word[pos + 1].code == 0x05C2) ||
-                                    (pos + 2 < word.length && word[pos + 2].code == 0x05C2)
-                    if (hasSinDot) "s" else "sh"
-                }
-                '\u05EA' -> "t"
-                else -> ""
+            // Special handling for shin/sin dot
+            if (hebrewLetter == HebrewLetter.SHIN) {
+                val hasSinDot = (pos + 1 < word.length && word[pos + 1].code == 0x05C2) ||
+                                (pos + 2 < word.length && word[pos + 2].code == 0x05C2)
+                return if (hasSinDot) "s" else "sh"
+            }
+
+            // For bgdkpt letters with dagesh, use dagesh IPA
+            return if (hasDagesh && hebrewLetter.colorIpaDagesh != null) {
+                hebrewLetter.colorIpaDagesh!!
+            } else {
+                hebrewLetter.colorIpa
             }
         }
 
@@ -323,23 +308,12 @@ data class UniKeySyllable(
 
             while (i < word.length) {
                 val cp = word[i].code
-                val vowelIpa = when (cp) {
-                    0x05B0 -> "@"   // shva
-                    0x05B1 -> "e"   // hataf segol
-                    0x05B2 -> "a"   // hataf patach
-                    0x05B3 -> "o"   // hataf kamatz
-                    0x05B4 -> "i"   // chirik
-                    0x05B5 -> "e"   // tzere
-                    0x05B6 -> "E"   // segol
-                    0x05B7 -> "a"   // patach
-                    0x05B8 -> "a"   // kamatz
-                    0x05B9 -> "o"   // cholam
-                    0x05BA -> "o"   // cholam haser
-                    0x05BB -> "u"   // kubutz
-                    0x05BC -> null  // dagesh - skip but include
-                    0x05C1 -> null  // shin dot
-                    0x05C2 -> null  // sin dot
-                    else -> break   // Not a vowel/diacritic
+                val vowelIpa = when {
+                    cp in 0x05B0..0x05BB -> NikudVowel.fromCodePoint(cp)?.colorIpa
+                    cp == 0x05BC -> null  // dagesh - skip but include
+                    cp == 0x05C1 -> null  // shin dot
+                    cp == 0x05C2 -> null  // sin dot
+                    else -> break         // Not a vowel/diacritic, exit loop
                 }
 
                 original.append(word[i])
