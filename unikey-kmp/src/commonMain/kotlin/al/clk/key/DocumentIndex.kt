@@ -1,5 +1,7 @@
 package al.clk.key
 
+import kotlin.math.*
+
 /**
  * Document Index System - hierarchical indexing for HTML/Markdown documents.
  *
@@ -1697,82 +1699,374 @@ class FormulaEvaluator(private val table: TableData) {
     fun evaluate(expression: String): CellValue {
         val expr = expression.trim().uppercase()
         return try {
-            when {
-                expr.startsWith("SUM(") -> evalSum(expr)
-                expr.startsWith("AVG(") || expr.startsWith("AVERAGE(") -> evalAvg(expr)
-                expr.startsWith("COUNT(") -> evalCount(expr)
-                expr.startsWith("MIN(") -> evalMin(expr)
-                expr.startsWith("MAX(") -> evalMax(expr)
-                expr.startsWith("IF(") -> evalIf(expr)
-                expr.contains("+") || expr.contains("-") || expr.contains("*") || expr.contains("/") -> evalArithmetic(expr)
-                CellRef.parse(expr) != null -> table[expr]
-                else -> CellValue.Text(expression)
+            // Extract function name if present
+            val funcMatch = Regex("""^([A-Z]+)\(""").find(expr)
+            if (funcMatch != null) {
+                val funcName = funcMatch.groupValues[1]
+                return evalFunction(funcName, expr)
             }
+
+            // Check for cell reference
+            CellRef.parse(expr)?.let { return table[expr] }
+
+            // Check for arithmetic expression
+            if (hasArithmeticOp(expr)) return evalArithmetic(expr)
+
+            // Return as text
+            CellValue.Text(expression)
         } catch (e: Exception) {
             CellValue.Text("#ERROR: ${e.message}")
         }
     }
 
-    private fun evalSum(expr: String): CellValue {
-        val values = extractRangeValues(expr)
-        val sum = values.sumOf { it }
-        return CellValue.Number(sum)
+    private fun hasArithmeticOp(expr: String): Boolean {
+        var depth = 0
+        for (c in expr) {
+            when (c) {
+                '(' -> depth++
+                ')' -> depth--
+                '+', '-', '*', '/', '^', '%' -> if (depth == 0) return true
+            }
+        }
+        return false
     }
 
-    private fun evalAvg(expr: String): CellValue {
-        val values = extractRangeValues(expr)
-        if (values.isEmpty()) return CellValue.Number(0.0)
-        return CellValue.Number(values.sum() / values.size)
-    }
-
-    private fun evalCount(expr: String): CellValue {
-        val values = extractRangeValues(expr)
-        return CellValue.Number(values.size.toDouble())
-    }
-
-    private fun evalMin(expr: String): CellValue {
-        val values = extractRangeValues(expr)
-        return CellValue.Number(values.minOrNull() ?: 0.0)
-    }
-
-    private fun evalMax(expr: String): CellValue {
-        val values = extractRangeValues(expr)
-        return CellValue.Number(values.maxOrNull() ?: 0.0)
-    }
-
-    private fun evalIf(expr: String): CellValue {
-        // IF(condition, trueValue, falseValue)
+    private fun evalFunction(name: String, expr: String): CellValue {
         val args = extractFunctionArgs(expr)
-        if (args.size < 3) return CellValue.Text("#ERROR: IF needs 3 args")
+        val values by lazy { extractRangeValues(expr) }
 
-        val condition = evaluateCondition(args[0])
-        return if (condition) evaluate(args[1]) else evaluate(args[2])
+        return when (name) {
+            // ═══ Aggregate Functions ═══
+            "SUM" -> CellValue.Number(values.sum())
+            "AVERAGE", "AVG" -> CellValue.Number(if (values.isEmpty()) 0.0 else values.sum() / values.size)
+            "COUNT" -> CellValue.Number(values.size.toDouble())
+            "COUNTA" -> CellValue.Number(extractAllValues(expr).count { it.isNotEmpty() }.toDouble())
+            "MIN" -> CellValue.Number(values.minOrNull() ?: 0.0)
+            "MAX" -> CellValue.Number(values.maxOrNull() ?: 0.0)
+            "PRODUCT" -> CellValue.Number(values.fold(1.0) { acc, v -> acc * v })
+            "MEDIAN" -> {
+                val sorted = values.sorted()
+                val mid = sorted.size / 2
+                CellValue.Number(if (sorted.size % 2 == 0) (sorted[mid - 1] + sorted[mid]) / 2 else sorted[mid])
+            }
+            "STDEV", "STDEV.S" -> CellValue.Number(stdev(values, sample = true))
+            "STDEV.P" -> CellValue.Number(stdev(values, sample = false))
+            "VAR", "VAR.S" -> CellValue.Number(variance(values, sample = true))
+            "VAR.P" -> CellValue.Number(variance(values, sample = false))
+
+            // ═══ Math Functions ═══
+            "ABS" -> CellValue.Number(kotlin.math.abs(resolveValue(args[0])))
+            "SQRT" -> CellValue.Number(kotlin.math.sqrt(resolveValue(args[0])))
+            "POWER", "POW" -> CellValue.Number(resolveValue(args[0]).pow(resolveValue(args[1])))
+            "MOD" -> {
+                val n = resolveValue(args[0])
+                val d = resolveValue(args[1])
+                CellValue.Number(n - d * kotlin.math.floor(n / d))
+            }
+            "ROUND" -> {
+                val num = resolveValue(args[0])
+                val digits = args.getOrNull(1)?.let { resolveValue(it).toInt() } ?: 0
+                val factor = 10.0.pow(digits.toDouble())
+                CellValue.Number(kotlin.math.round(num * factor) / factor)
+            }
+            "ROUNDUP" -> {
+                val num = resolveValue(args[0])
+                val digits = args.getOrNull(1)?.let { resolveValue(it).toInt() } ?: 0
+                val factor = 10.0.pow(digits.toDouble())
+                CellValue.Number(kotlin.math.ceil(num * factor) / factor)
+            }
+            "ROUNDDOWN" -> {
+                val num = resolveValue(args[0])
+                val digits = args.getOrNull(1)?.let { resolveValue(it).toInt() } ?: 0
+                val factor = 10.0.pow(digits.toDouble())
+                CellValue.Number(kotlin.math.floor(num * factor) / factor)
+            }
+            "FLOOR" -> CellValue.Number(kotlin.math.floor(resolveValue(args[0])))
+            "CEILING", "CEIL" -> CellValue.Number(kotlin.math.ceil(resolveValue(args[0])))
+            "INT", "TRUNC" -> CellValue.Number(kotlin.math.truncate(resolveValue(args[0])))
+            "SIGN" -> CellValue.Number(kotlin.math.sign(resolveValue(args[0])))
+            "EXP" -> CellValue.Number(kotlin.math.exp(resolveValue(args[0])))
+            "LN" -> CellValue.Number(kotlin.math.ln(resolveValue(args[0])))
+            "LOG", "LOG10" -> CellValue.Number(kotlin.math.log10(resolveValue(args[0])))
+            "LOG2" -> CellValue.Number(kotlin.math.log2(resolveValue(args[0])))
+            "PI" -> CellValue.Number(kotlin.math.PI)
+            "RAND" -> CellValue.Number(kotlin.random.Random.nextDouble())
+            "RANDBETWEEN" -> {
+                val low = resolveValue(args[0]).toInt()
+                val high = resolveValue(args[1]).toInt()
+                CellValue.Number(kotlin.random.Random.nextInt(low, high + 1).toDouble())
+            }
+
+            // ═══ Trigonometric Functions ═══
+            "SIN" -> CellValue.Number(kotlin.math.sin(resolveValue(args[0])))
+            "COS" -> CellValue.Number(kotlin.math.cos(resolveValue(args[0])))
+            "TAN" -> CellValue.Number(kotlin.math.tan(resolveValue(args[0])))
+            "ASIN" -> CellValue.Number(kotlin.math.asin(resolveValue(args[0])))
+            "ACOS" -> CellValue.Number(kotlin.math.acos(resolveValue(args[0])))
+            "ATAN" -> CellValue.Number(kotlin.math.atan(resolveValue(args[0])))
+            "ATAN2" -> CellValue.Number(kotlin.math.atan2(resolveValue(args[0]), resolveValue(args[1])))
+            "SINH" -> CellValue.Number(kotlin.math.sinh(resolveValue(args[0])))
+            "COSH" -> CellValue.Number(kotlin.math.cosh(resolveValue(args[0])))
+            "TANH" -> CellValue.Number(kotlin.math.tanh(resolveValue(args[0])))
+            "RADIANS" -> CellValue.Number(resolveValue(args[0]) * kotlin.math.PI / 180.0)
+            "DEGREES" -> CellValue.Number(resolveValue(args[0]) * 180.0 / kotlin.math.PI)
+
+            // ═══ Logical Functions ═══
+            "IF" -> {
+                if (args.size < 3) return CellValue.Text("#ERROR: IF needs 3 args")
+                if (evaluateCondition(args[0])) evaluate(args[1]) else evaluate(args[2])
+            }
+            "AND" -> CellValue.Number(if (args.all { evaluateCondition(it) }) 1.0 else 0.0)
+            "OR" -> CellValue.Number(if (args.any { evaluateCondition(it) }) 1.0 else 0.0)
+            "NOT" -> CellValue.Number(if (evaluateCondition(args[0])) 0.0 else 1.0)
+            "XOR" -> CellValue.Number(if (args.count { evaluateCondition(it) } % 2 == 1) 1.0 else 0.0)
+            "TRUE" -> CellValue.Number(1.0)
+            "FALSE" -> CellValue.Number(0.0)
+            "IFERROR" -> {
+                val result = evaluate(args[0])
+                if (result.raw.startsWith("#")) evaluate(args.getOrElse(1) { "0" }) else result
+            }
+            "IFNA" -> {
+                val result = evaluate(args[0])
+                if (result.raw == "#N/A") evaluate(args.getOrElse(1) { "0" }) else result
+            }
+
+            // ═══ Text Functions ═══
+            "LEN" -> CellValue.Number(resolveText(args[0]).length.toDouble())
+            "LEFT" -> {
+                val text = resolveText(args[0])
+                val n = args.getOrNull(1)?.let { resolveValue(it).toInt() } ?: 1
+                CellValue.Text(text.take(n))
+            }
+            "RIGHT" -> {
+                val text = resolveText(args[0])
+                val n = args.getOrNull(1)?.let { resolveValue(it).toInt() } ?: 1
+                CellValue.Text(text.takeLast(n))
+            }
+            "MID" -> {
+                val text = resolveText(args[0])
+                val start = resolveValue(args[1]).toInt() - 1  // 1-based
+                val len = resolveValue(args[2]).toInt()
+                CellValue.Text(text.substring(start.coerceAtLeast(0), (start + len).coerceAtMost(text.length)))
+            }
+            "CONCAT", "CONCATENATE" -> CellValue.Text(args.joinToString("") { resolveText(it) })
+            "TRIM" -> CellValue.Text(resolveText(args[0]).trim())
+            "UPPER" -> CellValue.Text(resolveText(args[0]).uppercase())
+            "LOWER" -> CellValue.Text(resolveText(args[0]).lowercase())
+            "PROPER" -> CellValue.Text(resolveText(args[0]).split(" ").joinToString(" ") {
+                it.lowercase().replaceFirstChar { c -> c.uppercase() }
+            })
+            "REPLACE" -> {
+                val text = resolveText(args[0])
+                val start = resolveValue(args[1]).toInt() - 1
+                val len = resolveValue(args[2]).toInt()
+                val newText = resolveText(args[3])
+                CellValue.Text(text.replaceRange(start, start + len, newText))
+            }
+            "SUBSTITUTE" -> {
+                val text = resolveText(args[0])
+                val old = resolveText(args[1])
+                val new = resolveText(args[2])
+                CellValue.Text(text.replace(old, new))
+            }
+            "REPT" -> {
+                val text = resolveText(args[0])
+                val n = resolveValue(args[1]).toInt()
+                CellValue.Text(text.repeat(n))
+            }
+            "FIND", "SEARCH" -> {
+                val find = resolveText(args[0])
+                val text = resolveText(args[1])
+                val start = args.getOrNull(2)?.let { resolveValue(it).toInt() - 1 } ?: 0
+                val idx = if (name == "SEARCH") text.lowercase().indexOf(find.lowercase(), start)
+                          else text.indexOf(find, start)
+                CellValue.Number((if (idx >= 0) idx + 1 else 0).toDouble())
+            }
+            "VALUE" -> CellValue.Number(resolveText(args[0]).toDoubleOrNull() ?: 0.0)
+            "TEXT" -> CellValue.Text(resolveValue(args[0]).toString())
+
+            // ═══ Lookup Functions (simplified) ═══
+            "INDEX" -> {
+                val range = args[0]
+                val rowNum = resolveValue(args[1]).toInt()
+                val colNum = args.getOrNull(2)?.let { resolveValue(it).toInt() } ?: 1
+                val ref = CellRef.parse(range.split(":")[0]) ?: return CellValue.Text("#REF!")
+                val targetRef = CellRef(ref.col + colNum - 1, ref.row + rowNum - 1)
+                table[targetRef]
+            }
+            "MATCH" -> {
+                val lookup = resolveValue(args[0])
+                val rangeValues = extractRangeValues("($args[1])")
+                val idx = rangeValues.indexOf(lookup)
+                CellValue.Number((if (idx >= 0) idx + 1 else 0).toDouble())
+            }
+
+            else -> CellValue.Text("#NAME? Unknown function: $name")
+        }
+    }
+
+    private fun stdev(values: List<Double>, sample: Boolean): Double {
+        if (values.size < 2) return 0.0
+        val mean = values.sum() / values.size
+        val sumSq = values.sumOf { (it - mean) * (it - mean) }
+        val n = if (sample) values.size - 1 else values.size
+        return kotlin.math.sqrt(sumSq / n)
+    }
+
+    private fun variance(values: List<Double>, sample: Boolean): Double {
+        if (values.size < 2) return 0.0
+        val mean = values.sum() / values.size
+        val sumSq = values.sumOf { (it - mean) * (it - mean) }
+        val n = if (sample) values.size - 1 else values.size
+        return sumSq / n
     }
 
     private fun evalArithmetic(expr: String): CellValue {
-        // Simple arithmetic: A1+B1, A1*2, etc.
-        var result = 0.0
-        var currentOp = '+'
-        var currentNum = ""
+        // Tokenize and evaluate with proper precedence
+        val tokens = tokenize(expr)
+        val result = parseExpression(tokens, 0).first
+        return CellValue.Number(result)
+    }
 
-        for (c in expr + '+') {  // Add trailing + to process last number
-            when (c) {
-                '+', '-', '*', '/' -> {
-                    val value = resolveValue(currentNum.trim())
-                    result = when (currentOp) {
-                        '+' -> result + value
-                        '-' -> result - value
-                        '*' -> result * value
-                        '/' -> if (value != 0.0) result / value else Double.NaN
-                        else -> result
+    private fun tokenize(expr: String): List<String> {
+        val tokens = mutableListOf<String>()
+        var current = StringBuilder()
+        var i = 0
+
+        while (i < expr.length) {
+            val c = expr[i]
+            when {
+                c in "+-*/%^()" -> {
+                    if (current.isNotEmpty()) {
+                        tokens.add(current.toString())
+                        current = StringBuilder()
                     }
-                    currentOp = c
-                    currentNum = ""
+                    tokens.add(c.toString())
                 }
-                else -> currentNum += c
+                c.isWhitespace() -> {
+                    if (current.isNotEmpty()) {
+                        tokens.add(current.toString())
+                        current = StringBuilder()
+                    }
+                }
+                else -> current.append(c)
+            }
+            i++
+        }
+        if (current.isNotEmpty()) tokens.add(current.toString())
+        return tokens
+    }
+
+    private fun parseExpression(tokens: List<String>, start: Int): Pair<Double, Int> {
+        var (left, pos) = parseTerm(tokens, start)
+
+        while (pos < tokens.size && tokens[pos] in listOf("+", "-")) {
+            val op = tokens[pos]
+            val (right, newPos) = parseTerm(tokens, pos + 1)
+            left = if (op == "+") left + right else left - right
+            pos = newPos
+        }
+        return left to pos
+    }
+
+    private fun parseTerm(tokens: List<String>, start: Int): Pair<Double, Int> {
+        var (left, pos) = parsePower(tokens, start)
+
+        while (pos < tokens.size && tokens[pos] in listOf("*", "/", "%")) {
+            val op = tokens[pos]
+            val (right, newPos) = parsePower(tokens, pos + 1)
+            left = when (op) {
+                "*" -> left * right
+                "/" -> if (right != 0.0) left / right else Double.NaN
+                "%" -> left % right
+                else -> left
+            }
+            pos = newPos
+        }
+        return left to pos
+    }
+
+    private fun parsePower(tokens: List<String>, start: Int): Pair<Double, Int> {
+        var (left, pos) = parseFactor(tokens, start)
+
+        while (pos < tokens.size && tokens[pos] == "^") {
+            val (right, newPos) = parseFactor(tokens, pos + 1)
+            left = left.pow(right)
+            pos = newPos
+        }
+        return left to pos
+    }
+
+    private fun parseFactor(tokens: List<String>, start: Int): Pair<Double, Int> {
+        if (start >= tokens.size) return 0.0 to start
+
+        val token = tokens[start]
+
+        // Handle parentheses
+        if (token == "(") {
+            val (result, pos) = parseExpression(tokens, start + 1)
+            val endPos = if (pos < tokens.size && tokens[pos] == ")") pos + 1 else pos
+            return result to endPos
+        }
+
+        // Handle unary minus
+        if (token == "-") {
+            val (result, pos) = parseFactor(tokens, start + 1)
+            return -result to pos
+        }
+
+        // Handle unary plus
+        if (token == "+") {
+            return parseFactor(tokens, start + 1)
+        }
+
+        // Number or cell reference
+        return resolveValue(token) to start + 1
+    }
+
+    private fun resolveText(ref: String): String {
+        val trimmed = ref.trim()
+        // Check if it's a quoted string
+        if (trimmed.startsWith("\"") && trimmed.endsWith("\"")) {
+            return trimmed.drop(1).dropLast(1)
+        }
+        // Check if it's a cell reference
+        val cellRef = CellRef.parse(trimmed)
+        if (cellRef != null) {
+            return table[cellRef].raw
+        }
+        return trimmed
+    }
+
+    private fun extractAllValues(expr: String): List<String> {
+        val inner = expr.substringAfter("(").substringBefore(")")
+        val results = mutableListOf<String>()
+
+        for (part in inner.split(",")) {
+            val trimmed = part.trim()
+            if (trimmed.contains(":")) {
+                results.addAll(expandRangeAsStrings(trimmed))
+            } else {
+                results.add(resolveText(trimmed))
             }
         }
-        return CellValue.Number(result)
+        return results
+    }
+
+    private fun expandRangeAsStrings(range: String): List<String> {
+        val parts = range.split(":")
+        if (parts.size != 2) return emptyList()
+
+        val start = CellRef.parse(parts[0].trim()) ?: return emptyList()
+        val end = CellRef.parse(parts[1].trim()) ?: return emptyList()
+
+        val results = mutableListOf<String>()
+        for (row in start.row..end.row) {
+            for (col in start.col..end.col) {
+                results.add(table[CellRef(col, row)].raw)
+            }
+        }
+        return results
     }
 
     private fun extractRangeValues(expr: String): List<Double> {
