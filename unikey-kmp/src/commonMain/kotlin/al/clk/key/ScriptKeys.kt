@@ -41,9 +41,21 @@ enum class GreekKey(
     PSI("ψ", "Ψ", "ps", "psi", "c"),
     OMEGA("ω", "Ω", "o", "omega", "v");
 
+    /** Is this a vowel? */
+    val isVowel: Boolean get() = ipa in listOf("a", "e", "i", "o")
+
     companion object {
         private val byQwerty = entries.associateBy { it.qwerty }
+        private val byChar = entries.associateBy { it.char.firstOrNull() }
+        // Accented vowels mapped to base forms
+        private val accentedToBase = mapOf(
+            'ά' to 'α', 'έ' to 'ε', 'ή' to 'η',
+            'ί' to 'ι', 'ϊ' to 'ι', 'ΐ' to 'ι',
+            'ό' to 'ο', 'ύ' to 'υ', 'ϋ' to 'υ', 'ΰ' to 'υ',
+            'ώ' to 'ω'
+        )
         fun fromQwerty(key: String): GreekKey? = byQwerty[key]
+        fun fromChar(c: Char): GreekKey? = byChar[c] ?: byChar[accentedToBase[c]]
     }
 }
 

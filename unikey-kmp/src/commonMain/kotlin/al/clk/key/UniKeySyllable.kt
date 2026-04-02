@@ -386,14 +386,11 @@ data class UniKeySyllable(
 
         private fun collectArabicVowel(word: String, start: Int): Pair<String, Int> {
             if (start >= word.length) return "a" to 0
-            val cp = word[start].code
-            return when (cp) {
-                0x064E -> "a" to 1  // fatha
-                0x064F -> "u" to 1  // damma
-                0x0650 -> "i" to 1  // kasra
-                0x0651 -> "a" to 1  // shadda (gemination)
-                0x0652 -> "" to 1   // sukun (no vowel)
-                else -> "a" to 0    // default short a
+            val haraka = Haraka.fromChar(word[start])
+            return if (haraka != null) {
+                (haraka.ipa.ifEmpty { "a" }) to 1  // shadda/sukun default to 'a'
+            } else {
+                "a" to 0  // no haraka, default short a
             }
         }
 
@@ -416,33 +413,11 @@ data class UniKeySyllable(
         }
 
         private fun parseGreekChar(word: String, pos: Int): Triple<String, String, Int> {
-            val c = word[pos]
-            return when (c) {
-                'α', 'ά' -> Triple("", "a", 1)
-                'ε', 'έ' -> Triple("", "e", 1)
-                'η', 'ή' -> Triple("", "i", 1)
-                'ι', 'ί', 'ϊ', 'ΐ' -> Triple("", "i", 1)
-                'ο', 'ό' -> Triple("", "o", 1)
-                'υ', 'ύ', 'ϋ', 'ΰ' -> Triple("", "i", 1)
-                'ω', 'ώ' -> Triple("", "o", 1)
-                'β' -> Triple("v", "", 1)
-                'γ' -> Triple("ɣ", "", 1)
-                'δ' -> Triple("ð", "", 1)
-                'ζ' -> Triple("z", "", 1)
-                'θ' -> Triple("θ", "", 1)
-                'κ' -> Triple("k", "", 1)
-                'λ' -> Triple("l", "", 1)
-                'μ' -> Triple("m", "", 1)
-                'ν' -> Triple("n", "", 1)
-                'ξ' -> Triple("ks", "", 1)
-                'π' -> Triple("p", "", 1)
-                'ρ' -> Triple("r", "", 1)
-                'σ', 'ς' -> Triple("s", "", 1)
-                'τ' -> Triple("t", "", 1)
-                'φ' -> Triple("f", "", 1)
-                'χ' -> Triple("x", "", 1)
-                'ψ' -> Triple("ps", "", 1)
-                else -> Triple("", "", 1)
+            val key = GreekKey.fromChar(word[pos]) ?: return Triple("", "", 1)
+            return if (key.isVowel) {
+                Triple("", key.ipa, 1)
+            } else {
+                Triple(key.ipa, "", 1)
             }
         }
 
