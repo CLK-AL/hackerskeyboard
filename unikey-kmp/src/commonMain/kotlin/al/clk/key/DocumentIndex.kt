@@ -240,11 +240,11 @@ enum class DocTag(
     ),
     DT(
         TagPattern.html("dt"),
-        TagPattern.md("^[^:\\s].*(?=\\s*::\\s*$|\\s*$)", "", "")  // Term before :: or at end
+        TagPattern.md("^(?:\\*\\*)?[^:]+(?:\\*\\*)?(?=:\\s)", "", "")  // term before : (with optional **)
     ),
     DD(
         TagPattern.html("dd"),
-        TagPattern.md("^:\\s+|^\\s{2,}", ".*", "$")  // : followed by text, or indented
+        TagPattern.md("(?<=:\\s)(?:\\*\\*)?.*(?:\\*\\*)?$", "", "")  // description after : (with optional **)
     ),
 
     // ═══ Code/Preformatted ═══
@@ -1131,7 +1131,9 @@ enum class LineType(
     UL_ITEM(DocTag.LI, "^\\s*[-*+]\\s+.*$"),  // "- text", "* text"
 
     // ═══ Definition List ═══
-    DT_ITEM(DocTag.DT, "^[^:\\s][^:]*(?=\\s*::\\s*$|$)"),  // Term (before ::)
+    // Inline format: "term: description" or "**term**: description"
+    DT_DD_INLINE(DocTag.DL, "^(?:\\*\\*)?[^:*]+(?:\\*\\*)?:\\s+.+$"),  // term: desc on same line
+    DT_ITEM(DocTag.DT, "^(?:\\*\\*)?[^:]+(?:\\*\\*)?(?=::\\s*$)"),  // Term before ::
     DD_ITEM(DocTag.DD, "^:\\s+.*$|^\\s{2,}[^\\s].*$"),  // : description or indented
 
     // ═══ Tables ═══
@@ -1182,8 +1184,8 @@ enum class LineType(
                 HR,
                 // Plain text headers
                 HEADER1, HEADER2, HEADER3, HEADER4, HEADER5, HEADER6,
-                // Definition list (before regular lists)
-                DD_ITEM, DT_ITEM,
+                // Definition list - inline first (term: desc), then separate
+                DT_DD_INLINE, DD_ITEM, DT_ITEM,
                 // Lists
                 OL_ITEM, UL_ITEM,
                 // Tables
@@ -1352,6 +1354,50 @@ class PlainTextParser {
 
             // Handle definition list containers
             when (lineType) {
+                LineType.DT_DD_INLINE -> {
+                    // Inline format: "term: description" - create both DT and DD
+                    if (!inDefList) {
+                        dlSegment = pushTagWithScript(DocTag.DL, scriptAttrs)
+                        inDefList = true
+                    }
+                    val dl = dlSegment!!
+                    currentListSegment = null
+                    currentListType = null
+
+                    // Split by first ": " to get term and description
+                    val colonIdx = line.indexOf(": ")
+                    if (colonIdx > 0) {
+                        val term = line.substring(0, colonIdx).trim()
+                        val desc = line.substring(colonIdx + 2).trim()
+
+                        // Create DT element
+                        val dtPath = mutableListOf(htmlSegment, bodySegment)
+                        sectionDivSegment?.let { dtPath.add(it) }
+                        dtPath.add(dl)
+                        val dtSegment = pushTagWithScript(DocTag.DT, ScriptDetector.detect(term))
+                        dtPath.add(dtSegment)
+                        elements.add(ParsedElement(
+                            DocumentIndex(dtPath), DocTag.DT, offset, offset + colonIdx,
+                            mapOf("lang" to (ScriptDetector.detect(term).lang ?: "")).filterValues { it.isNotEmpty() },
+                            term
+                        ))
+
+                        // Create DD element
+                        val ddPath = mutableListOf(htmlSegment, bodySegment)
+                        sectionDivSegment?.let { ddPath.add(it) }
+                        ddPath.add(dl)
+                        val ddSegment = pushTagWithScript(DocTag.DD, ScriptDetector.detect(desc))
+                        ddPath.add(ddSegment)
+                        elements.add(ParsedElement(
+                            DocumentIndex(ddPath), DocTag.DD, offset + colonIdx + 2, offset + line.length,
+                            mapOf("lang" to (ScriptDetector.detect(desc).lang ?: "")).filterValues { it.isNotEmpty() },
+                            desc
+                        ))
+
+                        offset += line.length + 1
+                        continue  // Skip normal element creation
+                    }
+                }
                 LineType.DT_ITEM -> {
                     if (!inDefList) {
                         dlSegment = pushTagWithScript(DocTag.DL, scriptAttrs)
@@ -1396,7 +1442,7 @@ class PlainTextParser {
                 }
                 else -> {
                     // Not a list item - close list (unless it's a definition list item)
-                    if (lineType !in listOf(LineType.DT_ITEM, LineType.DD_ITEM, LineType.PARAGRAPH)) {
+                    if (lineType !in listOf(LineType.DT_ITEM, LineType.DD_ITEM, LineType.DT_DD_INLINE, LineType.PARAGRAPH)) {
                         currentListSegment = null
                         currentListType = null
                     }

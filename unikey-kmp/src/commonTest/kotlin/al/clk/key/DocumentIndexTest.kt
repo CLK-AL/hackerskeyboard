@@ -714,6 +714,34 @@ class DocumentIndexTest {
 
         // DD item (indented)
         assertEquals(LineType.DD_ITEM, LineType.detect("  Indented description"))
+
+        // Inline DT:DD format (term: description)
+        assertEquals(LineType.DT_DD_INLINE, LineType.detect("term: description"))
+        assertEquals(LineType.DT_DD_INLINE, LineType.detect("**bold term**: value"))
+        assertEquals(LineType.DT_DD_INLINE, LineType.detect("מחבר: תֹּאמַר"))  // Hebrew
+    }
+
+    @Test
+    fun testPlainTextParserInlineDefinition() {
+        val text = """
+            **מחבר:** תֹּאמַר בַּת-שְׁלֹמֹה
+            **מקור:** ARMYSNGE.WRI
+            **ספר:** חוב אש פרחי הזית
+        """.trimIndent()
+
+        val parser = PlainTextParser()
+        val elements = parser.parse(text)
+
+        // Should create DT and DD for each line
+        val dtElements = elements.filter { it.tag == DocTag.DT }
+        val ddElements = elements.filter { it.tag == DocTag.DD }
+
+        assertTrue(dtElements.isNotEmpty())
+        assertTrue(ddElements.isNotEmpty())
+
+        // Check that DT contains term and DD contains description
+        assertTrue(dtElements.any { it.content.contains("מחבר") })
+        assertTrue(ddElements.any { it.content.contains("תֹּאמַר") })
     }
 
     @Test
