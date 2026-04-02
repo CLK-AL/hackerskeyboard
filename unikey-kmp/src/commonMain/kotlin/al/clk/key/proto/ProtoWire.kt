@@ -16,39 +16,55 @@ enum class WireFormat {
     @SerialName("msgpack") MESSAGE_PACK,
     @SerialName("cbor") CBOR,
     @SerialName("xml") XML,
-    @SerialName("text") TEXT,
-    @SerialName("lines") LINE_RANGES
+    @SerialName("ydoc") YDOC,           // Yjs/YDoc CRDT text format
+    @SerialName("segments") SEGMENTS     // Line range segments (diff hunks)
 }
 
 /**
- * Line range for text-based wire format.
+ * HTTP Range segment for partial content (206 Partial Content).
+ * Represents byte ranges per RFC 7233.
  */
 @Serializable
-data class LineRange(
-    val start: Int,
-    val end: Int,
-    val content: String? = null
+data class Range(
+    val start: Long,
+    val end: Long,
+    val total: Long? = null
 ) {
     val length get() = end - start + 1
-    fun contains(line: Int) = line in start..end
-    fun toIntRange() = start..end
+    fun contains(pos: Long) = pos in start..end
+
+    /** Format as Content-Range header value */
+    fun toContentRange(unit: String = "bytes") =
+        "$unit $start-$end${total?.let { "/$it" } ?: "/*"}"
+
+    /** Format as Range header value */
+    fun toRangeHeader(unit: String = "bytes") = "$unit=$start-$end"
 
     companion object {
-        fun single(line: Int, content: String? = null) = LineRange(line, line, content)
-        fun parse(spec: String): LineRange? {
-            val parts = spec.split("-", limit = 2)
-            return when (parts.size) {
-                1 -> parts[0].toIntOrNull()?.let { single(it) }
-                2 -> {
-                    val start = parts[0].toIntOrNull() ?: return null
-                    val end = parts[1].toIntOrNull() ?: return null
-                    LineRange(start, end)
-                }
-                else -> null
-            }
+        /** Parse Range header: "bytes=0-499" */
+        fun parseRange(header: String): Segment? {
+            val match = Regex("""(\w+)=(\d+)-(\d*)""").find(header) ?: return null
+            val start = match.groupValues[2].toLongOrNull() ?: return null
+            val end = match.groupValues[3].toLongOrNull() ?: Long.MAX_VALUE
+            return Range(start, end)
         }
+
+        /** Parse Content-Range header: "bytes 0-499/1000" */
+        fun parseContentRange(header: String): Segment? {
+            val match = Regex("""(\w+) (\d+)-(\d+)/(\d+|\*)""").find(header) ?: return null
+            val start = match.groupValues[2].toLongOrNull() ?: return null
+            val end = match.groupValues[3].toLongOrNull() ?: return null
+            val total = match.groupValues[4].toLongOrNull()
+            return Range(start, end, total)
+        }
+
+        fun bytes(start: Long, end: Long, total: Long? = null) = Range(start, end, total)
     }
 }
+
+/** Backwards compatibility aliases */
+typealias Segment = Range
+typealias LineRange = Range
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // VALUE CLASSES - Zero allocation wrappers for IDs
@@ -122,47 +138,121 @@ value class JsonPointer(val value: String) {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 /**
- * Text line codec for LINE_RANGES format.
+ * Range codec for HTTP partial content (206).
  */
-object TextLineCodec {
-    fun encode(lines: List<String>, ranges: List<LineRange>? = null): String {
-        return if (ranges != null) {
-            ranges.mapNotNull { r ->
-                val selected = lines.subList(
-                    maxOf(0, r.start - 1),
-                    minOf(lines.size, r.end)
-                )
-                if (selected.isNotEmpty()) {
-                    "@@ -${r.start},${r.length} @@\n${selected.joinToString("\n")}"
-                } else null
-            }.joinToString("\n\n")
-        } else {
-            lines.joinToString("\n")
+object RangeCodec {
+    /** Encode multipart/byteranges response */
+    fun encodeMultipart(data: ByteArray, segments: List<Range>, boundary: String, contentType: String): ByteArray {
+        val result = StringBuilder()
+        segments.forEach { seg ->
+            val slice = data.copyOfRange(seg.start.toInt(), minOf(seg.end.toInt() + 1, data.size))
+            result.append("--$boundary\r\n")
+            result.append("Content-Type: $contentType\r\n")
+            result.append("Content-Range: ${seg.toContentRange()}\r\n")
+            result.append("\r\n")
+            result.append(slice.decodeToString())
+            result.append("\r\n")
+        }
+        result.append("--$boundary--\r\n")
+        return result.toString().encodeToByteArray()
+    }
+
+    /** Parse Range header into segments */
+    fun parseRangeHeader(header: String): List<Range> {
+        val match = Regex("""(\w+)=(.+)""").find(header) ?: return emptyList()
+        val ranges = match.groupValues[2].split(",").map { it.trim() }
+        return ranges.mapNotNull { range ->
+            val parts = range.split("-")
+            when {
+                parts.size == 2 && parts[0].isNotEmpty() && parts[1].isNotEmpty() ->
+                    Range(parts[0].toLong(), parts[1].toLong())
+                parts.size == 2 && parts[0].isNotEmpty() ->
+                    Range(parts[0].toLong(), Long.MAX_VALUE)
+                parts.size == 2 && parts[1].isNotEmpty() ->
+                    Range(-parts[1].toLong(), -1)
+                else -> null
+            }
         }
     }
 
-    fun decode(text: String): Pair<List<String>, List<LineRange>> {
-        val lines = mutableListOf<String>()
-        val ranges = mutableListOf<LineRange>()
-        val chunks = text.split(Regex("""@@ -(\d+),(\d+) @@\n?"""))
+    /** Generate Content-Range header */
+    fun contentRangeHeader(segment: Segment, unit: String = "bytes") = segment.toContentRange(unit)
+}
 
-        if (chunks.size == 1) {
-            return text.lines() to listOf(LineRange(1, text.lines().size))
-        }
+/** Backwards compatibility alias */
+typealias TextLineCodec = RangeCodec
 
-        val rangePattern = Regex("""@@ -(\d+),(\d+) @@""")
-        rangePattern.findAll(text).forEach { match ->
-            val start = match.groupValues[1].toInt()
-            val length = match.groupValues[2].toInt()
-            ranges.add(LineRange(start, start + length - 1))
-        }
-
-        chunks.drop(1).forEach { chunk ->
-            lines.addAll(chunk.trimStart('\n').lines())
-        }
-
-        return lines to ranges
+/**
+ * YDoc codec for Yjs CRDT text format.
+ * Encodes/decodes YDoc state vectors and updates.
+ */
+object YDocCodec {
+    /**
+     * Encode YDoc state as update binary.
+     * Format: [clientId:4][clock:4][content...]
+     */
+    fun encodeUpdate(clientId: String, clock: Long, content: String): ByteArray {
+        val clientBytes = clientId.hashCode().toBytes()
+        val clockBytes = clock.toInt().toBytes()
+        val contentBytes = content.encodeToByteArray()
+        return clientBytes + clockBytes + contentBytes
     }
+
+    /**
+     * Decode YDoc update binary.
+     */
+    fun decodeUpdate(data: ByteArray): Triple<Int, Int, String>? {
+        if (data.size < 8) return null
+        val clientHash = data.copyOfRange(0, 4).toInt()
+        val clock = data.copyOfRange(4, 8).toInt()
+        val content = data.copyOfRange(8, data.size).decodeToString()
+        return Triple(clientHash, clock, content)
+    }
+
+    /**
+     * Encode state vector (client -> clock mapping).
+     */
+    fun encodeStateVector(clocks: Map<String, Long>): ByteArray {
+        val buffer = mutableListOf<Byte>()
+        buffer.addAll(clocks.size.toBytes().toList())
+        clocks.forEach { (client, clock) ->
+            buffer.addAll(client.hashCode().toBytes().toList())
+            buffer.addAll(clock.toInt().toBytes().toList())
+        }
+        return buffer.toByteArray()
+    }
+
+    /**
+     * Decode state vector.
+     */
+    fun decodeStateVector(data: ByteArray): Map<Int, Long> {
+        if (data.size < 4) return emptyMap()
+        val count = data.copyOfRange(0, 4).toInt()
+        val result = mutableMapOf<Int, Long>()
+        var offset = 4
+        repeat(count) {
+            if (offset + 8 <= data.size) {
+                val clientHash = data.copyOfRange(offset, offset + 4).toInt()
+                val clock = data.copyOfRange(offset + 4, offset + 8).toInt().toLong()
+                result[clientHash] = clock
+                offset += 8
+            }
+        }
+        return result
+    }
+
+    private fun Int.toBytes() = byteArrayOf(
+        (this shr 24).toByte(),
+        (this shr 16).toByte(),
+        (this shr 8).toByte(),
+        this.toByte()
+    )
+
+    private fun ByteArray.toInt() =
+        ((this[0].toInt() and 0xFF) shl 24) or
+        ((this[1].toInt() and 0xFF) shl 16) or
+        ((this[2].toInt() and 0xFF) shl 8) or
+        (this[3].toInt() and 0xFF)
 }
 
 /**
@@ -249,24 +339,36 @@ object ProtoWire {
         WireFormat.MESSAGE_PACK -> MessagePack.encode(value)
         WireFormat.CBOR -> json.encodeToString(value).encodeToByteArray()
         WireFormat.XML -> XmlCodec.encode(value).encodeToByteArray()
-        WireFormat.TEXT, WireFormat.LINE_RANGES -> json.encodeToString(value).encodeToByteArray()
+        WireFormat.YDOC -> json.encodeToString(value).encodeToByteArray() // YDoc state as JSON
+        WireFormat.SEGMENTS -> json.encodeToString(value).encodeToByteArray()
     }
 
     inline fun <reified T> decode(data: ByteArray, format: WireFormat = WireFormat.JSON): T = when (format) {
         WireFormat.JSON -> json.decodeFromString(data.decodeToString())
         WireFormat.MESSAGE_PACK -> MessagePack.decode(data)
         WireFormat.CBOR -> json.decodeFromString(data.decodeToString())
-        WireFormat.XML, WireFormat.TEXT, WireFormat.LINE_RANGES -> json.decodeFromString(data.decodeToString())
+        WireFormat.XML -> json.decodeFromString(data.decodeToString())
+        WireFormat.YDOC -> json.decodeFromString(data.decodeToString())
+        WireFormat.SEGMENTS -> json.decodeFromString(data.decodeToString())
     }
 
     inline fun <reified T> encodeToString(value: T): String = json.encodeToString(value)
     inline fun <reified T> decodeFromString(data: String): T = json.decodeFromString(data)
 
-    fun encodeLines(lines: List<String>, ranges: List<LineRange>? = null): ByteArray =
-        TextLineCodec.encode(lines, ranges).encodeToByteArray()
+    /** Encode multipart byte ranges (206 Partial Content) */
+    fun encodeSegments(data: ByteArray, segments: List<Range>, boundary: String = "segment_boundary", contentType: String = "application/octet-stream"): ByteArray =
+        RangeCodec.encodeMultipart(data, segments, boundary, contentType)
 
-    fun decodeLines(data: ByteArray): Pair<List<String>, List<LineRange>> =
-        TextLineCodec.decode(data.decodeToString())
+    /** Parse Range header */
+    fun parseRangeHeader(header: String): List<Range> =
+        RangeCodec.parseRangeHeader(header)
+
+    /** Encode YDoc update */
+    fun encodeYDocUpdate(clientId: String, clock: Long, content: String): ByteArray =
+        YDocCodec.encodeUpdate(clientId, clock, content)
+
+    /** Decode YDoc update */
+    fun decodeYDocUpdate(data: ByteArray) = YDocCodec.decodeUpdate(data)
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════

@@ -790,7 +790,7 @@ data class DefinitionPair(
  * A single segment in a document index path.
  * Format: TAG1.class1.class2@lang=he@dir=rtl=attr1=val1[term=desc]
  */
-data class IndexSegment(
+data class IndexRange(
     val tag: DocTag,
     val instance: Int,                              // 1-based instance number
     val cssClasses: List<String> = emptyList(),     // CSS classes
@@ -887,7 +887,7 @@ data class IndexSegment(
             }
 
             val scriptAttrs = ScriptAttrs(lang, dir)
-            return IndexSegment(tag, instance, cssClasses, scriptAttrs, dataAttrs, defPairs)
+            return IndexRange(tag, instance, cssClasses, scriptAttrs, dataAttrs, defPairs)
         }
     }
 }
@@ -1010,7 +1010,7 @@ class DocumentParser {
                         val scriptAttrs = ScriptAttrs.fromAttributes(attrs)
                         val dataAttrs = attrs.filterKeys { it.startsWith("data-") }
 
-                        val segment = IndexSegment(tag, count, cssClasses, scriptAttrs, dataAttrs)
+                        val segment = IndexRange(tag, count, cssClasses, scriptAttrs, dataAttrs)
                         stack.add(segment)
 
                         val index = DocumentIndex(stack.toList())
@@ -1064,7 +1064,7 @@ class DocumentParser {
                     val count = tagCounts.getOrPut(tag) { 0 } + 1
                     tagCounts[tag] = count
 
-                    val segment = IndexSegment(tag, count)
+                    val segment = IndexRange(tag, count)
                     val index = DocumentIndex(listOf(segment))
 
                     elements.add(ParsedElement(
@@ -2343,12 +2343,12 @@ object JsonPath {
     }
 
     sealed class PathSegment {
-        data class Property(val name: String) : PathSegment()
-        data class Index(val index: Int) : PathSegment()
-        data object Wildcard : PathSegment()
-        data object Recursive : PathSegment()
-        data class Slice(val start: Int, val end: Int?) : PathSegment()
-        data class Filter(val expr: String) : PathSegment()
+        data class Property(val name: String) : PathRange()
+        data class Index(val index: Int) : PathRange()
+        data object Wildcard : PathRange()
+        data object Recursive : PathRange()
+        data class Slice(val start: Int, val end: Int?) : PathRange()
+        data class Filter(val expr: String) : PathRange()
     }
 }
 
@@ -2476,10 +2476,10 @@ object XPath {
     }
 
     sealed class XPathSegment {
-        data class Element(val name: String, val predicate: String?) : XPathSegment()
-        data object Wildcard : XPathSegment()
-        data object Descendant : XPathSegment()
-        data class Attribute(val name: String) : XPathSegment()
+        data class Element(val name: String, val predicate: String?) : XPathRange()
+        data object Wildcard : XPathRange()
+        data object Descendant : XPathRange()
+        data class Attribute(val name: String) : XPathRange()
     }
 }
 
@@ -4369,7 +4369,7 @@ class PlainTextParser {
 
                         // Create DL segment with this pair
                         val pairCount = tagCounts.getOrPut(DocTag.DL) { 0 }  // Use same DL instance
-                        val dlWithPair = IndexSegment(
+                        val dlWithPair = IndexRange(
                             DocTag.DL,
                             pairCount,
                             emptyList(),
@@ -4518,7 +4518,7 @@ class PlainTextParser {
     private fun pushTag(tag: DocTag): IndexSegment {
         val count = tagCounts.getOrPut(tag) { 0 } + 1
         tagCounts[tag] = count
-        return IndexSegment(tag, count)
+        return IndexRange(tag, count)
     }
 
     /**
@@ -4527,7 +4527,7 @@ class PlainTextParser {
     private fun pushTagWithScript(tag: DocTag, scriptAttrs: ScriptAttrs = ScriptAttrs.EMPTY): IndexSegment {
         val count = tagCounts.getOrPut(tag) { 0 } + 1
         tagCounts[tag] = count
-        return IndexSegment(tag, count, emptyList(), scriptAttrs)
+        return IndexRange(tag, count, emptyList(), scriptAttrs)
     }
 
     /**
@@ -4558,7 +4558,7 @@ class DocumentIndexBuilder {
         val count = tagCounts.getOrPut(tag) { 0 } + 1
         tagCounts[tag] = count
 
-        val segment = IndexSegment(tag, count, cssClasses, scriptAttrs, dataAttrs)
+        val segment = IndexRange(tag, count, cssClasses, scriptAttrs, dataAttrs)
         stack.add(segment)
 
         return DocumentIndex(stack.toList())
@@ -4595,85 +4595,101 @@ enum class WireFormat {
     @SerialName("msgpack") MESSAGE_PACK,
     @SerialName("cbor") CBOR,
     @SerialName("xml") XML,
-    @SerialName("text") TEXT,
-    @SerialName("lines") LINE_RANGES
+    @SerialName("ydoc") YDOC,           // Yjs/YDoc CRDT text format
+    @SerialName("segments") SEGMENTS     // Line range segments (diff hunks)
 }
 
 /**
- * Line range for text-based wire format.
+ * HTTP Range segment for partial content (206 Partial Content).
+ * Represents byte ranges per RFC 7233.
  */
 @Serializable
-data class LineRange(
-    val start: Int,
-    val end: Int,
-    val content: String? = null
+data class Range(
+    val start: Long,
+    val end: Long,
+    val total: Long? = null
 ) {
     val length get() = end - start + 1
-    fun contains(line: Int) = line in start..end
-    fun toIntRange() = start..end
+    fun contains(pos: Long) = pos in start..end
+
+    /** Format as Content-Range header value */
+    fun toContentRange(unit: String = "bytes") =
+        "$unit $start-$end${total?.let { "/$it" } ?: "/*"}"
+
+    /** Format as Range header value */
+    fun toRangeHeader(unit: String = "bytes") = "$unit=$start-$end"
 
     companion object {
-        fun single(line: Int, content: String? = null) = LineRange(line, line, content)
-        fun parse(spec: String): LineRange? {
-            val parts = spec.split("-", limit = 2)
-            return when (parts.size) {
-                1 -> parts[0].toIntOrNull()?.let { single(it) }
-                2 -> {
-                    val start = parts[0].toIntOrNull() ?: return null
-                    val end = parts[1].toIntOrNull() ?: return null
-                    LineRange(start, end)
-                }
+        /** Parse Range header: "bytes=0-499" */
+        fun parseRange(header: String): Segment? {
+            val match = Regex("""(\w+)=(\d+)-(\d*)""").find(header) ?: return null
+            val start = match.groupValues[2].toLongOrNull() ?: return null
+            val end = match.groupValues[3].toLongOrNull() ?: Long.MAX_VALUE
+            return Range(start, end)
+        }
+
+        /** Parse Content-Range header: "bytes 0-499/1000" */
+        fun parseContentRange(header: String): Segment? {
+            val match = Regex("""(\w+) (\d+)-(\d+)/(\d+|\*)""").find(header) ?: return null
+            val start = match.groupValues[2].toLongOrNull() ?: return null
+            val end = match.groupValues[3].toLongOrNull() ?: return null
+            val total = match.groupValues[4].toLongOrNull()
+            return Range(start, end, total)
+        }
+
+        fun bytes(start: Long, end: Long, total: Long? = null) = Range(start, end, total)
+    }
+}
+
+/** Backwards compatibility aliases */
+typealias Segment = Range
+typealias LineRange = Range
+
+/**
+ * Segment codec for HTTP partial content.
+ */
+object RangeCodec {
+    /** Encode multipart/byteranges response */
+    fun encodeMultipart(data: ByteArray, segments: List<Range>, boundary: String, contentType: String): ByteArray {
+        val result = StringBuilder()
+        segments.forEach { seg ->
+            val slice = data.copyOfRange(seg.start.toInt(), minOf(seg.end.toInt() + 1, data.size))
+            result.append("--$boundary\r\n")
+            result.append("Content-Type: $contentType\r\n")
+            result.append("Content-Range: ${seg.toContentRange()}\r\n")
+            result.append("\r\n")
+            result.append(slice.decodeToString())
+            result.append("\r\n")
+        }
+        result.append("--$boundary--\r\n")
+        return result.toString().encodeToByteArray()
+    }
+
+    /** Parse Range header into segments */
+    fun parseRangeHeader(header: String): List<Range> {
+        // bytes=0-499, 1000-1499, 2000-
+        val match = Regex("""(\w+)=(.+)""").find(header) ?: return emptyList()
+        val ranges = match.groupValues[2].split(",").map { it.trim() }
+        return ranges.mapNotNull { range ->
+            val parts = range.split("-")
+            when {
+                parts.size == 2 && parts[0].isNotEmpty() && parts[1].isNotEmpty() ->
+                    Range(parts[0].toLong(), parts[1].toLong())
+                parts.size == 2 && parts[0].isNotEmpty() ->
+                    Range(parts[0].toLong(), Long.MAX_VALUE) // suffix
+                parts.size == 2 && parts[1].isNotEmpty() ->
+                    Range(-parts[1].toLong(), -1) // last N bytes
                 else -> null
             }
         }
     }
+
+    /** Generate Content-Range header */
+    fun contentRangeHeader(segment: Segment, unit: String = "bytes") = segment.toContentRange(unit)
 }
 
-/**
- * Text line codec for LINE_RANGES format.
- */
-object TextLineCodec {
-    fun encode(lines: List<String>, ranges: List<LineRange>? = null): String {
-        return if (ranges != null) {
-            ranges.mapNotNull { r ->
-                val selected = lines.subList(
-                    maxOf(0, r.start - 1),
-                    minOf(lines.size, r.end)
-                )
-                if (selected.isNotEmpty()) {
-                    "@@ -${r.start},${r.length} @@\n${selected.joinToString("\n")}"
-                } else null
-            }.joinToString("\n\n")
-        } else {
-            lines.joinToString("\n")
-        }
-    }
-
-    fun decode(text: String): Pair<List<String>, List<LineRange>> {
-        val lines = mutableListOf<String>()
-        val ranges = mutableListOf<LineRange>()
-        val chunks = text.split(Regex("""@@ -(\d+),(\d+) @@\n?"""))
-
-        if (chunks.size == 1) {
-            // Plain text, no ranges
-            return text.lines() to listOf(LineRange(1, text.lines().size))
-        }
-
-        val rangePattern = Regex("""@@ -(\d+),(\d+) @@""")
-        var currentLine = 1
-        rangePattern.findAll(text).forEachIndexed { idx, match ->
-            val start = match.groupValues[1].toInt()
-            val length = match.groupValues[2].toInt()
-            ranges.add(LineRange(start, start + length - 1))
-        }
-
-        chunks.drop(1).forEach { chunk ->
-            lines.addAll(chunk.trimStart('\n').lines())
-        }
-
-        return lines to ranges
-    }
-}
+/** Backwards compatibility */
+typealias TextLineCodec = RangeCodec
 
 /**
  * XML codec for XML wire format.
