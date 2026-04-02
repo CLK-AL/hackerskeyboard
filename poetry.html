@@ -39,6 +39,13 @@ a,a:hover,a:visited,a:active{color:inherit;text-decoration:none}
 .edit-line{cursor:text;white-space:nowrap;outline:1px dashed rgba(196,168,130,0.3);border-radius:2px;padding:0 2px;-webkit-tap-highlight-color:transparent;touch-action:manipulation;position:relative}
 .cursor{display:inline-block;width:2px;height:1.1em;background:#c4a882;vertical-align:text-bottom;animation:blink .7s step-end infinite;margin:0 -1px}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+/* Verse Index */
+.line-idx{font-size:8px;font-family:'JetBrains Mono',monospace;color:#555;min-width:36px;text-align:center;flex-shrink:0}
+.rhyme-letter{display:inline-block;font-size:9px;font-family:'JetBrains Mono',monospace;font-weight:700;padding:1px 4px;border-radius:2px;margin:0 2px;flex-shrink:0}
+.vtype-badge{font-size:9px;font-family:'JetBrains Mono',monospace;padding:1px 5px;border-radius:3px;cursor:pointer;margin-left:4px}
+.insert-btn{font-size:8px;color:#444;cursor:pointer;padding:0 4px;opacity:0;transition:opacity 0.15s}
+.ln:hover .insert-btn{opacity:0.5}
+.insert-btn:hover{opacity:1!important;color:#c4a882}
 .pencil{cursor:pointer;opacity:0.4;font-size:9px;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 /* BPM slider */
 .bpm-wrap{display:flex;align-items:center;gap:4px;white-space:nowrap}
@@ -113,6 +120,13 @@ function rhymeDistance(w1, h1, w2, h2) { return UK.rhymeDistance(w1, h1, w2, h2)
 
 /* Rhyme scheme using KMP */
 function rhymeScheme(ipas) { return UK.rhymeScheme(ipas); }
+
+/* ═══ Verse Index API (Poetry Editor) ═══ */
+function createVerseIndex(vType, lineIdx, order) { return UK.createVerseIndex(vType, lineIdx, order || 0); }
+function insertLineOrder(before, after) { return UK.insertLineOrder(before, after); }
+function computeRhymeSchemeState(lines, isHebrew) { return UK.computeRhymeSchemeState(lines, isHebrew || false); }
+function syllableBoundaries(word) { return UK.syllableBoundaries(word); }
+function createCursorState(word, pos, wordIdx) { return UK.createCursorState(word, pos, wordIdx || 0); }
 
 /* ═══ Multi-Language API (23 Languages) ═══ */
 function getKeyLanguages() { return UK.getKeyLanguages(); }
@@ -246,7 +260,7 @@ var POEM=[
 var SUNO=["Intro","Verse","Pre-Chorus","Chorus","Post-Chorus","Refrain","Hook","Bridge","Interlude","Instrumental","Break","Riff","Solo","Build","Drop","Rap","Spoken","Whisper","Scream","Ad-lib","Chant","Humming","Vocalize","Harmony","Duet","Call","Response","Fade Out","Outro","Tag","Coda"];
 var SUNO_GRP={"Intro":0,"Outro":0,"Fade Out":0,"Coda":0,"Verse":30,"Pre-Chorus":55,"Chorus":45,"Post-Chorus":45,"Refrain":45,"Hook":45,"Bridge":120,"Interlude":120,"Instrumental":150,"Break":150,"Riff":150,"Solo":150,"Build":80,"Drop":80,"Rap":200,"Spoken":200,"Whisper":200,"Scream":340,"Ad-lib":270,"Chant":270,"Humming":270,"Vocalize":270,"Harmony":290,"Duet":290,"Call":160,"Response":160,"Tag":0};
 function sunoHue(tag){return SUNO_GRP[tag]||0;}
-var verses=POEM.map(function(s,i){return{id:s.id,label:s.label,tag:"Verse",bpmLo:100,bpmHi:140,he:s.he.slice(),en:s.en.map(function(l){return l?l.charAt(0).toUpperCase()+l.slice(1):l;})};});
+var verses=POEM.map(function(s,i){return{id:s.id,label:s.label,tag:"Verse",vType:i+1,bpmLo:100,bpmHi:140,he:s.he.slice(),en:s.en.map(function(l){return l?l.charAt(0).toUpperCase()+l.slice(1):l;}),lineOrders:s.en.map(function(_,li){return li+1;})};});
 var editing=null,editVal="",showMatrix=false,editWordIdx=-1;
 var undoStack=[],redoStack=[];
 
@@ -1088,6 +1102,16 @@ function render(){
       ["\u2B06"]));
     vhdr.appendChild(h("span",{style:{color:"#c4a882",fontFamily:"mono",fontSize:"12px",margin:"0 4px"}},
       [String(vi+1)]));
+    /* Verse Type badge V1, V2... */
+    (function(vi2){
+      var vtBadge=h("span",{className:"vtype-badge",style:{color:"#887755",background:"#1a1a1a",border:"1px solid #333"},
+        onClick:function(){
+          var newType=prompt("Verse type (number):",String(verses[vi2].vType||1));
+          if(newType){verses[vi2].vType=parseInt(newType)||1;render();}
+        }
+      },["V"+(v.vType||1)]);
+      vhdr.appendChild(vtBadge);
+    })(vi);
     /* Suno tag — select dropdown */
     (function(vi2){
       var sh=sunoHue(v.tag);
@@ -1229,8 +1253,21 @@ function render(){
 
       /* === CENTER === */
       var ctr=h("div",{className:"ct"});
+      /* Line index V1.L1 format */
+      var vidx=createVerseIndex(v.vType,li,v.lineOrders?v.lineOrders[li]:(li+1));
+      var lineIdx=h("span",{className:"line-idx"},[vidx.formatted]);
+      /* Rhyme letter from scheme */
+      var enRi=enR[li];
+      var rhymeLtr=null;
+      if(enRi){
+        rhymeLtr=h("span",{className:"rhyme-letter"});
+        rhymeLtr.textContent=enRi.ch;
+        rhymeLtr.style.color=hl(enRi.hue,75,70);
+        rhymeLtr.style.background=hl(enRi.hue,30,12);
+      }
       ctr.appendChild(h("span",{className:"ar "+(canU?"on":"off"),style:{fontSize:"11px"},onClick:function(){if(canU){moveL(vi,li,-1);render();}}},["⬆"]));
-      ctr.appendChild(h("span",{style:{color:"#c4a882",fontFamily:"mono",fontSize:"10px",fontWeight:"700"}},[lineNum]));
+      ctr.appendChild(lineIdx);
+      if(rhymeLtr)ctr.appendChild(rhymeLtr);
       ctr.appendChild(h("span",{className:"ar "+(canD?"on":"off"),style:{fontSize:"11px"},onClick:function(){if(canD){moveL(vi,li,1);render();}}},["⬇"]));
       rw.appendChild(ctr);
 

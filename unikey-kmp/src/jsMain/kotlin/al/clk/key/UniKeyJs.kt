@@ -341,6 +341,55 @@ fun rhymes(word1: String, isHebrew1: Boolean, word2: String, isHebrew2: Boolean)
 fun rhymeDistance(word1: String, isHebrew1: Boolean, word2: String, isHebrew2: Boolean): Int =
     UniKeySyllable.rhymeDistance(word1, isHebrew1, word2, isHebrew2)
 
+// ═══ Verse Index System (Poetry Editor) ═══
+
+@JsName("createVerseIndex")
+fun createVerseIndex(vType: Int, lineIdx: Int, order: Float = 0f): dynamic {
+    val state = VerseIndexState(vType, lineIdx, order)
+    val obj = js("{}")
+    obj["vType"] = state.vType
+    obj["lineIdx"] = state.lineIdx
+    obj["order"] = state.order
+    obj["formatted"] = state.formatted
+    return obj
+}
+
+@JsName("insertLineOrder")
+fun insertLineOrder(before: Float, after: Float): Float =
+    VerseIndexState.insertOrder(before, after)
+
+@JsName("computeRhymeSchemeState")
+fun computeRhymeSchemeState(lines: Array<String>, isHebrew: Boolean = false): dynamic {
+    val state = RhymeSchemeState.fromLines(lines.toList(), isHebrew)
+    val obj = js("{}")
+    obj["pattern"] = state.pattern
+    obj["lines"] = state.lines.map { line ->
+        val lineObj = js("{}")
+        lineObj["letter"] = line.letter.toString()
+        lineObj["ipa"] = line.ipa
+        lineObj["hue"] = line.hue
+        lineObj
+    }.toTypedArray()
+    return obj
+}
+
+@JsName("syllableBoundaries")
+fun syllableBoundaries(word: String): Array<Int> =
+    CursorState.syllableBoundaries(word).toTypedArray()
+
+@JsName("createCursorState")
+fun createCursorState(word: String, pos: Int, wordIdx: Int = 0): dynamic {
+    val state = CursorState.forWord(word, pos, wordIdx)
+    val obj = js("{}")
+    obj["pos"] = state.pos
+    obj["wordIdx"] = state.wordIdx
+    obj["sylBounds"] = state.sylBounds.toTypedArray()
+    obj["nextSylBound"] = state.nextSylBound()
+    obj["prevSylBound"] = state.prevSylBound()
+    obj["isAtBoundary"] = state.isAtBoundary
+    return obj
+}
+
 // ═══ Keyboard Layouts (23 languages) ═══
 
 @JsName("getSupportedLanguages")
