@@ -727,19 +727,27 @@ fun ArabicSuffix.toMorphoKey(): MorphoKey {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 /**
- * Generate UniKey from HebrewLetter
+ * Generate UniKey from HebrewLetter - IPA as hub, language forms as ILayoutKey
  */
 fun HebrewLetter.toUniKey(): UniKey {
-    val key = qwerty
+    val heKey: ILayoutKey = if (ipaDagesh != null && ipaDagesh != ipa) {
+        SimpleKey(letter.toString(), ipa, displayName, SimpleKey("$letter\u05BC", ipaDagesh, "$displayName-dagesh"))
+    } else {
+        SimpleKey(letter.toString(), ipa, displayName)
+    }
+    val enKey = SimpleKey(qwerty, ipa, qwerty, SimpleKey(qwerty.uppercase(), ipa, qwerty.uppercase()))
+
+    val props = buildSet {
+        if (isGuttural) add(KeyProperty.GUTTURAL)
+        if (isFinalForm) add(KeyProperty.FINAL_FORM)
+        if (isBgdkpt) add(KeyProperty.BGDKPT)
+    }
+
     return UniKey(
-        id = key,
-        en = key,
-        EN = key.uppercase(),
-        he = letter.toString(),
+        id = qwerty,
         ipa = ipa,
-        dagesh = ipaDagesh,
-        guttural = isGuttural,
-        isFinal = isFinalForm
+        forms = mapOf("he" to heKey, "en" to enKey),
+        properties = props
     )
 }
 

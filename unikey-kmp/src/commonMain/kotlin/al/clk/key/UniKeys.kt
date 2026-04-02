@@ -11,43 +11,50 @@ object UniKeys {
         .filter { it.qwerty.isNotEmpty() }
         .associate { it.qwerty to it.toUniKey() }
 
+    // Helper to create key with language forms
+    private fun key(id: String, ipa: String, he: String, en: String, heShift: String? = null, enShift: String? = null): UniKey {
+        val heKey: ILayoutKey = if (heShift != null) SimpleKey(he, ipa, id, SimpleKey(heShift, "", "$id-shift")) else SimpleKey(he, ipa, id)
+        val enKey: ILayoutKey = SimpleKey(en, ipa, id, enShift?.let { SimpleKey(it, "", "$id-shift") })
+        return UniKey(id = id, ipa = ipa, forms = mapOf("he" to heKey, "en" to enKey))
+    }
+
     // Punctuation keys with shift variants
     private val punctuationKeys: Map<String, UniKey> = mapOf(
-        ";" to UniKey(id = ";", en = ";", EN = ":", he = "\u05E3", ipa = "f", shift = ":", heShift = ":"),
-        "." to UniKey(id = ".", en = ".", EN = ">", he = "\u05E5", ipa = "ts", shift = ">", heShift = ">"),
-        "," to UniKey(id = ",", en = ",", EN = "<", he = "\u05EA", ipa = "t", shift = "<", heShift = "<"),
-        "/" to UniKey(id = "/", en = "/", EN = "?", he = ".", shift = "?", heShift = "?"),
-        "'" to UniKey(id = "'", en = "'", EN = "\"", he = ",", shift = "\"", heShift = "\""),
-        "`" to UniKey(id = "`", en = "`", EN = "~", he = "`", shift = "~", heShift = "~")
+        ";" to key(";", "f", "\u05E3", ";", ":", ":"),
+        "." to key(".", "ts", "\u05E5", ".", ">", ">"),
+        "," to key(",", "t", "\u05EA", ",", "<", "<"),
+        "/" to key("/", "", ".", "/", "?", "?"),
+        "'" to key("'", "", ",", "'", "\"", "\""),
+        "`" to key("`", "", "`", "`", "~", "~")
     )
 
     // Non-Hebrew letters
     private val nonHebrewKeys: Map<String, UniKey> = mapOf(
-        "q" to UniKey(id = "q", en = "q", EN = "Q", he = "/", ipa = "kw"),
-        "w" to UniKey(id = "w", en = "w", EN = "W", he = "'", ipa = "w")
+        "q" to key("q", "kw", "/", "q", null, "Q"),
+        "w" to key("w", "w", "'", "w", null, "W")
     )
 
     // Numbers
     private val numberKeys: Map<String, UniKey> = mapOf(
-        "1" to UniKey(id = "1", en = "1", EN = "!", he = "1", shift = "!", heShift = "!"),
-        "2" to UniKey(id = "2", en = "2", EN = "@", he = "2", shift = "@", heShift = "@"),
-        "3" to UniKey(id = "3", en = "3", EN = "#", he = "3", shift = "#", heShift = "#"),
-        "4" to UniKey(id = "4", en = "4", EN = "$", he = "4", shift = "$", heShift = "\u20AA"),
-        "5" to UniKey(id = "5", en = "5", EN = "%", he = "5", shift = "%", heShift = "%"),
-        "6" to UniKey(id = "6", en = "6", EN = "^", he = "6", shift = "^", heShift = "^"),
-        "7" to UniKey(id = "7", en = "7", EN = "&", he = "7", shift = "&", heShift = "&"),
-        "8" to UniKey(id = "8", en = "8", EN = "*", he = "8", shift = "*", heShift = "*"),
-        "9" to UniKey(id = "9", en = "9", EN = "(", he = "9", shift = "(", heShift = ")"),
-        "0" to UniKey(id = "0", en = "0", EN = ")", he = "0", shift = ")", heShift = "(")
+        "1" to key("1", "", "1", "1", "!", "!"),
+        "2" to key("2", "", "2", "2", "@", "@"),
+        "3" to key("3", "", "3", "3", "#", "#"),
+        "4" to key("4", "", "4", "4", "\u20AA", "$"),
+        "5" to key("5", "", "5", "5", "%", "%"),
+        "6" to key("6", "", "6", "6", "^", "^"),
+        "7" to key("7", "", "7", "7", "&", "&"),
+        "8" to key("8", "", "8", "8", "*", "*"),
+        "9" to key("9", "", "9", "9", ")", "("),
+        "0" to key("0", "", "0", "0", "(", ")")
     )
 
     // Symbols
     private val symbolKeys: Map<String, UniKey> = mapOf(
-        "-" to UniKey(id = "-", en = "-", EN = "_", he = "-", shift = "_", heShift = "_"),
-        "=" to UniKey(id = "=", en = "=", EN = "+", he = "=", shift = "+", heShift = "+"),
-        "[" to UniKey(id = "[", en = "[", EN = "{", he = "[", shift = "{", heShift = "{"),
-        "]" to UniKey(id = "]", en = "]", EN = "}", he = "]", shift = "}", heShift = "}"),
-        "\\" to UniKey(id = "\\", en = "\\", EN = "|", he = "\\", shift = "|", heShift = "|")
+        "-" to key("-", "", "-", "-", "_", "_"),
+        "=" to key("=", "", "=", "=", "+", "+"),
+        "[" to key("[", "", "[", "[", "{", "{"),
+        "]" to key("]", "", "]", "]", "}", "}"),
+        "\\" to key("\\", "", "\\", "\\", "|", "|")
     )
 
     // All keys combined - Hebrew letters from enum + other keys

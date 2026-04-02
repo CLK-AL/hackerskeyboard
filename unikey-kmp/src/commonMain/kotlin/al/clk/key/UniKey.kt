@@ -1,34 +1,41 @@
 package al.clk.key
 
 /**
- * UniKey - Universal Keyboard Key with Hebrew/English/IPA mapping
+ * UniKey - Universal Keyboard Key with IPA as the hub.
+ * Language-specific forms stored as ILayoutKey instances.
  * Implements ILayoutKey for unified keyboard interface.
- * Kotlin Multiplatform implementation
  */
 data class UniKey(
     val id: String,
-    val en: String,
-    val EN: String,
-    val he: String,
-    override val ipa: String = "",
-    val shift: String? = null,
-    val heShift: String? = null,
+    override val ipa: String,
+    val forms: Map<String, ILayoutKey> = emptyMap(),  // langCode -> key form
     val syl: List<Syllable>? = null,
     val enSyl: List<EnglishSyllable>? = null,
     val mg: MultiGender? = null,
     val mgSyl: List<MgSyllable>? = null,
-    val dagesh: String? = null,
-    val guttural: Boolean = false,
-    val isFinal: Boolean = false
+    val properties: Set<KeyProperty> = emptySet()
 ) : ILayoutKey {
-    // ILayoutKey implementation
-    override val char: String get() = he
+    // Primary form is the first available or IPA
+    override val char: String get() = forms.values.firstOrNull()?.char ?: ipa
     override val displayName: String get() = id
-    override val shiftKey: ILayoutKey? get() = when {
-        dagesh != null -> SimpleKey("$he\u05BC", dagesh, "$id-dagesh")
-        heShift != null -> SimpleKey(heShift, "", "$id-shift")
-        else -> null
-    }
+    override val shiftKey: ILayoutKey? get() = forms.values.firstOrNull()?.shiftKey
+
+    /** Get form for language code */
+    fun forLang(langCode: String): ILayoutKey? = forms[langCode]
+
+    /** Get char for language */
+    fun charFor(langCode: String): String = forms[langCode]?.char ?: ipa
+
+    /** Check property */
+    fun has(prop: KeyProperty): Boolean = prop in properties
+
+    // Legacy accessors for backward compatibility
+    val he: String get() = forms["he"]?.char ?: ""
+    val en: String get() = forms["en"]?.char ?: id
+    val EN: String get() = forms["en"]?.shiftKey?.char ?: en.uppercase()
+    val dagesh: String? get() = (forms["he"]?.shiftKey as? SimpleKey)?.ipa?.takeIf { it.isNotEmpty() }
+    val guttural: Boolean get() = has(KeyProperty.GUTTURAL)
+    val isFinal: Boolean get() = has(KeyProperty.FINAL_FORM)
 
     /**
      * Get display label based on mode and modifiers
@@ -46,20 +53,20 @@ data class UniKey(
             }
         }
 
-        // Shift without Alt = syllables indicator or uppercase
+        val langKey = when (mode) {
+            KeyMode.he -> forms["he"]
+            KeyMode.en, KeyMode.EN -> forms["en"]
+        }
+
+        // Shift without Alt
         if (mods.shift && !mods.alt) {
-            return when (mode) {
-                KeyMode.he -> if (!syl.isNullOrEmpty()) "$he\u00B7" else he
-                KeyMode.en -> if (!enSyl.isNullOrEmpty()) "$en\u00B7" else EN.ifEmpty { en.uppercase() }
-                KeyMode.EN -> shift ?: EN
-            }
+            return langKey?.shiftKey?.char ?: langKey?.char?.uppercase() ?: ipa
         }
 
         // Normal mode
         return when (mode) {
-            KeyMode.en -> en
-            KeyMode.EN -> EN.ifEmpty { en.uppercase() }
-            KeyMode.he -> he
+            KeyMode.EN -> langKey?.shiftKey?.char ?: langKey?.char?.uppercase() ?: ipa
+            else -> langKey?.char ?: ipa
         }
     }
 
@@ -85,6 +92,25 @@ data class UniKey(
             female = if (isEn) mg.f_en else mg.f
         )
     }
+
+    companion object {
+        /** Create UniKey from IPA with language forms */
+        fun fromIpa(
+            id: String,
+            ipa: String,
+            vararg langForms: Pair<String, ILayoutKey>,
+            properties: Set<KeyProperty> = emptySet()
+        ) = UniKey(id, ipa, langForms.toMap(), properties = properties)
+    }
+}
+
+/** Key properties (replaces hardcoded boolean flags) */
+enum class KeyProperty {
+    GUTTURAL,
+    FINAL_FORM,
+    BGDKPT,
+    WEAK,
+    EMPHATIC
 }
 
 /**
