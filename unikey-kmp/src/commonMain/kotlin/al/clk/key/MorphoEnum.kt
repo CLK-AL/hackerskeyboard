@@ -686,6 +686,23 @@ fun HebrewLetter.toLayoutKey(): LayoutKey {
 }
 
 /**
+ * Generate UniKey from HebrewLetter
+ */
+fun HebrewLetter.toUniKey(): UniKey {
+    val key = qwerty
+    return UniKey(
+        id = key,
+        en = key,
+        EN = key.uppercase(),
+        he = letter.toString(),
+        ipa = ipa,
+        dagesh = ipaDagesh,
+        guttural = isGuttural,
+        isFinal = isFinalForm
+    )
+}
+
+/**
  * Generate LayoutKey from ArabicLetter with optional shift modifier
  */
 fun ArabicLetter.toLayoutKey(shiftChar: String? = null, shiftIpa: String? = null, shiftName: String? = null): LayoutKey {
