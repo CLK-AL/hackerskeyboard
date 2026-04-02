@@ -1,211 +1,264 @@
-# YDoc Protocol Implementation
+# YKT Protocol Specification
 
-Kotlin implementation extending Yjs CRDT for real-time collaboration.
+Extends [Yjs CRDT](https://github.com/yjs/yjs) with query selectors and HTTP range support.
 
-## Architecture
+## References
 
+| Spec | Use |
+|------|-----|
+| [Yjs Internals](https://github.com/yjs/yjs/blob/main/INTERNALS.md) | CRDT structure, state vectors |
+| [y-protocols](https://github.com/yjs/y-protocols) | Sync, awareness, auth |
+| [RFC 6902](https://datatracker.ietf.org/doc/html/rfc6902) | JSON Patch operations |
+| [RFC 9535](https://datatracker.ietf.org/doc/html/rfc9535) | JSONPath query |
+| [RFC 7233](https://datatracker.ietf.org/doc/html/rfc7233) | HTTP Range requests |
+| [RFC 4918](https://datatracker.ietf.org/doc/html/rfc4918) | WebDAV |
+
+## Yjs Core Concepts
+
+### State Vector
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                      YKT (Yjs-Kotlin)                           │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│  ┌──────────────┐   ┌──────────────┐   ┌──────────────┐        │
-│  │    QUERY     │   │    RANGE     │   │    MUTATE    │        │
-│  ├──────────────┤   ├──────────────┤   ├──────────────┤        │
-│  │ JsonPath     │   │ HTTP 206     │   │ JsonPatchOp  │        │
-│  │ XPath        │   │ Content-Range│   │ RFC 6902     │        │
-│  │ CssSelector  │   │ multipart    │   │ add/remove   │        │
-│  └──────────────┘   └──────────────┘   └──────────────┘        │
-│         │                  │                  │                 │
-│         └──────────────────┼──────────────────┘                 │
-│                            ▼                                    │
-│                 ┌────────────────────┐                          │
-│                 │   ProtoVectorClock │                          │
-│                 │   CRDT Merge       │                          │
-│                 └────────────────────┘                          │
-│                            │                                    │
-│         ┌──────────────────┼──────────────────┐                 │
-│         ▼                  ▼                  ▼                 │
-│  ┌──────────────┐   ┌──────────────┐   ┌──────────────┐        │
-│  │     SSE      │   │     WSS      │   │   WebDAV     │        │
-│  │  (audit)     │   │  (realtime)  │   │  (storage)   │        │
-│  └──────────────┘   └──────────────┘   └──────────────┘        │
-│                                                                 │
-├─────────────────────────────────────────────────────────────────┤
-│  WireFormat: JSON | MSGPACK | YDOC | SEGMENTS | XML            │
-└─────────────────────────────────────────────────────────────────┘
+StateVector = Map<ClientID, Clock>
+```
+Each client maintains monotonic clock. Vector comparison determines causal order.
+
+### Update Format
+```
+Update = [ClientID, Clock, Content, OriginLeft, OriginRight, Parent, ParentSub]
+```
+CRDT item with unique ID and origin pointers for conflict-free merge.
+
+### Sync Protocol (y-protocols)
+```
+Step 1: Client → Server: SyncStep1(stateVector)
+Step 2: Server → Client: SyncStep2(stateVector, update)
+Step 3: Client → Server: SyncStep2(update)
 ```
 
-## Wire Formats
+## YKT Extensions
 
-| Format | Use Case | Encoding |
-|--------|----------|----------|
-| `JSON` | Default, human-readable | kotlinx.serialization |
-| `MSGPACK` | Binary, compact | MessagePack header + JSON |
-| `YDOC` | Yjs state vectors | Binary state encoding |
-| `SEGMENTS` | HTTP 206 partial | Range byte slices |
-| `XML` | Legacy systems | JSON-to-XML conversion |
+### 1. Query Selectors
 
-## Core Types
+Yjs operates on known paths. YKT adds query-based targeting:
 
-### Value Classes (Zero Allocation)
-
-```kotlin
-@JvmInline value class SessionId(val value: String)
-@JvmInline value class ClientId(val value: String)
-@JvmInline value class RequestId(val value: String)
-@JvmInline value class ResourceUri(val value: String)
-@JvmInline value class JsonPointer(val value: String)
+```
+┌─────────────────────────────────────────────────┐
+│                  YKT QUERY LAYER                │
+├─────────────────────────────────────────────────┤
+│  JsonPath   │  $.users[?(@.active)].name       │
+│  XPath      │  //user[@role='admin']           │
+│  CSS        │  div.user[data-active]           │
+├─────────────────────────────────────────────────┤
+│                      ▼                          │
+│              Resolved Paths                     │
+│         /users/0/name, /users/2/name           │
+├─────────────────────────────────────────────────┤
+│                      ▼                          │
+│             Yjs Y.Map / Y.Array                 │
+└─────────────────────────────────────────────────┘
 ```
 
-### CRDT Types
+### 2. HTTP Range Integration
 
-```kotlin
-data class ProtoVersion(
-    val clientId: ClientId,
-    val clock: Long,
-    val timestamp: Long = 0L
-)
+Yjs uses binary encoding. YKT adds HTTP 206 partial content:
 
-data class ProtoVectorClock(
-    val clocks: Map<String, Long> = emptyMap()
-) {
-    fun tick(clientId: ClientId): ProtoVectorClock
-    fun merge(other: ProtoVectorClock): ProtoVectorClock
-    fun happensBefore(other: ProtoVectorClock): Boolean
-}
+```
+GET /doc/readme.md
+Range: bytes=0-1023
+
+HTTP/1.1 206 Partial Content
+Content-Range: bytes 0-1023/4096
 ```
 
-### HTTP Range (RFC 7233)
-
+Maps to Yjs state:
 ```kotlin
 data class Range(
-    val start: Long,
-    val end: Long,
-    val total: Long? = null
-) {
-    fun toContentRange(unit: String = "bytes"): String
-    fun toRangeHeader(unit: String = "bytes"): String
-    
-    companion object {
-        fun parseRange(header: String): Range?      // "bytes=0-499"
-        fun parseContentRange(header: String): Range? // "bytes 0-499/1000"
-    }
-}
-```
-
-## Query + Mutate Flow
-
-```
-Document ──┬── JsonPath.query("$.users[*].name") ──► Results
-           │
-           ├── XPath.query("//user/@id") ──────────► Results
-           │
-           └── CssSelector.query("div.user") ──────► Results
-                              │
-                              ▼
-                    JsonPatchOp.Replace("/users/0/name", "New")
-                              │
-                              ▼
-                    ProtoVectorClock.tick(clientId)
-                              │
-                              ▼
-                    Broadcast via WSS / Log via SSE
-```
-
-## Protocol Stack
-
-### MCP (Model Context Protocol)
-
-```kotlin
-sealed class McpMessage {
-    data class Request(id: String, method: String, params: JsonObject?)
-    data class Response(id: String, result: JsonElement?, error: McpError?)
-    data class Notification(method: String, params: JsonObject?)
-}
-```
-
-### WebDAV (RFC 4918)
-
-```kotlin
-enum class WebDavMethod {
-    OPTIONS, GET, HEAD, PUT, DELETE, 
-    MKCOL, COPY, MOVE, PROPFIND, PROPPATCH, LOCK, UNLOCK
-}
-
-data class DavLock(
-    val token: String,
-    val owner: String,
-    val scope: DavLockScope,
-    val depth: DavDepth
+    val start: Long,   // byte offset
+    val end: Long,     // byte offset  
+    val total: Long?   // total size
 )
 ```
 
-### Real-time Events
+### 3. JsonPatch Operations
+
+Yjs uses internal ops. YKT exposes RFC 6902 interface:
+
+| Yjs Op | JsonPatch Op | YKT Mapping |
+|--------|--------------|-------------|
+| Y.Map.set | add/replace | `YktPatchOp.Add`, `YktPatchOp.Replace` |
+| Y.Map.delete | remove | `YktPatchOp.Remove` |
+| Y.Array.insert | add | `YktPatchOp.Add` with array index |
+| Y.Array.delete | remove | `YktPatchOp.Remove` with array index |
+| Y.Text.insert | add | `YktPatchOp.Add` with text offset |
+| Y.Text.delete | remove | `YktPatchOp.Remove` with text offset |
+
+## Wire Protocol
+
+### Message Types
+
+Extends y-protocols message types:
+
+| Type | y-protocols | YKT Extension |
+|------|-------------|---------------|
+| 0 | sync step 1 | + query selector |
+| 1 | sync step 2 | + range header |
+| 2 | update | JsonPatch ops |
+| 3 | awareness | cursor, selection |
+
+### Frame Format
+
+```
+┌────────┬────────┬────────────────────────────────┐
+│ Type   │ Length │ Payload                        │
+│ 1 byte │ varint │ ...                            │
+└────────┴────────┴────────────────────────────────┘
+```
+
+### YKT Event Types
 
 ```kotlin
 sealed class YktEvent : ProtoEvent {
-    data class Patch(ops: List<YktPatchOp>, version: ProtoVersion)
-    data class Awareness(cursor: Int?, selection: YktSelection?)
+    // Yjs sync step 2 + JsonPatch
+    data class Patch(
+        ops: List<YktPatchOp>,
+        version: ProtoVersion  // clientId:clock
+    )
+    
+    // Yjs awareness protocol
+    data class Awareness(
+        cursor: Int?,
+        selection: YktSelection?,
+        user: Map<String, String>
+    )
+    
+    // Session lifecycle
     data class Join(user: Map<String, String>)
-    data class Leave(...)
-    data class Sync(document: JsonObject, version: ProtoVectorClock)
+    data class Leave()
+    
+    // Full state sync (Yjs encodeStateAsUpdate)
+    data class Sync(
+        document: JsonObject,
+        version: ProtoVectorClock
+    )
+    
+    // Ack for reliable delivery
     data class Ack(ackedVersion: ProtoVersion)
 }
 ```
 
-## Transport
+## State Vector Encoding
 
-| Transport | Direction | Use |
-|-----------|-----------|-----|
-| **WSS** | Bidirectional | Live collaboration |
-| **SSE** | Server→Client | Audit trail, read-only |
-| **WebDAV** | Request/Response | Document storage |
+### Yjs Binary Format
+```
+[numClients: varint]
+[clientId: varint, clock: varint]*
+```
 
-## Codecs
-
-```kotlin
-object ProtoWire {
-    fun <T> encode(value: T, format: WireFormat): ByteArray
-    fun <T> decode(data: ByteArray, format: WireFormat): T
-    fun encodeSegments(data: ByteArray, segments: List<Range>): ByteArray
-    fun encodeYDocUpdate(clientId: String, clock: Long, content: String): ByteArray
-}
-
-object YDocCodec {
-    fun encodeUpdate(clientId: String, clock: Long, content: String): ByteArray
-    fun decodeUpdate(data: ByteArray): Triple<Int, Int, String>?
-    fun encodeStateVector(clocks: Map<String, Long>): ByteArray
-    fun decodeStateVector(data: ByteArray): Map<Int, Long>
-}
-
-object RangeCodec {
-    fun encodeMultipart(data: ByteArray, segments: List<Range>, ...): ByteArray
-    fun parseRangeHeader(header: String): List<Range>
+### YKT JSON Format
+```json
+{
+  "clocks": {
+    "client_abc": 42,
+    "client_xyz": 17
+  }
 }
 ```
 
-## Example: Collaborative Edit
+### YKT Binary Format (YDocCodec)
+```
+┌──────────────┬──────────────┬──────────────┐
+│ count: u32   │ clientHash   │ clock: u32   │
+│              │   : u32      │              │
+└──────────────┴──────────────┴──────────────┘
+                     × count
+```
+
+## Conflict Resolution
+
+Follows Yjs CRDT rules:
+
+1. **Total Order**: Items ordered by `(clientId, clock)`
+2. **Origin Pointers**: Left/right origins determine insert position
+3. **Tombstones**: Deleted items marked, not removed
+4. **GC**: Tombstones collected after all clients acknowledge
+
+YKT preserves these semantics through `ProtoVectorClock`:
 
 ```kotlin
-// Client joins session
-val client = YktClient(transport, ClientId.generate())
-val session = client.join("/docs/readme.md")
-
-// Apply local edit
-client.applyPatch(listOf(
-    YktPatchOp.Replace(JsonPointer("/content"), JsonPrimitive("Updated"))
-))
-
-// Update cursor awareness
-client.updateAwareness(cursor = 42, selection = YktSelection(10, 20))
-
-// Process incoming events
-client.onEvent { event ->
-    when (event) {
-        is YktEvent.Patch -> applyRemotePatch(event.ops)
-        is YktEvent.Awareness -> updateCursors(event)
-        is YktEvent.Sync -> resetDocument(event.document)
-    }
+data class ProtoVectorClock(val clocks: Map<String, Long>) {
+    fun merge(other: ProtoVectorClock): ProtoVectorClock
+    fun happensBefore(other: ProtoVectorClock): Boolean
+    fun tick(clientId: ClientId): ProtoVectorClock
 }
 ```
+
+## Transport Bindings
+
+### WebSocket (y-websocket compatible)
+
+```
+wss://server/ykt/{docId}
+
+← Binary: Yjs update
+→ Binary: Yjs update
+← JSON: YktEvent.Awareness
+→ JSON: YktEvent.Awareness
+```
+
+### SSE (audit/read-only)
+
+```
+GET /ykt/{docId}/events
+Accept: text/event-stream
+
+event: patch
+data: {"ops":[...],"version":"client_a:42"}
+
+event: awareness  
+data: {"cursor":100,"user":{"name":"Alice"}}
+```
+
+### WebDAV (storage)
+
+```
+PROPFIND /ykt/{docId}
+→ State vector, metadata
+
+GET /ykt/{docId}
+Range: bytes=0-1023
+→ 206 Partial Content
+
+PUT /ykt/{docId}
+← Yjs update binary
+```
+
+## Example Flow
+
+```
+Client A                    Server                    Client B
+    │                          │                          │
+    │──── Join ───────────────►│                          │
+    │◄─── Sync(doc, clock) ────│                          │
+    │                          │                          │
+    │                          │◄──────── Join ───────────│
+    │                          │───── Sync(doc, clock) ──►│
+    │                          │                          │
+    │── Patch([add /x]) ──────►│                          │
+    │◄───────── Ack ───────────│                          │
+    │                          │─── Patch([add /x]) ─────►│
+    │                          │                          │
+    │◄── Awareness(cursor) ────│◄── Awareness(cursor) ────│
+    │                          │                          │
+```
+
+## Compatibility
+
+| Feature | Yjs | YKT |
+|---------|-----|-----|
+| Y.Map | native | via JsonPatch |
+| Y.Array | native | via JsonPatch |
+| Y.Text | native | via JsonPatch |
+| Y.XmlFragment | native | via XPath/CSS |
+| Awareness | y-protocols | YktEvent.Awareness |
+| Auth | y-protocols | MCP tools |
+| Persistence | y-indexeddb | WebDAV |
+| Network | y-websocket | WSS + SSE |
