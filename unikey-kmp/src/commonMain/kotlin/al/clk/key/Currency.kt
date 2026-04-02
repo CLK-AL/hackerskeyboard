@@ -71,6 +71,65 @@ interface ILayoutKey {
 }
 
 /**
+ * Interface for spelling pattern enums across all languages.
+ * Extends ILayoutKey to integrate with keyboard layouts.
+ */
+interface ISpellingPattern : ILayoutKey {
+    /** The written spelling (grapheme) */
+    val pattern: String
+
+    /** Example words demonstrating this pattern */
+    val examples: List<String>
+
+    /** Where in a word this pattern typically occurs */
+    val position: PatternPosition
+
+    /** The char property defaults to pattern */
+    override val char: String get() = pattern
+}
+
+/**
+ * Hebrew spelling pattern supporting male (full), haser (defective), and unpointed variants.
+ * Nikud male is the base/canonical form since it contains the most information.
+ */
+interface IHebrewPattern : ISpellingPattern {
+    /** Base form with nikud male (full spelling with mater lectionis) */
+    val male: String
+
+    /** Haser form (defective spelling without mater lectionis) */
+    val haser: String
+
+    /** Unpointed form (consonants only, no nikud) */
+    val unpointed: String
+
+    /** Default pattern is male form (canonical) */
+    override val pattern: String get() = male
+}
+
+/**
+ * Arabic spelling pattern supporting forms with and without harakat (vowel marks).
+ */
+interface IArabicPattern : ISpellingPattern {
+    /** Form with full harakat (vowel diacritics) */
+    val withHarakat: String
+
+    /** Form without harakat (consonants only) */
+    val withoutHarakat: String
+
+    /** Default pattern is with harakat (canonical) */
+    override val pattern: String get() = withHarakat
+}
+
+/**
+ * Form of Hebrew nikud spelling
+ */
+enum class NikudForm {
+    MALE,      // Full spelling with mater lectionis (שָׁלוֹם)
+    HASER,     // Defective without mater lectionis (שָׁלֹם)
+    UNPOINTED  // No nikud marks (שלום)
+}
+
+/**
  * Simple implementation of ILayoutKey for ad-hoc keys (punctuation, numbers)
  */
 data class SimpleKey(
