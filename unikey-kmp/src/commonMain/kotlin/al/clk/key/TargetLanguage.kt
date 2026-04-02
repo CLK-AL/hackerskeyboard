@@ -148,7 +148,7 @@ data class KeyLanguage(
             englishName = "German",
             direction = TextDirection.LTR,
             syllableParser = { UniKeySyllable.parseLatin(it, Lang.DE) },
-            ipaConverter = { latinIpa(it, GermanPattern::matchEnding) },
+            ipaConverter = { ipaForLang(it, Lang.DE) },
             aiPromptHints = LanguagePromptHints.GERMAN
         )
 
@@ -158,7 +158,7 @@ data class KeyLanguage(
             englishName = "French",
             direction = TextDirection.LTR,
             syllableParser = { UniKeySyllable.parseLatin(it, Lang.FR) },
-            ipaConverter = { latinIpa(it, FrenchPattern::matchEnding) },
+            ipaConverter = { ipaForLang(it, Lang.FR) },
             aiPromptHints = LanguagePromptHints.FRENCH
         )
 
@@ -168,7 +168,7 @@ data class KeyLanguage(
             englishName = "Spanish",
             direction = TextDirection.LTR,
             syllableParser = { UniKeySyllable.parseLatin(it, Lang.ES) },
-            ipaConverter = { latinIpa(it, SpanishPattern::matchEnding) },
+            ipaConverter = { ipaForLang(it, Lang.ES) },
             aiPromptHints = LanguagePromptHints.SPANISH
         )
 
@@ -178,7 +178,7 @@ data class KeyLanguage(
             englishName = "Italian",
             direction = TextDirection.LTR,
             syllableParser = { UniKeySyllable.parseLatin(it, Lang.IT) },
-            ipaConverter = { latinIpa(it, ItalianPattern::matchEnding) },
+            ipaConverter = { ipaForLang(it, Lang.IT) },
             aiPromptHints = LanguagePromptHints.ITALIAN
         )
 
@@ -188,7 +188,7 @@ data class KeyLanguage(
             englishName = "Portuguese",
             direction = TextDirection.LTR,
             syllableParser = { UniKeySyllable.parseLatin(it, Lang.PT) },
-            ipaConverter = { latinIpa(it, PortuguesePattern::matchEnding) },
+            ipaConverter = { ipaForLang(it, Lang.PT) },
             aiPromptHints = LanguagePromptHints.PORTUGUESE
         )
 
@@ -198,7 +198,7 @@ data class KeyLanguage(
             englishName = "Dutch",
             direction = TextDirection.LTR,
             syllableParser = { UniKeySyllable.parseLatin(it, Lang.NL) },
-            ipaConverter = { latinIpa(it, DutchPattern::matchEnding) },
+            ipaConverter = { ipaForLang(it, Lang.NL) },
             aiPromptHints = LanguagePromptHints.DUTCH
         )
 
@@ -208,7 +208,7 @@ data class KeyLanguage(
             englishName = "Polish",
             direction = TextDirection.LTR,
             syllableParser = { UniKeySyllable.parseLatin(it, Lang.PL) },
-            ipaConverter = { latinIpa(it, PolishPattern::matchEnding) },
+            ipaConverter = { ipaForLang(it, Lang.PL) },
             aiPromptHints = LanguagePromptHints.POLISH
         )
 
@@ -218,7 +218,7 @@ data class KeyLanguage(
             englishName = "Turkish",
             direction = TextDirection.LTR,
             syllableParser = { UniKeySyllable.parseLatin(it, Lang.TR) },
-            ipaConverter = { latinIpa(it, TurkishPattern::matchEnding) },
+            ipaConverter = { ipaForLang(it, Lang.TR) },
             aiPromptHints = LanguagePromptHints.TURKISH
         )
 
@@ -228,7 +228,7 @@ data class KeyLanguage(
             englishName = "Danish",
             direction = TextDirection.LTR,
             syllableParser = { UniKeySyllable.parseLatin(it, Lang.DA) },
-            ipaConverter = { it.lowercase().takeLast(3) },
+            ipaConverter = { ipaForLang(it, Lang.DA) },
             aiPromptHints = LanguagePromptHints.DANISH
         )
 
@@ -238,7 +238,7 @@ data class KeyLanguage(
             englishName = "Finnish",
             direction = TextDirection.LTR,
             syllableParser = { UniKeySyllable.parseLatin(it, Lang.FI) },
-            ipaConverter = { it.lowercase().takeLast(3) },
+            ipaConverter = { ipaForLang(it, Lang.FI) },
             aiPromptHints = LanguagePromptHints.FINNISH
         )
 
@@ -248,7 +248,7 @@ data class KeyLanguage(
             englishName = "Norwegian",
             direction = TextDirection.LTR,
             syllableParser = { UniKeySyllable.parseLatin(it, Lang.NO) },
-            ipaConverter = { it.lowercase().takeLast(3) },
+            ipaConverter = { ipaForLang(it, Lang.NO) },
             aiPromptHints = LanguagePromptHints.NORWEGIAN
         )
 
@@ -258,7 +258,7 @@ data class KeyLanguage(
             englishName = "Swedish",
             direction = TextDirection.LTR,
             syllableParser = { UniKeySyllable.parseLatin(it, Lang.SV) },
-            ipaConverter = { it.lowercase().takeLast(3) },
+            ipaConverter = { ipaForLang(it, Lang.SV) },
             aiPromptHints = LanguagePromptHints.SWEDISH
         )
 
@@ -268,7 +268,7 @@ data class KeyLanguage(
             englishName = "Malay",
             direction = TextDirection.LTR,
             syllableParser = { UniKeySyllable.parseLatin(it, Lang.MS) },
-            ipaConverter = { it.lowercase().takeLast(3) },
+            ipaConverter = { ipaForLang(it, Lang.MS) },
             aiPromptHints = LanguagePromptHints.MALAY
         )
 
@@ -278,7 +278,7 @@ data class KeyLanguage(
             englishName = "Swahili",
             direction = TextDirection.LTR,
             syllableParser = { UniKeySyllable.parseLatin(it, Lang.SW) },
-            ipaConverter = { it.lowercase().takeLast(3) },
+            ipaConverter = { ipaForLang(it, Lang.SW) },
             aiPromptHints = LanguagePromptHints.SWAHILI
         )
 
@@ -313,10 +313,19 @@ data class KeyLanguage(
         private fun syllablesToIpa(syllables: List<UniKeySyllable>): String =
             syllables.joinToString("") { it.consonant + it.vowel }
 
+        @Deprecated("Use ipaForLang instead", ReplaceWith("ipaForLang(word, lang)"))
         private fun latinIpa(word: String, matcher: (String) -> ISpellingPattern?): String {
             val w = word.lowercase()
             val pattern = matcher(w)
             return pattern?.ipa ?: w.takeLast(3)
+        }
+
+        /**
+         * Get IPA for word ending using Lang's centralized pattern matching.
+         * This is the preferred method - uses LangPatterns as truth center.
+         */
+        private fun ipaForLang(word: String, lang: Lang): String {
+            return lang.matchEndingIpa(word) ?: word.lowercase().takeLast(3)
         }
     }
 }

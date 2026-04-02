@@ -41,12 +41,76 @@ enum class Lang(val code: String, val script: Script, val baseLang: Lang? = null
     /** Is this a regional variant? */
     val isVariant: Boolean get() = baseLang != null
 
+    /**
+     * Get the IPA for a word ending using this language's spelling patterns.
+     * Returns null if no pattern matches or language has no spelling patterns.
+     */
+    fun matchEndingIpa(word: String): String? = LangPatterns.matchEnding(this, word)
+
     companion object {
         private val byCode = entries.associateBy { it.code }
         fun fromCode(code: String): Lang? = byCode[code.lowercase()]
 
         /** Get base languages only (no regional variants) */
         val baseLanguages: List<Lang> get() = entries.filter { !it.isVariant }
+    }
+}
+
+/**
+ * Centralized pattern matching for all languages.
+ * This is the single source of truth for language→pattern enum mappings.
+ * Pattern enums (XXXPattern.entries) are the truth center for IPA data.
+ */
+object LangPatterns {
+    /**
+     * Match word ending using the appropriate pattern enum for this language.
+     * Pattern enums use entries.associateBy { it.ipa } internally.
+     */
+    fun matchEnding(lang: Lang, word: String): String? {
+        // Use base language for variants
+        val baseLang = lang.baseLang ?: lang
+        return when (baseLang) {
+            // Latin-script languages with dedicated pattern enums
+            Lang.EN -> EnglishPattern.matchEnding(word)?.ipa
+            Lang.DE -> GermanPattern.matchEnding(word)?.ipa
+            Lang.FR -> FrenchPattern.matchEnding(word)?.ipa
+            Lang.ES -> SpanishPattern.matchEnding(word)?.ipa
+            Lang.IT -> ItalianPattern.matchEnding(word)?.ipa
+            Lang.PT -> PortuguesePattern.matchEnding(word)?.ipa
+            Lang.NL -> DutchPattern.matchEnding(word)?.ipa
+            Lang.PL -> PolishPattern.matchEnding(word)?.ipa
+            Lang.TR -> TurkishPattern.matchEnding(word)?.ipa
+            Lang.DA -> DanishPattern.matchEnding(word)?.ipa
+            Lang.FI -> FinnishPattern.matchEnding(word)?.ipa
+            Lang.NO -> NorwegianPattern.matchEnding(word)?.ipa
+            Lang.SV -> SwedishPattern.matchEnding(word)?.ipa
+            Lang.MS -> MalayPattern.matchEnding(word)?.ipa
+            Lang.SW -> SwahiliPattern.matchEnding(word)?.ipa
+            // Non-Latin scripts with dedicated pattern enums
+            Lang.EL -> GreekPattern.matchEnding(word)?.ipa
+            Lang.RU -> RussianPattern.matchEnding(word)?.ipa
+            Lang.ZH -> PinyinPattern.matchEnding(word)?.ipa
+            // Scripts using letter-based IPA (no spelling patterns needed)
+            Lang.HE -> null  // Uses HebrewLetter.entries directly
+            Lang.AR -> null  // Uses ArabicLetter.entries directly
+            Lang.HI -> null  // Uses DevanagariKey.entries directly
+            Lang.JA -> null  // Uses HiraganaKey.entries directly
+            Lang.KO -> null  // Uses HangulInitial/Vowel/Final directly
+            // Variants handled by baseLang above
+            else -> null
+        }
+    }
+
+    /**
+     * Check if a language has dedicated spelling patterns.
+     */
+    fun hasSpellingPatterns(lang: Lang): Boolean {
+        val baseLang = lang.baseLang ?: lang
+        return baseLang in listOf(
+            Lang.EN, Lang.DE, Lang.FR, Lang.ES, Lang.IT, Lang.PT, Lang.NL, Lang.PL, Lang.TR,
+            Lang.DA, Lang.FI, Lang.NO, Lang.SV, Lang.MS, Lang.SW,
+            Lang.EL, Lang.RU, Lang.ZH
+        )
     }
 }
 

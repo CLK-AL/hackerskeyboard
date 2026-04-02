@@ -785,22 +785,11 @@ data class UniKeySyllable(
         /**
          * Parse Latin-script word into syllables using language-specific patterns.
          * Falls back to generic English parsing if language has no specific patterns.
+         * Uses Lang.matchEndingIpa() which delegates to LangPatterns (truth center).
          */
         fun parseLatin(word: String, lang: Lang): List<UniKeySyllable> {
-            val w = word.lowercase()
-
-            // Try to match language-specific ending patterns for better IPA
-            val endingIpa = when (lang) {
-                Lang.DE -> GermanPattern.matchEnding(w)?.ipa
-                Lang.FR -> FrenchPattern.matchEnding(w)?.ipa
-                Lang.ES -> SpanishPattern.matchEnding(w)?.ipa
-                Lang.IT -> ItalianPattern.matchEnding(w)?.ipa
-                Lang.PT -> PortuguesePattern.matchEnding(w)?.ipa
-                Lang.NL -> DutchPattern.matchEnding(w)?.ipa
-                Lang.PL -> PolishPattern.matchEnding(w)?.ipa
-                Lang.TR -> TurkishPattern.matchEnding(w)?.ipa
-                else -> null
-            }
+            // Use centralized pattern matching from Lang enum
+            val endingIpa = lang.matchEndingIpa(word)
 
             // Use generic English parsing but with language-specific ending IPA
             val syllables = parseEnglish(word).toMutableList()
