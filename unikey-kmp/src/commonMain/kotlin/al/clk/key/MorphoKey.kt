@@ -142,12 +142,14 @@ object MorphoLayouts {
     )
 
     /**
-     * All layouts by language code
+     * All layouts - used to generate layouts map
      */
-    val layouts: Map<String, MorphoLayout> = mapOf(
-        "he" to HE,
-        "ar" to AR
-    )
+    private val allLayouts: List<MorphoLayout> = listOf(HE, AR)
+
+    /**
+     * All layouts by language code - generated from allLayouts list
+     */
+    val layouts: Map<String, MorphoLayout> = allLayouts.associateBy { it.code }
 
     /**
      * Get layout by code

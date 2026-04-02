@@ -707,43 +707,19 @@ object KeyboardLayouts {
     }
 
     /**
-     * All layouts by language code
+     * All layouts - used to generate layouts map
+     */
+    private val allLayouts: List<KeyboardLayout> = listOf(
+        AR, DA, DE, EL, EN, ES, FI, FR, HE, HI, IT, JA, KO, MS, NL, NO, PL, PT, RU, SV, SW, TR, ZH,
+        EN_GB, EN_AU, EN_CA, EN_IN, PT_BR, ES_419
+    )
+
+    /**
+     * All layouts by language code - generated from allLayouts list
      * Includes regional variants (en-gb, en-au, etc.)
      */
-    val layouts: Map<String, KeyboardLayout> = mapOf(
-        // Core 23 Chatterbox languages
-        "ar" to AR,
-        "da" to DA,
-        "de" to DE,
-        "el" to EL,
-        "en" to EN,
-        "es" to ES,
-        "fi" to FI,
-        "fr" to FR,
-        "he" to HE,
-        "hi" to HI,
-        "it" to IT,
-        "ja" to JA,
-        "ko" to KO,
-        "ms" to MS,
-        "nl" to NL,
-        "no" to NO,
-        "pl" to PL,
-        "pt" to PT,
-        "ru" to RU,
-        "sv" to SV,
-        "sw" to SW,
-        "tr" to TR,
-        "zh" to ZH,
-        // Regional variants
-        "en-us" to EN,        // US English (alias)
-        "en-gb" to EN_GB,     // UK English
-        "en-au" to EN_AU,     // Australian English
-        "en-ca" to EN_CA,     // Canadian English
-        "en-in" to EN_IN,     // Indian English
-        "pt-br" to PT_BR,     // Brazilian Portuguese
-        "es-419" to ES_419    // Latin American Spanish
-    )
+    val layouts: Map<String, KeyboardLayout> = allLayouts.associateBy { it.code } +
+        mapOf("en-us" to EN)  // US English alias
 
     /**
      * Get layout by language code (case-insensitive)
