@@ -667,27 +667,118 @@ data class ScriptAttrs(
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
+// DEFINITION PAIR - DT/DD paired like key=value attributes
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/**
+ * A definition term/description pair (DT=DD).
+ * Represents a single entry in a definition list, similar to key=value attributes.
+ */
+data class DefinitionPair(
+    val term: String,                              // DT content
+    val description: String,                       // DD content
+    val termScript: ScriptAttrs = ScriptAttrs.EMPTY,   // Script attrs for term
+    val descScript: ScriptAttrs = ScriptAttrs.EMPTY    // Script attrs for description
+) {
+    /** Formatted pair: [term=description] */
+    val formatted: String get() = "[$term=$description]"
+
+    /** Formatted with script: [term@lang=he=description@lang=en] */
+    val formattedFull: String get() = buildString {
+        append("[")
+        append(term)
+        if (!termScript.isEmpty) append(termScript.formatted)
+        append("=")
+        append(description)
+        if (!descScript.isEmpty) append(descScript.formatted)
+        append("]")
+    }
+
+    companion object {
+        private val PAIR_REGEX by lazy { Regex("\\[([^=]+)=([^\\]]+)\\]") }
+
+        /**
+         * Parse from formatted string like "[term=description]"
+         */
+        fun parse(s: String): DefinitionPair? {
+            val match = PAIR_REGEX.find(s) ?: return null
+            val term = match.groupValues[1]
+            val desc = match.groupValues[2]
+
+            // Extract script attrs if present
+            val termScript = ScriptAttrs.parse(term)
+            val descScript = ScriptAttrs.parse(desc)
+
+            // Remove script attrs from term/desc for clean values
+            val cleanTerm = term.replace(Regex("@lang=[a-z]+|@dir=(ltr|rtl|auto)"), "")
+            val cleanDesc = desc.replace(Regex("@lang=[a-z]+|@dir=(ltr|rtl|auto)"), "")
+
+            return DefinitionPair(cleanTerm, cleanDesc, termScript, descScript)
+        }
+
+        // Regex to strip markdown formatting (**, *, __, _)
+        private val MD_BOLD_REGEX by lazy { Regex("^\\*\\*|\\*\\*$|^__|__$") }
+        private val MD_ITALIC_REGEX by lazy { Regex("^\\*|\\*$|^_|_$") }
+
+        /**
+         * Strip markdown formatting from text.
+         */
+        private fun stripMarkdown(s: String): String {
+            return s.trim()
+                .replace(MD_BOLD_REGEX, "")  // Remove ** or __
+                .replace(MD_ITALIC_REGEX, "") // Remove * or _
+                .trim()
+        }
+
+        /**
+         * Create from term: description line.
+         * Strips markdown bold/italic from both term and description.
+         */
+        fun fromLine(line: String): DefinitionPair? {
+            val colonIdx = line.indexOf(": ")
+            if (colonIdx <= 0) return null
+
+            // Extract and strip markdown formatting
+            val rawTerm = line.substring(0, colonIdx)
+            val rawDesc = line.substring(colonIdx + 2)
+
+            val term = stripMarkdown(rawTerm)
+            val desc = stripMarkdown(rawDesc)
+
+            return DefinitionPair(
+                term = term,
+                description = desc,
+                termScript = ScriptDetector.detect(term),
+                descScript = ScriptDetector.detect(desc)
+            )
+        }
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
 // INDEX SEGMENT - Single element in the document path
 // ═══════════════════════════════════════════════════════════════════════════════
 
 /**
  * A single segment in a document index path.
- * Format: TAG1.class1.class2@lang=he@dir=rtl=attr1=val1
+ * Format: TAG1.class1.class2@lang=he@dir=rtl=attr1=val1[term=desc]
  */
 data class IndexSegment(
     val tag: DocTag,
     val instance: Int,                              // 1-based instance number
     val cssClasses: List<String> = emptyList(),     // CSS classes
     val scriptAttrs: ScriptAttrs = ScriptAttrs.EMPTY, // lang, dir attributes
-    val dataAttrs: Map<String, String> = emptyMap() // data-* attributes
+    val dataAttrs: Map<String, String> = emptyMap(), // data-* attributes
+    val defPairs: List<DefinitionPair> = emptyList() // DT=DD pairs (for DL tags)
 ) {
-    /** Formatted segment: P1.poem.intro@lang=he@dir=rtl=data-verse=1 */
+    /** Formatted segment: P1.poem.intro@lang=he@dir=rtl=data-verse=1[term=desc] */
     val formatted: String get() = buildString {
         append(tag.name)
         append(instance)
         cssClasses.forEach { append(".$it") }
         if (!scriptAttrs.isEmpty) append(scriptAttrs.formatted)
         dataAttrs.forEach { (k, v) -> append("=$k=$v") }
+        defPairs.forEach { append(it.formatted) }
     }
 
     /** Get language code if set */
@@ -698,6 +789,12 @@ data class IndexSegment(
 
     /** Check if this is RTL text */
     val isRtl: Boolean get() = scriptAttrs.dir == TextDir.RTL
+
+    /** Get definition pair by term */
+    fun getDefinition(term: String): String? = defPairs.find { it.term == term }?.description
+
+    /** Get all definitions as a map */
+    val definitions: Map<String, String> get() = defPairs.associate { it.term to it.description }
 
     companion object {
         // Lazy compiled regex patterns
@@ -754,8 +851,16 @@ data class IndexSegment(
                 i++
             }
 
+            // Parse definition pairs [term=desc]
+            val defPairs = mutableListOf<DefinitionPair>()
+            val pairRegex = Regex("\\[([^=\\]]+)=([^\\]]+)\\]")
+            pairRegex.findAll(segment).forEach { match ->
+                val pair = DefinitionPair.parse(match.value)
+                if (pair != null) defPairs.add(pair)
+            }
+
             val scriptAttrs = ScriptAttrs(lang, dir)
-            return IndexSegment(tag, instance, cssClasses, scriptAttrs, dataAttrs)
+            return IndexSegment(tag, instance, cssClasses, scriptAttrs, dataAttrs, defPairs)
         }
     }
 }
@@ -1352,46 +1457,46 @@ class PlainTextParser {
             // Add section DIV if we're in a section
             sectionDivSegment?.let { pathSegments.add(it) }
 
-            // Handle definition list containers
+            // Handle definition list containers - DT/DD are paired like attributes
             when (lineType) {
                 LineType.DT_DD_INLINE -> {
-                    // Inline format: "term: description" - create both DT and DD
+                    // Inline format: "term: description" - create paired DL element
                     if (!inDefList) {
                         dlSegment = pushTagWithScript(DocTag.DL, scriptAttrs)
                         inDefList = true
                     }
-                    val dl = dlSegment!!
                     currentListSegment = null
                     currentListType = null
 
-                    // Split by first ": " to get term and description
-                    val colonIdx = line.indexOf(": ")
-                    if (colonIdx > 0) {
-                        val term = line.substring(0, colonIdx).trim()
-                        val desc = line.substring(colonIdx + 2).trim()
+                    // Parse the definition pair
+                    val pair = DefinitionPair.fromLine(line)
+                    if (pair != null) {
+                        // Add DL element with the pair
+                        val dlPath = mutableListOf(htmlSegment, bodySegment)
+                        sectionDivSegment?.let { dlPath.add(it) }
 
-                        // Create DT element
-                        val dtPath = mutableListOf(htmlSegment, bodySegment)
-                        sectionDivSegment?.let { dtPath.add(it) }
-                        dtPath.add(dl)
-                        val dtSegment = pushTagWithScript(DocTag.DT, ScriptDetector.detect(term))
-                        dtPath.add(dtSegment)
-                        elements.add(ParsedElement(
-                            DocumentIndex(dtPath), DocTag.DT, offset, offset + colonIdx,
-                            mapOf("lang" to (ScriptDetector.detect(term).lang ?: "")).filterValues { it.isNotEmpty() },
-                            term
-                        ))
+                        // Create DL segment with this pair
+                        val pairCount = tagCounts.getOrPut(DocTag.DL) { 0 }  // Use same DL instance
+                        val dlWithPair = IndexSegment(
+                            DocTag.DL,
+                            pairCount,
+                            emptyList(),
+                            scriptAttrs,
+                            emptyMap(),
+                            listOf(pair)
+                        )
+                        dlPath.add(dlWithPair)
 
-                        // Create DD element
-                        val ddPath = mutableListOf(htmlSegment, bodySegment)
-                        sectionDivSegment?.let { ddPath.add(it) }
-                        ddPath.add(dl)
-                        val ddSegment = pushTagWithScript(DocTag.DD, ScriptDetector.detect(desc))
-                        ddPath.add(ddSegment)
                         elements.add(ParsedElement(
-                            DocumentIndex(ddPath), DocTag.DD, offset + colonIdx + 2, offset + line.length,
-                            mapOf("lang" to (ScriptDetector.detect(desc).lang ?: "")).filterValues { it.isNotEmpty() },
-                            desc
+                            DocumentIndex(dlPath),
+                            DocTag.DL,
+                            offset,
+                            offset + line.length,
+                            buildMap {
+                                pair.termScript.lang?.let { put("dt-lang", it) }
+                                pair.descScript.lang?.let { put("dd-lang", it) }
+                            },
+                            line
                         ))
 
                         offset += line.length + 1

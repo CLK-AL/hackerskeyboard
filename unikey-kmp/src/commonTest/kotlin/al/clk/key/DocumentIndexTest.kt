@@ -732,16 +732,61 @@ class DocumentIndexTest {
         val parser = PlainTextParser()
         val elements = parser.parse(text)
 
-        // Should create DT and DD for each line
-        val dtElements = elements.filter { it.tag == DocTag.DT }
-        val ddElements = elements.filter { it.tag == DocTag.DD }
+        // Should create DL elements with paired DT/DD
+        val dlElements = elements.filter { it.tag == DocTag.DL }
+        assertTrue(dlElements.isNotEmpty())
+        assertEquals(3, dlElements.size)  // 3 definition pairs
 
-        assertTrue(dtElements.isNotEmpty())
-        assertTrue(ddElements.isNotEmpty())
+        // Check that pairs are stored in the index
+        val firstDl = dlElements.first()
+        val pairs = firstDl.index.leaf?.defPairs
+        assertNotNull(pairs)
+        assertTrue(pairs.isNotEmpty())
 
-        // Check that DT contains term and DD contains description
-        assertTrue(dtElements.any { it.content.contains("מחבר") })
-        assertTrue(ddElements.any { it.content.contains("תֹּאמַר") })
+        // Check term and description are paired
+        val firstPair = pairs.first()
+        assertTrue(firstPair.term.contains("מחבר"))
+        assertTrue(firstPair.description.contains("תֹּאמַר"))
+    }
+
+    // ═══ DefinitionPair Tests ═══
+
+    @Test
+    fun testDefinitionPairFromLine() {
+        val pair = DefinitionPair.fromLine("**מחבר:** תֹּאמַר בַּת-שְׁלֹמֹה")
+        assertNotNull(pair)
+        assertEquals("מחבר", pair.term)
+        assertEquals("תֹּאמַר בַּת-שְׁלֹמֹה", pair.description)
+        assertEquals("he", pair.termScript.lang)
+        assertEquals("he", pair.descScript.lang)
+    }
+
+    @Test
+    fun testDefinitionPairFormatted() {
+        val pair = DefinitionPair("term", "value")
+        assertEquals("[term=value]", pair.formatted)
+    }
+
+    @Test
+    fun testDefinitionPairParse() {
+        val pair = DefinitionPair.parse("[author=John Doe]")
+        assertNotNull(pair)
+        assertEquals("author", pair.term)
+        assertEquals("John Doe", pair.description)
+    }
+
+    @Test
+    fun testIndexSegmentWithPairs() {
+        val pairs = listOf(
+            DefinitionPair("מחבר", "תֹּאמַר", ScriptAttrs.HEBREW, ScriptAttrs.HEBREW),
+            DefinitionPair("מקור", "file.txt", ScriptAttrs.HEBREW, ScriptAttrs.ENGLISH)
+        )
+        val segment = IndexSegment(DocTag.DL, 1, emptyList(), ScriptAttrs.EMPTY, emptyMap(), pairs)
+
+        assertEquals("תֹּאמַר", segment.getDefinition("מחבר"))
+        assertEquals("file.txt", segment.getDefinition("מקור"))
+        assertEquals(2, segment.definitions.size)
+        assertTrue(segment.formatted.contains("[מחבר=תֹּאמַר]"))
     }
 
     @Test
