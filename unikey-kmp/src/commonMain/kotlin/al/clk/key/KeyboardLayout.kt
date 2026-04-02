@@ -121,7 +121,7 @@ object KeyboardLayouts {
         name = "Arabic",
         nativeName = "العربية",
         script = Script.ARABIC,
-        keys = arabicKeys
+        keys = ArabicLetter.keys
     )
 
     // ═══ Danish (da) ═══
@@ -157,7 +157,7 @@ object KeyboardLayouts {
         name = "Greek",
         nativeName = "Ελληνικά",
         script = Script.GREEK,
-        keys = greekKeys
+        keys = GreekKey.keys
     )
 
     // ═══ English US (en) ═══
@@ -220,18 +220,12 @@ object KeyboardLayouts {
     )
 
     // ═══ Hebrew (he) ═══
-    // Use enum values directly - HebrewLetter provides shiftKey for dagesh
-    private val hebrewKeys: Map<String, ILayoutKey> = HebrewLetter.entries
-        .filter { it.qwerty.isNotEmpty() }
-        .associate { it.qwerty to it as ILayoutKey } +
-        mapOf("4" to key("₪", "", "shekel", "$", "", "dollar"))
-
     val HE = KeyboardLayout(
         code = "he",
         name = "Hebrew",
         nativeName = "עברית",
         script = Script.HEBREW,
-        keys = hebrewKeys
+        keys = HebrewLetter.keys + mapOf("4" to key("₪", "", "shekel", "$", "", "dollar"))
     )
 
     // ═══ Hindi (hi) ═══
@@ -299,7 +293,7 @@ object KeyboardLayouts {
         name = "Japanese",
         nativeName = "日本語",
         script = Script.HIRAGANA,
-        keys = hiraganaKeys + mapOf(
+        keys = HiraganaKey.keys + mapOf(
             "l" to key("ー", "ː", "long-vowel"),
             "q" to key("。", "", "period"),
             "/" to key("・", "", "middle-dot"),
@@ -433,7 +427,7 @@ object KeyboardLayouts {
         name = "Russian",
         nativeName = "Русский",
         script = Script.CYRILLIC,
-        keys = cyrillicKeys + mapOf("4" to key("₽", "", "ruble", "$", "", "dollar"))
+        keys = CyrillicKey.keys + mapOf("4" to key("₽", "", "ruble", "$", "", "dollar"))
     )
 
     // ═══ Swedish (sv) ═══

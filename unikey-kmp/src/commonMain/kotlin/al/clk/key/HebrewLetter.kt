@@ -76,8 +76,16 @@ enum class HebrewLetter(
     companion object {
         private val byLetter = entries.associateBy { it.letter }
         private val byQwerty = entries.associateBy { it.qwerty }
+        private val byIpa = entries.groupBy { it.ipa }
+
+        /** Keyboard layout keys by QWERTY position */
+        val keys: Map<String, ILayoutKey> = entries
+            .filter { it.qwerty.isNotEmpty() }
+            .associate { it.qwerty to it as ILayoutKey }
+
         fun fromChar(c: Char): HebrewLetter? = byLetter[c]
         fun fromQwerty(key: String): HebrewLetter? = byQwerty[key]
+        fun fromIpa(ipa: String): List<HebrewLetter> = byIpa[ipa] ?: emptyList()
         fun getFinalForm(letter: HebrewLetter): HebrewLetter? = letter.finalForm?.let { fromChar(it) }
     }
 }

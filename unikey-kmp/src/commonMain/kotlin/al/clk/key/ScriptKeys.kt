@@ -50,6 +50,7 @@ enum class GreekKey(
     companion object {
         private val byQwerty = entries.associateBy { it.qwerty }
         private val byChar = entries.associateBy { it.char.firstOrNull() }
+        private val byIpa = entries.groupBy { it.ipa }
         // Accented vowels mapped to base forms
         private val accentedToBase = mapOf(
             'ά' to 'α', 'έ' to 'ε', 'ή' to 'η',
@@ -57,8 +58,14 @@ enum class GreekKey(
             'ό' to 'ο', 'ύ' to 'υ', 'ϋ' to 'υ', 'ΰ' to 'υ',
             'ώ' to 'ω'
         )
+
+        /** Keyboard layout keys by QWERTY position */
+        val keys: Map<String, ILayoutKey> = entries.associate { it.qwerty to it as ILayoutKey } +
+            mapOf("q" to SimpleKey(";", "", "semicolon", SimpleKey(":", "", "colon")))
+
         fun fromQwerty(key: String): GreekKey? = byQwerty[key]
         fun fromChar(c: Char): GreekKey? = byChar[c] ?: byChar[accentedToBase[c]]
+        fun fromIpa(ipa: String): List<GreekKey> = byIpa[ipa] ?: emptyList()
     }
 }
 
@@ -112,8 +119,14 @@ enum class CyrillicKey(
     companion object {
         private val byQwerty = entries.associateBy { it.qwerty }
         private val byChar = entries.associateBy { it.char.firstOrNull() }
+        private val byIpa = entries.groupBy { it.ipa }
+
+        /** Keyboard layout keys by QWERTY position */
+        val keys: Map<String, ILayoutKey> = entries.associate { it.qwerty to it as ILayoutKey }
+
         fun fromQwerty(key: String): CyrillicKey? = byQwerty[key]
         fun fromChar(c: Char): CyrillicKey? = byChar[c]
+        fun fromIpa(ipa: String): List<CyrillicKey> = byIpa[ipa] ?: emptyList()
     }
 }
 
@@ -296,8 +309,24 @@ enum class HiraganaKey(
         private val byRomaji = entries.associateBy { it.romaji }
         private val byChar = entries.associateBy { it.char.firstOrNull() }
         private val byKatakana = entries.associateBy { it.katakana.firstOrNull() }
+        private val byIpa = entries.groupBy { it.ipa }
+
+        /** Keyboard layout keys by consonant romaji */
+        val keys: Map<String, ILayoutKey> = entries
+            .filter { it.romaji.length == 1 || it.romaji in listOf("ka", "sa", "ta", "na", "ha", "ma", "ya", "ra", "wa") }
+            .associate {
+                val key = when (it.romaji) {
+                    "a" -> "a"; "i" -> "i"; "u" -> "u"; "e" -> "e"; "o" -> "o"
+                    "ka" -> "k"; "sa" -> "s"; "ta" -> "t"; "na" -> "n"
+                    "ha" -> "h"; "ma" -> "m"; "ya" -> "y"; "ra" -> "r"; "wa" -> "w"
+                    else -> it.romaji
+                }
+                key to it as ILayoutKey
+            }
+
         fun fromRomaji(r: String): HiraganaKey? = byRomaji[r]
         fun fromChar(c: Char): HiraganaKey? = byChar[c] ?: byKatakana[c]
+        fun fromIpa(ipa: String): List<HiraganaKey> = byIpa[ipa] ?: emptyList()
     }
 }
 
@@ -407,8 +436,17 @@ enum class LatinKey(
     Y("y", "Y", "j", "y"),
     Z("z", "Z", "z", "z");
 
+    /** Shift key returns uppercase */
+    override val shiftKey: ILayoutKey get() = SimpleKey(upper, ipa, displayName.uppercase())
+
     companion object {
         private val byChar = entries.associateBy { it.char }
+        private val byIpa = entries.groupBy { it.ipa }
+
+        /** Keyboard layout keys by letter */
+        val keys: Map<String, ILayoutKey> = entries.associate { it.char to it as ILayoutKey }
+
         fun fromChar(c: String): LatinKey? = byChar[c.lowercase()]
+        fun fromIpa(ipa: String): List<LatinKey> = byIpa[ipa] ?: emptyList()
     }
 }

@@ -308,10 +308,15 @@ enum class ArabicLetter(
         private val byIsolated = entries.associateBy { it.isolated }
         private val byIsolatedChar = entries.associateBy { it.isolated.firstOrNull() }
         private val byQwerty = entries.associateBy { it.qwerty }
+        private val byIpa = entries.groupBy { it.ipa }
+
+        /** Keyboard layout keys - initialized lazily after Haraka/ArabicKeySymbol are available */
+        val keys: Map<String, ILayoutKey> by lazy { buildArabicKeys() }
 
         fun fromChar(s: String): ArabicLetter? = byIsolated[s]
         fun fromChar(c: Char): ArabicLetter? = byIsolatedChar[c]
         fun fromQwerty(c: Char): ArabicLetter? = byQwerty[c]
+        fun fromIpa(ipa: String): List<ArabicLetter> = byIpa[ipa] ?: emptyList()
     }
 }
 
@@ -761,44 +766,17 @@ fun ArabicLetter.toLayoutKey(shiftChar: String? = null, shiftIpa: String? = null
     return LayoutKey(isolated, ipa, displayName, modifiers)
 }
 
-/**
- * Greek keyboard keys - use enum values directly
- */
-val greekKeys: Map<String, ILayoutKey> = GreekKey.entries
-    .associate { it.qwerty to it as ILayoutKey } +
-    mapOf("q" to SimpleKey(";", "", "semicolon", SimpleKey(":", "", "colon")))
+/** @deprecated Use GreekKey.keys instead */
+@Deprecated("Use GreekKey.keys", ReplaceWith("GreekKey.keys"))
+val greekKeys: Map<String, ILayoutKey> get() = GreekKey.keys
 
-/**
- * Cyrillic (Russian) keyboard keys - use enum values directly
- */
-val cyrillicKeys: Map<String, ILayoutKey> = CyrillicKey.entries
-    .associate { it.qwerty to it as ILayoutKey }
+/** @deprecated Use CyrillicKey.keys instead */
+@Deprecated("Use CyrillicKey.keys", ReplaceWith("CyrillicKey.keys"))
+val cyrillicKeys: Map<String, ILayoutKey> get() = CyrillicKey.keys
 
-/**
- * Hiragana (Japanese) keyboard keys - use enum values directly
- */
-val hiraganaKeys: Map<String, ILayoutKey> = HiraganaKey.entries
-    .filter { it.romaji.length == 1 || it.romaji in listOf("ka", "sa", "ta", "na", "ha", "ma", "ya", "ra", "wa") }
-    .associate {
-        val key = when (it.romaji) {
-            "a" -> "a"
-            "i" -> "i"
-            "u" -> "u"
-            "e" -> "e"
-            "o" -> "o"
-            "ka" -> "k"
-            "sa" -> "s"
-            "ta" -> "t"
-            "na" -> "n"
-            "ha" -> "h"
-            "ma" -> "m"
-            "ya" -> "y"
-            "ra" -> "r"
-            "wa" -> "w"
-            else -> it.romaji
-        }
-        key to it as ILayoutKey  // Use enum directly
-    }
+/** @deprecated Use HiraganaKey.keys instead */
+@Deprecated("Use HiraganaKey.keys", ReplaceWith("HiraganaKey.keys"))
+val hiraganaKeys: Map<String, ILayoutKey> get() = HiraganaKey.keys
 
 /**
  * Arabic keyboard shift modifiers - derived from Haraka and ArabicKeySymbol enums
@@ -823,10 +801,10 @@ val arabicShiftMap: Map<Char, Triple<String, String, String>> = buildMap {
 }
 
 /**
- * Arabic keyboard keys generated from enum with shift modifiers.
- * Uses ILayoutKey interface for consistency.
+ * Build Arabic keyboard keys from enum with shift modifiers.
+ * Called lazily by ArabicLetter.keys companion property.
  */
-val arabicKeys: Map<String, ILayoutKey> = ArabicLetter.entries
+private fun buildArabicKeys(): Map<String, ILayoutKey> = ArabicLetter.entries
     .filter { it.qwerty != '/' }  // Skip letters with placeholder qwerty
     .associate { letter ->
         val shift = arabicShiftMap[letter.qwerty]
