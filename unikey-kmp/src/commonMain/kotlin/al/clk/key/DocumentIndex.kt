@@ -3234,6 +3234,341 @@ class YDoc(val clientId: String = generateClientId()) {
     }
 }
 
+// ═══════════════════════════════════════════════════════════════════════════════
+// DATETIME / CLDR CALENDAR - Locale-aware date/time with calendar systems
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/**
+ * Calendar type enum (CLDR calendar identifiers).
+ */
+enum class CalendarType(val cldrId: String) {
+    GREGORIAN("gregory"),
+    HEBREW("hebrew"),
+    ISLAMIC("islamic"),
+    ISLAMIC_CIVIL("islamic-civil"),
+    PERSIAN("persian"),
+    CHINESE("chinese"),
+    JAPANESE("japanese"),
+    BUDDHIST("buddhist"),
+    COPTIC("coptic"),
+    ETHIOPIC("ethiopic"),
+    INDIAN("indian");
+
+    companion object {
+        fun fromCldr(id: String): CalendarType? = entries.find { it.cldrId == id.lowercase() }
+        fun forLang(lang: String): CalendarType = when (lang.lowercase()) {
+            "he", "heb" -> HEBREW
+            "ar", "ara" -> ISLAMIC
+            "fa", "fas" -> PERSIAN
+            "ja", "jpn" -> JAPANESE
+            "zh", "zho" -> CHINESE
+            "th", "tha" -> BUDDHIST
+            else -> GREGORIAN
+        }
+    }
+}
+
+/**
+ * Hebrew month names (leap year aware).
+ */
+enum class HebrewMonth(val hebrewName: String, val transliteration: String, val index: Int) {
+    TISHREI("תשרי", "Tishrei", 1),
+    CHESHVAN("חשון", "Cheshvan", 2),
+    KISLEV("כסלו", "Kislev", 3),
+    TEVET("טבת", "Tevet", 4),
+    SHEVAT("שבט", "Shevat", 5),
+    ADAR("אדר", "Adar", 6),
+    ADAR_I("אדר א׳", "Adar I", 6),    // Leap year
+    ADAR_II("אדר ב׳", "Adar II", 7),  // Leap year
+    NISAN("ניסן", "Nisan", 7),
+    IYAR("אייר", "Iyar", 8),
+    SIVAN("סיון", "Sivan", 9),
+    TAMMUZ("תמוז", "Tammuz", 10),
+    AV("אב", "Av", 11),
+    ELUL("אלול", "Elul", 12);
+
+    companion object {
+        /** Get month for index (1-based), leap year aware */
+        fun forIndex(index: Int, isLeapYear: Boolean): HebrewMonth? {
+            return if (isLeapYear) {
+                when (index) {
+                    1 -> TISHREI
+                    2 -> CHESHVAN
+                    3 -> KISLEV
+                    4 -> TEVET
+                    5 -> SHEVAT
+                    6 -> ADAR_I
+                    7 -> ADAR_II
+                    8 -> NISAN
+                    9 -> IYAR
+                    10 -> SIVAN
+                    11 -> TAMMUZ
+                    12 -> AV
+                    13 -> ELUL
+                    else -> null
+                }
+            } else {
+                entries.find { it.index == index && it != ADAR_I && it != ADAR_II }
+                    ?: if (index == 6) ADAR else null
+            }
+        }
+    }
+}
+
+/**
+ * Islamic month names.
+ */
+enum class IslamicMonth(val arabicName: String, val transliteration: String, val index: Int) {
+    MUHARRAM("محرم", "Muharram", 1),
+    SAFAR("صفر", "Safar", 2),
+    RABI_AL_AWWAL("ربيع الأول", "Rabi' al-Awwal", 3),
+    RABI_AL_THANI("ربيع الآخر", "Rabi' al-Thani", 4),
+    JUMADA_AL_ULA("جمادى الأولى", "Jumada al-Ula", 5),
+    JUMADA_AL_THANI("جمادى الآخرة", "Jumada al-Thani", 6),
+    RAJAB("رجب", "Rajab", 7),
+    SHABAN("شعبان", "Sha'ban", 8),
+    RAMADAN("رمضان", "Ramadan", 9),
+    SHAWWAL("شوال", "Shawwal", 10),
+    DHU_AL_QADAH("ذو القعدة", "Dhu al-Qa'dah", 11),
+    DHU_AL_HIJJAH("ذو الحجة", "Dhu al-Hijjah", 12);
+
+    companion object {
+        fun forIndex(index: Int): IslamicMonth? = entries.find { it.index == index }
+    }
+}
+
+/**
+ * Day of week with locale-aware names.
+ */
+enum class DayOfWeek(val index: Int) {
+    SUNDAY(0),
+    MONDAY(1),
+    TUESDAY(2),
+    WEDNESDAY(3),
+    THURSDAY(4),
+    FRIDAY(5),
+    SATURDAY(6);
+
+    /** Get localized name */
+    fun getName(lang: String): String = when (lang.lowercase()) {
+        "he" -> when (this) {
+            SUNDAY -> "יום ראשון"
+            MONDAY -> "יום שני"
+            TUESDAY -> "יום שלישי"
+            WEDNESDAY -> "יום רביעי"
+            THURSDAY -> "יום חמישי"
+            FRIDAY -> "יום שישי"
+            SATURDAY -> "שבת"
+        }
+        "ar" -> when (this) {
+            SUNDAY -> "الأحد"
+            MONDAY -> "الإثنين"
+            TUESDAY -> "الثلاثاء"
+            WEDNESDAY -> "الأربعاء"
+            THURSDAY -> "الخميس"
+            FRIDAY -> "الجمعة"
+            SATURDAY -> "السبت"
+        }
+        else -> name.lowercase().replaceFirstChar { it.uppercase() }
+    }
+
+    /** Get short name (1-2 chars) */
+    fun getShortName(lang: String): String = when (lang.lowercase()) {
+        "he" -> when (this) {
+            SUNDAY -> "א׳"
+            MONDAY -> "ב׳"
+            TUESDAY -> "ג׳"
+            WEDNESDAY -> "ד׳"
+            THURSDAY -> "ה׳"
+            FRIDAY -> "ו׳"
+            SATURDAY -> "ש׳"
+        }
+        else -> name.take(2)
+    }
+
+    companion object {
+        fun fromIndex(index: Int): DayOfWeek = entries.find { it.index == index % 7 } ?: SUNDAY
+    }
+}
+
+/**
+ * Locale-aware date representation.
+ */
+data class LocaleDate(
+    val year: Int,
+    val month: Int,      // 1-based
+    val day: Int,
+    val calendar: CalendarType = CalendarType.GREGORIAN,
+    val lang: String = "en"
+) {
+    /** Get month name in locale */
+    val monthName: String get() = when (calendar) {
+        CalendarType.HEBREW -> HebrewMonth.forIndex(month, isHebrewLeapYear(year))?.let {
+            if (lang == "he") it.hebrewName else it.transliteration
+        } ?: month.toString()
+        CalendarType.ISLAMIC, CalendarType.ISLAMIC_CIVIL -> IslamicMonth.forIndex(month)?.let {
+            if (lang == "ar") it.arabicName else it.transliteration
+        } ?: month.toString()
+        else -> getGregorianMonthName(month, lang)
+    }
+
+    /** Format date according to locale */
+    fun format(pattern: String = "default"): String = when (pattern) {
+        "default" -> when (lang) {
+            "he" -> "$day ב$monthName $year"
+            "ar" -> "$day $monthName $year"
+            else -> "$monthName $day, $year"
+        }
+        "short" -> "$day/$month/$year"
+        "iso" -> "$year-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}"
+        else -> "$day $monthName $year"
+    }
+
+    /** Convert between calendar systems (simplified) */
+    fun toCalendar(target: CalendarType): LocaleDate {
+        if (target == calendar) return this
+        // Simplified conversion via Julian Day Number
+        val jdn = toJulianDay()
+        return fromJulianDay(jdn, target, lang)
+    }
+
+    /** Convert to Julian Day Number */
+    fun toJulianDay(): Long {
+        return when (calendar) {
+            CalendarType.GREGORIAN -> gregorianToJdn(year, month, day)
+            CalendarType.HEBREW -> hebrewToJdn(year, month, day)
+            CalendarType.ISLAMIC, CalendarType.ISLAMIC_CIVIL -> islamicToJdn(year, month, day)
+            else -> gregorianToJdn(year, month, day) // Fallback
+        }
+    }
+
+    companion object {
+        /** Create from Julian Day Number */
+        fun fromJulianDay(jdn: Long, calendar: CalendarType, lang: String = "en"): LocaleDate {
+            val (y, m, d) = when (calendar) {
+                CalendarType.GREGORIAN -> jdnToGregorian(jdn)
+                CalendarType.HEBREW -> jdnToHebrew(jdn)
+                CalendarType.ISLAMIC, CalendarType.ISLAMIC_CIVIL -> jdnToIslamic(jdn)
+                else -> jdnToGregorian(jdn)
+            }
+            return LocaleDate(y, m, d, calendar, lang)
+        }
+
+        /** Today's date in specified calendar */
+        fun today(calendar: CalendarType = CalendarType.GREGORIAN, lang: String = "en"): LocaleDate {
+            // Simplified: would use kotlinx-datetime in real impl
+            val epoch = 2440588L  // Jan 1, 1970 JDN
+            val days = (System.currentTimeMillis() / 86400000L)
+            return fromJulianDay(epoch + days, calendar, lang)
+        }
+
+        // Gregorian <-> JDN conversions
+        private fun gregorianToJdn(y: Int, m: Int, d: Int): Long {
+            val a = (14 - m) / 12
+            val yy = y + 4800 - a
+            val mm = m + 12 * a - 3
+            return d + (153 * mm + 2) / 5 + 365L * yy + yy / 4 - yy / 100 + yy / 400 - 32045
+        }
+
+        private fun jdnToGregorian(jdn: Long): Triple<Int, Int, Int> {
+            val a = jdn + 32044
+            val b = (4 * a + 3) / 146097
+            val c = a - 146097 * b / 4
+            val d = (4 * c + 3) / 1461
+            val e = c - 1461 * d / 4
+            val m = (5 * e + 2) / 153
+            val day = (e - (153 * m + 2) / 5 + 1).toInt()
+            val month = (m + 3 - 12 * (m / 10)).toInt()
+            val year = (100 * b + d - 4800 + m / 10).toInt()
+            return Triple(year, month, day)
+        }
+
+        // Hebrew calendar (simplified)
+        private fun hebrewToJdn(y: Int, m: Int, d: Int): Long {
+            // Simplified algorithm
+            val months = if (isHebrewLeapYear(y)) 13 else 12
+            val days = hebrewYearDays(y)
+            var jdn = hebrewEpoch(y)
+            for (i in 1 until m) {
+                jdn += hebrewMonthDays(y, i)
+            }
+            return jdn + d - 1
+        }
+
+        private fun jdnToHebrew(jdn: Long): Triple<Int, Int, Int> {
+            // Simplified reverse calculation
+            var year = ((jdn - 347997) * 98496 / 35975351).toInt()
+            while (hebrewEpoch(year + 1) <= jdn) year++
+            var month = 1
+            var remaining = (jdn - hebrewEpoch(year)).toInt()
+            while (remaining >= hebrewMonthDays(year, month)) {
+                remaining -= hebrewMonthDays(year, month)
+                month++
+            }
+            return Triple(year, month, remaining + 1)
+        }
+
+        private fun hebrewEpoch(year: Int): Long {
+            // Simplified: days from creation to Tishrei 1 of year
+            val months = (235 * year - 234) / 19
+            val parts = 12084L + 13753 * months
+            val day = 29 * months + parts / 25920
+            return day + 347997 // Hebrew epoch in JDN
+        }
+
+        private fun hebrewYearDays(year: Int): Int {
+            return (hebrewEpoch(year + 1) - hebrewEpoch(year)).toInt()
+        }
+
+        private fun hebrewMonthDays(year: Int, month: Int): Int {
+            return when (month) {
+                2 -> if (hebrewYearDays(year) % 10 == 5) 30 else 29  // Cheshvan
+                3 -> if (hebrewYearDays(year) % 10 == 3) 29 else 30  // Kislev
+                6 -> if (isHebrewLeapYear(year)) 30 else 29          // Adar
+                else -> if (month % 2 == 1) 30 else 29
+            }
+        }
+
+        private fun isHebrewLeapYear(year: Int): Boolean {
+            return (7 * year + 1) % 19 < 7
+        }
+
+        // Islamic calendar (simplified)
+        private fun islamicToJdn(y: Int, m: Int, d: Int): Long {
+            return d + 29 * (m - 1) + m / 2 + 354L * (y - 1) + (3 + 11 * y) / 30 + 1948439
+        }
+
+        private fun jdnToIslamic(jdn: Long): Triple<Int, Int, Int> {
+            val l = jdn - 1948440 + 10632
+            val n = (l - 1) / 10631
+            val ll = l - 10631 * n + 354
+            val j = (10985 - ll) / 5316 * ((50 * ll) / 17719) + (ll / 5670) * ((43 * ll) / 15238)
+            val lll = ll - ((30 - j) / 15) * ((17719 * j) / 50) - (j / 16) * ((15238 * j) / 43) + 29
+            val month = ((24 * lll) / 709).toInt()
+            val day = (lll - ((709 * month) / 24)).toInt()
+            val year = (30 * n + j - 30).toInt()
+            return Triple(year, month, day)
+        }
+
+        private fun getGregorianMonthName(month: Int, lang: String): String = when (lang) {
+            "he" -> listOf("ינואר", "פברואר", "מרץ", "אפריל", "מאי", "יוני",
+                          "יולי", "אוגוסט", "ספטמבר", "אוקטובר", "נובמבר", "דצמבר")
+                .getOrElse(month - 1) { "" }
+            "ar" -> listOf("يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو",
+                          "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر")
+                .getOrElse(month - 1) { "" }
+            else -> listOf("January", "February", "March", "April", "May", "June",
+                          "July", "August", "September", "October", "November", "December")
+                .getOrElse(month - 1) { "" }
+        }
+
+        // Stub for KMP
+        private object System {
+            fun currentTimeMillis(): Long = kotlin.random.Random.nextLong(0, 100000000000L)
+        }
+    }
+}
+
 /**
  * Sheet in a workbook.
  */
