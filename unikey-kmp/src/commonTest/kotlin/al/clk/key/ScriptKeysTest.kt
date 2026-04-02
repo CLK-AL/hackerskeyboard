@@ -621,6 +621,122 @@ class LatinKeyTest {
 }
 
 /**
+ * English spelling pattern tests
+ */
+class EnglishPatternTest {
+
+    @Test
+    fun testOughtPattern() {
+        val pattern = EnglishPattern.matchEnding("bought")
+        assertNotNull(pattern)
+        assertEquals(EnglishPattern.OUGHT, pattern)
+        assertEquals("ɔːt", pattern.ipa)
+    }
+
+    @Test
+    fun testOughVariants() {
+        // Different pronunciations of "ough"
+        val through = EnglishPattern.findInWord("through")
+        assertTrue(through.any { it.ipa == "uː" }, "through should have oo sound")
+
+        val rough = EnglishPattern.findInWord("rough")
+        assertTrue(rough.any { it.ipa == "ʌf" }, "rough should have uff sound")
+
+        val though = EnglishPattern.findInWord("though")
+        assertTrue(though.any { it.ipa == "oʊ" }, "though should have long o sound")
+    }
+
+    @Test
+    fun testAughtPattern() {
+        val pattern = EnglishPattern.matchEnding("caught")
+        assertNotNull(pattern)
+        assertEquals("ɔːt", pattern.ipa)
+        assertTrue(pattern.examples.contains("caught"))
+    }
+
+    @Test
+    fun testIghtPattern() {
+        val pattern = EnglishPattern.matchEnding("night")
+        assertNotNull(pattern)
+        assertEquals(EnglishPattern.IGHT, pattern)
+        assertEquals("aɪt", pattern.ipa)
+    }
+
+    @Test
+    fun testEighPattern() {
+        val pattern = EnglishPattern.matchEnding("weigh")
+        assertNotNull(pattern)
+        assertEquals(EnglishPattern.EIGH, pattern)
+        assertEquals("eɪ", pattern.ipa)
+    }
+
+    @Test
+    fun testTionPattern() {
+        val pattern = EnglishPattern.matchEnding("nation")
+        assertNotNull(pattern)
+        assertEquals(EnglishPattern.TION, pattern)
+        assertEquals("ʃən", pattern.ipa)
+    }
+
+    @Test
+    fun testIngPattern() {
+        val pattern = EnglishPattern.matchEnding("singing")
+        assertNotNull(pattern)
+        assertEquals(EnglishPattern.ING, pattern)
+        assertEquals("ɪŋ", pattern.ipa)
+    }
+
+    @Test
+    fun testOokPattern() {
+        val pattern = EnglishPattern.matchEnding("book")
+        assertNotNull(pattern)
+        assertEquals(EnglishPattern.OOK, pattern)
+        assertEquals("ʊk", pattern.ipa)
+    }
+
+    @Test
+    fun testSilentLetters() {
+        val kn = EnglishPattern.KN
+        assertEquals("n", kn.ipa)
+        assertTrue(kn.examples.contains("know"))
+
+        val wr = EnglishPattern.WR
+        assertEquals("r", wr.ipa)
+        assertTrue(wr.examples.contains("write"))
+    }
+
+    @Test
+    fun testFromIpa() {
+        // Multiple patterns can have same IPA
+        val awtPatterns = EnglishPattern.fromIpa("ɔːt")
+        assertTrue(awtPatterns.contains(EnglishPattern.OUGHT))
+        assertTrue(awtPatterns.contains(EnglishPattern.AUGHT))
+    }
+
+    @Test
+    fun testAllPatternsHaveExamples() {
+        EnglishPattern.entries.forEach { pattern ->
+            assertTrue(pattern.examples.isNotEmpty(), "${pattern.name} should have examples")
+        }
+    }
+
+    @Test
+    fun testAllPatternsHaveIpa() {
+        EnglishPattern.entries.filter { it != EnglishPattern.GH_SILENT }.forEach { pattern ->
+            assertTrue(pattern.ipa.isNotEmpty(), "${pattern.name} should have IPA")
+        }
+    }
+
+    @Test
+    fun testPatternPosition() {
+        assertEquals(PatternPosition.END, EnglishPattern.OUGHT.position)
+        assertEquals(PatternPosition.END, EnglishPattern.TION.position)
+        assertEquals(PatternPosition.END, EnglishPattern.LY.position)
+        assertEquals(PatternPosition.END, EnglishPattern.MB.position)
+    }
+}
+
+/**
  * Cross-script IPA round-trip tests
  */
 class IpaRoundTripTest {

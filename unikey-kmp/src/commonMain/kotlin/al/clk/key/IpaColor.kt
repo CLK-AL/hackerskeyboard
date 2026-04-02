@@ -7,57 +7,52 @@ package al.clk.key
 object IpaColor {
 
     /**
-     * English word ending patterns mapped to IPA.
-     * Order matters - more specific patterns first.
-     */
-    private val EN_ENDINGS = listOf(
-        Regex("ing$") to "IN",
-        Regex("tion$") to "shEn",
-        Regex("ting$") to "tIN",
-        Regex("ring$") to "rIN",
-        Regex("ling$") to "lIN",
-        Regex("ning$") to "nIN",
-        Regex("ent$") to "Ent",
-        Regex("ant$") to "ant",
-        Regex("ine$") to "ajn",
-        Regex("ate$") to "ejt",
-        Regex("ight$") to "ajt",
-        Regex("ite$") to "ajt",
-        Regex("ake$") to "ejk",
-        Regex("ade$") to "ejd",
-        Regex("age$") to "Ij",
-        Regex("ound$") to "awnd",
-        Regex("own$") to "awn",
-        Regex("out$") to "awt",
-        Regex("ash$") to "ash",
-        Regex("ush$") to "ush",
-        Regex("ay$") to "ej",
-        Regex("ey$") to "ej",
-        Regex("oy$") to "oj",
-        Regex("er$") to "Er",
-        Regex("or$") to "Er",
-        Regex("ar$") to "ar",
-        Regex("le$") to "El",
-        Regex("al$") to "El",
-        Regex("ed$") to "d",
-        Regex("es$") to "z",
-        Regex("ly$") to "li",
-        Regex("ck$") to "k",
-        Regex("ss$") to "s",
-        Regex("ll$") to "l"
-    )
-
-    /**
-     * Convert English word to IPA ending (2-4 chars).
+     * Convert English word to IPA ending using EnglishPattern enum.
+     * Falls back to simple approximation if no pattern matches.
      */
     fun enIpa(word: String): String {
         val w = word.lowercase().replace(Regex("[^a-z]"), "")
         if (w.isEmpty()) return ""
 
-        for ((pattern, ipa) in EN_ENDINGS) {
-            if (pattern.containsMatchIn(w)) return ipa
+        // Use the EnglishPattern enum for matching
+        val pattern = EnglishPattern.matchEnding(w)
+        if (pattern != null) {
+            // Simplify IPA for color hashing (ASCII-friendly)
+            return simplifyIpa(pattern.ipa)
         }
+
+        // Fallback to last 3 chars
         return w.takeLast(3)
+    }
+
+    /**
+     * Simplify IPA to ASCII-friendly form for color hashing.
+     */
+    private fun simplifyIpa(ipa: String): String {
+        return ipa
+            .replace("ɪ", "I")
+            .replace("ŋ", "N")
+            .replace("ʃ", "sh")
+            .replace("ʒ", "zh")
+            .replace("ə", "E")
+            .replace("ɔː", "aw")
+            .replace("ɔ", "o")
+            .replace("ɜː", "Er")
+            .replace("aʊ", "aw")
+            .replace("aɪ", "aj")
+            .replace("eɪ", "ej")
+            .replace("oʊ", "ow")
+            .replace("ɔɪ", "oj")
+            .replace("uː", "oo")
+            .replace("iː", "ee")
+            .replace("ɛ", "e")
+            .replace("æ", "a")
+            .replace("ʌ", "u")
+            .replace("ʊ", "U")
+            .replace("θ", "th")
+            .replace("ð", "dh")
+            .replace("ː", "")
+            .replace("r", "r")
     }
 
     /**

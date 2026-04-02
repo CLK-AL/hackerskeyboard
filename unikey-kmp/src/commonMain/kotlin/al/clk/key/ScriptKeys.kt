@@ -450,3 +450,191 @@ enum class LatinKey(
         fun fromIpa(ipa: String): List<LatinKey> = byIpa[ipa] ?: emptyList()
     }
 }
+
+/**
+ * English spelling patterns (graphemes) with IPA pronunciations.
+ * These are common letter combinations that represent specific sounds.
+ * Ordered by specificity - longer/more specific patterns first.
+ */
+enum class EnglishPattern(
+    val pattern: String,
+    override val ipa: String,
+    override val displayName: String,
+    val examples: List<String>,
+    val position: PatternPosition = PatternPosition.ANY
+) : ILayoutKey {
+    // === OUGH patterns (most variable in English) ===
+    OUGHT("ought", "ɔːt", "ought", listOf("bought", "thought", "fought", "brought"), PatternPosition.END),
+    OUGH_O("ough", "oʊ", "ough-long-o", listOf("though", "dough", "although"), PatternPosition.END),
+    OUGH_UFF("ough", "ʌf", "ough-uff", listOf("rough", "tough", "enough"), PatternPosition.END),
+    OUGH_OFF("ough", "ɒf", "ough-off", listOf("cough", "trough")),
+    OUGH_OO("ough", "uː", "ough-oo", listOf("through", "throughout")),
+    OUGH_OW("ough", "aʊ", "ough-ow", listOf("bough", "plough", "drought")),
+
+    // === AUGH patterns ===
+    AUGHT("aught", "ɔːt", "aught", listOf("caught", "taught", "daughter", "naughty"), PatternPosition.END),
+    AUGH("augh", "ɔː", "augh", listOf("laugh"), PatternPosition.END), // Note: "laugh" is actually /æf/
+    LAUGH("augh", "æf", "laugh", listOf("laugh", "laughter")),
+
+    // === EIGH patterns ===
+    EIGHT("eight", "eɪt", "eight", listOf("eight", "weight", "freight")),
+    EIGH("eigh", "eɪ", "eigh", listOf("weigh", "sleigh", "neigh", "neighbor")),
+    HEIGHT("eight", "aɪt", "height", listOf("height")), // Irregular
+
+    // === IGHT patterns ===
+    IGHT("ight", "aɪt", "ight", listOf("light", "night", "right", "might", "fight", "sight")),
+
+    // === IGH patterns ===
+    IGH("igh", "aɪ", "igh", listOf("high", "sigh", "thigh")),
+
+    // === TION/SION patterns ===
+    TION("tion", "ʃən", "tion", listOf("nation", "station", "motion", "action")),
+    SION_ZH("sion", "ʒən", "sion-zh", listOf("vision", "decision", "television")),
+    SION_SH("sion", "ʃən", "sion-sh", listOf("mission", "passion", "session")),
+
+    // === ING patterns ===
+    ING("ing", "ɪŋ", "ing", listOf("sing", "ring", "king", "thing")),
+    TING("ting", "tɪŋ", "ting", listOf("sitting", "hitting", "cutting")),
+    RING_VERB("ring", "rɪŋ", "ring", listOf("bring", "spring", "string")),
+
+    // === OU patterns ===
+    OUND("ound", "aʊnd", "ound", listOf("sound", "round", "ground", "found")),
+    OUNT("ount", "aʊnt", "ount", listOf("count", "mount", "amount")),
+    OUT("out", "aʊt", "out", listOf("out", "about", "shout", "scout")),
+    OUR("our", "aʊər", "our", listOf("our", "hour", "sour")),
+    OUR_ER("our", "ər", "our-er", listOf("colour", "favour", "honour")), // British
+    OUSE("ouse", "aʊs", "ouse", listOf("house", "mouse", "blouse")),
+    OUSE_Z("ouse", "aʊz", "ouse-z", listOf("house", "rouse")), // Verb forms
+    OULD("ould", "ʊd", "ould", listOf("could", "would", "should")),
+    OUP("oup", "uːp", "oup", listOf("soup", "group", "coup")),
+
+    // === OW patterns ===
+    OWN_OWN("own", "oʊn", "own-long", listOf("own", "grown", "shown", "known")),
+    OWN_OWN2("own", "aʊn", "own-down", listOf("town", "down", "brown", "crown")),
+    OW_LONG("ow", "oʊ", "ow-long", listOf("low", "show", "know", "grow", "slow")),
+    OW_OW("ow", "aʊ", "ow-ow", listOf("now", "how", "cow", "bow", "wow")),
+
+    // === EA patterns ===
+    EAR_EER("ear", "ɪər", "ear-eer", listOf("ear", "hear", "near", "fear", "dear")),
+    EAR_AIR("ear", "eər", "ear-air", listOf("bear", "wear", "pear", "swear")),
+    EAR_ER("ear", "ɜːr", "ear-er", listOf("earth", "learn", "early", "search")),
+    EAT("eat", "iːt", "eat", listOf("eat", "beat", "heat", "meat", "seat")),
+    EAD_EED("ead", "iːd", "ead-eed", listOf("read", "lead", "bead")),
+    EAD_ED("ead", "ɛd", "ead-ed", listOf("head", "dead", "bread", "spread")),
+    EAK("eak", "iːk", "eak", listOf("speak", "weak", "peak", "sneak")),
+    EAL("eal", "iːl", "eal", listOf("deal", "meal", "real", "steal")),
+    EAM("eam", "iːm", "eam", listOf("team", "dream", "stream", "cream")),
+    EAN("ean", "iːn", "ean", listOf("mean", "clean", "bean", "lean")),
+    EAP("eap", "iːp", "eap", listOf("heap", "leap", "cheap")),
+    EAS("eas", "iːz", "eas", listOf("peas", "please", "ease")),
+    EAST("east", "iːst", "east", listOf("east", "beast", "feast", "least")),
+    EATH("eath", "iːθ", "eath", listOf("beneath", "wreath")),
+    EATH_SHORT("eath", "ɛθ", "eath-short", listOf("death", "breath")),
+
+    // === OO patterns ===
+    OOK("ook", "ʊk", "ook", listOf("book", "look", "cook", "hook", "took")),
+    OOD_GOOD("ood", "ʊd", "ood-good", listOf("good", "wood", "stood", "hood")),
+    OOD_FOOD("ood", "uːd", "ood-food", listOf("food", "mood", "brood")),
+    OOL("ool", "uːl", "ool", listOf("pool", "cool", "school", "tool", "fool")),
+    OOM("oom", "uːm", "oom", listOf("room", "boom", "doom", "zoom", "bloom")),
+    OON("oon", "uːn", "oon", listOf("moon", "soon", "noon", "spoon")),
+    OOP("oop", "uːp", "oop", listOf("loop", "hoop", "troop")),
+    OOR("oor", "ɔːr", "oor", listOf("door", "floor", "poor")),
+    OOT_FOOT("oot", "ʊt", "oot-foot", listOf("foot", "soot")),
+    OOT_BOOT("oot", "uːt", "oot-boot", listOf("boot", "root", "shoot", "hoot")),
+    OOTH("ooth", "uːθ", "ooth", listOf("tooth", "ooth", "booth")),
+
+    // === AY/EY patterns ===
+    AY("ay", "eɪ", "ay", listOf("day", "say", "way", "play", "stay")),
+    EY("ey", "eɪ", "ey", listOf("they", "grey", "hey", "prey")),
+    EY_I("ey", "i", "ey-i", listOf("key", "money", "honey", "monkey")),
+
+    // === OY/OI patterns ===
+    OY("oy", "ɔɪ", "oy", listOf("boy", "toy", "joy", "enjoy")),
+    OI("oi", "ɔɪ", "oi", listOf("oil", "coin", "join", "point")),
+    OISE("oise", "ɔɪz", "oise", listOf("noise", "poise")),
+    OICE("oice", "ɔɪs", "oice", listOf("voice", "choice", "rejoice")),
+
+    // === AWE/AW patterns ===
+    AWE("awe", "ɔː", "awe", listOf("awe", "awesome")),
+    AW("aw", "ɔː", "aw", listOf("saw", "law", "raw", "draw", "jaw")),
+    AWN("awn", "ɔːn", "awn", listOf("dawn", "lawn", "yawn", "spawn")),
+    AWL("awl", "ɔːl", "awl", listOf("crawl", "shawl", "brawl")),
+
+    // === AIR/ARE patterns ===
+    AIR("air", "eər", "air", listOf("air", "hair", "fair", "pair", "chair")),
+    ARE("are", "eər", "are", listOf("care", "share", "rare", "bare", "dare")),
+
+    // === ER/IR/UR patterns ===
+    ER("er", "ər", "er", listOf("her", "father", "water", "better")),
+    IR("ir", "ɜːr", "ir", listOf("bird", "girl", "first", "shirt", "sir")),
+    UR("ur", "ɜːr", "ur", listOf("turn", "burn", "hurt", "nurse", "fur")),
+
+    // === AL/ALL patterns ===
+    ALL("all", "ɔːl", "all", listOf("all", "ball", "call", "fall", "tall", "wall")),
+    ALK("alk", "ɔːk", "alk", listOf("walk", "talk", "chalk")),
+    ALT("alt", "ɔːlt", "alt", listOf("salt", "halt", "malt")),
+
+    // === Silent letter patterns ===
+    KN("kn", "n", "kn", listOf("know", "knee", "knife", "knock", "knight")),
+    WR("wr", "r", "wr", listOf("write", "wrong", "wrap", "wrist")),
+    GN("gn", "n", "gn", listOf("gnaw", "gnat", "sign", "design")),
+    MB("mb", "m", "mb", listOf("lamb", "climb", "thumb", "bomb", "comb"), PatternPosition.END),
+    GH_SILENT("gh", "", "gh-silent", listOf("high", "sigh", "weigh", "though")),
+
+    // === Common endings ===
+    ABLE("able", "əbəl", "able", listOf("able", "table", "capable"), PatternPosition.END),
+    IBLE("ible", "ɪbəl", "ible", listOf("possible", "visible", "terrible"), PatternPosition.END),
+    NESS("ness", "nəs", "ness", listOf("happiness", "darkness", "kindness"), PatternPosition.END),
+    MENT("ment", "mənt", "ment", listOf("moment", "element", "government"), PatternPosition.END),
+    ENCE("ence", "əns", "ence", listOf("silence", "difference", "presence"), PatternPosition.END),
+    ANCE("ance", "əns", "ance", listOf("dance", "chance", "balance"), PatternPosition.END),
+    ENT("ent", "ənt", "ent", listOf("sent", "tent", "moment"), PatternPosition.END),
+    ANT("ant", "ənt", "ant", listOf("ant", "plant", "giant"), PatternPosition.END),
+    LY("ly", "li", "ly", listOf("really", "quickly", "slowly"), PatternPosition.END),
+    FUL("ful", "fəl", "ful", listOf("beautiful", "wonderful", "careful"), PatternPosition.END),
+    LESS("less", "ləs", "less", listOf("helpless", "careless", "endless"), PatternPosition.END),
+    ED_T("ed", "t", "ed-t", listOf("walked", "jumped", "helped"), PatternPosition.END),
+    ED_D("ed", "d", "ed-d", listOf("called", "played", "loved"), PatternPosition.END),
+    ED_ID("ed", "ɪd", "ed-id", listOf("wanted", "needed", "added"), PatternPosition.END);
+
+    override val char: String get() = pattern
+
+    companion object {
+        private val byPattern = entries.groupBy { it.pattern }
+        private val byIpa = entries.groupBy { it.ipa }
+
+        /** Find patterns matching a spelling */
+        fun fromPattern(pattern: String): List<EnglishPattern> =
+            byPattern[pattern.lowercase()] ?: emptyList()
+
+        /** Find patterns by IPA sound */
+        fun fromIpa(ipa: String): List<EnglishPattern> =
+            byIpa[ipa] ?: emptyList()
+
+        /** Find best matching pattern for a word ending */
+        fun matchEnding(word: String): EnglishPattern? {
+            val w = word.lowercase()
+            // Try longest patterns first
+            return entries
+                .filter { it.position != PatternPosition.START }
+                .sortedByDescending { it.pattern.length }
+                .firstOrNull { w.endsWith(it.pattern) }
+        }
+
+        /** Find all patterns that could match in a word */
+        fun findInWord(word: String): List<EnglishPattern> {
+            val w = word.lowercase()
+            return entries.filter { w.contains(it.pattern) }
+        }
+    }
+}
+
+/**
+ * Where in a word this pattern typically occurs
+ */
+enum class PatternPosition {
+    START,  // Beginning of word (kn-, wr-)
+    END,    // End of word (-tion, -ight)
+    ANY     // Can occur anywhere
+}
