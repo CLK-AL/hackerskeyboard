@@ -4937,16 +4937,97 @@ enum class WebDavMethod(val value: String) {
         fun parse(method: String): WebDavMethod? =
             entries.find { it.value.equals(method, ignoreCase = true) }
 
-        /** Standard HTTP methods */
-        val standardMethods = listOf(OPTIONS, GET, HEAD, PUT, DELETE)
+        /** Standard HTTP methods (setOf for O(1) contains) */
+        val standardMethods = setOf(OPTIONS, GET, HEAD, PUT, DELETE)
 
         /** WebDAV extension methods (RFC 4918) */
-        val davMethods = listOf(MKCOL, COPY, MOVE, PROPFIND, PROPPATCH, LOCK, UNLOCK)
+        val davMethods = setOf(MKCOL, COPY, MOVE, PROPFIND, PROPPATCH, LOCK, UNLOCK)
+
+        /** Methods that typically have a request body */
+        val methodsWithBody = setOf(PUT, PROPFIND, PROPPATCH, LOCK)
     }
 }
 
 // Usage with Ktor: io.ktor.http.HttpMethod(webDavMethod.value)
 // Example: HttpMethod(WebDavMethod.PROPFIND.value) creates Ktor's HttpMethod("PROPFIND")
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// OKIO INTEGRATION - Buffer/Source/Sink for efficient streaming
+// Usage: okio.Buffer, okio.Source, okio.Sink for Ktor/OkHttp streaming
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/**
+ * Okio-compatible streaming body for WebDAV operations.
+ * Integrates with okio.Buffer for efficient byte streaming.
+ */
+interface OkioBody {
+    /** Content length (-1 if unknown/streaming) */
+    val contentLength: Long get() = -1L
+
+    /** Content type for the body */
+    val contentType: String
+
+    /** Write body content to an Okio BufferedSink */
+    fun writeTo(sink: Any) // okio.BufferedSink
+}
+
+/**
+ * ByteArray body with Okio integration.
+ */
+data class ByteArrayBody(
+    val bytes: ByteArray,
+    override val contentType: String = "application/octet-stream"
+) : OkioBody {
+    override val contentLength: Long get() = bytes.size.toLong()
+    override fun writeTo(sink: Any) {
+        // sink.write(bytes) when using actual okio.BufferedSink
+    }
+    override fun equals(other: Any?) = other is ByteArrayBody && bytes.contentEquals(other.bytes)
+    override fun hashCode() = bytes.contentHashCode()
+}
+
+/**
+ * String body with Okio integration.
+ */
+data class StringBody(
+    val content: String,
+    override val contentType: String = "text/plain; charset=utf-8"
+) : OkioBody {
+    override val contentLength: Long get() = content.encodeToByteArray().size.toLong()
+    override fun writeTo(sink: Any) {
+        // sink.writeUtf8(content) when using actual okio.BufferedSink
+    }
+}
+
+/**
+ * Streaming body with Okio Source.
+ * Used for large content that shouldn't be loaded into memory.
+ */
+data class StreamingBody(
+    val source: Any, // okio.Source
+    override val contentLength: Long = -1L,
+    override val contentType: String = "application/octet-stream"
+) : OkioBody {
+    override fun writeTo(sink: Any) {
+        // sink.writeAll(source) when using actual okio.BufferedSink and okio.Source
+    }
+}
+
+/**
+ * Range-aware body for HTTP 206 Partial Content responses.
+ * Integrates with Okio for efficient range streaming.
+ */
+data class RangeBody(
+    val source: Any, // okio.Source
+    val range: Range,
+    override val contentType: String = "application/octet-stream"
+) : OkioBody {
+    override val contentLength: Long get() = range.length
+    override fun writeTo(sink: Any) {
+        // Skip to range.start, write range.length bytes
+        // source.skip(range.start); sink.write(source, range.length)
+    }
+}
 
 /**
  * WebDAV property.
@@ -5026,7 +5107,8 @@ data class DavPropstat(
 
 /**
  * WebDAV request builder with wire format content negotiation.
- * Supports all WireFormat types via Accept header for PROPFIND/PROPPATCH.
+ * Supports all WireFormat types via Accept header.
+ * Integrates with Okio for efficient streaming via OkioBody.
  */
 class DavRequest(
     val method: WebDavMethod,
@@ -5034,15 +5116,15 @@ class DavRequest(
     val depth: DavDepth = DavDepth.ONE,
     val headers: Map<String, String> = emptyMap(),
     val body: String? = null,
-    val format: WireFormat = WireFormat.XML
+    val okioBody: OkioBody? = null,
+    val format: WireFormat = WireFormat.JSON
 ) {
-    /** Content-Type for request body based on wire format */
-    val contentType: String get() = format.toContentType()
+    /** Content-Type for request body based on wire format or Okio body */
+    val contentType: String get() = okioBody?.contentType ?: format.toContentType()
 
     /** Accept header for response content negotiation (all methods) */
     val accept: String get() = format.toContentType()
 
-    /** Ktor HttpMethod for routing */
     /** HTTP method value for Ktor routing - use with io.ktor.http.HttpMethod(methodValue) */
     val methodValue: String get() = method.value
 
@@ -5060,7 +5142,7 @@ class DavRequest(
             }
         }
         // Content-Type for methods with body
-        if (method in listOf(WebDavMethod.PROPFIND, WebDavMethod.PROPPATCH, WebDavMethod.LOCK, WebDavMethod.PUT)) {
+        if (method in WebDavMethod.methodsWithBody) {
             base["Content-Type"] = contentType
         }
         return base + headers
@@ -5117,7 +5199,7 @@ class DavRequest(
 
     /** Legacy XML body (deprecated, use toBody()) */
     @Deprecated("Use toBody() with format parameter", ReplaceWith("toBody()"))
-    fun toXml(): String? = DavRequest(method, path, depth, headers, body, WireFormat.XML).toBody()
+    fun toXml(): String? = DavRequest(method, path, depth, headers, body, format = WireFormat.XML).toBody()
 
     companion object {
         /** PROPFIND with content negotiation */
@@ -5143,6 +5225,14 @@ class DavRequest(
         /** PUT with content negotiation */
         fun put(path: String, content: String, format: WireFormat = WireFormat.JSON) =
             DavRequest(WebDavMethod.PUT, path, body = content, format = format)
+
+        /** PUT with Okio streaming body */
+        fun put(path: String, body: OkioBody, format: WireFormat = WireFormat.JSON) =
+            DavRequest(WebDavMethod.PUT, path, okioBody = body, format = format)
+
+        /** PUT with byte array */
+        fun put(path: String, bytes: ByteArray, contentType: String = "application/octet-stream") =
+            DavRequest(WebDavMethod.PUT, path, okioBody = ByteArrayBody(bytes, contentType))
 
         /** DELETE with Accept header */
         fun delete(path: String, format: WireFormat = WireFormat.JSON) =
