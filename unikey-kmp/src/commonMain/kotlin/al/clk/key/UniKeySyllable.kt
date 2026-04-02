@@ -468,56 +468,10 @@ data class UniKeySyllable(
             return syllables
         }
 
-        private fun devanagariConsonantIpa(c: Char): String = when (c) {
-            'क' -> "k"
-            'ख' -> "kʰ"
-            'ग' -> "ɡ"
-            'घ' -> "ɡʱ"
-            'ङ' -> "ŋ"
-            'च' -> "tʃ"
-            'छ' -> "tʃʰ"
-            'ज' -> "dʒ"
-            'झ' -> "dʒʱ"
-            'ञ' -> "ɲ"
-            'ट' -> "ʈ"
-            'ठ' -> "ʈʰ"
-            'ड' -> "ɖ"
-            'ढ' -> "ɖʱ"
-            'ण' -> "ɳ"
-            'त' -> "t"
-            'थ' -> "tʰ"
-            'द' -> "d"
-            'ध' -> "dʱ"
-            'न' -> "n"
-            'प' -> "p"
-            'फ' -> "pʰ"
-            'ब' -> "b"
-            'भ' -> "bʱ"
-            'म' -> "m"
-            'य' -> "j"
-            'र' -> "r"
-            'ल' -> "l"
-            'व' -> "ʋ"
-            'श' -> "ʃ"
-            'ष' -> "ʂ"
-            'स' -> "s"
-            'ह' -> "ɦ"
-            else -> ""
-        }
+        private fun devanagariConsonantIpa(c: Char): String =
+            DevanagariKey.fromChar(c)?.takeIf { !it.isVowel }?.ipa ?: ""
 
-        private fun devanagariVowelIpa(c: Char): String = when (c) {
-            'अ' -> "ə"
-            'आ', 'ा' -> "aː"
-            'इ', 'ि' -> "ɪ"
-            'ई', 'ी' -> "iː"
-            'उ', 'ु' -> "ʊ"
-            'ऊ', 'ू' -> "uː"
-            'ए', 'े' -> "eː"
-            'ऐ', 'ै' -> "ɛː"
-            'ओ', 'ो' -> "oː"
-            'औ', 'ौ' -> "ɔː"
-            else -> "ə"
-        }
+        private fun devanagariVowelIpa(c: Char): String = DevanagariKey.vowelIpa(c)
 
         private fun collectDevanagariVowel(word: String, start: Int): Pair<String, Int> {
             if (start >= word.length) return "ə" to 0
@@ -592,84 +546,14 @@ data class UniKeySyllable(
             return Triple(initIpa, medIpa, finIpa)
         }
 
-        private fun hangulInitialIpa(i: Int): String = when (i) {
-            0 -> "ɡ"   // ㄱ
-            1 -> "k"   // ㄲ
-            2 -> "n"   // ㄴ
-            3 -> "d"   // ㄷ
-            4 -> "t"   // ㄸ
-            5 -> "r"   // ㄹ
-            6 -> "m"   // ㅁ
-            7 -> "b"   // ㅂ
-            8 -> "p"   // ㅃ
-            9 -> "s"   // ㅅ
-            10 -> "s"  // ㅆ
-            11 -> ""   // ㅇ (silent)
-            12 -> "dʒ" // ㅈ
-            13 -> "tʃ" // ㅉ
-            14 -> "tʃʰ"// ㅊ
-            15 -> "kʰ" // ㅋ
-            16 -> "tʰ" // ㅌ
-            17 -> "pʰ" // ㅍ
-            18 -> "h"  // ㅎ
-            else -> ""
-        }
+        private fun hangulInitialIpa(i: Int): String =
+            HangulInitial.fromCode(i)?.initialIpa ?: ""
 
-        private fun hangulMedialIpa(m: Int): String = when (m) {
-            0 -> "a"   // ㅏ
-            1 -> "ɛ"   // ㅐ
-            2 -> "ja"  // ㅑ
-            3 -> "jɛ"  // ㅒ
-            4 -> "ʌ"   // ㅓ
-            5 -> "e"   // ㅔ
-            6 -> "jʌ"  // ㅕ
-            7 -> "je"  // ㅖ
-            8 -> "o"   // ㅗ
-            9 -> "wa"  // ㅘ
-            10 -> "wɛ" // ㅙ
-            11 -> "we" // ㅚ
-            12 -> "jo" // ㅛ
-            13 -> "u"  // ㅜ
-            14 -> "wʌ" // ㅝ
-            15 -> "we" // ㅞ
-            16 -> "wi" // ㅟ
-            17 -> "ju" // ㅠ
-            18 -> "ɨ"  // ㅡ
-            19 -> "ɰi" // ㅢ
-            20 -> "i"  // ㅣ
-            else -> ""
-        }
+        private fun hangulMedialIpa(m: Int): String =
+            HangulMedial.fromCode(m)?.ipa ?: ""
 
-        private fun hangulFinalIpa(f: Int): String = when (f) {
-            1 -> "k"   // ㄱ
-            2 -> "k"   // ㄲ
-            3 -> "k"   // ㄳ
-            4 -> "n"   // ㄴ
-            5 -> "n"   // ㄵ
-            6 -> "n"   // ㄶ
-            7 -> "t"   // ㄷ
-            8 -> "l"   // ㄹ
-            9 -> "k"   // ㄺ
-            10 -> "m"  // ㄻ
-            11 -> "p"  // ㄼ
-            12 -> "l"  // ㄽ
-            13 -> "l"  // ㄾ
-            14 -> "l"  // ㄿ
-            15 -> "p"  // ㅀ
-            16 -> "m"  // ㅁ
-            17 -> "p"  // ㅂ
-            18 -> "p"  // ㅄ
-            19 -> "t"  // ㅅ
-            20 -> "t"  // ㅆ
-            21 -> "ŋ"  // ㅇ
-            22 -> "t"  // ㅈ
-            23 -> "t"  // ㅊ
-            24 -> "k"  // ㅋ
-            25 -> "t"  // ㅌ
-            26 -> "p"  // ㅍ
-            27 -> "t"  // ㅎ
-            else -> ""
-        }
+        private fun hangulFinalIpa(f: Int): String =
+            HangulFinal.fromCode(f)?.ipa ?: ""
 
         // ═══ Japanese (ja) - Hiragana/Katakana ═══
         fun parseJapanese(word: String): List<UniKeySyllable> {

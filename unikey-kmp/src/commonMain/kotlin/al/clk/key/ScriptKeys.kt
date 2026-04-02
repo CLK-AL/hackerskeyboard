@@ -104,28 +104,29 @@ enum class CyrillicKey(
  */
 enum class HangulInitial(
     override val char: String,
-    override val ipa: String,
+    override val ipa: String,  // IPA when in final position (for completeness)
     override val displayName: String,
-    val code: Int
+    val code: Int,
+    val initialIpa: String = ipa  // IPA when in initial position (silent ㅇ)
 ) : ILayoutKey {
-    GIYEOK("ㄱ", "k", "giyeok", 0),
-    SSANG_GIYEOK("ㄲ", "k͈", "ssang-giyeok", 1),
+    GIYEOK("ㄱ", "k", "giyeok", 0, "ɡ"),
+    SSANG_GIYEOK("ㄲ", "k", "ssang-giyeok", 1),
     NIEUN("ㄴ", "n", "nieun", 2),
-    DIGEUT("ㄷ", "t", "digeut", 3),
-    SSANG_DIGEUT("ㄸ", "t͈", "ssang-digeut", 4),
-    RIEUL("ㄹ", "ɾ", "rieul", 5),
+    DIGEUT("ㄷ", "t", "digeut", 3, "d"),
+    SSANG_DIGEUT("ㄸ", "t", "ssang-digeut", 4),
+    RIEUL("ㄹ", "l", "rieul", 5, "r"),
     MIEUM("ㅁ", "m", "mieum", 6),
-    BIEUP("ㅂ", "p", "bieup", 7),
-    SSANG_BIEUP("ㅃ", "p͈", "ssang-bieup", 8),
+    BIEUP("ㅂ", "p", "bieup", 7, "b"),
+    SSANG_BIEUP("ㅃ", "p", "ssang-bieup", 8),
     SIOT("ㅅ", "s", "siot", 9),
-    SSANG_SIOT("ㅆ", "s͈", "ssang-siot", 10),
-    IEUNG("ㅇ", "ŋ", "ieung", 11),
-    JIEUT("ㅈ", "tɕ", "jieut", 12),
-    SSANG_JIEUT("ㅉ", "t͈ɕ", "ssang-jieut", 13),
-    CHIEUT("ㅊ", "tɕʰ", "chieut", 14),
-    KIEUK("ㅋ", "kʰ", "kieuk", 15),
-    TIEUT("ㅌ", "tʰ", "tieut", 16),
-    PIEUP("ㅍ", "pʰ", "pieup", 17),
+    SSANG_SIOT("ㅆ", "s", "ssang-siot", 10),
+    IEUNG("ㅇ", "ŋ", "ieung", 11, ""),  // silent in initial position
+    JIEUT("ㅈ", "t", "jieut", 12, "dʒ"),
+    SSANG_JIEUT("ㅉ", "t", "ssang-jieut", 13, "tʃ"),
+    CHIEUT("ㅊ", "t", "chieut", 14, "tʃʰ"),
+    KIEUK("ㅋ", "k", "kieuk", 15, "kʰ"),
+    TIEUT("ㅌ", "t", "tieut", 16, "tʰ"),
+    PIEUP("ㅍ", "p", "pieup", 17, "pʰ"),
     HIEUT("ㅎ", "h", "hieut", 18);
 
     companion object {
@@ -165,6 +166,51 @@ enum class HangulMedial(
     companion object {
         private val byCode = entries.associateBy { it.code }
         fun fromCode(code: Int): HangulMedial? = byCode[code]
+    }
+}
+
+/**
+ * Korean Hangul Final Jamo (종성)
+ * Code 0 means no final consonant
+ */
+enum class HangulFinal(
+    override val char: String,
+    override val ipa: String,
+    override val displayName: String,
+    val code: Int
+) : ILayoutKey {
+    NONE("", "", "none", 0),
+    GIYEOK("ㄱ", "k", "giyeok", 1),
+    SSANG_GIYEOK("ㄲ", "k", "ssang-giyeok", 2),
+    GIYEOK_SIOT("ㄳ", "k", "giyeok-siot", 3),
+    NIEUN("ㄴ", "n", "nieun", 4),
+    NIEUN_JIEUT("ㄵ", "n", "nieun-jieut", 5),
+    NIEUN_HIEUT("ㄶ", "n", "nieun-hieut", 6),
+    DIGEUT("ㄷ", "t", "digeut", 7),
+    RIEUL("ㄹ", "l", "rieul", 8),
+    RIEUL_GIYEOK("ㄺ", "k", "rieul-giyeok", 9),
+    RIEUL_MIEUM("ㄻ", "m", "rieul-mieum", 10),
+    RIEUL_BIEUP("ㄼ", "p", "rieul-bieup", 11),
+    RIEUL_SIOT("ㄽ", "l", "rieul-siot", 12),
+    RIEUL_TIEUT("ㄾ", "l", "rieul-tieut", 13),
+    RIEUL_PIEUP("ㄿ", "l", "rieul-pieup", 14),
+    RIEUL_HIEUT("ㅀ", "p", "rieul-hieut", 15),
+    MIEUM("ㅁ", "m", "mieum", 16),
+    BIEUP("ㅂ", "p", "bieup", 17),
+    BIEUP_SIOT("ㅄ", "p", "bieup-siot", 18),
+    SIOT("ㅅ", "t", "siot", 19),
+    SSANG_SIOT("ㅆ", "t", "ssang-siot", 20),
+    IEUNG("ㅇ", "ŋ", "ieung", 21),
+    JIEUT("ㅈ", "t", "jieut", 22),
+    CHIEUT("ㅊ", "t", "chieut", 23),
+    KIEUK("ㅋ", "k", "kieuk", 24),
+    TIEUT("ㅌ", "t", "tieut", 25),
+    PIEUP("ㅍ", "p", "pieup", 26),
+    HIEUT("ㅎ", "t", "hieut", 27);
+
+    companion object {
+        private val byCode = entries.associateBy { it.code }
+        fun fromCode(code: Int): HangulFinal? = byCode[code]
     }
 }
 
@@ -294,7 +340,15 @@ enum class DevanagariKey(
         val consonants = entries.filter { !it.isVowel }
         val vowels = entries.filter { it.isVowel }
         private val byChar = entries.associateBy { it.char.firstOrNull() }
+        // Matra (vowel sign) to IPA mapping
+        private val matraIpa = mapOf(
+            'ा' to "aː", 'ि' to "ɪ", 'ी' to "iː",
+            'ु' to "ʊ", 'ू' to "uː", 'े' to "eː",
+            'ै' to "ɛː", 'ो' to "oː", 'ौ' to "ɔː"
+        )
         fun fromChar(c: Char): DevanagariKey? = byChar[c]
+        fun matraToIpa(c: Char): String? = matraIpa[c]
+        fun vowelIpa(c: Char): String = byChar[c]?.ipa ?: matraIpa[c] ?: "ə"
     }
 }
 
