@@ -16,7 +16,8 @@ Local LLM integration for bilingual poetry translation, supporting multiple back
 ## Recommended Models
 
 ### Hebrew Translation
-- **DictaLM3** (`dicta-il/dictalm2.0-instruct-GGUF`) - Best for Hebrew
+- **DictaLM 3.0 Nemotron 12B** (`dicta-il/DictaLM-3.0-Nemotron-12B-Instruct-GGUF`) - Best for Hebrew
+- **DictaLM 3.0 24B Thinking** (`dicta-il/DictaLM-3.0-24B-Thinking-GGUF`) - Flagship reasoning model
 - **Qwen2 7B** - Strong multilingual including Hebrew
 - **Aya-23 8B** - Cohere's 23-language model
 
@@ -29,7 +30,7 @@ Local LLM integration for bilingual poetry translation, supporting multiple back
 ### Using LM Studio (Recommended)
 
 1. Download and install [LM Studio](https://lmstudio.ai/)
-2. Download DictaLM3 model: `dicta-il/dictalm2.0-instruct-GGUF`
+2. Download DictaLM 3.0 model: `dicta-il/DictaLM-3.0-Nemotron-12B-Instruct-GGUF`
 3. Load the model and start the server (localhost:1234)
 
 ```kotlin

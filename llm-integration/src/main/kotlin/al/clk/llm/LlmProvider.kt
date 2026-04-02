@@ -32,18 +32,26 @@ data class ModelConfig(
     val threads: Int = Runtime.getRuntime().availableProcessors()
 ) {
     companion object {
-        /** DictaLM3 - Hebrew language model from Dicta */
+        /** DictaLM 3.0 Nemotron 12B - Hebrew language model from Dicta */
         val DICTA_LM3 = ModelConfig(
-            modelId = "dictalm3",
-            huggingFaceRepo = "dicta-il/dictalm2.0-instruct-GGUF",
+            modelId = "dictalm3-nemotron-12b",
+            huggingFaceRepo = "dicta-il/DictaLM-3.0-Nemotron-12B-Instruct-GGUF",
             quantization = Quantization.Q4_K_M,
             contextLength = 8192
         )
 
-        /** DictaLM 2.0 Instruct */
+        /** DictaLM 3.0 24B Thinking - Flagship reasoning model */
+        val DICTA_LM3_THINKING = ModelConfig(
+            modelId = "dictalm3-24b-thinking",
+            huggingFaceRepo = "dicta-il/DictaLM-3.0-24B-Thinking-GGUF",
+            quantization = Quantization.Q4_K_M,
+            contextLength = 32768
+        )
+
+        /** DictaLM 2.0 Instruct (legacy) */
         val DICTA_LM2_INSTRUCT = ModelConfig(
             modelId = "dictalm2-instruct",
-            huggingFaceRepo = "dicta-il/dictalm2.0-instruct-GGUF",
+            huggingFaceRepo = "dicta-il/dictalm2.0-GGUF",
             quantization = Quantization.Q4_K_M
         )
 

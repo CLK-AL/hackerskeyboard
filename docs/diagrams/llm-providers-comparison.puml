@@ -83,16 +83,17 @@ package "Orchestration" {
 }
 
 package "Hebrew Models" {
-    class "DictaLM3" <<recommended>> {
+    class "DictaLM 3.0" <<recommended>> {
         **Hebrew Specialist**
         --
-        dicta-il/dictalm2.0-instruct
+        dicta-il/DictaLM-3.0-Nemotron-12B
+        dicta-il/DictaLM-3.0-24B-Thinking
         --
         + Hebrew fluency
         + Instruction following
-        + Poetry understanding
+        + Reasoning (24B)
         --
-        Sizes: 7B (Q4_K_M ~4GB)
+        Sizes: 12B (~7GB), 24B (~14GB)
     }
 
     class "Qwen2" {
