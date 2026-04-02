@@ -439,3 +439,369 @@ class LanguageUITest {
         assertNull(invalid, "Same language pair should be null")
     }
 }
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// Translation Stage Tests (6 Paths)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+class TranslationStageTest {
+
+    @Test
+    fun testAllStages() {
+        assertEquals(6, TranslationStage.ALL.size)
+        assertEquals(1, TranslationStage.IPA_ECHO.index)
+        assertEquals(6, TranslationStage.COMPRESSION.index)
+    }
+
+    @Test
+    fun testStageFromIndex() {
+        assertEquals(TranslationStage.IPA_ECHO, TranslationStage.fromIndex(1))
+        assertEquals(TranslationStage.LITERAL_ANCHOR, TranslationStage.fromIndex(2))
+        assertEquals(TranslationStage.COMPRESSION, TranslationStage.fromIndex(6))
+        assertNull(TranslationStage.fromIndex(0))
+        assertNull(TranslationStage.fromIndex(7))
+    }
+
+    @Test
+    fun testStageFromShortLabel() {
+        assertEquals(TranslationStage.IPA_ECHO, TranslationStage.fromShortLabel("IPA"))
+        assertEquals(TranslationStage.COMPRESSION, TranslationStage.fromShortLabel("cmp"))
+        assertNull(TranslationStage.fromShortLabel("invalid"))
+    }
+
+    @Test
+    fun testStageColors() {
+        val stage = TranslationStage.IPA_ECHO
+        assertTrue(stage.color.startsWith("hsl("))
+        assertTrue(stage.bgColor.startsWith("hsl("))
+        assertEquals(0, stage.hue)  // Red for IPA Echo
+    }
+
+    @Test
+    fun testStageLabels() {
+        val stage = TranslationStage.LITERAL_ANCHOR
+        assertEquals("Literal Anchor", stage.label)
+        assertEquals("LIT", stage.shortLabel)
+        assertEquals("2. Literal Anchor", stage.numberedLabel)
+    }
+}
+
+class StageResultItemTest {
+
+    @Test
+    fun testStageResultProperties() {
+        val result = StageResultItem(
+            stage = TranslationStage.IPA_ECHO,
+            words = listOf("word1", "word2", "word3"),
+            ipa = "wɜːd",
+            score = 0.85f,
+            notes = "Good match"
+        )
+
+        assertEquals(1, result.index)
+        assertEquals("IPA Echo", result.label)
+        assertEquals(3, result.wordCount)
+        assertEquals("word1 word2 word3", result.formattedWords)
+        assertEquals(0.85f, result.score)
+    }
+}
+
+class TranslationStageStateTest {
+
+    @Test
+    fun testInitialState() {
+        val state = TranslationStageState.initial()
+        assertNull(state.pair)
+        assertEquals("", state.sourceText)
+        assertNull(state.currentStage)
+        assertTrue(state.completedStages.isEmpty())
+        assertEquals(0, state.progressPercent)
+        assertFalse(state.isComplete)
+    }
+
+    @Test
+    fun testForPair() {
+        val state = TranslationStageState.forPair("en", "he")
+        assertNotNull(state)
+        assertNotNull(state!!.pair)
+        assertEquals("en→he", state.pair!!.pairId)
+    }
+
+    @Test
+    fun testForPairInvalid() {
+        val state = TranslationStageState.forPair("en", "en")
+        assertNull(state)
+    }
+
+    @Test
+    fun testStageItems() {
+        val state = TranslationStageState.initial()
+        assertEquals(6, state.stageItems.size)
+
+        val first = state.stageItems.first()
+        assertEquals(1, first.index)
+        assertFalse(first.isCompleted)
+        assertFalse(first.isCurrent)
+    }
+
+    @Test
+    fun testProgress() {
+        val state = TranslationStageState(
+            completedStages = setOf(TranslationStage.IPA_ECHO, TranslationStage.LITERAL_ANCHOR)
+        )
+        assertEquals(33, state.progressPercent)  // 2/6 = 33%
+        assertFalse(state.isComplete)
+    }
+
+    @Test
+    fun testIsComplete() {
+        val state = TranslationStageState(
+            completedStages = TranslationStage.ALL.toSet()
+        )
+        assertEquals(100, state.progressPercent)
+        assertTrue(state.isComplete)
+    }
+
+    @Test
+    fun testNextStage() {
+        val state1 = TranslationStageState.initial()
+        assertEquals(TranslationStage.IPA_ECHO, state1.nextStage)
+
+        val state2 = TranslationStageState(
+            completedStages = setOf(TranslationStage.IPA_ECHO)
+        )
+        assertEquals(TranslationStage.LITERAL_ANCHOR, state2.nextStage)
+
+        val state3 = TranslationStageState(
+            completedStages = TranslationStage.ALL.toSet()
+        )
+        assertNull(state3.nextStage)
+    }
+
+    @Test
+    fun testBestResult() {
+        val result1 = StageResultItem(TranslationStage.IPA_ECHO, listOf("a"), "", 0.5f)
+        val result2 = StageResultItem(TranslationStage.LITERAL_ANCHOR, listOf("b"), "", 0.8f)
+        val result3 = StageResultItem(TranslationStage.CULTURAL_CHARGE, listOf("c"), "", 0.6f)
+
+        val state = TranslationStageState(
+            results = mapOf(
+                TranslationStage.IPA_ECHO to result1,
+                TranslationStage.LITERAL_ANCHOR to result2,
+                TranslationStage.CULTURAL_CHARGE to result3
+            )
+        )
+
+        val best = state.bestResult
+        assertNotNull(best)
+        assertEquals(TranslationStage.LITERAL_ANCHOR, best!!.stage)
+        assertEquals(0.8f, best.score)
+    }
+}
+
+class TranslationStageItemTest {
+
+    @Test
+    fun testStageItemProperties() {
+        val item = TranslationStageItem(
+            stage = TranslationStage.EMOTIONAL_REGISTER,
+            isCompleted = true,
+            isCurrent = false,
+            isSelected = true
+        )
+
+        assertEquals(4, item.index)
+        assertEquals("Emotional Register", item.label)
+        assertEquals("EMO", item.shortLabel)
+        assertEquals("💖", item.icon)
+        assertTrue(item.isCompleted)
+        assertFalse(item.isCurrent)
+        assertTrue(item.isSelected)
+    }
+
+    @Test
+    fun testStatusIcon() {
+        val completed = TranslationStageItem(TranslationStage.IPA_ECHO, isCompleted = true)
+        assertEquals("✓", completed.statusIcon)
+
+        val current = TranslationStageItem(TranslationStage.IPA_ECHO, isCurrent = true)
+        assertEquals("▶", current.statusIcon)
+
+        val pending = TranslationStageItem(TranslationStage.IPA_ECHO)
+        assertEquals("○", pending.statusIcon)
+    }
+}
+
+class TranslationStageManagerTest {
+
+    @Test
+    fun testInitialState() {
+        val manager = TranslationStageManager()
+        assertNull(manager.state.pair)
+        assertFalse(manager.state.isProcessing)
+    }
+
+    @Test
+    fun testSetPair() {
+        val manager = TranslationStageManager()
+        manager.dispatch(TranslationStageAction.SetPair("en", "he"))
+
+        assertNotNull(manager.state.pair)
+        assertEquals("en→he", manager.state.pair?.pairId)
+    }
+
+    @Test
+    fun testSetSourceText() {
+        val manager = TranslationStageManager()
+        manager.dispatch(TranslationStageAction.SetSourceText("Hello world"))
+
+        assertEquals("Hello world", manager.state.sourceText)
+    }
+
+    @Test
+    fun testSelectStage() {
+        val manager = TranslationStageManager()
+        manager.dispatch(TranslationStageAction.SelectStage(TranslationStage.CULTURAL_CHARGE))
+
+        assertEquals(TranslationStage.CULTURAL_CHARGE, manager.state.selectedStage)
+    }
+
+    @Test
+    fun testStartStage() {
+        val manager = TranslationStageManager()
+        manager.dispatch(TranslationStageAction.StartStage(TranslationStage.IPA_ECHO))
+
+        assertEquals(TranslationStage.IPA_ECHO, manager.state.currentStage)
+        assertTrue(manager.state.isProcessing)
+    }
+
+    @Test
+    fun testCompleteStage() {
+        val manager = TranslationStageManager()
+        manager.dispatch(TranslationStageAction.StartStage(TranslationStage.IPA_ECHO))
+
+        val result = StageResultItem(
+            stage = TranslationStage.IPA_ECHO,
+            words = listOf("echo", "sound"),
+            ipa = "ɛkəʊ",
+            score = 0.9f
+        )
+        manager.dispatch(TranslationStageAction.CompleteStage(result))
+
+        assertTrue(TranslationStage.IPA_ECHO in manager.state.completedStages)
+        assertNotNull(manager.state.resultFor(TranslationStage.IPA_ECHO))
+        assertNull(manager.state.currentStage)
+        assertFalse(manager.state.isProcessing)
+    }
+
+    @Test
+    fun testNextStage() {
+        val manager = TranslationStageManager()
+
+        // Complete first stage
+        val result = StageResultItem(TranslationStage.IPA_ECHO, listOf("a"), "")
+        manager.dispatch(TranslationStageAction.CompleteStage(result))
+
+        // Move to next
+        manager.dispatch(TranslationStageAction.NextStage)
+
+        assertEquals(TranslationStage.LITERAL_ANCHOR, manager.state.currentStage)
+        assertTrue(manager.state.isProcessing)
+    }
+
+    @Test
+    fun testReset() {
+        val manager = TranslationStageManager()
+        manager.dispatch(TranslationStageAction.SetPair("en", "he"))
+        manager.dispatch(TranslationStageAction.SetSourceText("Test"))
+        manager.dispatch(TranslationStageAction.CompleteStage(
+            StageResultItem(TranslationStage.IPA_ECHO, listOf("a"), "")
+        ))
+
+        manager.dispatch(TranslationStageAction.Reset)
+
+        assertEquals("", manager.state.sourceText)
+        assertTrue(manager.state.completedStages.isEmpty())
+        // Pair should be preserved
+        assertNotNull(manager.state.pair)
+    }
+
+    @Test
+    fun testGetTranslationPair() {
+        val manager = TranslationStageManager()
+        assertNull(manager.getTranslationPair())
+
+        manager.dispatch(TranslationStageAction.SetPair("en", "he"))
+        val pair = manager.getTranslationPair()
+        assertNotNull(pair)
+        assertEquals("en", pair!!.srcCode)
+        assertEquals("he", pair.tgtCode)
+    }
+
+    @Test
+    fun testGeneratePrompts() {
+        val manager = TranslationStageManager()
+        manager.dispatch(TranslationStageAction.SetPair("en", "he"))
+
+        val analysisPrompt = manager.generateAnalysisPrompt()
+        assertNotNull(analysisPrompt)
+        assertTrue(analysisPrompt!!.contains("English"))
+        assertTrue(analysisPrompt.contains("Hebrew"))
+
+        val pathPrompt = manager.generatePathPrompt()
+        assertNotNull(pathPrompt)
+        assertTrue(pathPrompt!!.contains("6 PATHS"))
+    }
+
+    @Test
+    fun testGetStagePrompt() {
+        val manager = TranslationStageManager()
+        manager.dispatch(TranslationStageAction.SetPair("en", "he"))
+
+        val prompt = manager.getStagePrompt(TranslationStage.IPA_ECHO)
+        assertTrue(prompt.contains("IPA"))
+
+        val literalPrompt = manager.getStagePrompt(TranslationStage.LITERAL_ANCHOR)
+        assertTrue(literalPrompt.contains("denotatively"))
+    }
+}
+
+class TranslationStageUITest {
+
+    @Test
+    fun testAllStages() {
+        assertEquals(6, TranslationStageUI.allStages.size)
+    }
+
+    @Test
+    fun testGetStage() {
+        assertEquals(TranslationStage.IPA_ECHO, TranslationStageUI.getStage(1))
+        assertEquals(TranslationStage.COMPRESSION, TranslationStageUI.getStage(6))
+        assertNull(TranslationStageUI.getStage(0))
+    }
+
+    @Test
+    fun testStartWorkflow() {
+        val state = TranslationStageUI.startWorkflow("en", "he", "Test text")
+
+        assertNotNull(state.pair)
+        assertEquals("en→he", state.pair?.pairId)
+        assertEquals("Test text", state.sourceText)
+    }
+
+    @Test
+    fun testCompleteStage() {
+        TranslationStageUI.manager.dispatch(TranslationStageAction.Reset)
+        TranslationStageUI.startWorkflow("en", "he")
+
+        val state = TranslationStageUI.completeStage(
+            stage = TranslationStage.IPA_ECHO,
+            words = listOf("word1", "word2"),
+            ipa = "test",
+            score = 0.75f
+        )
+
+        assertTrue(TranslationStage.IPA_ECHO in state.completedStages)
+        assertEquals(16, state.progressPercent)  // 1/6 ≈ 16%
+    }
+}
