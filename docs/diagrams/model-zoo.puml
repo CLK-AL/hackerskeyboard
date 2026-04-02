@@ -1,0 +1,149 @@
+@startuml model-zoo
+!theme plain
+skinparam packageStyle rectangle
+title HuggingFace Model Zoo Architecture
+
+package "UI Layer" as ui {
+    component "model-browser.html" as html {
+        portin "Search"
+        portin "Browse Categories"
+        portin "Download"
+        portin "Manage Cached"
+    }
+
+    class "ModelBrowserState" as browserState {
+        +uiState: StateFlow<ModelBrowserUiState>
+        --
+        +loadFeatured()
+        +loadCategory(category)
+        +loadHebrewModels()
+        +search(query)
+        +loadCached()
+        +selectModel(id)
+        +downloadModel(repoId, filename)
+        +cancelDownload(repoId, filename)
+        +deleteCachedModel(repoId, filename)
+        +getStateJson(): String
+    }
+}
+
+package "Model Zoo" as zoo {
+    class "HuggingFaceClient" as hfClient {
+        +token: String?
+        +cacheDir: Path
+        --
+        +searchModels(query): List<HfModelInfo>
+        +getModelInfo(repoId): HfModelDetails
+        +listFiles(repoId): List<HfFileInfo>
+        +listGgufFiles(repoId): List<GgufFileInfo>
+        +downloadFile(url, dest): Flow<DownloadProgress>
+        +downloadModel(repoId, filename): Flow<DownloadProgress>
+        +getCachedModelPath(repoId, filename): Path?
+        +listCachedModels(): List<CachedModel>
+    }
+
+    class "ModelDownloader" as downloader {
+        +downloadStates: StateFlow<Map<String, DownloadState>>
+        --
+        +download(repoId, filename): Flow<DownloadProgress>
+        +downloadCatalogModel(model): Flow<DownloadProgress>
+        +cancel(repoId, filename)
+        +cancelAll()
+        +getState(repoId, filename): DownloadState
+        +isDownloaded(repoId, filename): Boolean
+        +getCachedModels(): List<CachedModel>
+        +deleteCachedModel(repoId, filename): Boolean
+    }
+
+    object "ModelCatalog" as catalog {
+        +allModels: List<CatalogModel>
+        +featuredModels: List<CatalogModel>
+        +hebrewModels: List<CatalogModel>
+        +byCategory: Map<ModelCategory, List>
+        --
+        +findById(id): CatalogModel?
+        +search(query): List<CatalogModel>
+        +forLanguage(code): List<CatalogModel>
+    }
+}
+
+package "Data Classes" as data {
+    class "CatalogModel" as catModel {
+        id: String
+        name: String
+        repoId: String
+        description: String
+        category: ModelCategory
+        languages: List<String>
+        parameterCount: String
+        contextLength: Int
+        recommendedQuant: Quantization
+        featured: Boolean
+    }
+
+    class "GgufFileInfo" as ggufFile {
+        filename: String
+        size: Long
+        quantization: Quantization
+        downloadUrl: String
+    }
+
+    enum "Quantization" as quant {
+        F16
+        Q8_0
+        Q6_K
+        Q5_K_M
+        Q4_K_M
+        Q4_0
+        Q3_K_M
+        Q2_K
+        IQ4_XS
+        IQ3_M
+    }
+
+    enum "ModelCategory" as modelCat {
+        HEBREW
+        MULTILINGUAL
+        GENERAL
+        SMALL
+        CREATIVE
+    }
+
+    sealed class "DownloadProgress" as dlProgress {
+        Started(totalBytes)
+        InProgress(downloaded, total)
+        Completed(file)
+        Error(message)
+    }
+}
+
+cloud "HuggingFace Hub" as hf {
+    database "GGUF Models" as models
+    component "API" as hfApi
+}
+
+' Relationships
+html --> browserState : JS interop
+browserState --> downloader
+browserState --> catalog
+browserState --> hfClient
+downloader --> hfClient
+hfClient --> hfApi : REST
+hfApi --> models
+catalog --> catModel
+catModel --> quant
+catModel --> modelCat
+hfClient ..> ggufFile : returns
+downloader ..> dlProgress : emits
+
+note right of catalog
+  **Curated Models:**
+  - DictaLM 3.0 (12B, 24B)
+  - Qwen 2.5 (3B, 7B, 14B)
+  - Llama 3.1 (8B, 70B)
+  - Aya-23 (8B, 35B)
+  - Mistral 7B
+  - Gemma 2 9B
+end note
+
+@enduml

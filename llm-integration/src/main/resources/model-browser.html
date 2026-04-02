@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Model Zoo - HuggingFace GGUF Browser</title>
+    <style>
+        :root {
+            --bg-primary: #1a1a2e;
+            --bg-secondary: #16213e;
+            --bg-card: #1f2940;
+            --accent: #e94560;
+            --accent-hover: #ff6b6b;
+            --text-primary: #eee;
+            --text-secondary: #aaa;
+            --border: #2a3f5f;
+            --success: #4caf50;
+            --warning: #ff9800;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header h1 span {
+            font-size: 2rem;
+        }
+
+        /* Search */
+        .search-box {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            font-size: 1rem;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            background: var(--accent);
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn:hover {
+            background: var(--accent-hover);
+        }
+
+        .btn-secondary {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border);
+        }
+
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 0.9rem;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tab:hover, .tab.active {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        /* Model Grid */
+        .model-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        .model-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+        }
+
+        .model-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+        }
+
+        .model-card.featured {
+            border-color: var(--accent);
+        }
+
+        .model-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .model-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .model-badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .badge-hebrew {
+            background: #2196f3;
+            color: white;
+        }
+
+        .badge-featured {
+            background: var(--accent);
+            color: white;
+        }
+
+        .badge-multilingual {
+            background: #9c27b0;
+            color: white;
+        }
+
+        .model-desc {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 16px;
+            line-height: 1.5;
+        }
+
+        .model-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .meta-item strong {
+            color: var(--text-primary);
+        }
+
+        /* Model Detail Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            padding: 40px;
+            overflow-y: auto;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .modal {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            max-width: 800px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 24px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .modal-header h2 {
+            font-size: 1.5rem;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        /* File List */
+        .file-list {
+            margin-top: 20px;
+        }
+
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            background: var(--bg-card);
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+
+        .file-info {
+            flex: 1;
+        }
+
+        .file-name {
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .file-meta {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .quant-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            background: var(--border);
+            margin-right: 8px;
+        }
+
+        .quant-badge.recommended {
+            background: var(--success);
+            color: white;
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--border);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--accent);
+            transition: width 0.3s;
+        }
+
+        /* Cached Models */
+        .cached-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .cached-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            background: var(--bg-card);
+            border-radius: 8px;
+        }
+
+        .cached-info h4 {
+            margin-bottom: 4px;
+        }
+
+        .cached-path {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            font-family: monospace;
+        }
+
+        /* Status Messages */
+        .status {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+
+        .status-error {
+            background: rgba(244, 67, 54, 0.2);
+            border: 1px solid #f44336;
+        }
+
+        .status-success {
+            background: rgba(76, 175, 80, 0.2);
+            border: 1px solid var(--success);
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-secondary);
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--border);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Languages */
+        .lang-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 8px;
+        }
+
+        .lang-tag {
+            padding: 2px 8px;
+            background: var(--border);
+            border-radius: 4px;
+            font-size: 0.75rem;
+        }
+
+        .lang-tag.he {
+            background: #2196f3;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1><span>🤗</span> Model Zoo</h1>
+            <div>
+                <button class="btn btn-secondary" onclick="loadCached()">Downloaded Models</button>
+            </div>
+        </header>
+
+        <div class="search-box">
+            <input type="text" class="search-input" id="searchInput"
+                   placeholder="Search models (e.g., Hebrew, translation, DictaLM...)"
+                   onkeyup="handleSearch(event)">
+            <button class="btn" onclick="search()">Search</button>
+        </div>
+
+        <div class="tabs" id="tabs">
+            <button class="tab active" onclick="loadFeatured()">Featured</button>
+            <button class="tab" onclick="loadHebrew()">Hebrew</button>
+            <button class="tab" onclick="loadCategory('MULTILINGUAL')">Multilingual</button>
+            <button class="tab" onclick="loadCategory('GENERAL')">General</button>
+            <button class="tab" onclick="loadCategory('SMALL')">Small/Fast</button>
+            <button class="tab" onclick="loadCategory('CREATIVE')">Creative</button>
+        </div>
+
+        <div id="status"></div>
+
+        <div id="content">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>Loading models...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Model Detail Modal -->
+    <div class="modal-overlay" id="modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="modalTitle">Model Details</h2>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Dynamic content -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State
+        let state = {
+            models: [],
+            cachedModels: [],
+            downloadStates: {},
+            selectedModel: null,
+            view: 'featured'
+        };
+
+        // Mock data for demo (replace with actual API calls)
+        const CATALOG = {
+            featured: [
+                {
+                    id: 'dictalm3-12b',
+                    name: 'DictaLM 3.0 Nemotron 12B',
+                    repoId: 'dicta-il/DictaLM-3.0-Nemotron-12B-Instruct-GGUF',
+                    description: 'Best Hebrew LLM. 12B parameters, hybrid architecture.',
+                    category: 'HEBREW',
+                    languages: ['he', 'en'],
+                    parameterCount: '12B',
+                    contextLength: 8192,
+                    estimatedSize: '~7.0 GB',
+                    featured: true
+                },
+                {
+                    id: 'dictalm3-24b-thinking',
+                    name: 'DictaLM 3.0 24B Thinking',
+                    repoId: 'dicta-il/DictaLM-3.0-24B-Thinking-GGUF',
+                    description: 'Flagship reasoning model with chain-of-thought.',
+                    category: 'HEBREW',
+                    languages: ['he', 'en'],
+                    parameterCount: '24B',
+                    contextLength: 32768,
+                    estimatedSize: '~14.0 GB',
+                    featured: true
+                },
+                {
+                    id: 'qwen2.5-7b',
+                    name: 'Qwen 2.5 7B Instruct',
+                    repoId: 'Qwen/Qwen2.5-7B-Instruct-GGUF',
+                    description: 'Excellent multilingual model with strong Hebrew support.',
+                    category: 'MULTILINGUAL',
+                    languages: ['en', 'zh', 'he', 'ar', 'de', 'fr', 'es', 'it', 'pt', 'ru', 'ja', 'ko'],
+                    parameterCount: '7B',
+                    contextLength: 32768,
+                    estimatedSize: '~4.5 GB',
+                    featured: true
+                },
+                {
+                    id: 'llama-3.1-8b',
+                    name: 'Llama 3.1 8B Instruct',
+                    repoId: 'bartowski/Meta-Llama-3.1-8B-Instruct-GGUF',
+                    description: "Meta's latest open model. Good all-around performance.",
+                    category: 'GENERAL',
+                    languages: ['en', 'de', 'fr', 'es', 'it', 'pt', 'hi', 'th'],
+                    parameterCount: '8B',
+                    contextLength: 131072,
+                    estimatedSize: '~5.0 GB',
+                    featured: true
+                }
+            ],
+            hebrew: [
+                {
+                    id: 'dictalm3-12b',
+                    name: 'DictaLM 3.0 Nemotron 12B',
+                    repoId: 'dicta-il/DictaLM-3.0-Nemotron-12B-Instruct-GGUF',
+                    description: 'Best Hebrew LLM. 12B parameters, hybrid architecture.',
+                    category: 'HEBREW',
+                    languages: ['he', 'en'],
+                    parameterCount: '12B',
+                    contextLength: 8192,
+                    estimatedSize: '~7.0 GB',
+                    featured: true
+                },
+                {
+                    id: 'dictalm3-24b-thinking',
+                    name: 'DictaLM 3.0 24B Thinking',
+                    repoId: 'dicta-il/DictaLM-3.0-24B-Thinking-GGUF',
+                    description: 'Flagship reasoning model with chain-of-thought.',
+                    category: 'HEBREW',
+                    languages: ['he', 'en'],
+                    parameterCount: '24B',
+                    contextLength: 32768,
+                    estimatedSize: '~14.0 GB',
+                    featured: true
+                },
+                {
+                    id: 'qwen2.5-7b',
+                    name: 'Qwen 2.5 7B Instruct',
+                    repoId: 'Qwen/Qwen2.5-7B-Instruct-GGUF',
+                    description: 'Excellent multilingual model with strong Hebrew support.',
+                    category: 'MULTILINGUAL',
+                    languages: ['en', 'zh', 'he', 'ar', 'de', 'fr'],
+                    parameterCount: '7B',
+                    contextLength: 32768,
+                    estimatedSize: '~4.5 GB',
+                    featured: true
+                }
+            ]
+        };
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadFeatured();
+        });
+
+        function loadFeatured() {
+            setActiveTab(0);
+            state.view = 'featured';
+            state.models = CATALOG.featured;
+            render();
+        }
+
+        function loadHebrew() {
+            setActiveTab(1);
+            state.view = 'hebrew';
+            state.models = CATALOG.hebrew;
+            render();
+        }
+
+        function loadCategory(category) {
+            const tabIndex = ['MULTILINGUAL', 'GENERAL', 'SMALL', 'CREATIVE'].indexOf(category) + 2;
+            setActiveTab(tabIndex);
+            state.view = 'category';
+            state.models = CATALOG.featured.filter(m => m.category === category);
+            render();
+        }
+
+        function loadCached() {
+            state.view = 'cached';
+            state.cachedModels = []; // Would be populated from backend
+            renderCached();
+        }
+
+        function handleSearch(event) {
+            if (event.key === 'Enter') {
+                search();
+            }
+        }
+
+        function search() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            if (!query) {
+                loadFeatured();
+                return;
+            }
+            state.view = 'search';
+            state.models = CATALOG.featured.filter(m =>
+                m.name.toLowerCase().includes(query) ||
+                m.description.toLowerCase().includes(query) ||
+                m.languages.some(l => l.includes(query))
+            );
+            render();
+        }
+
+        function setActiveTab(index) {
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach((tab, i) => {
+                tab.classList.toggle('active', i === index);
+            });
+        }
+
+        function render() {
+            const content = document.getElementById('content');
+
+            if (state.models.length === 0) {
+                content.innerHTML = `
+                    <div class="loading">
+                        <p>No models found</p>
+                    </div>
+                `;
+                return;
+            }
+
+            content.innerHTML = `
+                <div class="model-grid">
+                    ${state.models.map(model => renderModelCard(model)).join('')}
+                </div>
+            `;
+        }
+
+        function renderModelCard(model) {
+            const badges = [];
+            if (model.featured) badges.push('<span class="model-badge badge-featured">Featured</span>');
+            if (model.languages.includes('he')) badges.push('<span class="model-badge badge-hebrew">Hebrew</span>');
+            if (model.category === 'MULTILINGUAL') badges.push('<span class="model-badge badge-multilingual">Multilingual</span>');
+
+            return `
+                <div class="model-card ${model.featured ? 'featured' : ''}" onclick="openModel('${model.id}')">
+                    <div class="model-header">
+                        <div class="model-name">${model.name}</div>
+                        <div>${badges.join('')}</div>
+                    </div>
+                    <div class="model-desc">${model.description}</div>
+                    <div class="model-meta">
+                        <div class="meta-item">
+                            <strong>${model.parameterCount}</strong> params
+                        </div>
+                        <div class="meta-item">
+                            <strong>${model.contextLength.toLocaleString()}</strong> ctx
+                        </div>
+                        <div class="meta-item">
+                            ${model.estimatedSize}
+                        </div>
+                    </div>
+                    <div class="lang-tags">
+                        ${model.languages.slice(0, 6).map(l =>
+                            `<span class="lang-tag ${l === 'he' ? 'he' : ''}">${l}</span>`
+                        ).join('')}
+                        ${model.languages.length > 6 ? `<span class="lang-tag">+${model.languages.length - 6}</span>` : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderCached() {
+            const content = document.getElementById('content');
+
+            if (state.cachedModels.length === 0) {
+                content.innerHTML = `
+                    <div class="loading">
+                        <p>No downloaded models</p>
+                        <p style="margin-top: 12px; font-size: 0.9rem;">
+                            Click on a model and download a quantization to get started.
+                        </p>
+                    </div>
+                `;
+                return;
+            }
+
+            content.innerHTML = `
+                <div class="cached-list">
+                    ${state.cachedModels.map(m => `
+                        <div class="cached-item">
+                            <div class="cached-info">
+                                <h4>${m.filename}</h4>
+                                <div class="cached-path">${m.path}</div>
+                            </div>
+                            <div>
+                                <span style="margin-right: 16px;">${m.displaySize}</span>
+                                <button class="btn btn-sm btn-secondary" onclick="deleteCached('${m.repoId}', '${m.filename}')">Delete</button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function openModel(modelId) {
+            const model = state.models.find(m => m.id === modelId);
+            if (!model) return;
+
+            state.selectedModel = model;
+
+            document.getElementById('modalTitle').textContent = model.name;
+            document.getElementById('modalBody').innerHTML = `
+                <p style="margin-bottom: 16px;">${model.description}</p>
+
+                <div class="model-meta" style="margin-bottom: 20px;">
+                    <div class="meta-item"><strong>Repo:</strong> ${model.repoId}</div>
+                    <div class="meta-item"><strong>Parameters:</strong> ${model.parameterCount}</div>
+                    <div class="meta-item"><strong>Context:</strong> ${model.contextLength.toLocaleString()}</div>
+                </div>
+
+                <h3 style="margin-bottom: 12px;">Available Quantizations</h3>
+                <div class="file-list">
+                    ${renderQuantFiles(model)}
+                </div>
+            `;
+
+            document.getElementById('modal').classList.add('show');
+        }
+
+        function renderQuantFiles(model) {
+            // Mock quantization files
+            const quants = [
+                { name: 'Q4_K_M', size: model.estimatedSize, recommended: true },
+                { name: 'Q5_K_M', size: '~' + (parseFloat(model.estimatedSize.replace(/[^0-9.]/g, '')) * 1.2).toFixed(1) + ' GB', recommended: false },
+                { name: 'Q6_K', size: '~' + (parseFloat(model.estimatedSize.replace(/[^0-9.]/g, '')) * 1.4).toFixed(1) + ' GB', recommended: false },
+                { name: 'Q8_0', size: '~' + (parseFloat(model.estimatedSize.replace(/[^0-9.]/g, '')) * 1.8).toFixed(1) + ' GB', recommended: false }
+            ];
+
+            return quants.map(q => `
+                <div class="file-item">
+                    <div class="file-info">
+                        <div class="file-name">
+                            <span class="quant-badge ${q.recommended ? 'recommended' : ''}">${q.name}</span>
+                            ${model.name.toLowerCase().replace(/\s+/g, '-')}-${q.name.toLowerCase()}.gguf
+                        </div>
+                        <div class="file-meta">${q.size} ${q.recommended ? '• Recommended' : ''}</div>
+                    </div>
+                    <button class="btn btn-sm" onclick="downloadFile('${model.repoId}', '${q.name}')">
+                        Download
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.remove('show');
+            state.selectedModel = null;
+        }
+
+        function downloadFile(repoId, quant) {
+            showStatus(`Starting download: ${repoId} (${quant})...`, 'success');
+            // Would trigger actual download via backend API
+        }
+
+        function deleteCached(repoId, filename) {
+            if (confirm(`Delete ${filename}?`)) {
+                state.cachedModels = state.cachedModels.filter(
+                    m => !(m.repoId === repoId && m.filename === filename)
+                );
+                renderCached();
+                showStatus('Model deleted', 'success');
+            }
+        }
+
+        function showStatus(message, type = 'info') {
+            const status = document.getElementById('status');
+            status.innerHTML = `<div class="status status-${type}">${message}</div>`;
+            setTimeout(() => { status.innerHTML = ''; }, 3000);
+        }
+
+        // Close modal on overlay click
+        document.getElementById('modal').addEventListener('click', (e) => {
+            if (e.target.classList.contains('modal-overlay')) {
+                closeModal();
+            }
+        });
+
+        // Close modal on Escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeModal();
+        });
+    </script>
+</body>
+</html>
