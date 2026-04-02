@@ -1327,4 +1327,167 @@ class DocumentIndexTest {
         assertTrue(result is CellValue.Number)
         assertEquals(30.0, (result as CellValue.Number).value)
     }
+
+    // ═══ TextBlock Tests ═══
+
+    @Test
+    fun testTextBlockParseMarkdown() {
+        val md = """
+            # Title
+
+            ```he
+            שלום עולם
+            זו שורה שנייה
+            ```
+
+            Some English text
+
+            ```en
+            Hello World
+            ```
+        """.trimIndent()
+
+        val blocks = TextBlock.parseMarkdown(md)
+        assertEquals(2, blocks.size)
+
+        val heBlock = blocks[0]
+        assertEquals("he", heBlock.lang)
+        assertTrue(heBlock.isRtl)
+        assertTrue(heBlock.content.contains("שלום"))
+        assertEquals(KerningHint.TIGHT, heBlock.kerning)
+
+        val enBlock = blocks[1]
+        assertEquals("en", enBlock.lang)
+        assertFalse(enBlock.isRtl)
+    }
+
+    @Test
+    fun testKerningHint() {
+        assertEquals(KerningHint.TIGHT, KerningHint.forLang("he"))
+        assertEquals(KerningHint.TIGHT, KerningHint.forLang("ar"))
+        assertEquals(KerningHint.NONE, KerningHint.forLang("ja"))
+        assertEquals(KerningHint.NONE, KerningHint.forLang("code"))
+        assertEquals(KerningHint.NORMAL, KerningHint.forLang("en"))
+    }
+
+    // ═══ SubtitleParser Tests ═══
+
+    @Test
+    fun testSubtitleCueTimestamp() {
+        val cue = SubtitleCue(1, 3661500, 3665000, "Hello")
+        assertEquals("01:01:01,500", cue.startTimestamp)
+        assertEquals("01:01:05,000", cue.endTimestamp)
+        assertEquals(3500, cue.duration)
+    }
+
+    @Test
+    fun testSubtitleCueParseSrtTime() {
+        assertEquals(3661500, SubtitleCue.parseSrtTime("01:01:01,500"))
+        assertEquals(0, SubtitleCue.parseSrtTime("00:00:00,000"))
+        assertEquals(3723456, SubtitleCue.parseSrtTime("01:02:03,456"))
+    }
+
+    @Test
+    fun testSubtitleParserParseSrt() {
+        val srt = """
+            1
+            00:00:01,000 --> 00:00:04,000
+            Hello World
+
+            2
+            00:00:05,000 --> 00:00:08,000
+            שלום עולם
+            Second line
+        """.trimIndent()
+
+        val cues = SubtitleParser.parseSrt(srt)
+        assertEquals(2, cues.size)
+
+        assertEquals(1, cues[0].index)
+        assertEquals(1000, cues[0].startTime)
+        assertEquals(4000, cues[0].endTime)
+        assertEquals("Hello World", cues[0].text)
+
+        assertEquals(2, cues[1].index)
+        assertEquals("he", cues[1].scriptAttrs.lang)
+        assertTrue(cues[1].text.contains("שלום"))
+        assertTrue(cues[1].text.contains("Second line"))
+    }
+
+    @Test
+    fun testSubtitleParserToSrt() {
+        val cues = listOf(
+            SubtitleCue(1, 1000, 4000, "Line one"),
+            SubtitleCue(2, 5000, 8000, "Line two")
+        )
+
+        val srt = SubtitleParser.toSrt(cues)
+        assertTrue(srt.contains("00:00:01,000 --> 00:00:04,000"))
+        assertTrue(srt.contains("Line one"))
+        assertTrue(srt.contains("00:00:05,000 --> 00:00:08,000"))
+    }
+
+    // ═══ FileType Tests ═══
+
+    @Test
+    fun testFileTypeFromFilename() {
+        assertEquals(FileType.MARKDOWN, FileType.fromFilename("readme.md"))
+        assertEquals(FileType.HTML, FileType.fromFilename("index.html"))
+        assertEquals(FileType.SRT, FileType.fromFilename("movie.srt"))
+        assertEquals(FileType.JSON, FileType.fromFilename("data.json"))
+        assertEquals(FileType.YAML, FileType.fromFilename("config.yaml"))
+        assertEquals(FileType.KOTLIN, FileType.fromFilename("Main.kt"))
+        assertEquals(FileType.JAVASCRIPT, FileType.fromFilename("app.js"))
+        assertEquals(FileType.INK, FileType.fromFilename("story.ink"))
+        assertEquals(FileType.MXKL, FileType.fromFilename("layout.mxklfile"))
+        assertEquals(FileType.UNKNOWN, FileType.fromFilename("file.xyz"))
+    }
+
+    @Test
+    fun testFileTypeFromPath() {
+        assertEquals(FileType.KOTLIN, FileType.fromPath("/src/main/kotlin/App.kt"))
+        assertEquals(FileType.TSV, FileType.fromPath("data/export.tsv"))
+    }
+
+    @Test
+    fun testFileTypeCategories() {
+        assertTrue(FileType.CODE_TYPES.contains(FileType.KOTLIN))
+        assertTrue(FileType.CODE_TYPES.contains(FileType.JAVASCRIPT))
+        assertFalse(FileType.CODE_TYPES.contains(FileType.MARKDOWN))
+
+        assertTrue(FileType.DATA_TYPES.contains(FileType.JSON))
+        assertTrue(FileType.DATA_TYPES.contains(FileType.CSV))
+
+        assertTrue(FileType.SUBTITLE_TYPES.contains(FileType.SRT))
+        assertTrue(FileType.SUBTITLE_TYPES.contains(FileType.VTT))
+    }
+
+    @Test
+    fun testFileTypeLangCode() {
+        assertEquals("kt", FileType.langCode(FileType.KOTLIN))
+        assertEquals("js", FileType.langCode(FileType.JAVASCRIPT))
+        assertEquals("py", FileType.langCode(FileType.PYTHON))
+        assertNull(FileType.langCode(FileType.MARKDOWN))
+    }
+
+    // ═══ ScriptAttrs.forLang Tests ═══
+
+    @Test
+    fun testScriptAttrsForLang() {
+        val hebrew = ScriptAttrs.forLang("he")
+        assertNotNull(hebrew)
+        assertEquals("he", hebrew.lang)
+        assertEquals(TextDir.RTL, hebrew.dir)
+
+        val arabic = ScriptAttrs.forLang("arabic")
+        assertNotNull(arabic)
+        assertEquals("ar", arabic.lang)
+        assertEquals(TextDir.RTL, arabic.dir)
+
+        val english = ScriptAttrs.forLang("en")
+        assertNotNull(english)
+        assertEquals(TextDir.LTR, english.dir)
+
+        assertNull(ScriptAttrs.forLang("unknown"))
+    }
 }

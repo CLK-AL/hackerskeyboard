@@ -664,6 +664,26 @@ data class ScriptAttrs(
             val dir = attrs["dir"]?.let { TextDir.fromValue(it) }
             return ScriptAttrs(lang, dir)
         }
+
+        /**
+         * Get ScriptAttrs for a language code.
+         * Returns null for unknown languages (use ScriptDetector instead).
+         */
+        fun forLang(lang: String): ScriptAttrs? = when (lang.lowercase()) {
+            "he", "heb", "hebrew" -> HEBREW
+            "ar", "ara", "arabic" -> ARABIC
+            "fa", "fas", "persian", "farsi" -> ScriptAttrs("fa", TextDir.RTL)
+            "ur", "urd", "urdu" -> ScriptAttrs("ur", TextDir.RTL)
+            "en", "eng", "english" -> ENGLISH
+            "de", "deu", "german" -> ScriptAttrs("de", TextDir.LTR)
+            "fr", "fra", "french" -> ScriptAttrs("fr", TextDir.LTR)
+            "es", "spa", "spanish" -> ScriptAttrs("es", TextDir.LTR)
+            "ja", "jpn", "japanese" -> ScriptAttrs("ja", TextDir.LTR)
+            "zh", "zho", "chinese" -> ScriptAttrs("zh", TextDir.LTR)
+            "ko", "kor", "korean" -> ScriptAttrs("ko", TextDir.LTR)
+            "ru", "rus", "russian" -> ScriptAttrs("ru", TextDir.LTR)
+            else -> null
+        }
     }
 }
 
@@ -1889,6 +1909,405 @@ data class Workbook(
                 Sheet(name, TableData.parseTsv(tsv))
             })
         }
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// TEXT BLOCK - Language-tagged markdown blocks with script detection
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/**
+ * Text block with language tag for MD fenced blocks.
+ * Supports: ```he, ```en, ```ar, etc.
+ * Detects kerning and bidirectional text requirements.
+ */
+data class TextBlock(
+    val content: String,
+    val lang: String,
+    val scriptAttrs: ScriptAttrs,
+    val startLine: Int,
+    val endLine: Int
+) {
+    /** Is this a right-to-left block */
+    val isRtl: Boolean get() = scriptAttrs.dir == TextDir.RTL
+
+    /** Get kerning hint for the block */
+    val kerning: KerningHint get() = KerningHint.forLang(lang)
+
+    companion object {
+        /** Fenced code block pattern with optional language */
+        private val FENCE_START by lazy { Regex("""^```(\w*)(.*)$""") }
+        private val FENCE_END by lazy { Regex("""^```\s*$""") }
+
+        /** Parse fenced blocks from markdown */
+        fun parseMarkdown(md: String): List<TextBlock> {
+            val lines = LineSeparator.splitLines(md)
+            val blocks = mutableListOf<TextBlock>()
+
+            var inBlock = false
+            var blockLang = ""
+            var blockContent = StringBuilder()
+            var startLine = 0
+
+            lines.forEachIndexed { idx, line ->
+                if (!inBlock) {
+                    val match = FENCE_START.matchEntire(line.trim())
+                    if (match != null) {
+                        inBlock = true
+                        blockLang = match.groupValues[1].lowercase().ifEmpty { "text" }
+                        blockContent = StringBuilder()
+                        startLine = idx
+                    }
+                } else {
+                    if (FENCE_END.matches(line.trim())) {
+                        val content = blockContent.toString()
+                        val script = ScriptAttrs.forLang(blockLang)
+                            ?: ScriptDetector.detect(content)
+                        blocks.add(TextBlock(content, blockLang, script, startLine, idx))
+                        inBlock = false
+                    } else {
+                        if (blockContent.isNotEmpty()) blockContent.append("\n")
+                        blockContent.append(line)
+                    }
+                }
+            }
+
+            return blocks
+        }
+    }
+}
+
+/**
+ * Kerning hint based on script/language.
+ */
+enum class KerningHint {
+    NORMAL,      // Standard kerning
+    TIGHT,       // Tight kerning (compact scripts)
+    LOOSE,       // Loose kerning (decorative)
+    NONE;        // No kerning (monospace/code)
+
+    companion object {
+        fun forLang(lang: String): KerningHint = when (lang.lowercase()) {
+            "he", "ar", "fa", "ur" -> TIGHT  // RTL scripts often need tighter kerning
+            "ja", "zh", "ko" -> NONE         // CJK scripts typically don't kern
+            "code", "pre", "mono" -> NONE    // Code blocks
+            else -> NORMAL
+        }
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// SUBTITLE FORMATS - SRT and related subtitle parsing
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/**
+ * Subtitle cue (single subtitle entry).
+ */
+data class SubtitleCue(
+    val index: Int,
+    val startTime: Long,      // Milliseconds
+    val endTime: Long,        // Milliseconds
+    val text: String,
+    val scriptAttrs: ScriptAttrs = ScriptAttrs.EMPTY
+) {
+    /** Duration in milliseconds */
+    val duration: Long get() = endTime - startTime
+
+    /** Format start time as SRT timestamp (HH:MM:SS,mmm) */
+    val startTimestamp: String get() = formatSrtTime(startTime)
+
+    /** Format end time as SRT timestamp */
+    val endTimestamp: String get() = formatSrtTime(endTime)
+
+    /** Format as SRT block */
+    fun toSrt(): String = buildString {
+        appendLine(index)
+        appendLine("$startTimestamp --> $endTimestamp")
+        appendLine(text)
+    }
+
+    companion object {
+        private fun formatSrtTime(ms: Long): String {
+            val hours = ms / 3600000
+            val minutes = (ms % 3600000) / 60000
+            val seconds = (ms % 60000) / 1000
+            val millis = ms % 1000
+            return "${pad2(hours)}:${pad2(minutes)}:${pad2(seconds)},${pad3(millis)}"
+        }
+
+        private fun pad2(n: Long): String = n.toString().padStart(2, '0')
+        private fun pad3(n: Long): String = n.toString().padStart(3, '0')
+
+        /** Parse SRT timestamp to milliseconds */
+        fun parseSrtTime(timestamp: String): Long {
+            val pattern = Regex("""(\d{2}):(\d{2}):(\d{2})[,.](\d{3})""")
+            val match = pattern.matchEntire(timestamp.trim()) ?: return 0
+            val (h, m, s, ms) = match.destructured
+            return h.toLong() * 3600000 + m.toLong() * 60000 + s.toLong() * 1000 + ms.toLong()
+        }
+    }
+}
+
+/**
+ * Subtitle file parser - supports SRT format.
+ */
+object SubtitleParser {
+    private val SRT_INDEX by lazy { Regex("""^\d+$""") }
+    private val SRT_TIMESTAMP by lazy { Regex("""^(\d{2}:\d{2}:\d{2}[,.]\d{3})\s*-->\s*(\d{2}:\d{2}:\d{2}[,.]\d{3})(.*)$""") }
+
+    /**
+     * Parse SRT subtitle file content.
+     */
+    fun parseSrt(content: String): List<SubtitleCue> {
+        val lines = LineSeparator.splitLines(content)
+        val cues = mutableListOf<SubtitleCue>()
+
+        var i = 0
+        while (i < lines.size) {
+            // Skip empty lines
+            while (i < lines.size && lines[i].isBlank()) i++
+            if (i >= lines.size) break
+
+            // Parse index
+            val indexLine = lines[i].trim()
+            if (!SRT_INDEX.matches(indexLine)) {
+                i++
+                continue
+            }
+            val index = indexLine.toInt()
+            i++
+
+            // Parse timestamp
+            if (i >= lines.size) break
+            val timestampMatch = SRT_TIMESTAMP.matchEntire(lines[i].trim())
+            if (timestampMatch == null) {
+                i++
+                continue
+            }
+            val startTime = SubtitleCue.parseSrtTime(timestampMatch.groupValues[1])
+            val endTime = SubtitleCue.parseSrtTime(timestampMatch.groupValues[2])
+            i++
+
+            // Parse text (may be multiple lines)
+            val textLines = mutableListOf<String>()
+            while (i < lines.size && lines[i].isNotBlank()) {
+                textLines.add(lines[i])
+                i++
+            }
+            val text = textLines.joinToString("\n")
+            val script = ScriptDetector.detect(text)
+
+            cues.add(SubtitleCue(index, startTime, endTime, text, script))
+        }
+
+        return cues
+    }
+
+    /**
+     * Convert cues to SRT format.
+     */
+    fun toSrt(cues: List<SubtitleCue>): String {
+        return cues.joinToString("\n") { it.toSrt() }
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// FILE EXTENSION DETECTION
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/**
+ * File type detection by extension.
+ */
+enum class FileType(
+    val extensions: Set<String>,
+    val mimeType: String,
+    val isText: Boolean = true,
+    val isCode: Boolean = false
+) {
+    // ═══ Document Formats ═══
+    MARKDOWN(setOf("md", "markdown", "mdown"), "text/markdown"),
+    HTML(setOf("html", "htm", "xhtml"), "text/html"),
+    TEXT(setOf("txt", "text"), "text/plain"),
+
+    // ═══ Subtitle Formats ═══
+    SRT(setOf("srt"), "application/x-subrip"),
+    VTT(setOf("vtt"), "text/vtt"),
+    ASS(setOf("ass", "ssa"), "text/x-ssa"),
+    SUB(setOf("sub"), "text/x-sub"),
+
+    // ═══ Data Formats ═══
+    JSON(setOf("json"), "application/json"),
+    YAML(setOf("yaml", "yml"), "text/yaml"),
+    XML(setOf("xml"), "application/xml"),
+    TSV(setOf("tsv"), "text/tab-separated-values"),
+    CSV(setOf("csv"), "text/csv"),
+
+    // ═══ Code Formats ═══
+    KOTLIN(setOf("kt", "kts"), "text/x-kotlin", isCode = true),
+    JAVASCRIPT(setOf("js", "mjs", "cjs"), "text/javascript", isCode = true),
+    TYPESCRIPT(setOf("ts", "tsx"), "text/typescript", isCode = true),
+    JAVA(setOf("java"), "text/x-java", isCode = true),
+    PYTHON(setOf("py", "pyw"), "text/x-python", isCode = true),
+    RUST(setOf("rs"), "text/x-rust", isCode = true),
+    GO(setOf("go"), "text/x-go", isCode = true),
+    SWIFT(setOf("swift"), "text/x-swift", isCode = true),
+    C(setOf("c", "h"), "text/x-c", isCode = true),
+    CPP(setOf("cpp", "cc", "cxx", "hpp", "hh"), "text/x-c++", isCode = true),
+    CSHARP(setOf("cs"), "text/x-csharp", isCode = true),
+
+    // ═══ Script/Narrative Formats ═══
+    INK(setOf("ink"), "text/x-ink"),           // Inkle's Ink scripting
+    FOUNTAIN(setOf("fountain"), "text/x-fountain"),  // Screenplay format
+
+    // ═══ MKV/Media Formats ═══
+    MKV(setOf("mkv"), "video/x-matroska", isText = false),
+    MKA(setOf("mka"), "audio/x-matroska", isText = false),
+    MKS(setOf("mks"), "video/x-matroska", isText = false),  // Subtitles only MKV
+    MXL(setOf("mxl", "musicxml"), "application/vnd.recordare.musicxml", isText = false),  // MusicXML
+
+    // ═══ Keyboard/Layout Files ═══
+    KL(setOf("kl"), "application/x-keylayout"),
+    MXKL(setOf("mxkl", "mxklfile"), "application/x-mxkeylayout"),
+    XKB(setOf("xkb"), "text/x-xkb"),
+
+    UNKNOWN(emptySet(), "application/octet-stream", false);
+
+    companion object {
+        /** Detect file type from filename or extension */
+        fun fromFilename(filename: String): FileType {
+            val ext = filename.substringAfterLast('.', "").lowercase()
+            return entries.find { ext in it.extensions } ?: UNKNOWN
+        }
+
+        /** Detect file type from path */
+        fun fromPath(path: String): FileType {
+            val filename = path.substringAfterLast('/')
+            return fromFilename(filename)
+        }
+
+        /** Get all subtitle formats */
+        val SUBTITLE_TYPES = listOf(SRT, VTT, ASS, SUB)
+
+        /** Get all text-based formats */
+        val TEXT_TYPES = entries.filter { it.isText }
+
+        /** Get all code formats */
+        val CODE_TYPES = entries.filter { it.isCode }
+
+        /** Get all data formats */
+        val DATA_TYPES = listOf(JSON, YAML, XML, TSV, CSV)
+
+        /** Get language code for code file type */
+        fun langCode(type: FileType): String? = when (type) {
+            KOTLIN -> "kt"
+            JAVASCRIPT -> "js"
+            TYPESCRIPT -> "ts"
+            JAVA -> "java"
+            PYTHON -> "py"
+            RUST -> "rs"
+            GO -> "go"
+            SWIFT -> "swift"
+            C, CPP -> "c"
+            CSHARP -> "cs"
+            INK -> "ink"
+            else -> null
+        }
+    }
+}
+
+/**
+ * Document parser that auto-detects format from file extension.
+ */
+object AutoParser {
+    /**
+     * Parse content based on file type.
+     * Returns list of parsed elements or null if unsupported.
+     */
+    fun parse(content: String, fileType: FileType): List<ParsedElement>? {
+        return when (fileType) {
+            FileType.MARKDOWN -> DocumentParser().parseMarkdown(content)
+            FileType.HTML -> DocumentParser().parseHtml(content)
+            FileType.TEXT -> PlainTextParser().parse(content)
+            FileType.SRT -> parseSrtAsElements(content)
+            FileType.TSV, FileType.CSV -> parseTableAsElements(content, fileType)
+            else -> null
+        }
+    }
+
+    /**
+     * Parse file by filename (auto-detect type).
+     */
+    fun parseByFilename(content: String, filename: String): List<ParsedElement>? {
+        return parse(content, FileType.fromFilename(filename))
+    }
+
+    private fun parseSrtAsElements(content: String): List<ParsedElement> {
+        val cues = SubtitleParser.parseSrt(content)
+        val builder = DocumentIndexBuilder()
+
+        builder.push(DocTag.HTML)
+        builder.push(DocTag.BODY)
+
+        return cues.map { cue ->
+            val segment = builder.push(DocTag.P, scriptAttrs = cue.scriptAttrs)
+            ParsedElement(
+                index = segment,
+                tag = DocTag.P,
+                startOffset = 0,
+                endOffset = cue.text.length,
+                attributes = mapOf(
+                    "data-index" to cue.index.toString(),
+                    "data-start" to cue.startTime.toString(),
+                    "data-end" to cue.endTime.toString(),
+                    "lang" to (cue.scriptAttrs.lang ?: ""),
+                    "dir" to (cue.scriptAttrs.dir?.value ?: "")
+                ),
+                content = cue.text
+            ).also { builder.pop() }
+        }
+    }
+
+    private fun parseTableAsElements(content: String, fileType: FileType): List<ParsedElement> {
+        val table = when (fileType) {
+            FileType.TSV -> TableData.parseTsv(content)
+            FileType.CSV -> TableData.parseTsv(content.replace(",", "\t"))  // Simple CSV handling
+            else -> return emptyList()
+        }
+
+        val builder = DocumentIndexBuilder()
+        builder.push(DocTag.HTML)
+        builder.push(DocTag.BODY)
+        builder.push(DocTag.TABLE)
+
+        val elements = mutableListOf<ParsedElement>()
+
+        // Header row
+        if (table.headers.isNotEmpty()) {
+            val trIndex = builder.push(DocTag.TR)
+            table.headers.forEach { header ->
+                val thIndex = builder.push(DocTag.TH)
+                elements.add(ParsedElement(thIndex, DocTag.TH, 0, header.length, emptyMap(), header))
+                builder.pop()
+            }
+            builder.pop()
+        }
+
+        // Data rows
+        table.rows.forEach { row ->
+            val trIndex = builder.push(DocTag.TR)
+            row.cells.forEachIndexed { idx, cell ->
+                val tdIndex = builder.push(DocTag.TD)
+                elements.add(ParsedElement(
+                    tdIndex, DocTag.TD, 0, cell.raw.length,
+                    mapOf("data-col" to CellRef(idx, row.rowIndex).colLetter),
+                    cell.raw
+                ))
+                builder.pop()
+            }
+            builder.pop()
+        }
+
+        return elements
     }
 }
 
